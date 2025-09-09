@@ -336,68 +336,52 @@
               </div>
             </div>
                         <div class="demo-content">
-                            <div class="demo-category">
-                                <h5>Improvements Needed</h5>
-                                <div class="demo-item">
-                                    <span class="badge improvement">Missing AC</span>
-                                    <p>No acceptance criteria for password strength requirements</p>
+                            <div class="demo-card-category">
+                                <div class="category-header">
+                                    <span class="category-icon">🔧</span>
+                                    <h5>Improvements Needed</h5>
                                 </div>
-                                <div class="demo-item">
-                                    <span class="badge improvement">Missing Design</span>
-                                    <p>No mockups for login error states and loading indicators</p>
-                                </div>
-                                <div class="demo-item">
-                                    <span class="badge improvement">Missing Details</span>
-                                    <p>Token expiration time and refresh mechanism not specified</p>
-                                </div>
+                                <ul class="demo-examples">
+                                    <li>Missing acceptance criteria for password strength</li>
+                                    <li>No mockups for login error states</li>
+                                    <li>Token expiration time not specified</li>
+                                </ul>
                             </div>
                             
-                            <div class="demo-category">
-                                <h5>QA Questions</h5>
-                                <div class="demo-item">
-                                    <span class="badge question">Security</span>
-                                    <p>What hashing algorithm will be used for password storage?</p>
+                            <div class="demo-card-category">
+                                <div class="category-header">
+                                    <span class="category-icon">❓</span>
+                                    <h5>QA Questions</h5>
                                 </div>
-                                <div class="demo-item">
-                                    <span class="badge question">UX</span>
-                                    <p>How should the system handle concurrent logins from different devices?</p>
-                                </div>
-                                <div class="demo-item">
-                                    <span class="badge question">Error Handling</span>
-                                    <p>What happens when a user tries to use an expired reset token?</p>
-                                </div>
+                                <ul class="demo-examples">
+                                    <li>What hashing algorithm for password storage?</li>
+                                    <li>How to handle concurrent logins from devices?</li>
+                                    <li>What happens with expired reset tokens?</li>
+                                </ul>
                             </div>
                             
-                            <div class="demo-category">
-                                <h5>Key Risks</h5>
-                                <div class="demo-item">
-                                    <span class="badge risk">Security</span>
-                                    <p>Potential JWT token hijacking if not properly secured</p>
+                            <div class="demo-card-category">
+                                <div class="category-header">
+                                    <span class="category-icon">⚠️</span>
+                                    <h5>Key Risks</h5>
                                 </div>
-                                <div class="demo-item">
-                                    <span class="badge risk">Performance</span>
-                                    <p>Database bottleneck during peak login periods</p>
-                                </div>
-                                <div class="demo-item">
-                                    <span class="badge risk">UX</span>
-                                    <p>User frustration if password reset emails are delayed</p>
-                                </div>
+                                <ul class="demo-examples">
+                                    <li>JWT token hijacking if not secured</li>
+                                    <li>Database bottleneck during peak login</li>
+                                    <li>User frustration if emails are delayed</li>
+                                </ul>
                             </div>
                             
-                            <div class="demo-category">
-                                <h5>Test Recipe</h5>
-                                <div class="demo-item">
-                                    <span class="badge happy-path">Happy Path</span>
-                                    <p>User logs in with valid credentials and receives JWT token</p>
+                            <div class="demo-card-category">
+                                <div class="category-header">
+                                    <span class="category-icon">🧪</span>
+                                    <h5>Test Recipe</h5>
                                 </div>
-                                <div class="demo-item">
-                                    <span class="badge critical-path">Critical Path</span>
-                                    <p>User accesses protected route with valid token - access granted</p>
-                                </div>
-                                <div class="demo-item">
-                                    <span class="badge edge-case">Edge Case</span>
-                                    <p>User tries to use expired token - proper error handling</p>
-                                </div>
+                                <ul class="demo-examples">
+                                    <li><strong>Happy Path:</strong> User logs in with valid credentials</li>
+                                    <li><strong>Critical Path:</strong> Access protected route with valid token</li>
+                                    <li><strong>Edge Case:</strong> Try to use expired token</li>
+                                </ul>
                             </div>
                         </div>
     </div>
@@ -1589,24 +1573,80 @@
     }
 
     .demo-content {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
     }
 
-    .demo-category {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+    .demo-card-category {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      transition: all 0.2s ease;
     }
 
-    .demo-category h5 {
-      margin: 0 0 0.5rem 0;
+    .demo-card-category:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .category-icon {
+      font-size: 1.25rem;
+    }
+
+    .category-header h5 {
+      margin: 0;
       font-size: 0.875rem;
       font-weight: 600;
       color: #4a5568;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+    }
+
+    .demo-examples {
+      margin: 0;
+      padding-left: 1.25rem;
+      list-style: none;
+    }
+
+    .demo-examples li {
+      font-size: 0.875rem;
+      color: #1a202c;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+
+    .demo-examples li:before {
+      content: "•";
+      color: #718096;
+      font-weight: bold;
+      position: absolute;
+      left: -1rem;
+    }
+
+    .demo-examples li:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+      .demo-content {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      
+      .demo-card-category {
+        padding: 0.75rem;
+      }
     }
 
     .demo-item {
