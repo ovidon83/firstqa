@@ -22,25 +22,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('No active tab found');
             }
 
-            // Check if we're on a supported ticket page with retry
+            // Check if we're on a supported ticket page with improved retry logic
             let isTicketPage = false;
             let retryCount = 0;
-            const maxRetries = 3;
+            const maxRetries = 5; // Increased retries
+            const retryDelay = 800; // Increased delay
 
             while (!isTicketPage && retryCount < maxRetries) {
                 try {
-                    setStatus('loading', '🔍 Detecting ticket...');
+                    setStatus('loading', `🔍 Detecting ticket... (${retryCount + 1}/${maxRetries})`);
+                    
+                    // First check if content script is ready
+                    const isReady = await chrome.tabs.sendMessage(tab.id, { action: 'isReady' });
+                    if (!isReady) {
+                        throw new Error('Content script not ready');
+                    }
+                    
+                    // Then check for ticket
                     isTicketPage = await chrome.tabs.sendMessage(tab.id, { action: 'checkTicketPage' });
                     if (isTicketPage) break;
+                    
                 } catch (error) {
-                    console.log(`Retry ${retryCount + 1}/${maxRetries}: Content script not ready yet`);
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms between retries
+                    console.log(`Retry ${retryCount + 1}/${maxRetries}: ${error.message}`);
+                    // Progressive delay: 800ms, 1200ms, 1600ms, 2000ms, 2400ms
+                    const delay = retryDelay + (retryCount * 400);
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
                 retryCount++;
             }
             
             if (!isTicketPage) {
-                throw new Error('Could not detect ticket. Please refresh the page and try again.');
+                throw new Error('Could not detect ticket. The page may still be loading. Please wait a moment and try again.');
             }
 
             // Start dynamic thinking progress

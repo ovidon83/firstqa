@@ -81,6 +81,11 @@
   function detectTicket() {
     const url = window.location.href;
     
+    // Wait for DOM to be ready
+    if (document.readyState !== 'complete') {
+      return null;
+    }
+    
     if (url.includes('linear.app')) {
       return detectLinearTicket();
     } else if (url.includes('atlassian.net')) {
@@ -147,6 +152,12 @@
 
     const title = getElementText(titleSelectors);
     const description = getElementText(descriptionSelectors);
+
+    // If we can't find title or description, the page might still be loading
+    if (!title && !description) {
+      console.log('🔍 No title or description found - page might still be loading');
+      return null;
+    }
 
     console.log('🔍 Linear ticket detection:', {
       ticketId,
@@ -264,6 +275,12 @@
 
     const title = getElementText(titleSelectors);
     const description = getElementText(descriptionSelectors);
+
+    // If we can't find title, the page might still be loading
+    if (!title) {
+      console.log('🔍 No title found in Jira - page might still be loading');
+      return null;
+    }
 
     if (title) {
       return {
@@ -1110,6 +1127,11 @@
   async function handleMessage(request, sender, sendResponse) {
     try {
       switch (request.action) {
+        case 'isReady':
+          // Check if the extension is fully initialized
+          sendResponse(!!firstqaAPI);
+          break;
+          
         case 'checkTicketPage':
           const ticketInfo = detectTicket();
           sendResponse(!!ticketInfo);
@@ -3006,11 +3028,18 @@
     document.addEventListener('mousedown', handleClickOutside);
   }
 
-  // Initialize when DOM is ready
+  // Initialize when DOM is ready and page is fully loaded
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait a bit more for dynamic content to load
+      setTimeout(init, 500);
+    });
+  } else if (document.readyState === 'interactive') {
+    // DOM is ready but resources might still be loading
+    setTimeout(init, 1000);
   } else {
-    init();
+    // Page is fully loaded
+    setTimeout(init, 200);
   }
   
   // Cleanup on page unload
