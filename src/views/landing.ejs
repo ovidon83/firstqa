@@ -317,7 +317,7 @@
                                 </div>
                                 <div>
                                     <h4>Backed by Humans</h4>
-                                    <p>Expert QA professionals with 20+ years experience handle complex scenarios and provide strategic guidance</p>
+                                    <p>Sr. QAs with 5+ yrs experience handle complex needs and provide strategic guidance</p>
                                 </div>
                             </div>
                         </div>
@@ -336,23 +336,70 @@
               </div>
             </div>
                         <div class="demo-content">
-                            <div class="demo-item">
-                                <span class="badge risk">Risk</span>
-                                <p>Potential XSS vulnerability in user input handling - requires sanitization</p>
-          </div>
-                            <div class="demo-item">
-                                <span class="badge question">Question</span>
-                                <p>How should the system handle concurrent user sessions on the same device?</p>
-        </div>
-                            <div class="demo-item">
-                                <span class="badge plan">Test Recipe</span>
-                                <p>Test user registration flow with invalid email formats and edge cases</p>
-      </div>
-                            <div class="demo-item">
-                                <span class="badge example">Expected Result</span>
-                                <p>System should gracefully handle errors and provide clear user feedback</p>
-    </div>
-  </div>
+                            <div class="demo-category">
+                                <h5>Improvements Needed</h5>
+                                <div class="demo-item">
+                                    <span class="badge improvement">Missing AC</span>
+                                    <p>No acceptance criteria for password strength requirements</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge improvement">Missing Design</span>
+                                    <p>No mockups for login error states and loading indicators</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge improvement">Missing Details</span>
+                                    <p>Token expiration time and refresh mechanism not specified</p>
+                                </div>
+                            </div>
+                            
+                            <div class="demo-category">
+                                <h5>QA Questions</h5>
+                                <div class="demo-item">
+                                    <span class="badge question">Security</span>
+                                    <p>What hashing algorithm will be used for password storage?</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge question">UX</span>
+                                    <p>How should the system handle concurrent logins from different devices?</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge question">Error Handling</span>
+                                    <p>What happens when a user tries to use an expired reset token?</p>
+                                </div>
+                            </div>
+                            
+                            <div class="demo-category">
+                                <h5>Key Risks</h5>
+                                <div class="demo-item">
+                                    <span class="badge risk">Security</span>
+                                    <p>Potential JWT token hijacking if not properly secured</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge risk">Performance</span>
+                                    <p>Database bottleneck during peak login periods</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge risk">UX</span>
+                                    <p>User frustration if password reset emails are delayed</p>
+                                </div>
+                            </div>
+                            
+                            <div class="demo-category">
+                                <h5>Test Recipe</h5>
+                                <div class="demo-item">
+                                    <span class="badge happy-path">Happy Path</span>
+                                    <p>User logs in with valid credentials and receives JWT token</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge critical-path">Critical Path</span>
+                                    <p>User accesses protected route with valid token - access granted</p>
+                                </div>
+                                <div class="demo-item">
+                                    <span class="badge edge-case">Edge Case</span>
+                                    <p>User tries to use expired token - proper error handling</p>
+                                </div>
+                            </div>
+                        </div>
     </div>
     </div>
             </div>
@@ -1544,7 +1591,22 @@
     .demo-content {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.5rem;
+    }
+
+    .demo-category {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .demo-category h5 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .demo-item {
@@ -1596,6 +1658,30 @@
       background: #faf5ff;
       color: #553c9a;
       border: 1px solid #e9d8fd;
+    }
+
+    .badge.improvement {
+      background: #fef2f2;
+      color: #c53030;
+      border: 1px solid #fecaca;
+    }
+
+    .badge.happy-path {
+      background: #f0fff4;
+      color: #22543d;
+      border: 1px solid #c6f6d5;
+    }
+
+    .badge.critical-path {
+      background: #fffaf0;
+      color: #c05621;
+      border: 1px solid #fed7aa;
+    }
+
+    .badge.edge-case {
+      background: #f7fafc;
+      color: #4a5568;
+      border: 1px solid #e2e8f0;
     }
 
     .demo-item p {
