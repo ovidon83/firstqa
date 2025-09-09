@@ -57,22 +57,24 @@
                         <div class="hero-features">
                             <div class="feature-item">
                                 <div class="feature-icon">
-                                    <i class="fas fa-clipboard-check"></i>
-            </div>
+                                    <i class="fas fa-robot"></i>
+                                    <span class="ai-badge">AI</span>
+                                </div>
                                 <div class="feature-content">
                                     <span class="feature-title">Pre-Dev: Ticket Analysis</span>
                                     <span class="feature-desc">Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements, unclear acceptance criteria, potential risks, and generates comprehensive test plans</span>
                                 </div>
-          </div>
+                            </div>
                             <div class="feature-item">
-                              <div class="feature-icon">
-                                  <i class="fas fa-code-branch"></i>
-            </div>
-                              <div class="feature-content">
+                                <div class="feature-icon">
+                                    <i class="fas fa-brain"></i>
+                                    <span class="ai-badge">AI</span>
+                                </div>
+                                <div class="feature-content">
                                     <span class="feature-title">Post-Dev: PR Review</span>
                                     <span class="feature-desc">Ovi reviews GitHub PRs after development - catches bugs, security issues, missing test cases, and provides detailed test recipes for validation</span>
                                 </div>
-          </div>
+                            </div>
                             <div class="feature-item">
                                 <div class="feature-icon">
                                     <i class="fas fa-users"></i>
@@ -1053,6 +1055,21 @@
       color: #3182ce;
       flex-shrink: 0;
       border: 1px solid #e2e8f0;
+      position: relative;
+    }
+
+    .ai-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 8px;
+      line-height: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .feature-content {
