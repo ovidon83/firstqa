@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check if we're on a supported ticket page with improved retry logic
             let isTicketPage = false;
             let retryCount = 0;
-            const maxRetries = 5; // Increased retries
-            const retryDelay = 800; // Increased delay
+            const maxRetries = 3; // Reduced back to 3
+            const retryDelay = 500; // Reduced back to 500ms
 
             while (!isTicketPage && retryCount < maxRetries) {
                 try {
@@ -44,15 +44,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                 } catch (error) {
                     console.log(`Retry ${retryCount + 1}/${maxRetries}: ${error.message}`);
-                    // Progressive delay: 800ms, 1200ms, 1600ms, 2000ms, 2400ms
-                    const delay = retryDelay + (retryCount * 400);
+                    // Simple delay: 500ms, 1000ms, 1500ms
+                    const delay = retryDelay + (retryCount * 500);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
                 retryCount++;
             }
             
             if (!isTicketPage) {
-                throw new Error('Could not detect ticket. The page may still be loading. Please wait a moment and try again.');
+                throw new Error('Could not detect ticket. Please refresh the page and try again.');
             }
 
             // Start dynamic thinking progress
