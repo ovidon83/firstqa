@@ -112,14 +112,20 @@
                 </div>
               </div>
                                 <div class="step">
-                                    <div class="step-number">2</div>
+                                    <div class="step-number">
+                                        <i class="fas fa-brain"></i>
+                                        <span class="ai-badge">AI</span>
+                                    </div>
                                     <div class="step-content">
                                         <h4>Ovi Analyzes Everything</h4>
                                         <p>Automatically reviews tickets before dev and PRs after dev</p>
                 </div>
               </div>
                                 <div class="step">
-                                    <div class="step-number">3</div>
+                                    <div class="step-number">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span class="ai-badge">AI</span>
+                                    </div>
                                     <div class="step-content">
                                         <h4>Get Instant Feedback</h4>
                                         <p>Receive detailed reports with test plans, risk analysis, and improvement suggestions</p>
@@ -1166,6 +1172,25 @@
       font-weight: 600;
       font-size: 0.875rem;
       flex-shrink: 0;
+      position: relative;
+    }
+
+    .step-number i {
+      font-size: 1rem;
+    }
+
+    .step-number .ai-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 0.5rem;
+      font-weight: 600;
+      padding: 2px 4px;
+      border-radius: 6px;
+      line-height: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .step-content h4 {
