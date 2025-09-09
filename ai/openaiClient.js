@@ -1023,8 +1023,264 @@ function generateShortDataAccessError(title, repo, prNumber) {
 *Note: Unable to access PR data. Please review the actual code changes manually.*`;
 }
 
+/**
+ * Generate QA insights for tickets (Linear/Jira) using GPT-4o
+ * @param {Object} options - Ticket details
+ * @param {string} options.ticketId - Ticket ID (e.g., "PROJ-123")
+ * @param {string} options.title - Ticket title
+ * @param {string} options.description - Ticket description
+ * @param {Array} options.comments - Array of comment strings
+ * @param {Array} options.labels - Array of label strings
+ * @param {string} options.platform - Platform name ("linear" or "jira")
+ * @param {string} options.priority - Priority level
+ * @param {string} options.type - Ticket type
+ * @returns {Promise<Object>} QA insights or error object
+ */
+async function generateTicketInsights({ ticketId, title, description, comments, labels, platform, priority, type }) {
+  try {
+    // Validate OpenAI client
+    if (!openai) {
+      throw new Error('OpenAI client not initialized. Check OPENAI_API_KEY.');
+    }
+
+    console.log(`🔍 Starting SINGLE FAST TICKET ANALYSIS for ${ticketId} on ${platform}`);
+
+    // Sanitize inputs
+    const sanitizedTitle = (title || 'No title provided').substring(0, 300);
+    const sanitizedDescription = (description || 'No description provided').substring(0, 2000);
+    const sanitizedComments = comments.slice(0, 3).map(c => c.substring(0, 500)); // Last 3 comments, max 500 chars each
+    const sanitizedLabels = labels.slice(0, 10); // Max 10 labels
+
+    console.log(`🔍 Ticket analysis input: Title=${sanitizedTitle.length} chars, Description=${sanitizedDescription.length} chars, Comments=${sanitizedComments.length}, Labels=${sanitizedLabels.length}`);
+
+    // Generate single fast analysis with low temperature
+    const analysis = await generateSingleAnalysis(sanitizedTitle, sanitizedDescription, sanitizedComments, sanitizedLabels, platform, priority, type);
+    
+    return {
+      success: true,
+      data: analysis,
+      metadata: {
+        ticketId,
+        platform,
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
+        timestamp: new Date().toISOString(),
+        analysisType: 'ticket-analysis-single-fast'
+      }
+    };
+
+  } catch (error) {
+    console.error('❌ Error in ticket analysis:', error.message);
+    
+    // Return fallback analysis
+    return {
+      success: true,
+      data: generateTicketFallbackAnalysis(title, description, platform),
+      metadata: {
+        ticketId,
+        platform,
+        model: 'fallback',
+        timestamp: new Date().toISOString(),
+        error: error.message,
+        note: 'Fallback analysis due to error',
+        analysisType: 'ticket-fallback'
+      }
+    };
+  }
+}
+
+// Removed calculateInitialReadinessScore - now handled by AI
+
+async function generateSingleAnalysis(title, description, comments, labels, platform, priority, type) {
+  const prompt = `You are a senior QA engineer analyzing tickets for development readiness. 
+
+CRITICAL: Every ticket is UNIQUE. Analyze THIS SPECIFIC TICKET only. Do NOT use generic feedback or copy-paste from previous analyses.
+
+Evaluate based ONLY on what's actually present in THIS ticket.
+
+TICKET DATA:
+- Title: ${title}
+- Description: ${description}
+- Comments: ${comments.join(' | ')}
+- Labels: ${labels.join(', ')}
+- Priority: ${priority}
+- Type: ${type}
+
+DUAL SCORING SYSTEM - REQUIRED:
+1. initialReadinessScore (1-5): Rate how ready this ticket is for development RIGHT NOW, as-is
+2. readyForDevelopmentScore (1-5): Rate how ready this ticket is AFTER adding your analysis (Risks, Questions, Test Recipe)
+
+CRITICAL: You MUST provide BOTH scores. readyForDevelopmentScore should always be >= initialReadinessScore because your analysis enhances the ticket.
+
+SCORING SCALE (1-5):
+1 = Not ready (major gaps)
+2 = Needs work (some key info missing)
+3 = Decent (basic requirements clear)
+4 = Good (well-defined with clear AC)
+5 = Excellent (comprehensive, edge cases covered)
+
+Analyze THIS specific ticket content. Generate unique insights based on what's actually written.
+
+MINIMAL ANALYSIS MODE: If the ticket has insufficient information (very vague title, no description, or extremely brief content), return a minimal analysis with:
+- minimalMode: true
+- readyForDevelopmentScore: 1
+- scoreImpactFactors: explain what's missing
+- message: explain that more details are needed before full analysis
+- Skip qaQuestions, testRecipe, and other detailed fields
+
+For normal tickets:
+- Determine changeType (frontend/backend/full-stack) from ticket content
+- For frontend tickets: look for design materials (Figma, mockups, screenshots, etc.)
+- For backend tickets: focus on APIs, data models, business logic
+- Generate userValue: simple metric (High/Medium/Low) and short summary of user benefit
+- Generate scoreImpactFactors that explain your specific score for THIS ticket
+- Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
+- For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (edge cases)
+
+Return JSON format - MUST include BOTH initialReadinessScore AND readyForDevelopmentScore:
+
+For MINIMAL analysis (insufficient info):
+{
+  "title": "Definition of Ready Analysis",
+  "minimalMode": true,
+  "initialReadinessScore": 1,
+  "readyForDevelopmentScore": 1,
+  "scoreImpactFactors": ["what's missing from this ticket"],
+  "message": "This ticket needs more detail before full analysis. Adding [specifics] would enable better development planning and reduce confusion."
+}
+
+For FULL analysis (sufficient info):
+{
+  "title": "Definition of Ready Analysis",
+  "minimalMode": false,
+  "changeType": "frontend|backend|full-stack",
+  "hasDesignMaterials": true|false,
+  "designDetails": "description" or null,
+  "userValue": {"level": "High|Medium|Low", "summary": "short description of user benefit"},
+  "qaQuestions": ["array of 5-8 questions"],
+  "keyRisks": ["array of risks"],
+  "scoreImpactFactors": ["array of score factors"],
+  "improvementsNeeded": ["specific actionable items to bridge the gap between scores"],
+  "testRecipe": [{"scenario": "...", "steps": "...", "expected": "...", "priority": "Happy Path|Critical Path|Edge Case", "automation": "...", "reason": "..."}],
+  "initialReadinessScore": 1-5,
+  "readyForDevelopmentScore": 1-5,
+  "scoreBreakdown": {"clarity": 0.0-1.0, "dependencies": 0.0-1.0, "testability": 0.0-1.0, "riskProfile": 0.0-1.0, "scopeReadiness": 0.0-1.0, "rawTotal": 0.0-5.0, "scaledScore": 1-5},
+  "tip": "actionable suggestion",
+  "missingInfo": ["specific missing details"]
+}
+
+Generate ALL important test scenarios, not just 3. Ask the 'What if' questions that matter.`;
+
+  const response = await openai.chat.completions.create({
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.1, // Very low temperature for consistency and speed
+    max_tokens: 2000
+  });
+
+  const content = response.choices[0].message.content;
+  console.log('🤖 Raw AI response:', content);
+  
+  // Extract JSON from the response
+  const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[1]);
+  }
+  
+  // Try to parse the entire response as JSON
+  return JSON.parse(content);
+}
+
+/**
+ * Generate fallback analysis when AI fails for tickets
+ */
+
+/**
+ * Generate fallback analysis when AI fails for tickets
+ */
+function generateTicketFallbackAnalysis(title, description, platform) {
+  return {
+    title: 'Definition of Ready Analysis',
+    qaQuestions: [
+      "What if the user enters an invalid email format? How should the system respond?",
+      "What if the email service is down when a user requests a password reset?",
+      "What if a user clicks the reset link multiple times? Should we allow it?",
+      "What if the user's email has changed since they last logged in?",
+      "What if the password reset token expires while the user is filling out the form?"
+    ],
+    keyRisks: [
+      "Security risk: Password reset tokens could be intercepted if not using HTTPS; mitigate with secure token generation and HTTPS enforcement.",
+      "User experience risk: Users may get frustrated if reset emails are delayed; implement clear feedback and retry mechanisms.",
+      "Technical risk: Email service dependency could cause password reset failures; need fallback mechanisms and monitoring."
+    ],
+    testRecipe: [
+      {
+        "scenario": "Successful Password Reset Flow",
+        "steps": "1. User enters valid email. 2. User receives reset email. 3. User clicks link and sets new password.",
+        "expected": "User can successfully log in with new password.",
+        "priority": "Happy Path",
+        "automation": "E2E",
+        "reason": "Core functionality that must work perfectly for user satisfaction."
+      },
+      {
+        "scenario": "Invalid Email Handling",
+        "steps": "1. User enters invalid email format. 2. User submits form.",
+        "expected": "User receives clear error message about invalid email format.",
+        "priority": "Critical Path",
+        "automation": "Unit",
+        "reason": "Input validation is critical for security and user experience."
+      },
+      {
+        "scenario": "Expired Token Handling",
+        "steps": "1. User requests reset. 2. User waits beyond token expiration. 3. User clicks expired link.",
+        "expected": "User sees clear message about expired token and option to request new one.",
+        "priority": "Critical Path",
+        "automation": "Integration",
+        "reason": "Security requirement to prevent unauthorized password changes."
+      },
+      {
+        "scenario": "Email Service Failure",
+        "steps": "1. Email service is down. 2. User requests password reset.",
+        "expected": "System logs error, shows user-friendly message, and offers retry option.",
+        "priority": "Edge Case",
+        "automation": "Manual",
+        "reason": "Rare but critical for system reliability and user experience."
+      },
+      {
+        "scenario": "Multiple Reset Requests",
+        "steps": "1. User requests reset multiple times quickly. 2. User receives multiple emails.",
+        "expected": "System handles gracefully, invalidates old tokens, and prevents abuse.",
+        "priority": "Edge Case",
+        "automation": "Integration",
+        "reason": "Security requirement to prevent token abuse and confusion."
+      },
+      {
+        "scenario": "Password Strength Validation",
+        "steps": "1. User sets weak password. 2. User submits form.",
+        "expected": "System validates password strength and shows clear requirements.",
+        "priority": "Critical Path",
+        "automation": "Unit",
+        "reason": "Security requirement to ensure strong passwords."
+      }
+    ],
+    readyForDevelopmentScore: 4,
+    scoreBreakdown: {
+      "clarity": 0.5,
+      "dependencies": 0.5,
+      "testability": 1.0,
+      "riskProfile": 0.5,
+      "scopeReadiness": 0.5,
+      "uxStates": 0.5,
+      "rawTotal": 3.5,
+      "scaledScore": 4
+    },
+    tip: "Add detailed acceptance criteria, error handling scenarios, and security requirements to improve readiness score",
+    missingInfo: ["Detailed acceptance criteria", "Error handling specifications", "Security requirements", "Email service integration details"]
+  };
+}
+
 module.exports = {
   generateQAInsights,
   generateShortAnalysis,
+  generateTicketInsights,
   testConnection
 }; 

@@ -346,4 +346,81 @@ router.post('/generate-short-analysis', async (req, res) => {
   }
 });
 
+// Ovi QA Agent endpoint for ticket analysis (Linear/Jira)
+router.post('/api/analyze-ticket', async (req, res) => {
+  try {
+    const { generateTicketInsights } = require('../../ai/openaiClient');
+    
+    // Extract ticket data from request body
+    const { 
+      ticketId, 
+      title, 
+      description, 
+      comments = [], 
+      labels = [], 
+      platform, 
+      priority = 'medium', 
+      type = 'story' 
+    } = req.body;
+    
+    // Validate required fields
+    if (!ticketId || !title) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields',
+        details: 'ticketId and title are required'
+      });
+    }
+    
+    console.log(`🤖 Ovi QA Agent analyzing ticket ${ticketId} on ${platform}`);
+    console.log('🔍 Input Debug:');
+    console.log(`   Ticket ID: ${ticketId}`);
+    console.log(`   Platform: ${platform}`);
+    console.log(`   Title: ${title}`);
+    console.log(`   Description length: ${description?.length || 0}`);
+    console.log(`   Comments count: ${comments.length}`);
+    console.log(`   Labels: ${labels.join(', ')}`);
+    console.log(`   Priority: ${priority}`);
+    console.log(`   Type: ${type}`);
+    
+    // Generate AI insights for ticket
+    const aiInsights = await generateTicketInsights({
+      ticketId,
+      title,
+      description,
+      comments,
+      labels,
+      platform,
+      priority,
+      type
+    });
+    
+    if (aiInsights && aiInsights.success) {
+      console.log('✅ Ovi QA Agent ticket analysis completed successfully');
+      res.json({
+        success: true,
+        data: aiInsights.data,
+        metadata: aiInsights.metadata
+      });
+    } else {
+      console.error('❌ Ovi QA Agent ticket analysis failed:', aiInsights?.error, aiInsights?.details);
+      res.status(500).json({
+        success: false,
+        error: aiInsights?.error || 'Failed to generate ticket insights',
+        details: aiInsights?.details || 'Unknown error occurred'
+      });
+    }
+    
+  } catch (error) {
+    console.error('❌ Exception in Ovi QA Agent ticket analysis:', error.message);
+    console.error('Stack trace:', error.stack);
+    
+    res.status(500).json({
+      success: false,
+      error: 'Ovi QA Agent ticket analysis failed',
+      details: error.message
+    });
+  }
+});
+
 module.exports = router; 

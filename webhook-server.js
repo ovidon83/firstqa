@@ -27,6 +27,19 @@ const stripeRoutes = require('./src/routes/stripe');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Add CORS middleware for Chrome extension (MUST be first!)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 // Fix working directory issue in production BEFORE initializing customer functions
 if (process.cwd().includes('/src')) {
   console.log(`⚠️  WARNING: Server running from src/ directory, fixing working directory...`);

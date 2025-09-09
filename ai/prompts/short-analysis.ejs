@@ -46,10 +46,11 @@ Based on THESE SPECIFIC CODE CHANGES (not assumptions), provide your analysis in
 - **Identify assumptions, missing context, suspicious diffs**
 - Keep it concise and focused on the 4 required sections
 - Use realistic test data and user actions
-- Prioritize tests by business impact and user dependency:
-  - **Critical Priority**: Core functionality that users absolutely depend on (main features, critical paths, essential workflows)
-  - **High Priority**: Important supporting functionality that enhances experience but isn't core
-  - Examples: User registration/login = Critical, profile customization = High
+- Prioritize tests using unified system:
+  - **Happy Path**: Core functionality that works as intended
+  - **Critical Path**: Important scenarios that must work correctly
+  - **Edge Case**: Edge cases and error conditions
+  - **Regression**: Existing functionality that might be affected by these changes (based on Product Areas affected)
 - For Release Pulse Analysis:
   - **User Value**: Infer from PR description and code diff. What is the meaningful value or benefit to the end user? MAX 15 words.
   - **Release Confidence**: Evaluate test coverage, presence of test files, handling of edge cases, and overall implementation confidence. MAX 15 words.
@@ -60,8 +61,8 @@ Based on THESE SPECIFIC CODE CHANGES (not assumptions), provide your analysis in
 - Always specify file names with line numbers in questions and risks
 - Focus on real, code-based risks, not potential or generic ones
 - For Test Recipe: 
-  - ONLY include Critical and High priority scenarios
-  - Order scenarios by priority (Critical first, then High)
+  - Include ALL priority levels: Happy Path, Critical Path, Edge Case, and Regression
+  - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case, then Regression)
   - Within each priority level, order by relevance to the actual changes
   - **For each priority level, include BOTH positive and negative scenarios:**
     - Start with **positive test cases** (happy path, successful workflows)
@@ -71,7 +72,7 @@ Based on THESE SPECIFIC CODE CHANGES (not assumptions), provide your analysis in
   - Focus on scenarios that directly test the changed functionality and affected product areas
   - Make steps detailed, actionable, and multiline-friendly
   - Evaluate which scenarios make most sense given the specific changes in the PR
-  - **Priority Examples**: User login = Critical, form submission = Critical, data validation = Critical, UI polish = High
+  - **Priority Examples**: User login = Happy Path, form validation = Critical Path, network timeout = Edge Case, existing user flows = Regression
 - For Questions, Risks & Bugs: 
   - ACTUALLY ANALYZE the code changes to see if they affect other modules/components/files
   - If dependencies are found, specify exactly which files/modules are affected and how

@@ -2,7 +2,7 @@
 
 /**
  * Detects if the current page is a Linear or Jira ticket
- * @returns {Object|null} { platform: 'linear'|'jira', ticketData: {title, description} }
+ * @returns {Object|null} { platform: 'linear'|'jira', ticketData: {id, title, description} }
  */
 function detectTicket() {
   const url = window.location.href;
@@ -21,11 +21,15 @@ function detectTicket() {
  * @returns {Object|null}
  */
 function detectLinearTicket() {
-  // Check if we're on an issue page (contains issue ID pattern)
-  const issuePattern = /\/issue\/[A-Z]+-\d+/;
-  if (!issuePattern.test(window.location.pathname)) {
+  // Check if we're on an issue page (Linear uses /issue/ID/ format)
+  const issuePattern = /\/issue\/([A-Z]+-\d+)/;
+  const match = window.location.pathname.match(issuePattern);
+  
+  if (!match) {
     return null;
   }
+
+  const ticketId = match[1];
 
   // Try multiple selectors for title
   const titleSelectors = [
@@ -33,25 +37,128 @@ function detectLinearTicket() {
     '.issue-title',
     'h1[contenteditable="true"]',
     '.title-input',
-    '[aria-label*="title"]'
+    '[aria-label*="title"]',
+    'h1', // Fallback to any h1
+    '[data-testid*="title"]',
+    '.title',
+    'h1[data-testid*="title"]',
+    '[data-testid="issue.views.issue-base.foundation.summary.heading"]',
+    'h1:first-of-type'
   ];
   
-  // Try multiple selectors for description
+  // Try multiple selectors for description (updated for current Linear DOM)
   const descriptionSelectors = [
+    // EXACT Linear selectors based on real DOM (2024+)
+    '[aria-label="Issue description"].ProseMirror.editor',
+    '[aria-label="Issue description"][contenteditable="true"]',
+    '[role="textbox"].ProseMirror.editor',
+    '[role="textbox"][aria-label="Issue description"]',
+    '.ProseMirror.editor[contenteditable="true"]',
+    
+    // Fallback selectors
+    '[data-slot="content"] .ProseMirror',
+    '[role="textbox"]',
+    '.ProseMirror-doc',
     '[data-testid="issue-description"]',
     '.issue-description',
     '.ProseMirror',
     '[data-testid="editor-content"]',
-    '.description-content'
+    '.description-content',
+    '[data-testid*="description"]',
+    '.description',
+    '[data-testid="issue.views.field.rich-text.description"]',
+    '.ak-renderer-document',
+    'div[data-testid*="description"]',
+    
+    // Fallback selectors
+    'main [contenteditable="true"]',
+    'main .ProseMirror'
   ];
 
   const title = getElementText(titleSelectors);
   const description = getElementText(descriptionSelectors);
 
+  console.log('🔍 Linear ticket detection:', {
+    ticketId,
+    title: title ? title.substring(0, 50) + '...' : null,
+    description: description ? description.substring(0, 50) + '...' : null,
+    fullDescriptionLength: description ? description.length : 0
+  });
+
+  console.log('🔍 FULL LINEAR DESCRIPTION:', description);
+  
+  // DOM INSPECTOR: Let's find what elements actually exist
+  console.log('🔍 DOM INSPECTOR - All elements containing "password reset":');
+  const allElements = document.querySelectorAll('*');
+  const relevantElements = Array.from(allElements).filter(el => 
+    el.textContent && el.textContent.toLowerCase().includes('password reset')
+  ).slice(0, 10); // Limit to first 10 matches
+  
+  relevantElements.forEach((el, index) => {
+    console.log(`🔍 Element ${index}:`, {
+      tagName: el.tagName,
+      className: el.className,
+      id: el.id,
+      textContent: el.textContent.substring(0, 100) + '...',
+      attributes: Array.from(el.attributes).map(attr => `${attr.name}="${attr.value}"`).join(' ')
+    });
+  });
+
+  // Debug: Log all h1 elements on the page
+  const allH1s = document.querySelectorAll('h1');
+  console.log('🔍 All h1 elements found:', Array.from(allH1s).map(h1 => ({
+    text: h1.textContent?.substring(0, 50),
+    className: h1.className,
+    testId: h1.getAttribute('data-testid')
+  })));
+
+  // If we have a ticket ID, try to get title from the page text
+  if (!title && ticketId) {
+    // Look for any text that might be the title
+    const pageText = document.body.textContent;
+    const lines = pageText.split('\n').map(line => line.trim()).filter(line => line.length > 10);
+    const possibleTitle = lines.find(line => 
+      line.length > 10 && 
+      line.length < 100 && 
+      !line.includes('Linear') && 
+      !line.includes('firstqa') &&
+      !line.includes('FIR-5') &&
+      !line.includes('Backlog') &&
+      !line.includes('Set priority') &&
+      !line.includes('Assign')
+    );
+    
+    if (possibleTitle) {
+      console.log('🔍 Found possible title from page text:', possibleTitle);
+      return {
+        platform: 'linear',
+        ticketData: {
+          id: ticketId,
+          title: possibleTitle,
+          description: description ? description.trim() : ''
+        }
+      };
+    }
+  }
+
+  // If we still don't have a title but have a ticket ID, use a fallback
+  if (!title && ticketId) {
+    console.log('🔍 Using fallback title for ticket:', ticketId);
+    return {
+      platform: 'linear',
+      ticketData: {
+        id: ticketId,
+        title: `Ticket ${ticketId}`, // Fallback title
+        description: description ? description.trim() : ''
+      }
+    };
+  }
+
   if (title) {
     return {
       platform: 'linear',
       ticketData: {
+        id: ticketId,
         title: title.trim(),
         description: description ? description.trim() : ''
       }
@@ -67,10 +174,14 @@ function detectLinearTicket() {
  */
 function detectJiraTicket() {
   // Check if we're on an issue page
-  const issuePattern = /\/browse\/[A-Z]+-\d+/;
-  if (!issuePattern.test(window.location.pathname)) {
+  const issuePattern = /\/browse\/([A-Z]+-\d+)/;
+  const match = window.location.pathname.match(issuePattern);
+  
+  if (!match) {
     return null;
   }
+
+  const ticketId = match[1];
 
   // Try multiple selectors for title
   const titleSelectors = [
@@ -81,13 +192,25 @@ function detectJiraTicket() {
     '[aria-label*="Summary"]'
   ];
   
-  // Try multiple selectors for description
+  // Try multiple selectors for description (updated for modern Jira)
   const descriptionSelectors = [
+    // Modern Jira selectors (2024+)
+    '[data-testid="issue.views.field.rich-text.description"] .ak-renderer-document',
     '[data-testid="issue.views.field.rich-text.description"]',
+    '.ak-renderer-document',
+    '[data-testid*="description"] .ak-renderer-document',
+    '[data-testid*="description"]',
+    
+    // Legacy Jira selectors
     '#description-val',
     '.description',
-    '.ak-renderer-document',
-    '[data-testid*="description"]'
+    '.description-content',
+    '[id*="description"]',
+    
+    // Fallback selectors for any rich text content
+    'main [data-testid*="description"]',
+    'main .ak-renderer-document',
+    '[role="main"] [data-testid*="description"]'
   ];
 
   const title = getElementText(titleSelectors);
@@ -97,6 +220,7 @@ function detectJiraTicket() {
     return {
       platform: 'jira',
       ticketData: {
+        id: ticketId,
         title: title.trim(),
         description: description ? description.trim() : ''
       }
@@ -112,10 +236,43 @@ function detectJiraTicket() {
  * @returns {string|null}
  */
 function getElementText(selectors) {
+  console.log('🔍 getElementText called with selectors:', selectors);
+  
   for (const selector of selectors) {
     const element = document.querySelector(selector);
+    console.log(`🔍 Checking selector "${selector}":`, element ? 'FOUND' : 'NOT FOUND');
+    
     if (element) {
-      return element.textContent || element.innerText || '';
+      // Try to get text content, handle rich text editors
+      let text = '';
+      
+      // For ProseMirror editors (Linear), get all text content including from child elements
+      if (element.classList.contains('ProseMirror') || element.querySelector('.ProseMirror')) {
+        const proseMirror = element.classList.contains('ProseMirror') ? element : element.querySelector('.ProseMirror');
+        if (proseMirror) {
+          text = proseMirror.textContent || proseMirror.innerText || '';
+        }
+      }
+      // For Atlassian Renderer (Jira), get content from the document renderer
+      else if (element.classList.contains('ak-renderer-document') || element.querySelector('.ak-renderer-document')) {
+        const renderer = element.classList.contains('ak-renderer-document') ? element : element.querySelector('.ak-renderer-document');
+        if (renderer) {
+          text = renderer.textContent || renderer.innerText || '';
+        }
+      }
+      // Default text extraction
+      else {
+        text = element.textContent || element.innerText || '';
+      }
+      
+      // Clean up the text
+      text = text.trim();
+      
+      // Only return if we have substantial content (more than just whitespace/short fragments)
+      if (text && text.length > 5) {
+        console.log(`✅ Found content with selector "${selector}": ${text.substring(0, 100)}...`);
+        return text;
+      }
     }
   }
   return null;
@@ -128,12 +285,19 @@ function getElementText(selectors) {
  */
 async function getQAInsights(ticketData) {
   try {
-    const response = await fetch('https://www.firstqa.dev/generate-test-recipe', {
+    const response = await fetch('http://localhost:3000/api/analyze-ticket', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(ticketData)
+      body: JSON.stringify({
+        ticketId: ticketData.id || 'UNKNOWN',
+        title: ticketData.title,
+        description: ticketData.description,
+        platform: window.location.href.includes('linear.app') ? 'linear' : 'jira',
+        priority: 'medium',
+        type: 'story'
+      })
     });
 
     if (!response.ok) {
@@ -145,41 +309,6 @@ async function getQAInsights(ticketData) {
     console.error('Error calling QA API:', error);
     throw error;
   }
-}
-
-/**
- * Formats QA insights as markdown
- * @param {Object} insights - {smartQuestions, testCases, risks}
- * @returns {string} Markdown formatted text
- */
-function formatAsMarkdown(insights) {
-  let markdown = '# QA Copilot Insights\n\n';
-  
-  if (insights.smartQuestions && insights.smartQuestions.length > 0) {
-    markdown += '## 🤔 Smart Questions\n\n';
-    insights.smartQuestions.forEach(question => {
-      markdown += `- ${question}\n`;
-    });
-    markdown += '\n';
-  }
-  
-  if (insights.testCases && insights.testCases.length > 0) {
-    markdown += '## 🧪 Suggested Test Cases\n\n';
-    insights.testCases.forEach(testCase => {
-      markdown += `- ${testCase}\n`;
-    });
-    markdown += '\n';
-  }
-  
-  if (insights.risks && insights.risks.length > 0) {
-    markdown += '## ⚠️ Risks\n\n';
-    insights.risks.forEach(risk => {
-      markdown += `- ${risk}\n`;
-    });
-    markdown += '\n';
-  }
-  
-  return markdown;
 }
 
 /**

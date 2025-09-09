@@ -6,20 +6,24 @@
   "permissions": [
     "activeTab",
     "storage",
-    "https://www.firstqa.dev/*"
+    "notifications"
   ],
   "host_permissions": [
     "https://*.linear.app/*",
     "https://*.atlassian.net/*",
-    "https://www.firstqa.dev/*"
+    "https://www.firstqa.dev/*",
+    "http://localhost:3000/*"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": [
         "https://*.linear.app/*",
         "https://*.atlassian.net/*"
       ],
-      "js": ["utils.js", "content.js"],
+      "js": ["utils.js", "formatters.js", "submission.js", "content.js"],
       "css": ["ui.css"],
       "run_at": "document_idle"
     }
@@ -29,8 +33,8 @@
     "default_title": "FirstQA Ovi AI"
   },
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 } 

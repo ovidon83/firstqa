@@ -1,0 +1,65 @@
+name: Preview Deployment
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create preview environment file
+        run: |
+          echo "PREVIEW_ENV=true" >> .env
+          echo "NODE_ENV=preview" >> .env
+          echo "PREVIEW_DB_URL=postgresql://preview_user:preview_pass@localhost:5432/preview_db_${{ github.event.number }}" >> .env
+
+      - name: Deploy to Render
+        env:
+          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          # Create preview service on Render
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "branch": "${{ github.head_ref }}",
+              "environmentVariables": {
+                "NODE_ENV": "preview",
+                "PREVIEW_ENV": "true",
+                "PREVIEW_PR_NUMBER": "${{ github.event.number }}"
+              }
+            }'
+
+      - name: Generate preview URL
+        run: |
+          echo "PREVIEW_URL=https://firstqa-preview-${{ github.event.number }}.onrender.com" >> $GITHUB_ENV
+          echo "Preview URL: https://firstqa-preview-${{ github.event.number }}.onrender.com"
+
+      - name: Notify FirstQA
+        run: |
+          curl -X POST "https://api.firstqa.dev/webhook/preview-ready" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "repo": "${{ github.repository }}",
+              "prNumber": ${{ github.event.number }},
+              "previewUrl": "https://firstqa-preview-${{ github.event.number }}.onrender.com",
+              "branch": "${{ github.head_ref }}"
+            }'
+
+
+
+

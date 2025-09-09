@@ -48,18 +48,19 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - Look for potential performance, security, or accessibility implications from the actual code
 - **Test recipe based on the diff + other impacted files — no guessing, no overtesting**
 - **Identify assumptions, missing context, suspicious diffs**
-- Prioritize tests by business impact and user dependency:
-  - **Critical Priority**: Core functionality that users absolutely depend on (main features, critical paths, essential workflows)
-  - **High Priority**: Important supporting functionality that enhances experience but isn't core
-  - Examples: User registration/login = Critical, profile customization = High
+- Prioritize tests using unified system:
+  - **Happy Path**: Core functionality that works as intended
+  - **Critical Path**: Important scenarios that must work correctly
+  - **Edge Case**: Edge cases and error conditions
+  - **Regression**: Existing functionality that might be affected by these changes (based on Product Areas affected)
 - Provide concrete, actionable test steps based on the real changes
 - Consider the full user journey and potential impact areas
 - Include comprehensive test coverage while being specific to this PR
 - Always specify file names with line numbers in questions and risks
 - Focus on real, code-based risks, not potential or generic ones
 - For Test Recipe: 
-  - ONLY include Critical and High priority scenarios
-  - Order scenarios by priority (Critical first, then High)
+  - Include ALL priority levels: Happy Path, Critical Path, Edge Case, and Regression
+  - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case, then Regression)
   - Within each priority level, order by relevance to the actual PR changes
   - **For each priority level, include BOTH positive and negative scenarios:**
     - Start with **positive test cases** (happy path, successful workflows)
@@ -69,7 +70,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Focus on scenarios that directly test the changed functionality and affected product areas
   - Make steps detailed, actionable, and multiline-friendly
   - Evaluate which scenarios make most sense given the specific changes in the PR
-  - **Priority Examples**: User login = Critical, form submission = Critical, data validation = Critical, UI polish = High
+  - **Priority Examples**: User login = Happy Path, form validation = Critical Path, network timeout = Edge Case, existing user flows = Regression
 - For Questions, Risks & Bugs: 
   - ACTUALLY ANALYZE the code changes to see if they affect other modules/components/files
   - If dependencies are found, specify exactly which files/modules are affected and how
