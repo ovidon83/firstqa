@@ -50,11 +50,11 @@
                             <i class="fas fa-rocket me-2"></i>Built for Startups
         </div>
                         <h1 class="hero-title">
-                            Meet <span class="text-gradient">Ovi</span>, Your AI QA Agent
+                            Meet <span class="text-gradient">Ovi</span>, Your First QA
                         </h1>
                         
                         <p class="hero-subtitle">
-                            The <strong>only QA team</strong> your startup needs. Bug prevention through pre-dev ticket analysis, post-dev PR review, and human QA when you need it.
+                            The <strong>only QA team</strong> your startup needs. Bug prevention through pre-dev ticket analysis, post-dev PR review, comprehensive test plans, and human QA when you need it.
                         </p>
                         
                         <div class="hero-features">
@@ -64,7 +64,7 @@
             </div>
                                 <div class="feature-content">
                                     <span class="feature-title">Pre-Dev: Ticket Analysis</span>
-                                    <span class="feature-desc">Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements, unclear acceptance criteria, and potential risks</span>
+                                    <span class="feature-desc">Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements, unclear acceptance criteria, potential risks, and generates comprehensive test plans</span>
                                 </div>
           </div>
                             <div class="feature-item">
@@ -73,7 +73,7 @@
             </div>
                               <div class="feature-content">
                                     <span class="feature-title">Post-Dev: PR Review</span>
-                                    <span class="feature-desc">Ovi reviews GitHub PRs after development - catches bugs, security issues, and missing test cases before they reach production</span>
+                                    <span class="feature-desc">Ovi reviews GitHub PRs after development - catches bugs, security issues, missing test cases, and provides detailed test recipes for validation</span>
                                 </div>
           </div>
                             <div class="feature-item">
@@ -116,14 +116,14 @@
                                     <div class="step-number">2</div>
                                     <div class="step-content">
                                         <h4>Pre-Dev: Ticket Analysis</h4>
-                                        <p>Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements and risks</p>
+                                        <p>Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements, risks, and generates comprehensive test plans</p>
                 </div>
               </div>
                                 <div class="step">
                                     <div class="step-number">3</div>
                                     <div class="step-content">
                                         <h4>Post-Dev: PR Review</h4>
-                                        <p>Ovi reviews GitHub PRs after development - catches bugs and security issues before production</p>
+                                        <p>Ovi reviews GitHub PRs after development - catches bugs, security issues, and provides detailed test recipes for validation</p>
             </div>
             </div>
                                 <div class="step">
@@ -268,7 +268,61 @@
                 </div>
     </div>
   </div>
-</section>
+    </section>
+
+    <!-- First QA Section -->
+    <section class="first-qa-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="first-qa-content">
+                        <h2>Your <span class="text-gradient">First QA</span> Team</h2>
+                        <p class="lead">Most startups ship without QA. They fix bugs in production, lose customers, and waste engineering time. <strong>You don't have to.</strong></p>
+                        
+                        <div class="trust-indicators">
+                            <div class="trust-item">
+                                <div class="trust-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="trust-content">
+                                    <h4>Ship with Confidence</h4>
+                                    <p>Ovi catches bugs before they reach production. No more 3 AM emergency fixes or customer complaints.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="trust-item">
+                                <div class="trust-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="trust-content">
+                                    <h4>Move Faster, Not Slower</h4>
+                                    <p>Get comprehensive test plans and bug detection in seconds, not weeks of manual testing.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="trust-item">
+                                <div class="trust-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="trust-content">
+                                    <h4>Senior QA Expertise</h4>
+                                    <p>Access 10+ years of QA experience without hiring. Ovi + Human QA when you need it.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="first-qa-cta">
+                            <p class="cta-text">Join 500+ startups who chose Ovi as their first QA team</p>
+                            <div class="cta-buttons">
+                                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-primary btn-lg" target="_blank">Start Your First QA</a>
+                                <a href="https://calendly.com/firstqa/demo" class="btn btn-outline-primary btn-lg" target="_blank">See Ovi in Action</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Features Section -->
     <section id="features" class="features-section">
@@ -284,7 +338,7 @@
               </div>
               <div>
                                     <h4>Prevent Bugs Before They Happen</h4>
-                                    <p>Ovi analyzes tickets before development starts - catches missing requirements and unclear acceptance criteria</p>
+                                    <p>Ovi analyzes tickets before development starts - catches missing requirements, unclear acceptance criteria, and generates comprehensive test plans</p>
               </div>
             </div>
                             <div class="feature-card">
@@ -293,7 +347,7 @@
               </div>
               <div>
                                     <h4>Catch Bugs After Development</h4>
-                                    <p>Ovi reviews GitHub PRs after development - identifies bugs, security issues, and missing test cases</p>
+                                    <p>Ovi reviews GitHub PRs after development - identifies bugs, security issues, missing test cases, and provides detailed test recipes</p>
               </div>
             </div>
                             <div class="feature-card">
@@ -1092,9 +1146,122 @@
       line-height: 1.4;
     }
 
-    .hero-cta {
-      margin-bottom: 1rem;
-      gap: 0.75rem;
+    .first-qa-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 4rem 0;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .first-qa-content h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #1a202c;
+    }
+
+    .first-qa-content .lead {
+      font-size: 1.25rem;
+      color: #4a5568;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+
+    .trust-indicators {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .trust-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .trust-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .trust-content h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a202c;
+      margin-bottom: 0.5rem;
+    }
+
+    .trust-content p {
+      color: #4a5568;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .first-qa-cta {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .cta-text {
+      font-size: 1.125rem;
+      color: #4a5568;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    .first-qa-cta .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .first-qa-content h2 {
+        font-size: 2rem;
+      }
+      
+      .trust-indicators {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .trust-item {
+        padding: 1rem;
+      }
+      
+      .first-qa-cta .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .first-qa-cta .cta-buttons .btn {
+        width: 100%;
+        max-width: 300px;
+      }
     }
 
     .hero-trial-info {
