@@ -556,7 +556,10 @@ async function buildCodeContext(repo, pr_number, changedFiles, diff) {
     complexity: {},
     dependencies: {},
     patterns: {},
-    risks: {}
+    risks: {},
+    codeQuality: {},
+    architecture: {},
+    dataFlow: {}
   };
 
   // Analyze file types and patterns
@@ -579,6 +582,15 @@ async function buildCodeContext(repo, pr_number, changedFiles, diff) {
   context.complexity.deletions = diffLines.filter(line => line.startsWith('-') && !line.startsWith('---')).length;
   context.complexity.changes = context.complexity.additions + context.complexity.deletions;
 
+  // Advanced code quality analysis
+  context.codeQuality = analyzeCodeQuality(diff, changedFiles);
+  
+  // Architecture analysis
+  context.architecture = analyzeArchitecture(changedFiles, diff);
+  
+  // Data flow analysis
+  context.dataFlow = analyzeDataFlow(diff, changedFiles);
+
   // Detect potential risk patterns
   context.risks = detectRiskPatterns(diff, changedFiles);
 
@@ -586,7 +598,201 @@ async function buildCodeContext(repo, pr_number, changedFiles, diff) {
 }
 
 /**
- * Detect risk patterns in code changes
+ * Analyze code quality metrics
+ */
+function analyzeCodeQuality(diff, changedFiles) {
+  const quality = {
+    cyclomaticComplexity: 0,
+    maintainabilityIndex: 0,
+    codeSmells: [],
+    testCoverage: 0,
+    documentation: 0
+  };
+
+  const lines = diff.split('\n');
+  const diffLower = diff.toLowerCase();
+
+  // Cyclomatic complexity estimation
+  const complexityIndicators = [
+    'if(', 'else', 'switch', 'case', 'for(', 'while(', 'catch', '&&', '||', '?'
+  ];
+  
+  for (const indicator of complexityIndicators) {
+    const matches = lines.filter(line => line.includes(indicator)).length;
+    quality.cyclomaticComplexity += matches;
+  }
+
+  // Code smells detection
+  if (lines.some(line => line.length > 120)) {
+    quality.codeSmells.push('Long lines detected (>120 chars)');
+  }
+  
+  if (lines.filter(line => line.includes('function')).length > 5) {
+    quality.codeSmells.push('Multiple functions in single change');
+  }
+  
+  if (lines.some(line => line.includes('TODO') || line.includes('FIXME'))) {
+    quality.codeSmells.push('TODO/FIXME comments detected');
+  }
+
+  // Test coverage estimation
+  const testFiles = changedFiles.filter(f => f.includes('test') || f.includes('spec'));
+  const sourceFiles = changedFiles.filter(f => !f.includes('test') && !f.includes('spec'));
+  quality.testCoverage = testFiles.length / Math.max(sourceFiles.length, 1);
+
+  // Documentation estimation
+  const commentLines = lines.filter(line => 
+    line.trim().startsWith('//') || 
+    line.trim().startsWith('*') || 
+    line.trim().startsWith('/**')
+  ).length;
+  quality.documentation = commentLines / Math.max(lines.length, 1);
+
+  return quality;
+}
+
+/**
+ * Analyze architecture patterns
+ */
+function analyzeArchitecture(changedFiles, diff) {
+  const architecture = {
+    layers: [],
+    patterns: [],
+    integrations: [],
+    boundaries: []
+  };
+
+  // Detect architectural layers
+  if (changedFiles.some(f => f.includes('component') || f.includes('ui'))) {
+    architecture.layers.push('Presentation Layer');
+  }
+  
+  if (changedFiles.some(f => f.includes('service') || f.includes('business'))) {
+    architecture.layers.push('Business Logic Layer');
+  }
+  
+  if (changedFiles.some(f => f.includes('data') || f.includes('model') || f.includes('entity'))) {
+    architecture.layers.push('Data Access Layer');
+  }
+
+  // Detect design patterns
+  if (diff.includes('singleton') || diff.includes('getInstance')) {
+    architecture.patterns.push('Singleton Pattern');
+  }
+  
+  if (diff.includes('factory') || diff.includes('create')) {
+    architecture.patterns.push('Factory Pattern');
+  }
+  
+  if (diff.includes('observer') || diff.includes('subscribe')) {
+    architecture.patterns.push('Observer Pattern');
+  }
+
+  // Detect integrations
+  if (changedFiles.some(f => f.includes('api') || f.includes('endpoint'))) {
+    architecture.integrations.push('External API Integration');
+  }
+  
+  if (changedFiles.some(f => f.includes('database') || f.includes('db'))) {
+    architecture.integrations.push('Database Integration');
+  }
+  
+  if (changedFiles.some(f => f.includes('auth') || f.includes('login'))) {
+    architecture.integrations.push('Authentication Integration');
+  }
+
+  // Detect boundaries
+  if (changedFiles.some(f => f.includes('controller') || f.includes('handler'))) {
+    architecture.boundaries.push('Controller Boundary');
+  }
+  
+  if (changedFiles.some(f => f.includes('repository') || f.includes('dao'))) {
+    architecture.boundaries.push('Repository Boundary');
+  }
+
+  return architecture;
+}
+
+/**
+ * Analyze data flow patterns
+ */
+function analyzeDataFlow(diff, changedFiles) {
+  const dataFlow = {
+    inputs: [],
+    outputs: [],
+    transformations: [],
+    validations: [],
+    persistence: []
+  };
+
+  const diffLower = diff.toLowerCase();
+
+  // Input analysis
+  if (diffLower.includes('input') || diffLower.includes('form') || diffLower.includes('request')) {
+    dataFlow.inputs.push('User Input');
+  }
+  
+  if (diffLower.includes('file') || diffLower.includes('upload')) {
+    dataFlow.inputs.push('File Input');
+  }
+  
+  if (diffLower.includes('api') || diffLower.includes('fetch')) {
+    dataFlow.inputs.push('API Input');
+  }
+
+  // Output analysis
+  if (diffLower.includes('response') || diffLower.includes('return')) {
+    dataFlow.outputs.push('API Response');
+  }
+  
+  if (diffLower.includes('render') || diffLower.includes('display')) {
+    dataFlow.outputs.push('UI Output');
+  }
+  
+  if (diffLower.includes('email') || diffLower.includes('notification')) {
+    dataFlow.outputs.push('Notification Output');
+  }
+
+  // Transformation analysis
+  if (diffLower.includes('map') || diffLower.includes('transform')) {
+    dataFlow.transformations.push('Data Mapping');
+  }
+  
+  if (diffLower.includes('filter') || diffLower.includes('sort')) {
+    dataFlow.transformations.push('Data Filtering');
+  }
+  
+  if (diffLower.includes('aggregate') || diffLower.includes('group')) {
+    dataFlow.transformations.push('Data Aggregation');
+  }
+
+  // Validation analysis
+  if (diffLower.includes('validate') || diffLower.includes('check')) {
+    dataFlow.validations.push('Input Validation');
+  }
+  
+  if (diffLower.includes('sanitize') || diffLower.includes('clean')) {
+    dataFlow.validations.push('Data Sanitization');
+  }
+
+  // Persistence analysis
+  if (diffLower.includes('save') || diffLower.includes('store')) {
+    dataFlow.persistence.push('Data Storage');
+  }
+  
+  if (diffLower.includes('update') || diffLower.includes('modify')) {
+    dataFlow.persistence.push('Data Update');
+  }
+  
+  if (diffLower.includes('delete') || diffLower.includes('remove')) {
+    dataFlow.persistence.push('Data Deletion');
+  }
+
+  return dataFlow;
+}
+
+/**
+ * Detect risk patterns in code changes with advanced analysis
  */
 function detectRiskPatterns(diff, changedFiles) {
   const risks = {
@@ -594,59 +800,209 @@ function detectRiskPatterns(diff, changedFiles) {
     performance: [],
     reliability: [],
     maintainability: [],
-    build: []
+    build: [],
+    architecture: [],
+    dataIntegrity: []
   };
 
   const diffLower = diff.toLowerCase();
   const filesLower = changedFiles.map(f => f.toLowerCase());
-
-  // Security risks
-  if (diffLower.includes('innerhtml') || diffLower.includes('dangerouslysetinnerhtml')) {
-    risks.security.push('Potential XSS vulnerability with innerHTML usage');
-  }
-  if (diffLower.includes('eval(') || diffLower.includes('settimeout(') || diffLower.includes('setinterval(')) {
-    risks.security.push('Potential code injection with eval/setTimeout/setInterval');
-  }
-  if (diffLower.includes('sql') && (diffLower.includes('select') || diffLower.includes('insert') || diffLower.includes('update'))) {
-    risks.security.push('SQL queries detected - verify proper parameterization');
-  }
-
-  // Performance risks
-  if (diffLower.includes('foreach') && diffLower.includes('api') && diffLower.includes('call')) {
-    risks.performance.push('Potential N+1 query pattern with forEach and API calls');
-  }
-  if (diffLower.includes('settimeout') || diffLower.includes('setinterval')) {
-    risks.performance.push('Timers detected - verify cleanup to prevent memory leaks');
-  }
-  if (diffLower.includes('addlistener') || diffLower.includes('addeventlistener')) {
-    risks.performance.push('Event listeners detected - verify proper removal');
-  }
-
-  // Reliability risks
-  if (diffLower.includes('try') && !diffLower.includes('catch')) {
-    risks.reliability.push('Try block without catch - potential unhandled errors');
-  }
-  if (diffLower.includes('async') && diffLower.includes('await')) {
-    risks.reliability.push('Async/await usage - verify proper error handling');
-  }
-  if (diffLower.includes('promise') && !diffLower.includes('catch')) {
-    risks.reliability.push('Promises detected - verify error handling');
-  }
-
-  // Maintainability risks
-  if (diffLower.includes('magic') && diffLower.includes('number')) {
-    risks.maintainability.push('Magic numbers detected - consider constants');
-  }
-  if (diffLower.includes('hardcoded') || diffLower.includes('hard-coded')) {
-    risks.maintainability.push('Hardcoded values detected - consider configuration');
-  }
-
-  // Build risks - detect potential unused imports and variables
   const lines = diff.split('\n');
-  const importLines = lines.filter(line => line.includes('import') && line.includes('from'));
-  const declaredVariables = [];
+
+  // Advanced Security Analysis
+  analyzeSecurityRisks(diff, lines, risks);
   
-  // Look for variable declarations
+  // Advanced Performance Analysis
+  analyzePerformanceRisks(diff, lines, risks);
+  
+  // Advanced Reliability Analysis
+  analyzeReliabilityRisks(diff, lines, risks);
+  
+  // Advanced Maintainability Analysis
+  analyzeMaintainabilityRisks(diff, lines, risks);
+  
+  // Advanced Build Analysis
+  analyzeBuildRisks(diff, lines, risks);
+  
+  // Architecture Analysis
+  analyzeArchitectureRisks(diff, changedFiles, risks);
+  
+  // Data Integrity Analysis
+  analyzeDataIntegrityRisks(diff, lines, risks);
+
+  return risks;
+}
+
+/**
+ * Advanced security risk analysis
+ */
+function analyzeSecurityRisks(diff, lines, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // XSS vulnerabilities
+  if (diffLower.includes('innerhtml') || diffLower.includes('dangerouslysetinnerhtml')) {
+    risks.security.push('🚨 XSS vulnerability: innerHTML usage without sanitization');
+  }
+  
+  // Code injection
+  if (diffLower.includes('eval(') || diffLower.includes('settimeout(') || diffLower.includes('setinterval(')) {
+    risks.security.push('🚨 Code injection risk: eval/setTimeout/setInterval with user input');
+  }
+  
+  // SQL injection
+  if (diffLower.includes('sql') && (diffLower.includes('select') || diffLower.includes('insert') || diffLower.includes('update'))) {
+    risks.security.push('🚨 SQL injection risk: Raw SQL queries without parameterization');
+  }
+  
+  // Authentication bypass
+  if (diffLower.includes('bypass') || diffLower.includes('skip') || diffLower.includes('ignore')) {
+    risks.security.push('⚠️ Authentication bypass: Potential security bypass detected');
+  }
+  
+  // Sensitive data exposure
+  if (diffLower.includes('password') || diffLower.includes('secret') || diffLower.includes('token')) {
+    risks.security.push('⚠️ Sensitive data: Password/secret handling detected');
+  }
+  
+  // CORS issues
+  if (diffLower.includes('cors') || diffLower.includes('origin')) {
+    risks.security.push('⚠️ CORS configuration: Cross-origin requests detected');
+  }
+  
+  // File upload vulnerabilities
+  if (diffLower.includes('upload') || diffLower.includes('file')) {
+    risks.security.push('⚠️ File upload: Potential file upload vulnerabilities');
+  }
+}
+
+/**
+ * Advanced performance risk analysis
+ */
+function analyzePerformanceRisks(diff, lines, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // N+1 query patterns
+  if (diffLower.includes('foreach') && diffLower.includes('api') && diffLower.includes('call')) {
+    risks.performance.push('🐌 N+1 query pattern: forEach with API calls detected');
+  }
+  
+  // Memory leaks
+  if (diffLower.includes('settimeout') || diffLower.includes('setinterval')) {
+    risks.performance.push('🐌 Memory leak risk: Timers without cleanup detected');
+  }
+  
+  // Event listener leaks
+  if (diffLower.includes('addlistener') || diffLower.includes('addeventlistener')) {
+    risks.performance.push('🐌 Event listener leak: Listeners without removal detected');
+  }
+  
+  // Large data processing
+  if (diffLower.includes('map(') && diffLower.includes('filter(') && diffLower.includes('reduce(')) {
+    risks.performance.push('🐌 Performance: Multiple array operations chained');
+  }
+  
+  // Synchronous operations
+  if (diffLower.includes('sync') && !diffLower.includes('async')) {
+    risks.performance.push('🐌 Blocking operation: Synchronous I/O detected');
+  }
+  
+  // Large loops
+  const loopPatterns = lines.filter(line => 
+    line.includes('for(') || line.includes('while(') || line.includes('forEach(')
+  );
+  if (loopPatterns.length > 3) {
+    risks.performance.push('🐌 Performance: Multiple loops detected');
+  }
+}
+
+/**
+ * Advanced reliability risk analysis
+ */
+function analyzeReliabilityRisks(diff, lines, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // Error handling
+  if (diffLower.includes('try') && !diffLower.includes('catch')) {
+    risks.reliability.push('💥 Unhandled errors: Try block without catch');
+  }
+  
+  // Promise handling
+  if (diffLower.includes('promise') && !diffLower.includes('catch')) {
+    risks.reliability.push('💥 Promise errors: Missing error handling');
+  }
+  
+  // Async/await
+  if (diffLower.includes('async') && diffLower.includes('await')) {
+    risks.reliability.push('💥 Async errors: Verify proper error handling');
+  }
+  
+  // Null/undefined checks
+  if (diffLower.includes('null') || diffLower.includes('undefined')) {
+    risks.reliability.push('💥 Null safety: Potential null/undefined access');
+  }
+  
+  // Network calls
+  if (diffLower.includes('fetch') || diffLower.includes('axios') || diffLower.includes('request')) {
+    risks.reliability.push('💥 Network reliability: HTTP calls without timeout/retry');
+  }
+  
+  // Database operations
+  if (diffLower.includes('database') || diffLower.includes('db.') || diffLower.includes('query')) {
+    risks.reliability.push('💥 Database reliability: DB operations without error handling');
+  }
+}
+
+/**
+ * Advanced maintainability risk analysis
+ */
+function analyzeMaintainabilityRisks(diff, lines, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // Magic numbers
+  if (diffLower.includes('magic') && diffLower.includes('number')) {
+    risks.maintainability.push('🔧 Magic numbers: Consider using constants');
+  }
+  
+  // Hardcoded values
+  if (diffLower.includes('hardcoded') || diffLower.includes('hard-coded')) {
+    risks.maintainability.push('🔧 Hardcoded values: Consider configuration');
+  }
+  
+  // Complex conditionals
+  const complexConditions = lines.filter(line => 
+    line.includes('&&') && line.includes('||') && line.length > 100
+  );
+  if (complexConditions.length > 0) {
+    risks.maintainability.push('🔧 Complex logic: Consider breaking down complex conditions');
+  }
+  
+  // Long functions
+  const functionLines = lines.filter(line => line.includes('function') || line.includes('=>'));
+  if (functionLines.length > 10) {
+    risks.maintainability.push('🔧 Function complexity: Consider breaking down large functions');
+  }
+  
+  // Duplicate code
+  const duplicatePatterns = findDuplicatePatterns(lines);
+  if (duplicatePatterns.length > 0) {
+    risks.maintainability.push('🔧 Code duplication: Consider extracting common logic');
+  }
+}
+
+/**
+ * Advanced build risk analysis
+ */
+function analyzeBuildRisks(diff, lines, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // Import analysis
+  const importLines = lines.filter(line => line.includes('import') && line.includes('from'));
+  if (importLines.length > 5) {
+    risks.build.push('🔨 Import complexity: Multiple imports detected');
+  }
+  
+  // Variable declarations
+  const declaredVariables = [];
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (trimmedLine.startsWith('const ') || trimmedLine.startsWith('let ') || trimmedLine.startsWith('var ')) {
@@ -656,23 +1012,100 @@ function detectRiskPatterns(diff, changedFiles) {
       }
     }
   }
-
-  // Check for potential unused imports (imports that might not be used)
-  if (importLines.length > 5) {
-    risks.build.push('Multiple imports detected - verify all imports are actually used to avoid TypeScript compilation errors');
-  }
-
-  // Check for potential unused variables
+  
   if (declaredVariables.length > 10) {
-    risks.build.push('Multiple variable declarations detected - verify all variables are used to avoid TypeScript compilation errors');
+    risks.build.push('🔨 Variable complexity: Multiple declarations detected');
   }
-
-  // Look for specific patterns that often lead to unused imports
+  
+  // Destructured imports
   if (diffLower.includes('import') && diffLower.includes('{') && diffLower.includes('}')) {
-    risks.build.push('Destructured imports detected - verify all imported items are used');
+    risks.build.push('🔨 Destructured imports: Verify all imported items are used');
   }
+  
+  // TypeScript issues
+  if (diffLower.includes('typescript') || diffLower.includes('tsconfig')) {
+    risks.build.push('🔨 TypeScript: Verify type definitions and compilation');
+  }
+}
 
-  return risks;
+/**
+ * Architecture risk analysis
+ */
+function analyzeArchitectureRisks(diff, changedFiles, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // Cross-cutting concerns
+  if (changedFiles.some(f => f.includes('auth')) && changedFiles.some(f => f.includes('api'))) {
+    risks.architecture.push('🏗️ Cross-cutting: Authentication and API changes together');
+  }
+  
+  // Database schema changes
+  if (changedFiles.some(f => f.includes('migration') || f.includes('schema'))) {
+    risks.architecture.push('🏗️ Schema change: Database migration detected');
+  }
+  
+  // API changes
+  if (changedFiles.some(f => f.includes('api') || f.includes('route'))) {
+    risks.architecture.push('🏗️ API change: Backend API modifications detected');
+  }
+  
+  // Frontend changes
+  if (changedFiles.some(f => f.includes('component') || f.includes('ui'))) {
+    risks.architecture.push('🏗️ UI change: Frontend component modifications detected');
+  }
+  
+  // Configuration changes
+  if (changedFiles.some(f => f.includes('config') || f.includes('env'))) {
+    risks.architecture.push('🏗️ Configuration: Environment or config changes detected');
+  }
+}
+
+/**
+ * Data integrity risk analysis
+ */
+function analyzeDataIntegrityRisks(diff, lines, risks) {
+  const diffLower = diff.toLowerCase();
+  
+  // Data validation
+  if (diffLower.includes('validation') || diffLower.includes('validate')) {
+    risks.dataIntegrity.push('📊 Data validation: Verify input validation logic');
+  }
+  
+  // Data transformation
+  if (diffLower.includes('transform') || diffLower.includes('map') || diffLower.includes('filter')) {
+    risks.dataIntegrity.push('📊 Data transformation: Verify data integrity during processing');
+  }
+  
+  // Data persistence
+  if (diffLower.includes('save') || diffLower.includes('store') || diffLower.includes('persist')) {
+    risks.dataIntegrity.push('📊 Data persistence: Verify data consistency during storage');
+  }
+  
+  // Data migration
+  if (diffLower.includes('migrate') || diffLower.includes('migration')) {
+    risks.dataIntegrity.push('📊 Data migration: Verify data integrity during migration');
+  }
+}
+
+/**
+ * Find duplicate code patterns
+ */
+function findDuplicatePatterns(lines) {
+  const patterns = [];
+  const seen = new Set();
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.length > 20 && !line.startsWith('//') && !line.startsWith('*')) {
+      if (seen.has(line)) {
+        patterns.push(line);
+      } else {
+        seen.add(line);
+      }
+    }
+  }
+  
+  return patterns;
 }
 
 /**
