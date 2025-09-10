@@ -91,6 +91,11 @@
             box-shadow: 0 4px 12px rgba(36, 41, 46, 0.3);
         }
         
+        .install-button[style*="background: #4285f4"]:hover {
+            background: #3367d6 !important;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+        
         .feature-list {
             list-style: none;
             padding-left: 0;
@@ -187,35 +192,58 @@
         
         <!-- Success Header -->
         <div class="success-header">
-            <h1>Let's Connect Ovi to Your GitHub</h1>
-            <p>Follow these simple steps to get started with AI-powered QA</p>
+            <h1>Get Started with Ovi AI QA</h1>
+            <p>Choose how you want to use Ovi - or use both for complete coverage!</p>
         </div>
         
         <!-- Step 1: Install GitHub App -->
         <div class="step-card">
             <div class="step-number">1</div>
-            <h3 class="step-title">Install the GitHub App (1 minute)</h3>
-            <p class="step-description">Click the button below and choose the org/repos where you want Ovi to run.</p>
+            <h3 class="step-title">Install GitHub App (Post-Dev Analysis)</h3>
+            <p class="step-description">Get AI-powered PR reviews with automated test recipes and risk analysis. Perfect for code review and testing guidance.</p>
             <a href="https://github.com/apps/get-your-tester/installations/new" class="install-button">
-                <i class="fab fa-github me-2"></i>Install Ovi on GitHub
+                <i class="fab fa-github me-2"></i>Install GitHub App
             </a>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <strong>What you get:</strong> Automated PR comments with readiness scores, risk analysis, and test recipes
+                </small>
+            </div>
         </div>
         
-        <!-- Step 2: Create/Update PR -->
+        <!-- Step 2: Install Chrome Extension -->
         <div class="step-card">
             <div class="step-number">2</div>
-            <h3 class="step-title">Open/Update a PR</h3>
-            <p class="step-description">After installation, open a new PR or push to an existing one. Ovi will post an automated review comment with:</p>
+            <h3 class="step-title">Install Chrome Extension (Pre-Dev Analysis)</h3>
+            <p class="step-description">Analyze Jira and Linear tickets before development starts. Get readiness scores, improvements, and test plans.</p>
+            <a href="https://chrome.google.com/webstore/detail/firstqa-ticket-review/your-extension-id" class="install-button" style="background: #4285f4;">
+                <i class="fab fa-chrome me-2"></i>Install Chrome Extension
+            </a>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <strong>What you get:</strong> Ticket analysis, readiness assessment, QA questions, and test recipes for Jira/Linear
+                </small>
+            </div>
+        </div>
+        
+        <!-- Step 3: How It Works -->
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Start Using Ovi</h3>
+            <p class="step-description">After installation, Ovi will automatically analyze your work:</p>
             <ul class="feature-list">
-                <li>Readiness score</li>
-                <li>Specific risks</li>
-                <li>Test Recipe (happy path + critical path)</li>
+                <li><strong>GitHub App:</strong> Analyzes PRs and posts automated reviews</li>
+                <li><strong>Chrome Extension:</strong> Analyzes tickets in Jira/Linear with one click</li>
+                <li><strong>Both:</strong> Complete pre-dev and post-dev QA coverage</li>
             </ul>
         </div>
         
         <!-- Support Section -->
         <div class="support-section">
-            <h3>Need help or want human QA on a release?</h3>
+            <h3>Need help with GitHub App or Chrome Extension?</h3>
+            <p>Email us at <strong><a href="mailto:hello@firstqa.dev">hello@firstqa.dev</a></strong> with your question or the PR/ticket link.</p>
+            
+            <h3 class="mt-4">Want human QA on a release?</h3>
             <p>Email us at <strong><a href="mailto:hello@firstqa.dev">hello@firstqa.dev</a></strong> with the PR link and "Human QA" in the subject.</p>
             
             <h3 class="mt-4">What if I need an invoice or to cancel?</h3>
