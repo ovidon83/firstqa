@@ -119,11 +119,6 @@
                                 </div>
                             </div>
                         </div>
-        
-                        <div class="hero-cta d-flex">
-                            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-primary btn-lg me-3" target="_blank">Start Free Trial</a>
-                            <a href="#features" class="btn btn-outline-primary btn-lg">Why It Works</a>
-                        </div>
                         
                         <div class="hero-trial-info">
                             <i class="fas fa-clock me-2"></i>5-day free trial • No credit card required • Cancel anytime
@@ -1036,6 +1031,9 @@
       max-width: 550px;
       position: relative;
       z-index: 2;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
     .hero-badge {
@@ -1180,6 +1178,10 @@
       border-radius: 12px;
       border: 1px solid #e2e8f0;
       backdrop-filter: blur(10px);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .tools-header {
@@ -1284,6 +1286,7 @@
       align-items: center;
   position: relative;
       z-index: 2;
+      height: 100%;
     }
 
     .workflow-card {
