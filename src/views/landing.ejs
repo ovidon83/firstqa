@@ -498,7 +498,58 @@
 
 
 
-    <section class="testimonials-section">
+    <!-- Demo Screenshots Section -->
+    <section class="demo-screenshots-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h3>Ovi AI In Action</h3>
+                <p class="lead">See Ovi AI analyzing GitHub PRs and Jira/Linear tickets in real-time</p>
+            </div>
+            
+            <div class="screenshot-carousel-container">
+                <div class="carousel-wrapper">
+                    <div class="carousel-main">
+                        <div class="carousel-image-container">
+                            <img id="main-screenshot" src="/images/demo-pr-report-1.png" alt="Ovi AI Analysis Demo" class="main-screenshot">
+                        </div>
+                        <div class="carousel-caption">
+                            <h4 id="screenshot-title">GitHub PR Analysis</h4>
+                            <p id="screenshot-description">Comprehensive code review with risk detection and test recipes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-thumbnails">
+                        <div class="thumbnail-item active" data-src="/images/demo-pr-report-1.png" data-title="GitHub PR Analysis" data-desc="Comprehensive code review with risk detection and test recipes">
+                            <img src="/images/demo-pr-report-1.png" alt="PR Report 1">
+                            <span class="thumbnail-label">PR Report</span>
+                        </div>
+                        <div class="thumbnail-item" data-src="/images/demo-pr-report-2.png" data-title="GitHub PR Analysis" data-desc="Detailed risk analysis and security vulnerability detection">
+                            <img src="/images/demo-pr-report-2.png" alt="PR Report 2">
+                            <span class="thumbnail-label">PR Analysis</span>
+                        </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-general.png" data-title="Ticket Analysis" data-desc="Pre-development ticket review with readiness assessment">
+                            <img src="/images/demo-ticket-general.png" alt="General Ticket">
+                            <span class="thumbnail-label">Ticket Review</span>
+                        </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-general-2.png" data-title="Ticket Analysis" data-desc="Comprehensive test recipe generation and risk identification">
+                            <img src="/images/demo-ticket-general-2.png" alt="General Ticket 2">
+                            <span class="thumbnail-label">Test Planning</span>
+                        </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-jira-1.png" data-title="Jira Ticket Analysis" data-desc="Jira ticket analysis with improvements and QA questions">
+                            <img src="/images/demo-ticket-jira-1.png" alt="Jira Ticket">
+                            <span class="thumbnail-label">Jira Analysis</span>
+                        </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-linear-1.png" data-title="Linear Ticket Analysis" data-desc="Linear ticket review with readiness scoring and test scenarios">
+                            <img src="/images/demo-ticket-linear-1.png" alt="Linear Ticket">
+                            <span class="thumbnail-label">Linear Analysis</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
         <div class="container">
             <div class="section-header text-center">
                 <h2>Trusted by Fast-Moving Startups</h2>
@@ -640,6 +691,41 @@
 </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Carousel functionality
+        const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+        const mainScreenshot = document.getElementById('main-screenshot');
+        const screenshotTitle = document.getElementById('screenshot-title');
+        const screenshotDescription = document.getElementById('screenshot-description');
+        
+        thumbnailItems.forEach(item => {
+          item.addEventListener('click', function() {
+            // Remove active class from all thumbnails
+            thumbnailItems.forEach(thumb => thumb.classList.remove('active'));
+            
+            // Add active class to clicked thumbnail
+            this.classList.add('active');
+            
+            // Update main image and caption
+            const src = this.getAttribute('data-src');
+            const title = this.getAttribute('data-title');
+            const desc = this.getAttribute('data-desc');
+            
+            mainScreenshot.src = src;
+            screenshotTitle.textContent = title;
+            screenshotDescription.textContent = desc;
+            
+            // Add smooth transition effect
+            mainScreenshot.style.opacity = '0.7';
+            setTimeout(() => {
+              mainScreenshot.style.opacity = '1';
+            }, 150);
+          });
+        });
+      });
+    </script>
     
     
     <!-- Crisp Chat Plugin -->
