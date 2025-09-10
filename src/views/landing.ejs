@@ -676,15 +676,11 @@
     <!-- Screenshot Carousel JavaScript -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        console.log('Carousel script loaded');
-        
         // Carousel functionality
         const thumbnailItems = document.querySelectorAll('.thumbnail-item');
         const mainScreenshot = document.getElementById('main-screenshot');
         const screenshotTitle = document.getElementById('screenshot-title');
         const screenshotDescription = document.getElementById('screenshot-description');
-        
-        console.log('Found thumbnail items:', thumbnailItems.length);
         
         thumbnailItems.forEach(item => {
           item.addEventListener('click', function() {
@@ -1867,7 +1863,6 @@
       max-height: 500px;
       object-fit: contain;
       display: block;
-      background: #f7fafc;
     }
 
     .carousel-caption {
@@ -1917,7 +1912,6 @@
       height: 60px;
       object-fit: cover;
       display: block;
-      background: #f7fafc;
     }
 
     .thumbnail-label {
