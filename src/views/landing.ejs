@@ -512,10 +512,6 @@
                         <div class="carousel-image-container">
                             <img id="main-screenshot" src="/images/demo-pr-report-1.png" alt="Ovi AI Analysis Demo" class="main-screenshot">
                         </div>
-                        <div class="carousel-caption">
-                            <h4 id="screenshot-title">GitHub PR Analysis</h4>
-                            <p id="screenshot-description">Comprehensive code review with risk detection and test recipes</p>
-                        </div>
                     </div>
                     
                     <div class="carousel-thumbnails">
@@ -697,8 +693,6 @@
         // Carousel functionality
         const thumbnailItems = document.querySelectorAll('.thumbnail-item');
         const mainScreenshot = document.getElementById('main-screenshot');
-        const screenshotTitle = document.getElementById('screenshot-title');
-        const screenshotDescription = document.getElementById('screenshot-description');
         
         thumbnailItems.forEach(item => {
           item.addEventListener('click', function() {
@@ -708,14 +702,9 @@
             // Add active class to clicked thumbnail
             this.classList.add('active');
             
-            // Update main image and caption
+            // Update main image
             const src = this.getAttribute('data-src');
-            const title = this.getAttribute('data-title');
-            const desc = this.getAttribute('data-desc');
-            
             mainScreenshot.src = src;
-            screenshotTitle.textContent = title;
-            screenshotDescription.textContent = desc;
             
             // Add smooth transition effect
             mainScreenshot.style.opacity = '0.7';
