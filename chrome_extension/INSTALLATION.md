@@ -1,112 +1,132 @@
-# FirstQA Ovi AI Chrome Extension - Installation Guide
+# 🔧 FirstQA Chrome Extension - Early Access Installation
 
-## Quick Start
+## **📋 Quick Installation Guide**
 
-### 1. Download the Extension
-- Download the `chrome_extension` folder from this repository
-- Ensure all files are present (manifest.json, content.js, popup.html, etc.)
+Follow these simple steps to install the FirstQA Chrome Extension in developer mode:
 
-### 2. Generate Icons
-Before loading the extension, you need to generate the PNG icons from the SVG:
+### **Step 1: Download Extension Files**
+1. **Download the extension** from our GitHub repository:
+   - Go to: https://github.com/ovidon83/firstqa/releases
+   - Download the latest `firstqa-chrome-extension.zip` file
+   - Extract the zip file to a folder on your computer
 
-**Option A: Using ImageMagick (Recommended)**
-```bash
-cd chrome_extension/icons
-convert icon.svg -resize 16x16 icon16.png
-convert icon.svg -resize 48x48 icon48.png
-convert icon.svg -resize 128x128 icon128.png
-```
+### **Step 2: Enable Developer Mode**
+1. **Open Chrome** and go to `chrome://extensions/`
+2. **Enable Developer Mode** by toggling the switch in the top-right corner
+3. You'll see "Developer mode" appear with additional options
 
-**Option B: Online Converter**
-1. Open `icons/icon.svg` in a web browser
-2. Use an online SVG to PNG converter
-3. Generate sizes: 16x16, 48x48, and 128x128
-4. Save as `icon16.png`, `icon48.png`, and `icon128.png` in the `icons/` folder
+### **Step 3: Load the Extension**
+1. **Click "Load unpacked"** button
+2. **Select the folder** where you extracted the extension files
+3. **Click "Select Folder"**
+4. The FirstQA extension will appear in your extensions list
 
-### 3. Load in Chrome
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in top-right corner)
-3. Click "Load unpacked"
-4. Select the `chrome_extension` folder
-5. The extension should now appear in your extensions list
+### **Step 4: Verify Installation**
+1. **Look for the FirstQA icon** in your Chrome toolbar
+2. **Visit a Jira or Linear ticket** to test the extension
+3. **Click the FirstQA icon** to analyze tickets
 
-### 4. Configure API Key
-1. Click the extension icon in your toolbar
-2. Click "Open Settings" in the popup
-3. Enter your FirstQA API key
-4. Click "Test Connection" to verify
-5. Click "Save API Key"
+---
 
-### 5. Test the Extension
-1. Navigate to any Linear or Jira ticket
-2. The extension should automatically detect the ticket
-3. Click "Analyze Current Ticket" in the popup
-4. Wait for analysis to complete
-5. Try "Insert as Comment" to add analysis to the ticket
+## **🎯 What You Get**
 
-## Troubleshooting
+### **✅ Full Functionality**
+- **Jira Integration**: Analyze Jira tickets with AI-powered QA insights
+- **Linear Integration**: Get comprehensive analysis for Linear tickets
+- **Test Recipes**: Generate actionable test plans and scenarios
+- **Risk Detection**: Identify potential issues and edge cases
+- **Readiness Scoring**: Get readiness scores for development
 
-### Extension Not Loading
-- Check that all files are present in the folder
-- Ensure icons are generated and in the correct location
-- Check Chrome's extension page for error messages
-- Try reloading the extension
+### **✅ Real-time Analysis**
+- **Instant Analysis**: Get QA feedback in seconds
+- **Comprehensive Reports**: Detailed analysis with improvements, questions, and risks
+- **Copy to Clipboard**: Easy sharing of analysis results
+- **Auto-submit to Linear**: Automatic comment posting in Linear
 
-### API Connection Issues
-- Verify your API key is correct
-- Check that you have internet connectivity
-- Test the API endpoint directly: `https://www.firstqa.dev/api/health`
-- Contact support if issues persist
+---
 
-### Analysis Not Working
-- Ensure you're on a supported platform (Linear/Jira)
-- Check that the ticket page is fully loaded
-- Verify your API key is configured
-- Check browser console for error messages
+## **🔄 Updating the Extension**
 
-### Comments Not Inserting
-- Ensure you have write permissions on the ticket
-- Check that comment fields are present on the page
-- Try refreshing the page and trying again
-- Some ticket types may not support comments
+### **Manual Updates**
+1. **Download the latest version** from GitHub releases
+2. **Extract the new files** to replace the old ones
+3. **Go to `chrome://extensions/`**
+4. **Click the refresh icon** on the FirstQA extension
+5. **The extension will update** with the latest features
 
-## Development
+### **Automatic Notifications**
+- We'll notify you via email when new versions are available
+- Follow our GitHub repository for release announcements
 
-### Making Changes
-1. Edit the source files
-2. Go to `chrome://extensions/`
-3. Click the refresh icon on the extension
-4. Test your changes
+---
 
-### Debugging
-- **Content Script**: Check browser console on ticket pages
-- **Background Script**: Click "service worker" link in extension details
-- **Popup**: Right-click popup and select "Inspect"
+## **🛠️ Troubleshooting**
 
-### File Structure
-```
-chrome_extension/
-├── manifest.json          # Extension configuration
-├── background.js          # Background service worker
-├── popup.html             # Extension popup UI
-├── popup.js               # Popup logic
-├── content.js             # Content script for ticket pages
-├── utils.js               # Utility functions
-├── ui.css                 # Styles for floating panel
-├── settings.html          # Settings page
-├── settings.js            # Settings logic
-├── scripts/
-│   └── firstqa-api.js     # API integration
-└── icons/
-    ├── icon.svg           # Source icon
-    ├── icon16.png         # 16x16 icon (generate this)
-    ├── icon48.png         # 48x48 icon (generate this)
-    └── icon128.png        # 128x128 icon (generate this)
-```
+### **Extension Not Loading**
+- **Check file permissions**: Ensure the extension folder is readable
+- **Verify folder structure**: Make sure all files are in the same folder
+- **Restart Chrome**: Close and reopen Chrome after installation
 
-## Support
+### **Extension Not Working on Jira/Linear**
+- **Check page load**: Wait for the page to fully load before clicking the extension
+- **Refresh the page**: Try refreshing the ticket page
+- **Check console**: Open Developer Tools (F12) to see any error messages
 
-- Check the [main README](../README.md) for detailed documentation
-- Contact support at support@firstqa.dev
-- Report issues on GitHub
-- Check the [FirstQA documentation](https://www.firstqa.dev/docs)
+### **Analysis Not Appearing**
+- **Check internet connection**: The extension needs to connect to our servers
+- **Verify ticket format**: Ensure you're on a valid Jira or Linear ticket page
+- **Try a different ticket**: Test with another ticket to isolate the issue
+
+---
+
+## **📞 Support & Help**
+
+### **Need Help?**
+- **Email Support**: hello@firstqa.dev
+- **GitHub Issues**: Report bugs or request features
+- **Documentation**: Check our full documentation
+
+### **Feedback Welcome**
+- **Feature Requests**: Tell us what you'd like to see
+- **Bug Reports**: Help us improve the extension
+- **User Experience**: Share your thoughts on the interface
+
+---
+
+## **🔒 Security & Privacy**
+
+### **Data Handling**
+- **Read-only access**: We only read ticket content, never modify it
+- **Secure transmission**: All data is encrypted in transit
+- **No storage**: Ticket content is processed in real-time only
+- **Privacy protected**: We don't collect personal information
+
+### **Permissions Explained**
+- **Active tab**: Required to read ticket content for analysis
+- **Storage**: Used to remember your preferences
+- **Host permissions**: Required to access Jira and Linear domains
+
+---
+
+## **🚀 What's Next**
+
+### **Coming Soon**
+- **Chrome Web Store**: Official release in the Chrome Web Store
+- **Automatic Updates**: Seamless updates without manual installation
+- **Enhanced Features**: More analysis capabilities and integrations
+- **Team Features**: Collaboration tools for QA teams
+
+### **Stay Updated**
+- **Follow our releases**: Watch our GitHub repository
+- **Join our newsletter**: Get updates on new features
+- **Connect with us**: Follow us on social media
+
+---
+
+**Last Updated**: September 2024  
+**Version**: 1.0  
+**Next Review**: December 2024
+
+---
+
+*Thank you for being an early adopter of FirstQA! Your feedback helps us build the best QA tool for startups.*
