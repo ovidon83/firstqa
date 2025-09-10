@@ -165,6 +165,28 @@ FirstQA features **Ovi**, an AI-powered QA Agent that provides comprehensive ana
 - **DigitalOcean**: App Platform or Droplet deployment
 - **Vercel**: Serverless deployment option
 
+## 🔒 **Security & Privacy**
+
+FirstQA takes security seriously. We understand that granting access to your codebase is a significant decision.
+
+### **🔐 GitHub App Permissions**
+- **Read-only access** to repository contents (code, pull requests, issues)
+- **No write access** - We cannot modify your code
+- **No admin access** - We cannot change repository settings
+- **Revocable at any time** - You maintain full control
+
+### **🛡️ Data Protection**
+- **Analysis results**: Stored securely for 14 days, then automatically deleted
+- **Code content**: Processed in memory only, never permanently stored
+- **Personal information**: Never collected or stored
+- **HTTPS/TLS encryption** for all data transmission
+
+### **📋 Security Documentation**
+- **🔒 Security Policy**: [View Security Details →](SECURITY.md)
+- **🔐 Privacy Policy**: [Privacy Policy](https://firstqa.dev/privacy)
+- **📄 Terms of Service**: [Terms](https://firstqa.dev/terms)
+- **📧 Security Contact**: security@firstqa.dev
+
 ## 📚 **Documentation & Support**
 
 - **📖 Documentation**: [View Documentation →](https://firstqa.dev/docs)
