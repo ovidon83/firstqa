@@ -480,85 +480,46 @@
     <section class="demo-screenshots-section">
         <div class="container">
             <div class="section-header text-center">
-                <h3>What Ovi AI Delivers</h3>
-                <p class="lead">Comprehensive analysis that catches what you miss</p>
+                <h3>Ovi AI In Action</h3>
+                <p class="lead">See Ovi AI analyzing GitHub PRs and Jira/Linear tickets in real-time</p>
             </div>
             
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="demo-screenshot-card">
-                        <div class="screenshot-header">
-                            <div class="screenshot-icon">
-                                <i class="fas fa-code-branch"></i>
-                            </div>
-                            <div class="screenshot-title">
-                                <h4>AI-Powered PR Analysis</h4>
-                                <span>Instant risk detection and quality assessment</span>
-                            </div>
+            <div class="screenshot-carousel-container">
+                <div class="carousel-wrapper">
+                    <div class="carousel-main">
+                        <div class="carousel-image-container">
+                            <img id="main-screenshot" src="/images/demo-pr-report-1.png" alt="Ovi AI Analysis Demo" class="main-screenshot">
                         </div>
-                        <div class="screenshot-content">
-                            <div class="screenshot-image-container">
-                                <img src="/images/ovi-ovi-pr-analysis-demo" alt="Ovi AI PR Analysis Demo" class="demo-screenshot">
-                            </div>
+                        <div class="carousel-caption">
+                            <h4 id="screenshot-title">GitHub PR Analysis</h4>
+                            <p id="screenshot-description">Comprehensive code review with risk detection and test recipes</p>
                         </div>
                     </div>
-                </div>
-                
-                <div class="col-lg-6 mb-4">
-                    <div class="demo-screenshot-card">
-                        <div class="screenshot-header">
-                            <div class="screenshot-icon">
-                                <i class="fas fa-list-check"></i>
-                            </div>
-                            <div class="screenshot-title">
-                                <h4>Smart Test Recipe Generation</h4>
-                                <span>AI-generated testing scenarios and edge cases</span>
-                            </div>
+                    
+                    <div class="carousel-thumbnails">
+                        <div class="thumbnail-item active" data-src="/images/demo-pr-report-1.png" data-title="GitHub PR Analysis" data-desc="Comprehensive code review with risk detection and test recipes">
+                            <img src="/images/demo-pr-report-1.png" alt="PR Report 1">
+                            <span class="thumbnail-label">PR Report</span>
                         </div>
-                        <div class="screenshot-content">
-                            <div class="screenshot-image-container">
-                                <img src="/images/ovi-test-recipe.png" alt="Ovi Test Recipe Demo" class="demo-screenshot">
-                            </div>
+                        <div class="thumbnail-item" data-src="/images/demo-pr-report-2.png" data-title="GitHub PR Analysis" data-desc="Detailed risk analysis and security vulnerability detection">
+                            <img src="/images/demo-pr-report-2.png" alt="PR Report 2">
+                            <span class="thumbnail-label">PR Analysis</span>
                         </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="demo-screenshot-card">
-                        <div class="screenshot-header">
-                            <div class="screenshot-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="screenshot-title">
-                                <h4>Advanced Risk Detection</h4>
-                                <span>AI identifies security vulnerabilities and code issues</span>
-                            </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-general.png" data-title="Ticket Analysis" data-desc="Pre-development ticket review with readiness assessment">
+                            <img src="/images/demo-ticket-general.png" alt="General Ticket">
+                            <span class="thumbnail-label">Ticket Review</span>
                         </div>
-                        <div class="screenshot-content">
-                            <div class="screenshot-image-container">
-                                <img src="/images/ovi-risk-analysis-demo.png" alt="Ovi Risk Analysis Demo" class="demo-screenshot">
-                            </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-general-2.png" data-title="Ticket Analysis" data-desc="Comprehensive test recipe generation and risk identification">
+                            <img src="/images/demo-ticket-general-2.png" alt="General Ticket 2">
+                            <span class="thumbnail-label">Test Planning</span>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6 mb-4">
-                    <div class="demo-screenshot-card">
-                        <div class="screenshot-header">
-                            <div class="screenshot-icon">
-                                <i class="fas fa-crosshairs"></i>
-                            </div>
-                            <div class="screenshot-title">
-                                <h4>Impact Analysis</h4>
-                                <span>AI maps changes to affected product areas and components</span>
-                            </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-jira-1.png" data-title="Jira Ticket Analysis" data-desc="Jira ticket analysis with improvements and QA questions">
+                            <img src="/images/demo-ticket-jira-1.png" alt="Jira Ticket">
+                            <span class="thumbnail-label">Jira Analysis</span>
                         </div>
-                        <div class="screenshot-content">
-                            <div class="screenshot-image-container">
-                                <img src="/images/ovi-product-areas-affected-demo.png" alt="Ovi Product Areas Affected Demo" class="demo-screenshot">
-                            </div>
+                        <div class="thumbnail-item" data-src="/images/demo-ticket-linear-1.png" data-title="Linear Ticket Analysis" data-desc="Linear ticket review with readiness scoring and test scenarios">
+                            <img src="/images/demo-ticket-linear-1.png" alt="Linear Ticket">
+                            <span class="thumbnail-label">Linear Analysis</span>
                         </div>
                     </div>
                 </div>
@@ -711,6 +672,41 @@
 </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Screenshot Carousel JavaScript -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+        const mainScreenshot = document.getElementById('main-screenshot');
+        const screenshotTitle = document.getElementById('screenshot-title');
+        const screenshotDescription = document.getElementById('screenshot-description');
+        
+        thumbnailItems.forEach(item => {
+          item.addEventListener('click', function() {
+            // Remove active class from all thumbnails
+            thumbnailItems.forEach(thumb => thumb.classList.remove('active'));
+            
+            // Add active class to clicked thumbnail
+            this.classList.add('active');
+            
+            // Update main image and caption
+            const src = this.getAttribute('data-src');
+            const title = this.getAttribute('data-title');
+            const desc = this.getAttribute('data-desc');
+            
+            mainScreenshot.src = src;
+            screenshotTitle.textContent = title;
+            screenshotDescription.textContent = desc;
+            
+            // Add smooth transition effect
+            mainScreenshot.style.opacity = '0.7';
+            setTimeout(() => {
+              mainScreenshot.style.opacity = '1';
+            }, 150);
+          });
+        });
+      });
+    </script>
     
     <!-- Crisp Chat Plugin -->
     <script type="text/javascript">
@@ -1833,77 +1829,132 @@
       border-top: 1px solid #e2e8f0;
     }
 
-    .demo-screenshot-card {
+    /* Screenshot Carousel Styles */
+    .screenshot-carousel-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .carousel-wrapper {
       background: white;
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 2rem;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       border: 1px solid #e2e8f0;
-      transition: all 0.3s ease;
-      height: 100%;
     }
 
-    .demo-screenshot-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-      border-color: #cbd5e0;
+    .carousel-main {
+      margin-bottom: 2rem;
     }
 
-    .screenshot-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    .carousel-image-container {
+      text-align: center;
       margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .screenshot-icon {
-      width: 48px;
-      height: 48px;
-      background: #3182ce;
-      color: white;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      flex-shrink: 0;
+      overflow: hidden;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
     }
 
-    .screenshot-title h4 {
-      font-size: 1.125rem;
+    .main-screenshot {
+      width: 100%;
+      height: auto;
+      max-height: 500px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .carousel-caption {
+      text-align: center;
+    }
+
+    .carousel-caption h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
       color: #1a202c;
-      margin: 0 0 0.25rem 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .carousel-caption p {
+      color: #718096;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .carousel-thumbnails {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+    }
+
+    .thumbnail-item {
+      cursor: pointer;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      background: #f7fafc;
+    }
+
+    .thumbnail-item:hover {
+      border-color: #cbd5e0;
+      transform: translateY(-2px);
+    }
+
+    .thumbnail-item.active {
+      border-color: #3182ce;
+      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+    }
+
+    .thumbnail-item img {
+      width: 100%;
+      height: 60px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumbnail-label {
+      display: block;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #4a5568;
+      padding: 0.25rem 0.5rem;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .thumbnail-item.active .thumbnail-label {
+      color: #3182ce;
       font-weight: 600;
     }
 
-    .screenshot-title span {
-      font-size: 0.875rem;
-      color: #718096;
-      font-weight: 400;
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .carousel-wrapper {
+        padding: 1.5rem;
+      }
+      
+      .carousel-thumbnails {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+      
+      .thumbnail-item img {
+        height: 50px;
+      }
+      
+      .main-screenshot {
+        max-height: 300px;
+      }
     }
 
-    /* Screenshot Images */
-    .screenshot-image-container {
-      background: #f8f9fa;
-      border-radius: 8px;
-      border: 1px solid #e1e4e8;
-      padding: 1rem;
-      overflow: hidden;
+    @media (max-width: 480px) {
+      .carousel-thumbnails {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
-    .demo-screenshot {
-      width: 100%;
-      height: auto;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .demo-screenshot:hover {
-      transform: scale(1.02);
-    }
 
     /* Human QA Section */
     .human-qa-section {
@@ -2467,13 +2518,6 @@
         margin-bottom: 2rem;
       }
       
-      .demo-screenshot-card {
-        margin-bottom: 2rem;
-      }
-      
-      .screenshot-image-container {
-        padding: 0.5rem;
-      }
       
       .hero-cta {
         flex-direction: column;
