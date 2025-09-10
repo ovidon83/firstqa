@@ -86,6 +86,40 @@
                             </div>
                         </div>
         
+                        <!-- Tool Badges/CTAs -->
+                        <div class="hero-tools">
+                            <div class="tools-header">
+                                <h4>Get Started with Both Tools</h4>
+                                <p>Install both tools for complete QA coverage</p>
+                            </div>
+                            <div class="tools-badges">
+                                <div class="tool-badge">
+                                    <div class="tool-icon">
+                                        <i class="fab fa-github"></i>
+                                    </div>
+                                    <div class="tool-content">
+                                        <h5>GitHub App</h5>
+                                        <p>Post-Dev PR Analysis</p>
+                                        <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
+                                            <i class="fas fa-download me-1"></i>Get Free Trial
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="tool-badge">
+                                    <div class="tool-icon">
+                                        <i class="fab fa-chrome"></i>
+                                    </div>
+                                    <div class="tool-content">
+                                        <h5>Chrome Extension</h5>
+                                        <p>Pre-Dev Ticket Analysis</p>
+                                        <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
+                                            <i class="fas fa-download me-1"></i>Get Free Trial
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
                         <div class="hero-cta d-flex">
                             <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-primary btn-lg me-3" target="_blank">Start Free Trial</a>
                             <a href="#features" class="btn btn-outline-primary btn-lg">Why It Works</a>
@@ -1136,6 +1170,111 @@
       font-size: 0.75rem;
       color: #718096;
       font-weight: 400;
+    }
+
+    /* Hero Tools */
+    .hero-tools {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      backdrop-filter: blur(10px);
+    }
+
+    .tools-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .tools-header h4 {
+      color: #1a202c;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .tools-header p {
+      color: #4a5568;
+      font-size: 0.875rem;
+      margin-bottom: 0;
+    }
+
+    .tools-badges {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .tool-badge {
+      flex: 1;
+      max-width: 200px;
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .tool-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      border-color: #3182ce;
+    }
+
+    .tool-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    .tool-badge:first-child .tool-icon {
+      background: #24292e;
+      color: white;
+    }
+
+    .tool-badge:last-child .tool-icon {
+      background: #4285f4;
+      color: white;
+    }
+
+    .tool-content h5 {
+      color: #1a202c;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .tool-content p {
+      color: #4a5568;
+      font-size: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tool-cta {
+      display: inline-block;
+      background: #3182ce;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .tool-cta:hover {
+      background: #2c5aa0;
+      color: white;
+      text-decoration: none;
+      transform: translateY(-1px);
     }
 
     /* Hero Visual */
@@ -2515,6 +2654,20 @@
         width: 36px;
         height: 36px;
         font-size: 1.25rem;
+      }
+      
+      .hero-tools {
+        margin: 1.5rem 0;
+        padding: 1rem;
+      }
+      
+      .tools-badges {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      
+      .tool-badge {
+        max-width: none;
       }
       
       .features-grid,
