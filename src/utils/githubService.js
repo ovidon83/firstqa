@@ -910,7 +910,7 @@ async function handleTestRequest(repository, issue, comment, sender) {
     console.log('AI Insights success:', aiInsights.success);
     console.log('AI Insights data type:', typeof aiInsights.data);
     console.log('AI Insights data length:', aiInsights.data ? aiInsights.data.length : 'undefined');
-    console.log('AI Insights data preview:', aiInsights.data ? aiInsights.data.substring(0, 200) + '...' : 'undefined');
+    console.log('AI Insights data preview:', aiInsights.data ? JSON.stringify(aiInsights.data).substring(0, 200) + '...' : 'undefined');
     // Use the same hybrid formatting as the automatic PR analysis
     acknowledgmentComment += formatHybridAnalysisForComment(aiInsights);
   } else if (aiInsights && !aiInsights.success) {
