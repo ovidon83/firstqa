@@ -452,42 +452,57 @@ function generateDataAccessError(title, repo, prNumber) {
 function generateUltimateFallback(title) {
   console.log('🔄 Generating ultimate fallback analysis');
   
-  return {
-    summary: {
-      description: `Updates ${title || 'the application'} with new features and improvements`,
-      riskLevel: "MEDIUM",
-      shipScore: 6,
-      reasoning: "Unable to perform detailed analysis due to AI processing issues - manual review recommended"
-    },
-    questions: [
-      "What is the main purpose and scope of these changes?",
-      "Are there any breaking changes that could affect existing functionality?",
-      "What are the key user workflows that need to be tested?",
-      "Are there any dependencies or integrations that might be affected?"
-    ],
-    testRecipe: {
-      criticalPath: [
-        "Test the main functionality that was changed",
-        "Verify that existing features still work as expected",
-        "Check for any new error conditions or edge cases"
-      ],
-      edgeCases: [
-        "Test with invalid or unexpected inputs",
-        "Check error handling and recovery",
-        "Verify performance under load if applicable"
-      ],
-      automation: {
-        unit: ["Add unit tests for new functionality"],
-        integration: ["Test integration points and dependencies"],
-        e2e: ["Verify end-to-end user workflows"]
-      }
-    },
-    risks: [
-      "Unable to perform detailed risk analysis due to AI processing error",
-      "Please review the changes manually for potential issues",
-      "Consider testing the affected functionality thoroughly"
-    ]
-  };
+  // Return markdown format to match the main AI prompt format
+  return `# 🎯 Ovi QA Analysis
+
+## 📊 **Ship Assessment**
+🎯 **Risk:** MEDIUM • 📈 **Ship Score:** 6/10 • 🔒 **Confidence:** LOW
+
+**User Impact:** Important • **Complexity:** Unknown • **Test Coverage:** Unknown
+
+💭 **Bottom Line:** Unable to perform detailed analysis due to AI processing issues - manual review recommended.
+
+---
+
+## 🔍 **Key Questions**
+1. What is the main purpose and scope of these changes?
+2. Are there any breaking changes that could affect existing functionality?
+3. What are the key user workflows that need to be tested?
+4. Are there any dependencies or integrations that might be affected?
+
+---
+
+## ⚠️ **Risks & Issues**
+**🚨 Critical (P0):**
+- Unable to perform detailed risk analysis due to AI processing error
+
+**⚠️ Important (P1):**
+- Please review the changes manually for potential issues
+- Consider testing the affected functionality thoroughly
+
+---
+
+## 🧪 **Test Plan**
+
+### 🔥 **Critical User Flows (P0 - Must Test)**
+1. **Main Functionality Test**
+   - **Steps:** Test the main functionality that was changed
+   - **Expected:** Core features work as expected
+   - **Priority:** Critical Path
+
+2. **Regression Testing**
+   - **Steps:** Verify that existing features still work as expected
+   - **Expected:** No existing functionality is broken
+   - **Priority:** Critical Path
+
+3. **Error Handling**
+   - **Steps:** Check for any new error conditions or edge cases
+   - **Expected:** Proper error handling and recovery
+   - **Priority:** Critical Path
+
+---
+
+*🤖 **With Quality By Ovi** - AI-powered QA analysis by FirstQA*`;
 }
 
 /**
@@ -1235,16 +1250,40 @@ function generateDeepFallbackAnalysis(title, body, diff, codeContext) {
     risks.push(`Build risks identified in code: ${codeContext.risks.build.join(', ')}`);
   }
 
-  return {
-    summary: {
-      riskLevel: "MEDIUM",
-      shipScore: 7,
-      reasoning: `Medium risk due to deep code changes and potential for complex interactions. ${prInfo.featureName} changes are primarily ${prInfo.affectedArea}.`
-    },
-    questions: questions,
-    testRecipe: testRecipe,
-    risks: risks
-  };
+  // Return markdown format to match the main AI prompt format
+  return `# 🎯 Ovi QA Analysis
+
+## 📊 **Ship Assessment**
+🎯 **Risk:** MEDIUM • 📈 **Ship Score:** 7/10 • 🔒 **Confidence:** MEDIUM
+
+**User Impact:** Important • **Complexity:** Medium • **Test Coverage:** Partial
+
+💭 **Bottom Line:** ${prInfo.featureName} changes are primarily ${prInfo.affectedArea} - proceed with thorough testing.
+
+---
+
+## 🔍 **Key Questions**
+${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+---
+
+## ⚠️ **Risks & Issues**
+**🚨 Critical (P0):**
+${risks.filter(r => r.includes('Critical') || r.includes('Security')).length > 0 ? risks.filter(r => r.includes('Critical') || r.includes('Security')).map(r => `- ${r}`).join('\n') : '- No critical risks identified'}
+
+**⚠️ Important (P1):**
+${risks.filter(r => !r.includes('Critical') && !r.includes('Security')).length > 0 ? risks.filter(r => !r.includes('Critical') && !r.includes('Security')).map(r => `- ${r}`).join('\n') : '- No important risks identified'}
+
+---
+
+## 🧪 **Test Plan**
+
+### 🔥 **Critical User Flows (P0 - Must Test)**
+${testRecipe.map((test, i) => `${i + 1}. **${test.scenario}**\n   - **Steps:** ${test.steps}\n   - **Expected:** ${test.expected}\n   - **Priority:** ${test.priority}`).join('\n\n')}
+
+---
+
+*🤖 **With Quality By Ovi** - AI-powered QA analysis by FirstQA*`;
 }
 
 /**
@@ -1633,6 +1672,7 @@ Generate ALL important test scenarios, not just 3. Ask the 'What if' questions t
 function generateTicketFallbackAnalysis(title, description, platform) {
   return {
     title: 'Definition of Ready Analysis',
+    initialReadinessScore: 2, // Add missing initial readiness score
     qaQuestions: [
       "What if the user enters an invalid email format? How should the system respond?",
       "What if the email service is down when a user requests a password reset?",
