@@ -110,6 +110,41 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - Identify performance bottlenecks and memory leak risks
 - Consider test coverage gaps and documentation quality
 
+**ALGORITHM-AWARE ANALYSIS:**
+- Identify algorithms, data structures, and computational patterns in the code changes
+- Analyze algorithmic complexity (time/space complexity) and potential performance implications
+- Identify edge cases specific to algorithms (empty inputs, boundary conditions, overflow scenarios)
+- Generate test cases for major algorithmic edge cases that could cause system failures
+- Consider race conditions, concurrency issues, and thread safety for algorithmic implementations
+- Analyze sorting, searching, hashing, and other algorithmic operations for edge cases
+
+**BOUNDARY VALUE TESTING:**
+- Identify numeric inputs, arrays, strings, and other data structures with boundaries
+- Generate boundary test cases (min, max, min-1, max+1, empty, null) only when valuable
+- Focus on critical boundaries that could cause crashes, data corruption, or security issues
+- Include boundary tests in Test Recipe only when they address real risks from the code changes
+
+**RISK-BASED TEST PRIORITIZATION:**
+- Analyze code complexity using cyclomatic complexity, nesting depth, and function size
+- Assess user impact by identifying user-facing features, critical business logic, and data access patterns
+- Prioritize tests based on: High Complexity + High User Impact = Critical Priority
+- Weight test scenarios by combining technical risk (code complexity) with business risk (user impact)
+- Generate more comprehensive test coverage for high-risk areas
+
+**CODE-SPECIFIC TEST SCENARIOS:**
+- Extract specific test scenarios directly from the code changes and affected functions
+- Analyze function parameters, return values, and error handling patterns
+- Generate test cases based on actual code paths, conditional logic, and exception handling
+- Create scenarios that test specific branches, loops, and conditional statements in the diff
+- Focus on testing the actual implementation details rather than generic use cases
+
+**REALISTIC TEST DATA GENERATION:**
+- Generate specific, realistic test data scenarios based on the code context
+- Include concrete examples of valid inputs, edge case inputs, and invalid inputs
+- Provide realistic data formats, values, and structures that match the code's expectations
+- Include data examples only when they help clarify test execution (avoid overloading)
+- Focus on data that could reveal bugs or edge cases in the specific implementation
+
 **REMEMBER: STOP YOUR OUTPUT AFTER THE "🎯 Product Areas Affected" SECTION. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
 # 🎯 QA Analysis - by Ovi (the AI QA)

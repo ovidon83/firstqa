@@ -83,11 +83,36 @@ async function generateQAInsights({ repo, pr_number, title, body, diff }) {
 
     console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars, Context=${sanitizedContext.length} chars`);
 
-    // Load and render the deep analysis prompt template
-    const promptTemplatePath = path.join(__dirname, 'prompts', 'deep-analysis.ejs');
+    // Load and render the enhanced deep analysis prompt template
+    const enhancedPromptTemplatePath = path.join(__dirname, 'prompts', 'enhanced-deep-analysis.ejs');
+    const deepPromptTemplatePath = path.join(__dirname, 'prompts', 'deep-analysis.ejs');
     let prompt;
     
-    if (!fs.existsSync(promptTemplatePath)) {
+    if (fs.existsSync(enhancedPromptTemplatePath)) {
+      console.log('✅ Using enhanced deep analysis template with algorithm-aware testing');
+      const promptTemplate = fs.readFileSync(enhancedPromptTemplatePath, 'utf8');
+      prompt = ejs.render(promptTemplate, {
+        repo,
+        pr_number,
+        title: sanitizedTitle,
+        body: sanitizedBody,
+        diff: sanitizedDiff,
+        codeContext: sanitizedContext,
+        changedFiles: changedFiles
+      });
+    } else if (fs.existsSync(deepPromptTemplatePath)) {
+      console.log('✅ Using deep analysis template for comprehensive code review');
+      const promptTemplate = fs.readFileSync(deepPromptTemplatePath, 'utf8');
+      prompt = ejs.render(promptTemplate, {
+        repo,
+        pr_number,
+        title: sanitizedTitle,
+        body: sanitizedBody,
+        diff: sanitizedDiff,
+        codeContext: sanitizedContext,
+        changedFiles: changedFiles
+      });
+    } else {
       // Fallback to default template if deep analysis template doesn't exist
       console.log('⚠️ Deep analysis template not found, using default template');
       const defaultTemplatePath = path.join(__dirname, 'prompts', 'default.ejs');
@@ -98,18 +123,6 @@ async function generateQAInsights({ repo, pr_number, title, body, diff }) {
         title: sanitizedTitle,
         body: sanitizedBody,
         diff: sanitizedDiff
-      });
-    } else {
-      console.log('✅ Using deep analysis template for comprehensive code review');
-      const promptTemplate = fs.readFileSync(promptTemplatePath, 'utf8');
-      prompt = ejs.render(promptTemplate, {
-        repo,
-        pr_number,
-        title: sanitizedTitle,
-        body: sanitizedBody,
-        diff: sanitizedDiff,
-        codeContext: sanitizedContext,
-        changedFiles: changedFiles
       });
     }
 
@@ -556,7 +569,7 @@ function extractChangedFiles(diff) {
 }
 
 /**
- * Build comprehensive code context for deep analysis
+ * Build comprehensive code context for deep analysis with enhanced algorithmic awareness
  */
 async function buildCodeContext(repo, pr_number, changedFiles, diff) {
   const context = {
@@ -568,7 +581,11 @@ async function buildCodeContext(repo, pr_number, changedFiles, diff) {
     risks: {},
     codeQuality: {},
     architecture: {},
-    dataFlow: {}
+    dataFlow: {},
+    algorithms: {},
+    boundaries: {},
+    performance: {},
+    concurrency: {}
   };
 
   // Analyze file types and patterns
@@ -590,6 +607,12 @@ async function buildCodeContext(repo, pr_number, changedFiles, diff) {
   context.complexity.additions = diffLines.filter(line => line.startsWith('+') && !line.startsWith('+++')).length;
   context.complexity.deletions = diffLines.filter(line => line.startsWith('-') && !line.startsWith('---')).length;
   context.complexity.changes = context.complexity.additions + context.complexity.deletions;
+
+  // Enhanced algorithmic analysis
+  context.algorithms = analyzeAlgorithms(diff);
+  context.boundaries = analyzeBoundaries(diff);
+  context.performance = analyzePerformance(diff);
+  context.concurrency = analyzeConcurrency(diff);
 
   // Advanced code quality analysis
   context.codeQuality = analyzeCodeQuality(diff, changedFiles);
@@ -1719,6 +1742,259 @@ function generateTicketFallbackAnalysis(title, description, platform) {
     tip: "Add detailed acceptance criteria, error handling scenarios, and security requirements to improve readiness score",
     missingInfo: ["Detailed acceptance criteria", "Error handling specifications", "Security requirements", "Email service integration details"]
   };
+}
+
+/**
+ * Analyze algorithms and computational patterns in the diff
+ */
+function analyzeAlgorithms(diff) {
+  const algorithms = {
+    sorting: [],
+    searching: [],
+    hashing: [],
+    recursion: [],
+    loops: [],
+    dataStructures: [],
+    complexity: {}
+  };
+
+  const lines = diff.split('\n');
+  const codeLines = lines.filter(line => line.startsWith('+') || line.startsWith('-')).map(line => line.substring(1));
+
+  for (let i = 0; i < codeLines.length; i++) {
+    const line = codeLines[i].toLowerCase();
+    
+    // Detect sorting algorithms
+    if (line.includes('sort') || line.includes('sorted') || line.includes('ordering')) {
+      algorithms.sorting.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect searching algorithms
+    if (line.includes('find') || line.includes('search') || line.includes('indexof') || line.includes('includes')) {
+      algorithms.searching.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect hashing
+    if (line.includes('hash') || line.includes('map') || line.includes('dictionary') || line.includes('object')) {
+      algorithms.hashing.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect recursion
+    if (line.includes('function') && (line.includes('return') || line.includes('recursive'))) {
+      algorithms.recursion.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect loops and their complexity
+    if (line.includes('for') || line.includes('while') || line.includes('foreach')) {
+      algorithms.loops.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect data structures
+    if (line.includes('array') || line.includes('list') || line.includes('stack') || line.includes('queue')) {
+      algorithms.dataStructures.push({ line: i + 1, context: line.trim() });
+    }
+  }
+
+  // Estimate complexity
+  algorithms.complexity = {
+    timeComplexity: estimateTimeComplexity(codeLines),
+    spaceComplexity: estimateSpaceComplexity(codeLines),
+    nestedLoops: algorithms.loops.length > 2
+  };
+
+  return algorithms;
+}
+
+/**
+ * Analyze boundary conditions and edge cases
+ */
+function analyzeBoundaries(diff) {
+  const boundaries = {
+    numeric: [],
+    string: [],
+    array: [],
+    object: [],
+    nullChecks: [],
+    edgeCases: []
+  };
+
+  const lines = diff.split('\n');
+  const codeLines = lines.filter(line => line.startsWith('+') || line.startsWith('-')).map(line => line.substring(1));
+
+  for (let i = 0; i < codeLines.length; i++) {
+    const line = codeLines[i];
+    
+    // Detect numeric boundaries
+    const numberMatches = line.match(/\b\d+\b/g);
+    if (numberMatches) {
+      boundaries.numeric.push({ line: i + 1, values: numberMatches, context: line.trim() });
+    }
+    
+    // Detect string operations
+    if (line.includes('length') || line.includes('substring') || line.includes('slice')) {
+      boundaries.string.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect array operations
+    if (line.includes('length') && (line.includes('[') || line.includes('array'))) {
+      boundaries.array.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect null/undefined checks
+    if (line.includes('null') || line.includes('undefined') || line.includes('?')) {
+      boundaries.nullChecks.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect edge case handling
+    if (line.includes('if') && (line.includes('empty') || line.includes('zero') || line.includes('max'))) {
+      boundaries.edgeCases.push({ line: i + 1, context: line.trim() });
+    }
+  }
+
+  return boundaries;
+}
+
+/**
+ * Analyze performance implications
+ */
+function analyzePerformance(diff) {
+  const performance = {
+    bottlenecks: [],
+    memoryUsage: [],
+    asyncOperations: [],
+    loops: [],
+    apiCalls: []
+  };
+
+  const lines = diff.split('\n');
+  const codeLines = lines.filter(line => line.startsWith('+') || line.startsWith('-')).map(line => line.substring(1));
+
+  for (let i = 0; i < codeLines.length; i++) {
+    const line = codeLines[i].toLowerCase();
+    
+    // Detect potential bottlenecks
+    if (line.includes('for') && line.includes('for')) { // Nested loops
+      performance.bottlenecks.push({ line: i + 1, type: 'nested_loops', context: line.trim() });
+    }
+    
+    // Detect memory-intensive operations
+    if (line.includes('new array') || line.includes('clone') || line.includes('copy')) {
+      performance.memoryUsage.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect async operations
+    if (line.includes('async') || line.includes('await') || line.includes('promise')) {
+      performance.asyncOperations.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect API calls
+    if (line.includes('fetch') || line.includes('axios') || line.includes('http')) {
+      performance.apiCalls.push({ line: i + 1, context: line.trim() });
+    }
+  }
+
+  return performance;
+}
+
+/**
+ * Analyze concurrency and thread safety
+ */
+function analyzeConcurrency(diff) {
+  const concurrency = {
+    raceConditions: [],
+    locks: [],
+    asyncOperations: [],
+    sharedState: [],
+    threadSafety: []
+  };
+
+  const lines = diff.split('\n');
+  const codeLines = lines.filter(line => line.startsWith('+') || line.startsWith('-')).map(line => line.substring(1));
+
+  for (let i = 0; i < codeLines.length; i++) {
+    const line = codeLines[i].toLowerCase();
+    
+    // Detect async operations
+    if (line.includes('async') || line.includes('await') || line.includes('promise')) {
+      concurrency.asyncOperations.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect shared state modifications
+    if (line.includes('this.') || line.includes('global') || line.includes('window.')) {
+      concurrency.sharedState.push({ line: i + 1, context: line.trim() });
+    }
+    
+    // Detect potential race conditions
+    if (line.includes('settimeout') || line.includes('setinterval') || line.includes('event')) {
+      concurrency.raceConditions.push({ line: i + 1, context: line.trim() });
+    }
+  }
+
+  return concurrency;
+}
+
+/**
+ * Estimate time complexity based on code patterns
+ */
+function estimateTimeComplexity(codeLines) {
+  let complexity = 'O(1)';
+  let nestedLoops = 0;
+  let hasRecursion = false;
+  
+  for (const line of codeLines) {
+    const lowerLine = line.toLowerCase();
+    
+    // Count nested loops
+    if (lowerLine.includes('for') || lowerLine.includes('while')) {
+      nestedLoops++;
+    }
+    
+    // Detect recursion
+    if (lowerLine.includes('function') && lowerLine.includes('return')) {
+      hasRecursion = true;
+    }
+  }
+  
+  if (nestedLoops > 1) {
+    complexity = `O(n^${nestedLoops})`;
+  } else if (nestedLoops === 1) {
+    complexity = 'O(n)';
+  } else if (hasRecursion) {
+    complexity = 'O(log n) to O(n)';
+  }
+  
+  return complexity;
+}
+
+/**
+ * Estimate space complexity based on code patterns
+ */
+function estimateSpaceComplexity(codeLines) {
+  let complexity = 'O(1)';
+  let hasArrays = false;
+  let hasRecursion = false;
+  
+  for (const line of codeLines) {
+    const lowerLine = line.toLowerCase();
+    
+    if (lowerLine.includes('array') || lowerLine.includes('[]')) {
+      hasArrays = true;
+    }
+    
+    if (lowerLine.includes('function') && lowerLine.includes('return')) {
+      hasRecursion = true;
+    }
+  }
+  
+  if (hasArrays && hasRecursion) {
+    complexity = 'O(n)';
+  } else if (hasArrays) {
+    complexity = 'O(n)';
+  } else if (hasRecursion) {
+    complexity = 'O(log n)';
+  }
+  
+  return complexity;
 }
 
 module.exports = {

@@ -857,100 +857,105 @@
     // Format analysis for Linear (HTML format)
     let html = `<h2>🤖 QA Analysis</h2>`;
     
-    // Handle minimal mode
+    // Check if this is minimal mode - show simplified format
     if (insights.minimalMode) {
-      html += `<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 16px 0; border-radius: 4px;">`;
-      html += `<p><strong>⚠️ Insufficient Information for Full Analysis</strong></p>`;
-      html += `<p><strong>📊 Ready for Development Score: ${insights.readyForDevelopmentScore}/5</strong></p>`;
+      // Simplified format for minimal/missing info tickets
+      html += `<h3>📊 TICKET READINESS</h3>`;
+      html += `<p><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
+      html += `<p><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
+      
+      html += `<h3>❌ NOT READY FOR DEVELOPMENT</h3>`;
+      html += `<p><strong>Why:</strong> This ticket lacks essential information needed for development.</p>`;
       
       if (insights.scoreImpactFactors && insights.scoreImpactFactors.length > 0) {
-        html += `<p>What's Missing:</p><ul>`;
-        insights.scoreImpactFactors.slice(0, 5).forEach(factor => {
-          html += `<li>${factor}</li>`;
+        html += `<h3>🔍 WHAT'S MISSING</h3>`;
+        html += `<ul>`;
+        insights.scoreImpactFactors.forEach(factor => {
+          html += `<li>${escapeHtml(factor)}</li>`;
         });
         html += `</ul>`;
       }
       
       if (insights.message) {
-        html += `<p><em>${insights.message}</em></p>`;
+        html += `<h3>💡 RECOMMENDATION</h3>`;
+        html += `<p>${escapeHtml(insights.message)}</p>`;
       }
+    } else {
+      // Full detailed format for complete tickets
       
-      html += `</div>`;
-      return html;
-    }
-    
-    // User Value (new section)
-    if (insights.userValue) {
-      html += `<h3>🎯 USER VALUE</h3>`;
-      html += `<p><strong>Level:</strong> ${insights.userValue.level}</p>`;
-      html += `<p><strong>Summary:</strong> ${insights.userValue.summary}</p>`;
-    }
+      // User Value (new section)
+      if (insights.userValue) {
+        html += `<h3>🎯 USER VALUE</h3>`;
+        html += `<p><strong>Level:</strong> ${insights.userValue.level}</p>`;
+        html += `<p><strong>Summary:</strong> ${insights.userValue.summary}</p>`;
+      }
 
-    // Readiness Assessment
-    html += `<h3>📊 TICKET READINESS</h3>`;
-    html += `<p><strong>As-is:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
-    html += `<p><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
-    
-    // Improvements Needed
-    if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
-      html += `<h3>🔧 IMPROVEMENTS NEEDED</h3>`;
-      html += `<ol>`;
-      insights.improvementsNeeded.forEach(improvement => {
-        html += `<li>${escapeHtml(improvement)}</li>`;
-      });
-      html += `</ol>`;
-    }
-
-    // QA Questions
-    const questions = insights.qaQuestions || [];
-    html += `<h3>🧠 QA Questions</h3>`;
-    if (questions.length > 0) {
-      html += `<ol>`;
-      questions.slice(0, 5).forEach((q, i) => {
-        const cleanQuestion = q.replace(/^🧠\s*/, '');
-        html += `<li>${escapeHtml(cleanQuestion)}</li>`;
-      });
-      html += `</ol>`;
-    } else {
-      html += `<p>No specific questions identified.</p>`;
-    }
-
-    // Key Risks
-    html += `<h3>⚠️ Key Risks</h3>`;
-    if (insights.keyRisks && insights.keyRisks.length > 0) {
-      html += `<ol>`;
-      insights.keyRisks.slice(0, 5).forEach((r, i) => {
-        const cleanRisk = r.replace(/^⚠️\s*/, '');
-        html += `<li>${escapeHtml(cleanRisk)}</li>`;
-      });
-      html += `</ol>`;
-    } else {
-      html += `<p>No significant risks identified.</p>`;
-    }
-
-    // Test Recipe
-    html += `<h3>🧪 Test Recipe</h3>`;
-    if (insights.testRecipe && insights.testRecipe.length > 0) {
-      html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0;">`;
-      html += `<thead><tr style="background-color: #f5f5f5;">`;
-      html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Scenario</th>`;
-      html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Steps</th>`;
-      html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Expected</th>`;
-      html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Priority</th>`;
-      html += `</tr></thead><tbody>`;
-
-      insights.testRecipe.slice(0, 5).forEach(test => {
-        html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.scenario || '')}</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.steps || '')}</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.expected || '')}</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.priority || '')}</td>`;
-        html += `</tr>`;
-      });
+      // Readiness Assessment
+      html += `<h3>📊 TICKET READINESS</h3>`;
+      html += `<p><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
+      html += `<p><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
       
-      html += `</tbody></table>`;
-    } else {
-      html += `<p>No specific test scenarios identified.</p>`;
+      // Improvements Needed
+      if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
+        html += `<h3>🔧 IMPROVEMENTS NEEDED</h3>`;
+        html += `<ol>`;
+        insights.improvementsNeeded.forEach(improvement => {
+          html += `<li>${escapeHtml(improvement)}</li>`;
+        });
+        html += `</ol>`;
+      }
+
+      // QA Questions
+      const questions = insights.qaQuestions || [];
+      html += `<h3>🧠 QA Questions</h3>`;
+      if (questions.length > 0) {
+        html += `<ol>`;
+        questions.slice(0, 5).forEach((q, i) => {
+          const cleanQuestion = q.replace(/^🧠\s*/, '');
+          html += `<li>${escapeHtml(cleanQuestion)}</li>`;
+        });
+        html += `</ol>`;
+      } else {
+        html += `<p>No specific questions identified.</p>`;
+      }
+
+      // Key Risks
+      html += `<h3>⚠️ Key Risks</h3>`;
+      if (insights.keyRisks && insights.keyRisks.length > 0) {
+        html += `<ol>`;
+        insights.keyRisks.slice(0, 5).forEach((r, i) => {
+          const cleanRisk = r.replace(/^⚠️\s*/, '');
+          html += `<li>${escapeHtml(cleanRisk)}</li>`;
+        });
+        html += `</ol>`;
+      } else {
+        html += `<p>No significant risks identified.</p>`;
+      }
+
+      // Test Recipe
+      html += `<h3>🧪 Test Recipe</h3>`;
+      if (insights.testRecipe && insights.testRecipe.length > 0) {
+        html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0;">`;
+        html += `<thead><tr style="background-color: #f5f5f5;">`;
+        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Scenario</th>`;
+        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Steps</th>`;
+        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Expected</th>`;
+        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Priority</th>`;
+        html += `</tr></thead><tbody>`;
+
+        insights.testRecipe.slice(0, 5).forEach(test => {
+          html += `<tr>`;
+          html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.scenario || '')}</td>`;
+          html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.steps || '')}</td>`;
+          html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.expected || '')}</td>`;
+          html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(test.priority || '')}</td>`;
+          html += `</tr>`;
+        });
+
+        html += `</tbody></table>`;
+      } else {
+        html += `<p>No specific test scenarios identified.</p>`;
+      }
     }
 
     return html;
@@ -1389,12 +1394,16 @@
   async function insertComment(analysis) {
     try {
       console.log('🔍 insertComment called with platform detection');
+      console.log('🔍 Analysis to insert:', analysis.title);
       
       if (window.location.href.includes('linear.app')) {
         // Use HTML formatting for Linear
         const commentText = formatAsMarkdown(analysis);
+        console.log('🔍 Formatted comment text length:', commentText.length);
         const success = await insertLinearComment(commentText);
+        console.log('🔍 insertLinearComment result:', success);
         if (!success) {
+          console.log('🔍 Comment insertion failed - NOT inserting anywhere else');
           showNotification('❌ Failed to insert comment', 'error');
         }
         return success;
@@ -1499,32 +1508,30 @@
    * Insert comment into Linear ticket using ProseMirror-compatible approach
    */
   async function insertLinearComment(commentText) {
-    console.log('🚀 Starting Linear comment insertion (simplified approach)');
+    console.log('🚀 Starting Linear comment insertion (improved selector)');
     
     try {
-      // Find the comment input field
+      // More specific selectors for Linear comment input
       const commentSelectors = [
-        '[aria-label="Issue description"].ProseMirror.editor',
-        '[role="textbox"]',
-        '[contenteditable="true"]',
-        '.ProseMirror'
+        // Most specific: comment field with aria-label="Comment"
+        '[aria-label="Comment"]',
+        // Comment placeholder with specific text
+        '[data-empty-text="Leave a comment..."]',
+        // Comment input in activity section
+        '.activity-section [aria-label="Comment"]',
+        '.activity-section [data-empty-text="Leave a comment..."]',
+        // Fallback selectors
+        '[data-testid="comment-input"] [aria-label="Comment"]',
+        '[data-testid="comment-input"] [data-empty-text="Leave a comment..."]'
       ];
       
       let commentInput = null;
       for (const selector of commentSelectors) {
-        const elements = document.querySelectorAll(selector);
-        for (const element of elements) {
-          // Look for elements that could be comment fields
-          if (element.textContent === '' || 
-              element.textContent === 'Leave a comment…' ||
-              element.closest('[data-testid*="comment"]') ||
-              element.getAttribute('aria-label')?.toLowerCase().includes('comment')) {
-            commentInput = element;
-            console.log('✅ Found comment input using selector:', selector);
-            break;
-          }
+        commentInput = document.querySelector(selector);
+        if (commentInput) {
+          console.log(`✅ Found comment input with selector: ${selector}`);
+          break;
         }
-        if (commentInput) break;
       }
       
       if (!commentInput) {
@@ -1537,30 +1544,99 @@
       commentInput.click();
       await new Promise(resolve => setTimeout(resolve, 200));
       
+      // Clear any existing content first
+      commentInput.innerHTML = '';
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Insert the text
+      console.log('🔧 Inserting HTML content into comment field');
       commentInput.innerHTML = commentText;
       
-      // Trigger input event to notify Linear
+      // Trigger multiple events to ensure Linear processes the HTML content
       commentInput.dispatchEvent(new Event('input', { bubbles: true }));
       commentInput.dispatchEvent(new Event('change', { bubbles: true }));
+      commentInput.dispatchEvent(new Event('blur', { bubbles: true }));
+      commentInput.dispatchEvent(new Event('focus', { bubbles: true }));
       
-      // Wait a moment for Linear to process the input
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait longer for Linear to process the HTML content
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Try to auto-submit using Cmd+Enter (Linear's native shortcut)
-      const enterEvent = new KeyboardEvent('keydown', {
-        key: 'Enter',
-        code: 'Enter',
-        metaKey: true, // Cmd key on Mac
-        bubbles: true,
-        cancelable: true
-      });
+      // Try multiple submission methods to ensure proper comment creation
+      let submissionSuccess = false;
+
+      // Method 1: Try to find and click the submit button
+      const submitSelectors = [
+        'button[type="submit"]',
+        '.submit-button',
+        '[data-testid="submit"]',
+        'button:contains("Comment")',
+        'button:contains("Post")',
+        'button:contains("Send")',
+        'button[aria-label*="comment"]',
+        'button[aria-label*="submit"]',
+        // Linear-specific selectors
+        '[data-testid="comment-submit"]',
+        'button[data-testid="submit-comment"]',
+        '.comment-submit-button'
+      ];
       
-      commentInput.dispatchEvent(enterEvent);
-      console.log('✅ Comment inserted and auto-submitted with Cmd+Enter');
+      let submitButton = null;
+      for (const selector of submitSelectors) {
+        submitButton = document.querySelector(selector);
+        if (submitButton && submitButton.offsetParent !== null) { // Check if button is visible
+          console.log(`✅ Found visible submit button with selector: ${selector}`);
+          break;
+        }
+      }
       
-      // Return true since both insertion and submission were attempted
-      return true;
+      if (submitButton) {
+        console.log('✅ Clicking submit button');
+        submitButton.click();
+        submissionSuccess = true;
+      } else {
+        console.log('⚠️ No submit button found, trying keyboard shortcuts');
+        
+        // Method 2: Try Cmd+Enter (Mac)
+        const cmdEnterEvent = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          code: 'Enter',
+          metaKey: true, // Cmd key on Mac
+          bubbles: true,
+          cancelable: true
+        });
+        commentInput.dispatchEvent(cmdEnterEvent);
+        
+        // Wait a bit and try Ctrl+Enter as well (Windows/Linux)
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const ctrlEnterEvent = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          code: 'Enter',
+          ctrlKey: true, // Ctrl key
+          bubbles: true,
+          cancelable: true
+        });
+        commentInput.dispatchEvent(ctrlEnterEvent);
+        
+        submissionSuccess = true;
+      }
+
+      // Wait for the comment to be properly submitted to Linear's system
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Verify the comment was actually submitted by checking if it appears in the comments list
+      const commentsSection = document.querySelector('.activity-section, [data-testid="comments"], .comments-section');
+      if (commentsSection) {
+        const commentText = commentsSection.textContent || commentsSection.innerHTML || '';
+        if (commentText.includes('QA Analysis')) {
+          console.log('✅ Comment successfully submitted and appears in comments section');
+          return true;
+        } else {
+          console.log('⚠️ Comment may not have been properly submitted - not found in comments section');
+        }
+      }
+      
+      console.log('✅ Comment submission process completed');
+      return submissionSuccess;
       
     } catch (error) {
       console.error('❌ Error in insertLinearComment:', error);
@@ -2795,239 +2871,33 @@
       <div class="qa-modal-content">
     `;
 
-    // Handle minimal mode first
-    if (analysis.minimalMode) {
-      html += `
-        <div class="qa-modal-section" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-          <h3>⚠️ Insufficient Information for Full Analysis</h3>
-          <div class="qa-score-badge score-low">
-            📊 Ready for Development Score: ${analysis.readyForDevelopmentScore}/5
-          </div>
-      `;
-      
-      if (analysis.scoreImpactFactors && analysis.scoreImpactFactors.length > 0) {
-        html += `<p><strong>What's Missing:</strong></p><ul>`;
-        analysis.scoreImpactFactors.slice(0, 5).forEach(factor => {
-          html += `<li>${escapeHtml(factor)}</li>`;
-        });
-        html += `</ul>`;
-      }
-      
-      if (analysis.message) {
-        html += `<p><em>${escapeHtml(analysis.message)}</em></p>`;
-      }
-      
-      html += `</div>`;
-      
-      // Close modal and return for minimal mode
-      html += `
-        </div>
-        <div class="qa-modal-footer">
-          <button id="qa-close-btn" class="qa-modal-button">Close</button>
-        </div>
-      `;
-      
-      qaPanel.innerHTML = html;
-      
-      // Add close button listener
-      const closeBtn = qaPanel.querySelector('#qa-close-btn');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => closeJiraPanel());
-      }
-      
-      return;
-    }
-
-           // User Value (new section)
-           if (analysis.userValue) {
-             html += `
-               <div class="qa-modal-section">
-                 <h3>🎯 USER VALUE</h3>
-                 <p><strong>Level:</strong> ${analysis.userValue.level}</p>
-                 <p><strong>Summary:</strong> ${analysis.userValue.summary}</p>
-               </div>
-             `;
-           }
-
-           // Readiness Assessment
-           html += `
-             <div class="qa-modal-section">
-               <h3>📊 TICKET READINESS</h3>
-               <p><strong>As-is:</strong> ${analysis.initialReadinessScore}/5 ${getScoreEmoji(analysis.initialReadinessScore)} (${getScoreLabel(analysis.initialReadinessScore)})</p>
-               <p><strong>With Ovi's analysis:</strong> ${analysis.readyForDevelopmentScore}/5 ${getScoreEmoji(analysis.readyForDevelopmentScore)} (${getScoreLabel(analysis.readyForDevelopmentScore)})</p>
-             </div>
-           `;
-
-           // Improvements Needed
-           if (analysis.improvementsNeeded && analysis.improvementsNeeded.length > 0) {
-             html += `
-               <div class="qa-modal-section">
-                 <h3>🔧 IMPROVEMENTS NEEDED</h3>
-                 <ol>
-             `;
-             analysis.improvementsNeeded.forEach(improvement => {
-               html += `<li>${escapeHtml(improvement)}</li>`;
-             });
-             html += `
-                 </ol>
-               </div>
-             `;
-           }
-
-    // QA Questions with enhanced styling
-    const questions = analysis.qaQuestions || analysis.topQuestions || [];
-    if (questions.length > 0) {
-      html += `
-        <div class="qa-modal-section">
-          <h3>🧠 QA Questions</h3>
-      `;
-      questions.slice(0, 5).forEach((q, i) => {
-        const cleanQuestion = q.replace(/^🧠\s*/, '');
-        html += `<div style="margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">${i + 1}. ${cleanQuestion}</div>`;
-      });
-      html += '</div>';
-    }
-
-    // Key Risks with enhanced styling
-    if (analysis.keyRisks && analysis.keyRisks.length > 0) {
-      html += `
-        <div class="qa-modal-section">
-          <h3>⚠️ Key Risks</h3>
-      `;
-      analysis.keyRisks.slice(0, 5).forEach((r, i) => {
-        const cleanRisk = r.replace(/^⚠️\s*/, '');
-        html += `<div style="margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">${i + 1}. ${cleanRisk}</div>`;
-      });
-      html += '</div>';
-    }
-
-    // Test Recipe with enhanced table design
-    if (analysis.testRecipe && analysis.testRecipe.length > 0) {
-      html += `
-        <div class="qa-modal-section">
-          <h3>🧪 Test Recipe</h3>
-          <div style="overflow-x: auto; border-radius: 8px; border: 1px solid #e5e7eb;">
-            <table class="qa-modal-table" style="width: 100%; border-collapse: collapse; margin: 0;">
-              <thead>
-                <tr style="background: #f8f9fa;">
-                  <th style="text-align: left; padding: 12px 16px; border: none; font-weight: 600; color: #495057;">Scenario</th>
-                  <th style="text-align: left; padding: 12px 16px; border: none; font-weight: 600; color: #495057;">Steps</th>
-                  <th style="text-align: left; padding: 12px 16px; border: none; font-weight: 600; color: #495057;">Expected</th>
-                  <th style="text-align: left; padding: 12px 16px; border: none; font-weight: 600; color: #495057;">Priority</th>
-                  <th style="text-align: left; padding: 12px 16px; border: none; font-weight: 600; color: #495057;">Automation</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-
-      // Sort test scenarios by priority
-      const sortedTestRecipe = analysis.testRecipe.sort((a, b) => {
-        const priorityOrder = { 'Happy Path': 1, 'Critical Path': 2, 'Edge Case': 3, 'Regression': 4 };
-        return (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5);
-      });
-
-      sortedTestRecipe.forEach((tr, index) => {
-        html += `
-          <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td style="padding: 12px 16px; border: none; border-bottom: 1px solid #e5e7eb; vertical-align: top; font-weight: 500;">${tr.scenario}</td>
-            <td style="padding: 12px 16px; border: none; border-bottom: 1px solid #e5e7eb; vertical-align: top; line-height: 1.5;">${tr.steps}</td>
-            <td style="padding: 12px 16px; border: none; border-bottom: 1px solid #e5e7eb; vertical-align: top; line-height: 1.5;">${tr.expected}</td>
-            <td style="padding: 12px 16px; border: none; border-bottom: 1px solid #e5e7eb; vertical-align: top;">
-              <span style="background: #f8f9fa; border: 1px solid #e5e7eb; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${tr.priority}</span>
-            </td>
-            <td style="padding: 12px 16px; border: none; border-bottom: 1px solid #e5e7eb; vertical-align: top;">
-              <span style="background: #f8f9fa; border: 1px solid #e5e7eb; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${tr.automation}</span>
-            </td>
-          </tr>
-        `;
-      });
-
-      html += '</tbody></table></div></div>';
-    }
-
+    // Use the same formatAsMarkdown function for consistency
+    const formattedContent = formatAsMarkdown(analysis);
+    
+    // Convert HTML to Jira panel format
+    html += `<div class="qa-modal-section">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6;">
+        ${formattedContent}
+      </div>
+    </div>`;
+    
+    // Close modal
     html += `
       </div>
       <div class="qa-modal-footer">
-        <button id="qa-copy-btn" class="qa-modal-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          Copy to Clipboard
-        </button>
+        <button id="qa-close-btn" class="qa-modal-button">Close</button>
       </div>
     `;
-
-    // Set the panel content
+    
     qaPanel.innerHTML = html;
-
-    // Add event listeners
+    
+    // Add close button listener
     const closeBtn = qaPanel.querySelector('#qa-close-btn');
-    closeBtn.addEventListener('click', closeJiraPanel);
-
-    const copyBtn = qaPanel.querySelector('#qa-copy-btn');
-    copyBtn.addEventListener('click', async () => {
-      try {
-        // Get the content div
-        const contentDiv = qaPanel.querySelector('.qa-modal-content');
-        
-        // Create a selection range
-        const range = document.createRange();
-        range.selectNodeContents(contentDiv);
-        
-        // Add the range to the current selection
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        
-        // Execute the copy command
-        document.execCommand('copy');
-        
-        // Clear the selection
-        selection.removeAllRanges();
-        
-        // Update button state
-        copyBtn.textContent = '✅ Copied!';
-        setTimeout(() => {
-          copyBtn.textContent = '📋 Copy to Clipboard';
-        }, 2000);
-      } catch (error) {
-        console.error('Failed to copy:', error);
-        copyBtn.textContent = '❌ Failed to copy';
-        setTimeout(() => {
-          copyBtn.textContent = '📋 Copy to Clipboard';
-        }, 2000);
-      }
-    });
-
-    // Add click outside to close
-    const handleClickOutside = (event) => {
-      if (qaPanel && !qaPanel.contains(event.target)) {
-        qaPanel.remove();
-        qaPanel = null;
-        document.removeEventListener('mousedown', handleClickOutside);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => closeJiraPanel());
+    }
   }
 
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      // Wait a bit for dynamic content to load
-      setTimeout(init, 200);
-    });
-  } else if (document.readyState === 'interactive') {
-    // DOM is ready but resources might still be loading
-    setTimeout(init, 500);
-  } else {
-    // Page is fully loaded
-    init();
-  }
-  
-  // Cleanup on page unload
-  window.addEventListener('beforeunload', removePanel);
-  
 /**
  * Get score label for display
  */
@@ -3038,10 +2908,6 @@ function getScoreLabel(score) {
   if (score === 5) return 'Excellent';
   return 'Unknown';
 }
-
-/**
- * Get score emoji for display
- */
 function getScoreEmoji(score) {
   if (score <= 2) return '😞';
   if (score === 3) return '😐';

@@ -232,7 +232,7 @@ class BackgroundManager {
 
             await chrome.notifications.create({
                 type: 'basic',
-                iconUrl: 'icon48.png',
+                iconUrl: 'icons/icon48.png',
                 title: title,
                 message: message
             });
