@@ -948,8 +948,45 @@
       html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🧪 Test Recipe</h3>`;
       if (insights.testRecipe) {
         if (typeof insights.testRecipe === 'string') {
-          // Handle string format
-          html += `<div style="white-space: pre-wrap; background-color: #f8f9fa; padding: 12px; border-radius: 4px; border: 1px solid #e9ecef; font-family: monospace;">${escapeHtml(insights.testRecipe)}</div>`;
+          // Handle string format - check if it's Jira table format
+          if (insights.testRecipe.includes('||') && insights.testRecipe.includes('|')) {
+            // Convert Jira table format to HTML table
+            const lines = insights.testRecipe.split('\n').filter(line => line.trim());
+            if (lines.length > 0) {
+              html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0;">`;
+              
+              // Process header (first line with ||)
+              const headerLine = lines[0];
+              if (headerLine.includes('||')) {
+                const headers = headerLine.split('|').filter(cell => cell.trim());
+                html += `<thead><tr style="background-color: #f5f5f5;">`;
+                headers.forEach(header => {
+                  html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">${escapeHtml(header.trim())}</th>`;
+                });
+                html += `</tr></thead><tbody>`;
+              }
+              
+              // Process data rows
+              for (let i = 1; i < lines.length; i++) {
+                const row = lines[i];
+                if (row.includes('|')) {
+                  const cells = row.split('|').filter(cell => cell.trim());
+                  html += `<tr>`;
+                  cells.forEach(cell => {
+                    html += `<td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(cell.trim())}</td>`;
+                  });
+                  html += `</tr>`;
+                }
+              }
+              
+              html += `</tbody></table>`;
+            } else {
+              html += `<div style="white-space: pre-wrap; background-color: #f8f9fa; padding: 12px; border-radius: 4px; border: 1px solid #e9ecef; font-family: monospace;">${escapeHtml(insights.testRecipe)}</div>`;
+            }
+          } else {
+            // Regular string format
+            html += `<div style="white-space: pre-wrap; background-color: #f8f9fa; padding: 12px; border-radius: 4px; border: 1px solid #e9ecef; font-family: monospace;">${escapeHtml(insights.testRecipe)}</div>`;
+          }
         } else if (Array.isArray(insights.testRecipe) && insights.testRecipe.length > 0) {
           // Handle array format
           html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0;">`;
