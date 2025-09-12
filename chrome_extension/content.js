@@ -866,7 +866,7 @@
     });
 
     // Format analysis for Linear (HTML format)
-    let html = `<h2 style="margin-bottom: 20px;">🤖 QA Analysis</h2>`;
+    let html = ``;
     
     // Check if this is minimal mode - show simplified format
     if (insights.minimalMode) {
@@ -897,21 +897,21 @@
       // User Value (new section)
       if (insights.userValue) {
         html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🎯 USER VALUE</h3>`;
-        html += `<p><strong>Level:</strong> ${insights.userValue.level}</p>`;
-        html += `<p><strong>Summary:</strong> ${insights.userValue.summary}</p>`;
+        html += `<p style="margin: 8px 0;"><strong>Level:</strong> ${insights.userValue.level}</p>`;
+        html += `<p style="margin: 8px 0;"><strong>Summary:</strong> ${insights.userValue.summary}</p>`;
       }
 
       // Readiness Assessment
       html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">📊 TICKET READINESS</h3>`;
-      html += `<p><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
-      html += `<p><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
+      html += `<p style="margin: 8px 0;"><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
+      html += `<p style="margin: 8px 0;"><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
       
       // Improvements Needed
       if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
         html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🔧 IMPROVEMENTS NEEDED</h3>`;
-        html += `<ol>`;
+        html += `<ol style="margin: 8px 0; padding-left: 20px;">`;
         insights.improvementsNeeded.forEach(improvement => {
-          html += `<li>${escapeHtml(improvement)}</li>`;
+          html += `<li style="margin: 6px 0;">${escapeHtml(improvement)}</li>`;
         });
         html += `</ol>`;
       }
@@ -920,27 +920,27 @@
       const questions = insights.qaQuestions || [];
       html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🧠 QA Questions</h3>`;
       if (questions.length > 0) {
-        html += `<ol>`;
+        html += `<ol style="margin: 8px 0; padding-left: 20px;">`;
         questions.slice(0, 5).forEach((q, i) => {
           const cleanQuestion = q.replace(/^🧠\s*/, '');
-          html += `<li>${escapeHtml(cleanQuestion)}</li>`;
+          html += `<li style="margin: 6px 0;">${escapeHtml(cleanQuestion)}</li>`;
         });
         html += `</ol>`;
       } else {
-        html += `<p>No specific questions identified.</p>`;
+        html += `<p style="margin: 8px 0;">No specific questions identified.</p>`;
       }
 
       // Key Risks
       html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">⚠️ Key Risks</h3>`;
       if (insights.keyRisks && insights.keyRisks.length > 0) {
-        html += `<ol>`;
+        html += `<ol style="margin: 8px 0; padding-left: 20px;">`;
         insights.keyRisks.slice(0, 5).forEach((r, i) => {
           const cleanRisk = r.replace(/^⚠️\s*/, '');
-          html += `<li>${escapeHtml(cleanRisk)}</li>`;
+          html += `<li style="margin: 6px 0;">${escapeHtml(cleanRisk)}</li>`;
         });
         html += `</ol>`;
       } else {
-        html += `<p>No significant risks identified.</p>`;
+        html += `<p style="margin: 8px 0;">No significant risks identified.</p>`;
       }
 
       // Test Recipe
@@ -2885,7 +2885,7 @@
     // Create panel content with enhanced design
     let html = `
       <div class="qa-modal-header">
-        <h3>🤖 FirstQA</h3>
+        <h3>🤖 QA Analysis - by Ovi (the AI QA)</h3>
         <button id="qa-close-btn" class="close-btn">&times;</button>
       </div>
       <div class="qa-modal-content">
@@ -2896,7 +2896,7 @@
     
     // Convert HTML to Jira panel format
     html += `<div class="qa-modal-section">
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; margin-top: 10px;">
         ${formattedContent}
       </div>
     </div>`;
