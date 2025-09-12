@@ -15,7 +15,7 @@
   // FirstQA API class (embedded for reliability)
   class FirstQAAPI {
     constructor() {
-      this.baseURL = 'http://localhost:3000'; // Use localhost for development
+      this.baseURL = 'https://www.firstqa.dev'; // Use production URL
       this.apiKey = null;
     }
 

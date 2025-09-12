@@ -189,7 +189,17 @@ function detectJiraTicket() {
     '#summary-val',
     '.summary',
     'h1[data-test-id*="issue-title"]',
-    '[aria-label*="Summary"]'
+    '[aria-label*="Summary"]',
+    // Add more modern Jira selectors
+    'h1[data-testid*="summary"]',
+    '[data-testid*="summary"] h1',
+    'h1[data-testid*="heading"]',
+    '[data-testid*="issue-title"]',
+    'h1[data-testid*="issue-title"]',
+    // Fallback selectors
+    'h1',
+    '[data-testid*="title"]',
+    '.title'
   ];
   
   // Try multiple selectors for description (updated for modern Jira)
@@ -210,7 +220,18 @@ function detectJiraTicket() {
     // Fallback selectors for any rich text content
     'main [data-testid*="description"]',
     'main .ak-renderer-document',
-    '[role="main"] [data-testid*="description"]'
+    '[role="main"] [data-testid*="description"]',
+    
+    // Additional fallback selectors
+    '[data-testid*="field"] .ak-renderer-document',
+    '[data-testid*="field"]',
+    '.ak-renderer-document p',
+    '.ak-renderer-document div',
+    '[contenteditable="true"]',
+    '.description-text',
+    '[data-testid*="content"]',
+    'div[data-testid*="description"] p',
+    'div[data-testid*="description"] div'
   ];
 
   const title = getElementText(titleSelectors);
@@ -285,7 +306,7 @@ function getElementText(selectors) {
  */
 async function getQAInsights(ticketData) {
   try {
-    const response = await fetch('http://localhost:3000/api/analyze-ticket', {
+    const response = await fetch('https://www.firstqa.dev/api/analyze-ticket', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
