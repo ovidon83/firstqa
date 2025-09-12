@@ -3,6 +3,8 @@
 (function() {
   'use strict';
   
+  console.log('🔧 FirstQA Content Script: Starting...');
+  
   // Global state
   let qaPanel = null;
   let currentTicketData = null;
@@ -329,14 +331,23 @@
    * Initialize the extension
    */
   async function init() {
-    // Initialize FirstQA API
-    await initFirstQAAPI();
-    
-    // Only detect ticket data, but NEVER create panel automatically
-    checkAndSetupPanel();
-    
-    // Listen for messages from popup
-    setupMessageListeners();
+    console.log('🔧 FirstQA Content Script: init() called');
+    try {
+      // Initialize FirstQA API
+      console.log('🔧 FirstQA Content Script: Initializing FirstQA API...');
+      await initFirstQAAPI();
+      
+      // Only detect ticket data, but NEVER create panel automatically
+      console.log('🔧 FirstQA Content Script: Checking and setting up panel...');
+      checkAndSetupPanel();
+      
+      // Listen for messages from popup
+      console.log('🔧 FirstQA Content Script: Setting up message listeners...');
+      setupMessageListeners();
+      console.log('🔧 FirstQA Content Script: init() completed successfully');
+    } catch (error) {
+      console.error('🔧 FirstQA Content Script: init() error:', error);
+    }
   }
   
   /**
@@ -3011,4 +3022,9 @@ function getScoreEmoji(score) {
 
     return text;
   }
+  
+  // Initialize the extension
+  console.log('🔧 FirstQA Content Script: About to call init()...');
+  init();
+  console.log('🔧 FirstQA Content Script: Script loaded successfully');
 })(); 
