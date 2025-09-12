@@ -831,14 +831,15 @@
     });
     
     try {
-      const markdown = formatAsMarkdown(insights);
-      console.log('📋 Generated markdown:', markdown.substring(0, 200) + '...');
+      // Use Jira-compatible text format for copying
+      const jiraText = formatAsMarkdownForJira(insights);
+      console.log('📋 Generated Jira text:', jiraText.substring(0, 200) + '...');
       
-      const success = await copyToClipboard(markdown);
+      const success = await copyToClipboard(jiraText);
       
       if (success) {
         console.log('✅ Successfully copied to clipboard');
-        // Show a temporary notification
+        // Show a temporary notification with higher z-index
         showNotification('✅ Analysis copied to clipboard!', 'success');
       } else {
         throw new Error('Copy failed');
@@ -1018,7 +1019,7 @@
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 10000;
+      z-index: 999999999;
       background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
       color: white;
       padding: 12px 16px;
@@ -2906,17 +2907,10 @@
       </div>
       <div class="qa-modal-footer">
         <button id="qa-copy-btn" class="qa-modal-button">Copy to Clipboard</button>
-        <button id="qa-close-btn" class="qa-modal-button">Close</button>
       </div>
     `;
     
     qaPanel.innerHTML = html;
-    
-    // Add close button listener
-    const closeBtn = qaPanel.querySelector('#qa-close-btn');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => closeJiraPanel());
-    }
     
     // Add copy button listener
     const copyBtn = qaPanel.querySelector('#qa-copy-btn');
