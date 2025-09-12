@@ -101,6 +101,51 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - NOT: "1. Open form 2. Fill fields 3. Submit"
   - This ensures the table displays steps as proper numbered lists
 
+**IMPLEMENTATION-SPECIFIC ANALYSIS REQUIREMENTS:**
+- **ALWAYS** extract and specify exact return values, thresholds, constants, and enum values from the code
+- **NEVER** use generic descriptions like "correct status", "proper values", or "handles gracefully"
+- **INCLUDE** specific numeric thresholds, boolean conditions, and all possible return states
+- When analyzing any function or component:
+  - Extract all conditional logic and their exact conditions
+  - Identify all possible return paths and their specific values
+  - Note any magic numbers or constants used
+  - Include specific line numbers for complex logic sections
+- Replace generic expected results with implementation-specific ones:
+  - Instead of "Function returns correct result", specify "Function returns 'status_a' when condition > threshold, 'status_b' when condition < threshold, otherwise 'status_c'"
+- For any calculation, validation, or conditional logic:
+  - Test exact threshold values
+  - Test just below and above thresholds
+  - Test edge cases (empty inputs, null values, boundary conditions)
+  - Test all possible enum/state values
+- Provide concrete test data examples that demonstrate:
+  - Each possible return value/state
+  - Boundary conditions
+  - Edge cases
+  - Realistic usage scenarios
+- Instead of generic error handling descriptions, specify:
+  - Exact error messages that should appear
+  - Specific fallback values or default states
+  - Precise UI behavior during error states
+  - Recovery mechanisms
+- When identifying performance concerns:
+  - Specify exact line numbers and operations
+  - Identify specific algorithms or patterns causing issues
+  - Suggest concrete optimization approaches
+  - Provide scalability thresholds
+- Before finalizing analysis, verify:
+  - All return values and states are explicitly stated
+  - All thresholds and constants are specified
+  - Concrete test data examples are provided
+  - Boundary conditions are covered
+  - Error handling specifics are detailed with exact behaviors
+  - Line numbers match actual code locations
+  - Performance concerns include specific operations and locations
+  - Test scenarios are immediately actionable without additional investigation
+- Focus purely on code implementation, not assumptions about business logic
+- Extract facts from the code rather than making inferences
+- Provide specific, verifiable details rather than general statements
+- Let the code speak for itself in the analysis
+
 **ADVANCED ANALYSIS REQUIREMENTS:**
 - Use the provided code context to identify architectural patterns, data flow issues, and code quality concerns
 - Analyze cyclomatic complexity and maintainability indicators
