@@ -866,20 +866,20 @@
     });
 
     // Format analysis for Linear (HTML format)
-    let html = `<h2>🤖 QA Analysis</h2>`;
+    let html = `<h2 style="margin-bottom: 20px;">🤖 QA Analysis</h2>`;
     
     // Check if this is minimal mode - show simplified format
     if (insights.minimalMode) {
       // Simplified format for minimal/missing info tickets
-      html += `<h3>📊 TICKET READINESS</h3>`;
+      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">📊 TICKET READINESS</h3>`;
       html += `<p><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
       html += `<p><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
       
-      html += `<h3>❌ NOT READY FOR DEVELOPMENT</h3>`;
+      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">❌ NOT READY FOR DEVELOPMENT</h3>`;
       html += `<p><strong>Why:</strong> This ticket lacks essential information needed for development.</p>`;
       
       if (insights.scoreImpactFactors && insights.scoreImpactFactors.length > 0) {
-        html += `<h3>🔍 WHAT'S MISSING</h3>`;
+        html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🔍 WHAT'S MISSING</h3>`;
         html += `<ul>`;
         insights.scoreImpactFactors.forEach(factor => {
           html += `<li>${escapeHtml(factor)}</li>`;
@@ -896,19 +896,19 @@
       
       // User Value (new section)
       if (insights.userValue) {
-        html += `<h3>🎯 USER VALUE</h3>`;
+        html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🎯 USER VALUE</h3>`;
         html += `<p><strong>Level:</strong> ${insights.userValue.level}</p>`;
         html += `<p><strong>Summary:</strong> ${insights.userValue.summary}</p>`;
       }
 
       // Readiness Assessment
-      html += `<h3>📊 TICKET READINESS</h3>`;
+      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">📊 TICKET READINESS</h3>`;
       html += `<p><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
       html += `<p><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
       
       // Improvements Needed
       if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
-        html += `<h3>🔧 IMPROVEMENTS NEEDED</h3>`;
+        html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🔧 IMPROVEMENTS NEEDED</h3>`;
         html += `<ol>`;
         insights.improvementsNeeded.forEach(improvement => {
           html += `<li>${escapeHtml(improvement)}</li>`;
@@ -918,7 +918,7 @@
 
       // QA Questions
       const questions = insights.qaQuestions || [];
-      html += `<h3>🧠 QA Questions</h3>`;
+      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🧠 QA Questions</h3>`;
       if (questions.length > 0) {
         html += `<ol>`;
         questions.slice(0, 5).forEach((q, i) => {
@@ -931,7 +931,7 @@
       }
 
       // Key Risks
-      html += `<h3>⚠️ Key Risks</h3>`;
+      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">⚠️ Key Risks</h3>`;
       if (insights.keyRisks && insights.keyRisks.length > 0) {
         html += `<ol>`;
         insights.keyRisks.slice(0, 5).forEach((r, i) => {
@@ -944,7 +944,7 @@
       }
 
       // Test Recipe
-      html += `<h3>🧪 Test Recipe</h3>`;
+      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🧪 Test Recipe</h3>`;
       if (insights.testRecipe) {
         if (typeof insights.testRecipe === 'string') {
           // Handle string format
@@ -2905,6 +2905,7 @@
     html += `
       </div>
       <div class="qa-modal-footer">
+        <button id="qa-copy-btn" class="qa-modal-button">Copy to Clipboard</button>
         <button id="qa-close-btn" class="qa-modal-button">Close</button>
       </div>
     `;
@@ -2915,6 +2916,12 @@
     const closeBtn = qaPanel.querySelector('#qa-close-btn');
     if (closeBtn) {
       closeBtn.addEventListener('click', () => closeJiraPanel());
+    }
+    
+    // Add copy button listener
+    const copyBtn = qaPanel.querySelector('#qa-copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => copyInsightsToClipboard(analysis));
     }
   }
 
