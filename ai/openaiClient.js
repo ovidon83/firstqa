@@ -1562,6 +1562,49 @@ CRITICAL: Every ticket is UNIQUE. Analyze THIS SPECIFIC TICKET only. Do NOT use 
 
 Evaluate based ONLY on what's actually present in THIS ticket.
 
+**IMPLEMENTATION-SPECIFIC ANALYSIS REQUIREMENTS:**
+- **ALWAYS** extract and specify exact requirements, acceptance criteria, and expected behaviors from the ticket description
+- **NEVER** use generic descriptions like "works correctly", "handles gracefully", or "proper functionality"
+- **INCLUDE** specific user actions, data inputs, validation rules, and expected outputs mentioned in the ticket
+- When analyzing ticket requirements:
+  - Extract all specific user actions and workflows described
+  - Identify exact validation rules, constraints, and business logic mentioned
+  - Note any specific data formats, field requirements, or input constraints
+  - Include specific acceptance criteria and success conditions
+- Replace generic expected results with implementation-specific ones:
+  - Instead of "User can upload file successfully", specify "User uploads .jpg/.png file under 10MB, sees 'Upload successful' message, file appears in gallery"
+- For any validation, input handling, or user workflows:
+  - Test exact input constraints and validation rules mentioned
+  - Test boundary conditions (min/max values, character limits, file sizes)
+  - Test edge cases (empty inputs, invalid formats, error states)
+  - Test all possible user actions and workflow paths described
+- Provide concrete test data examples that demonstrate:
+  - Each specific user action mentioned in the ticket
+  - Boundary conditions and validation limits
+  - Edge cases and error scenarios
+  - Realistic usage scenarios based on the ticket context
+- Instead of generic error handling descriptions, specify:
+  - Exact error messages or user feedback mentioned in the ticket
+  - Specific fallback behaviors or default states
+  - Precise UI behavior during error states
+  - Recovery mechanisms or user guidance
+- When identifying risks or issues:
+  - Specify exact scenarios that could break the described functionality
+  - Identify specific edge cases not covered in the ticket
+  - Suggest concrete test scenarios for boundary conditions
+  - Focus on real risks based on the actual ticket requirements
+- Before finalizing analysis, verify:
+  - All user actions and workflows are explicitly stated
+  - All validation rules and constraints are specified
+  - Concrete test data examples are provided
+  - Boundary conditions are covered
+  - Error handling specifics are detailed with exact behaviors
+  - Test scenarios are immediately actionable without additional investigation
+- Focus purely on ticket requirements and acceptance criteria, not assumptions about implementation
+- Extract facts from the ticket description rather than making inferences
+- Provide specific, verifiable details rather than general statements
+- Let the ticket requirements speak for themselves in the analysis
+
 TICKET DATA:
 - Title: ${title}
 - Description: ${description}
@@ -1601,6 +1644,20 @@ For normal tickets:
 - Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
 - For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (edge cases)
 
+**ENHANCED TEST RECIPE REQUIREMENTS:**
+- **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
+- **Specific Data Examples**: Provide concrete test data that matches the ticket requirements (e.g., specific email formats, file types, user names, etc.)
+- **Validation Testing**: Test exact validation rules mentioned in the ticket (e.g., "password must be 8+ characters", "email format validation", "file size limit 10MB")
+- **Error State Testing**: Test specific error scenarios and edge cases that could occur based on the ticket description
+- **User Workflow Testing**: Test complete user journeys described in the ticket with realistic data
+- **State Testing**: Test all possible states, statuses, or conditions mentioned in the ticket
+- For each test scenario:
+  - Use specific, realistic test data that matches the ticket context
+  - Include exact input values, expected outputs, and validation criteria
+  - Specify boundary conditions (min/max values, edge cases)
+  - Include error scenarios and recovery paths
+  - Make steps detailed and immediately actionable
+
 Return JSON format - MUST include BOTH initialReadinessScore AND readyForDevelopmentScore:
 
 For MINIMAL analysis (insufficient info):
@@ -1633,7 +1690,16 @@ For FULL analysis (sufficient info):
   "missingInfo": ["specific missing details"]
 }
 
-Generate ALL important test scenarios, not just 3. Ask the 'What if' questions that matter.`;
+Generate ALL important test scenarios, not just 3. Ask the 'What if' questions that matter.
+
+**FINAL VERIFICATION:**
+Before completing the analysis, ensure:
+- All test scenarios use specific, realistic data from the ticket context
+- Boundary conditions are tested with exact values mentioned in the ticket
+- Validation rules are tested with concrete examples
+- Error scenarios are based on actual ticket requirements
+- Test steps are detailed and immediately actionable
+- Expected results are specific and verifiable`;
 
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
