@@ -1419,16 +1419,9 @@
         }
         return success;
       } else if (window.location.href.includes('atlassian.net')) {
-        // Use Jira-specific formatting for Jira
-        const commentText = formatAsMarkdownForJira(analysis);
-        console.log('🔍 Formatted comment text length:', commentText.length);
-        const success = await insertJiraComment(commentText);
-        console.log('🔍 insertJiraComment result:', success);
-        if (!success) {
-          console.log('🔍 Comment insertion failed - showing panel as fallback');
-          showJiraPanel(analysis);
-        }
-        return success;
+        // For Jira, show a panel with formatted text for manual copy/paste
+        showJiraPanel(analysis);
+        return true;
       }
       
       console.error('❌ Unknown platform, cannot insert comment');
@@ -2890,12 +2883,12 @@
       <div class="qa-modal-content">
     `;
 
-    // Use the same formatAsMarkdown function for consistency
-    const formattedContent = formatAsMarkdown(analysis);
+    // Format analysis specifically for the panel with proper styling
+    const formattedContent = formatAnalysisForPanel(analysis);
     
-    // Convert HTML to Jira panel format
+    // Add the formatted content to the panel
     html += `<div class="qa-modal-section">
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333;">
         ${formattedContent}
       </div>
     </div>`;
@@ -2934,6 +2927,97 @@ function getScoreEmoji(score) {
   if (score === 5) return '🎉';
   return '❓';
 }
+
+  /**
+   * Format analysis specifically for the panel display with proper HTML styling
+   */
+  function formatAnalysisForPanel(insights) {
+    console.log('🔍 formatAnalysisForPanel called with data:', insights);
+    
+    let html = '';
+    
+    // Handle minimal mode
+    if (insights.minimalMode) {
+      html += `<div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; color: #856404;">⚠️ Insufficient Information for Full Analysis</h3>
+        <p style="margin: 0 0 8px 0;"><strong>📊 Ready for Development Score:</strong> ${insights.readyForDevelopmentScore}/5</p>`;
+      
+      if (insights.scoreImpactFactors && insights.scoreImpactFactors.length > 0) {
+        html += `<p style="margin: 8px 0 4px 0;"><strong>What's Missing:</strong></p><ul style="margin: 0; padding-left: 20px;">`;
+        insights.scoreImpactFactors.slice(0, 5).forEach(factor => {
+          html += `<li style="margin: 4px 0;">${factor}</li>`;
+        });
+        html += `</ul>`;
+      }
+      
+      if (insights.message) {
+        html += `<p style="margin: 12px 0 0 0;">${insights.message}</p>`;
+      }
+      
+      html += `</div>`;
+      return html;
+    }
+
+    // User Value section
+    if (insights.userValue) {
+      html += `<div style="background: #e8f5e8; border: 1px solid #c3e6c3; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; color: #2d5a2d;">🎯 USER VALUE</h3>
+        <p style="margin: 0 0 8px 0;"><strong>Level:</strong> ${insights.userValue.level}</p>
+        <p style="margin: 0;"><strong>Summary:</strong> ${insights.userValue.summary}</p>
+      </div>`;
+    }
+
+    // Readiness Assessment
+    html += `<div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 12px 0; color: #495057;">📊 TICKET READINESS</h3>
+      <p style="margin: 0 0 8px 0;"><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>
+      <p style="margin: 0;"><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>
+    </div>`;
+
+    // Improvements Needed
+    if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
+      html += `<div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; color: #856404;">🔧 IMPROVEMENTS NEEDED</h3>
+        <ol style="margin: 0; padding-left: 20px;">`;
+      insights.improvementsNeeded.forEach((improvement, i) => {
+        html += `<li style="margin: 8px 0;">${improvement}</li>`;
+      });
+      html += `</ol></div>`;
+    }
+
+    // QA Questions
+    const questions = insights.qaQuestions || insights.topQuestions || [];
+    if (questions.length > 0) {
+      html += `<div style="background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; color: #1565c0;">🧠 QA Questions</h3>
+        <ol style="margin: 0; padding-left: 20px;">`;
+      questions.slice(0, 5).forEach((question, i) => {
+        html += `<li style="margin: 8px 0;">${question}</li>`;
+      });
+      html += `</ol></div>`;
+    }
+
+    // Key Risks
+    if (insights.keyRisks && insights.keyRisks.length > 0) {
+      html += `<div style="background: #ffebee; border: 1px solid #ffcdd2; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; color: #c62828;">⚠️ Key Risks</h3>
+        <ul style="margin: 0; padding-left: 20px;">`;
+      insights.keyRisks.slice(0, 5).forEach(risk => {
+        html += `<li style="margin: 8px 0;">${risk}</li>`;
+      });
+      html += `</ul></div>`;
+    }
+
+    // Test Recipe
+    if (insights.testRecipe && typeof insights.testRecipe === 'string') {
+      html += `<div style="background: #f3e5f5; border: 1px solid #e1bee7; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; color: #7b1fa2;">🧪 Test Recipe</h3>
+        <div style="white-space: pre-wrap; font-family: 'Courier New', monospace; background: #f8f9fa; padding: 12px; border-radius: 4px; border: 1px solid #e9ecef;">${insights.testRecipe}</div>
+      </div>`;
+    }
+
+    return html;
+  }
 
   /**
    * Format analysis as Markdown for Jira (with proper newlines and formatting)
