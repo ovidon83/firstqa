@@ -125,8 +125,8 @@ class BackgroundManager {
                 try {
                     await chrome.tabs.sendMessage(tabId, { action: 'checkTicketPage' });
                 } catch (error) {
-                    console.log('Content script not ready, reloading extension on tab');
-                    await chrome.tabs.reload(tabId);
+                    console.log('Content script not ready yet, will load automatically');
+                    // Don't reload - content script will be injected automatically on next page load
                 }
             } else {
                 // Clear badge
