@@ -1419,9 +1419,16 @@
         }
         return success;
       } else if (window.location.href.includes('atlassian.net')) {
-        // For Jira, show a panel with formatted text for manual copy/paste
-        showJiraPanel(analysis);
-        return true;
+        // Use Jira-specific formatting for Jira
+        const commentText = formatAsMarkdownForJira(analysis);
+        console.log('🔍 Formatted comment text length:', commentText.length);
+        const success = await insertJiraComment(commentText);
+        console.log('🔍 insertJiraComment result:', success);
+        if (!success) {
+          console.log('🔍 Comment insertion failed - showing panel as fallback');
+          showJiraPanel(analysis);
+        }
+        return success;
       }
       
       console.error('❌ Unknown platform, cannot insert comment');
@@ -2278,6 +2285,7 @@
    */
   async function insertJiraComment(commentText) {
     console.log('🔍 Inserting comment into Jira by typing:', commentText.substring(0, 200) + '...');
+    console.log('🔍 Full comment text length:', commentText.length);
     
     // Wait for the page to be fully loaded and comment field to appear
     await new Promise(resolve => setTimeout(resolve, 1000));
