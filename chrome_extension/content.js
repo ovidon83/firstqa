@@ -831,11 +831,11 @@
     });
     
     try {
-      // Use Jira-compatible text format for copying
-      const jiraText = formatAsMarkdownForJira(insights);
-      console.log('📋 Generated Jira text:', jiraText.substring(0, 200) + '...');
+      // Use the same HTML format as the panel, then convert to plain text
+      const htmlContent = formatAsMarkdown(insights);
+      console.log('📋 Generated HTML content:', htmlContent.substring(0, 200) + '...');
       
-      const success = await copyToClipboard(jiraText);
+      const success = await copyToClipboard(htmlContent);
       
       if (success) {
         console.log('✅ Successfully copied to clipboard');
