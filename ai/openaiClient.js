@@ -1640,6 +1640,12 @@ For normal tickets:
 - For frontend tickets: look for design materials (Figma, mockups, screenshots, etc.)
 - For backend tickets: focus on APIs, data models, business logic
 - Generate userValue: simple metric (High/Medium/Low) and short summary of user benefit
+- Generate readyForDevPulse with:
+  - userValue: same as above userValue
+  - readyForDevScoreNow: initialReadinessScore (1-5)
+  - readyForDevScoreAfter: readyForDevelopmentScore (1-5)
+  - needsQA: true/false based on risk/impact/complexity/money-path changes/user-sensitive changes. Set to true for: high-risk changes, money-path features, user-sensitive functionality, complex integrations, security changes, data migrations. Set to false for: simple UI tweaks, documentation updates, low-risk refactoring, basic CRUD operations.
+  - needsQAReason: brief explanation of why QA is needed or not needed
 - Generate scoreImpactFactors that explain your specific score for THIS ticket
 - Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
 - For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (most impactful edge cases specific to this ticket), "Regression" (regression testing)
@@ -1684,6 +1690,13 @@ For FULL analysis (sufficient info):
   "hasDesignMaterials": true|false,
   "designDetails": "description" or null,
   "userValue": {"level": "High|Medium|Low", "summary": "short description of user benefit"},
+  "readyForDevPulse": {
+    "userValue": {"level": "High|Medium|Low", "summary": "short description of user benefit"},
+    "readyForDevScoreNow": 1-5,
+    "readyForDevScoreAfter": 1-5,
+    "needsQA": true|false,
+    "needsQAReason": "brief explanation of why QA is needed or not needed"
+  },
   "qaQuestions": ["array of 5-8 questions"],
   "keyRisks": ["array of risks"],
   "scoreImpactFactors": ["array of score factors"],
