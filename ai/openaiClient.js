@@ -1644,7 +1644,7 @@ For normal tickets:
   - userValue: same as above userValue
   - readyForDevScoreNow: initialReadinessScore (1-5)
   - readyForDevScoreAfter: readyForDevelopmentScore (1-5)
-  - needsQA: true/false based on risk/impact/complexity/money-path changes/user-sensitive changes. Set to true for: high-risk changes, money-path features, user-sensitive functionality, complex integrations, security changes, data migrations. Set to false for: simple UI tweaks, documentation updates, low-risk refactoring, basic CRUD operations.
+  - needsQA: "Mandatory|Recommended|No" based on risk/impact/complexity/money-path changes/user-sensitive changes. Set to "Mandatory" for: critical security changes, money-path features, high-risk integrations, data migrations. Set to "Recommended" for: user-sensitive functionality, complex features, moderate-risk changes. Set to "No" for: simple UI tweaks, documentation updates, low-risk refactoring, basic CRUD operations.
   - needsQAReason: brief explanation of why QA is needed or not needed
 - Generate scoreImpactFactors that explain your specific score for THIS ticket
 - Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
@@ -1694,7 +1694,7 @@ For FULL analysis (sufficient info):
     "userValue": {"level": "High|Medium|Low", "summary": "short description of user benefit"},
     "readyForDevScoreNow": 1-5,
     "readyForDevScoreAfter": 1-5,
-    "needsQA": true|false,
+    "needsQA": "Mandatory|Recommended|No",
     "needsQAReason": "brief explanation of why QA is needed or not needed"
   },
   "qaQuestions": ["array of 5-8 questions"],

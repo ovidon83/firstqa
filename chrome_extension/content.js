@@ -999,12 +999,6 @@
     } else {
       // Full detailed format for complete tickets
       
-      // User Value (new section)
-      if (insights.userValue) {
-        html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🎯 USER VALUE</h3>`;
-        html += `<p style="margin: 8px 0;"><strong>Level:</strong> ${insights.userValue.level}</p>`;
-        html += `<p style="margin: 8px 0;"><strong>Summary:</strong> ${insights.userValue.summary}</p>`;
-      }
 
       // Ready for Dev Pulse section
       if (insights.readyForDevPulse) {
@@ -1025,32 +1019,28 @@
         
         // Ready for Dev Score Now row
         html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">📊 Ready for Dev (Now)</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">📊 Ready for Dev Score - Now</td>`;
         html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.readyForDevScoreNow}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreNow)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreNow)})</td>`;
         html += `<td style="border: 1px solid #ddd; padding: 8px;">Current readiness level</td>`;
         html += `</tr>`;
         
         // Ready for Dev Score After row
         html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">🚀 Ready for Dev (After Ovi AI)</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">🚀 Ready for Dev Score - After Ovi-AI</td>`;
         html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">Readiness after AI analysis</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">Readiness after using Ovi-AI's input</td>`;
         html += `</tr>`;
         
         // Needs QA row
         html += `<tr>`;
         html += `<td style="border: 1px solid #ddd; padding: 8px;">🔍 Needs QA</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.needsQA ? '🟢 Yes' : '🔴 No'}</td>`;
+        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.needsQA || 'No'}</td>`;
         html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.needsQAReason || 'No reason provided'}</td>`;
         html += `</tr>`;
         
         html += `</tbody></table>`;
       }
 
-      // Readiness Assessment
-      html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">📊 TICKET READINESS</h3>`;
-      html += `<p style="margin: 8px 0;"><strong>Now:</strong> ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})</p>`;
-      html += `<p style="margin: 8px 0;"><strong>With Ovi's analysis:</strong> ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})</p>`;
       
       // Improvements Needed
       if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
@@ -3154,27 +3144,17 @@ function getScoreEmoji(score) {
       return text;
     }
 
-           // User Value (new section)
-           if (insights.userValue) {
-             text += '## 🎯 USER VALUE\n';
-             text += `**Level:** ${insights.userValue.level}\n`;
-             text += `**Summary:** ${insights.userValue.summary}\n\n`;
-           }
 
            // Ready for Dev Pulse section
            if (insights.readyForDevPulse) {
              text += '## 🚀 Ready for Dev Pulse\n\n';
              text += '||Metric||Level||Summary||\n';
              text += `|🎯 User Value|${insights.readyForDevPulse.userValue?.level || 'Unknown'}|${insights.readyForDevPulse.userValue?.summary || 'No summary available'}|\n`;
-             text += `|📊 Ready for Dev (Now)|${insights.readyForDevPulse.readyForDevScoreNow}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreNow)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreNow)})|Current readiness level|\n`;
-             text += `|🚀 Ready for Dev (After Ovi AI)|${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})|Readiness after AI analysis|\n`;
-             text += `|🔍 Needs QA|${insights.readyForDevPulse.needsQA ? '🟢 Yes' : '🔴 No'}|${insights.readyForDevPulse.needsQAReason || 'No reason provided'}|\n\n`;
+             text += `|📊 Ready for Dev Score - Now|${insights.readyForDevPulse.readyForDevScoreNow}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreNow)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreNow)})|Current readiness level|\n`;
+             text += `|🚀 Ready for Dev Score - After Ovi-AI|${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})|Readiness after using Ovi-AI's input|\n`;
+             text += `|🔍 Needs QA|${insights.readyForDevPulse.needsQA || 'No'}|${insights.readyForDevPulse.needsQAReason || 'No reason provided'}|\n\n`;
            }
 
-           // Readiness Assessment
-           text += '## 📊 TICKET READINESS\n';
-           text += `**As-is:** ${insights.initialReadinessScore}/5 ${getScoreEmoji(insights.initialReadinessScore)} (${getScoreLabel(insights.initialReadinessScore)})\n`;
-           text += `**With Ovi's analysis:** ${insights.readyForDevelopmentScore}/5 ${getScoreEmoji(insights.readyForDevelopmentScore)} (${getScoreLabel(insights.readyForDevelopmentScore)})\n\n`;
     
     // Improvements Needed
     if (insights.improvementsNeeded && insights.improvementsNeeded.length > 0) {
