@@ -1697,11 +1697,13 @@ For FULL analysis (sufficient info):
 
 Generate ALL important test scenarios, not just 3. Ask the 'What if' questions that matter.
 
-IMPORTANT: When generating the testRecipe array, ensure scenarios are ordered by priority:
-1. Happy Path scenarios first (core functionality)
-2. Critical Path scenarios second (important scenarios)  
-3. Edge Case scenarios third (edge cases)
-4. Regression scenarios last (regression testing)
+CRITICAL ORDERING REQUIREMENT: You MUST order the testRecipe array by priority in this EXACT order:
+1. ALL Happy Path scenarios first (core functionality)
+2. ALL Critical Path scenarios second (important scenarios)  
+3. ALL Edge Case scenarios third (edge cases)
+4. ALL Regression scenarios last (regression testing)
+
+DO NOT mix priorities - group all scenarios of the same priority together in the order above.
 
 **FINAL VERIFICATION:**
 Before completing the analysis, ensure:
@@ -1710,7 +1712,8 @@ Before completing the analysis, ensure:
 - Validation rules are tested with concrete examples
 - Error scenarios are based on actual ticket requirements
 - Test steps are detailed and immediately actionable
-- Expected results are specific and verifiable`;
+- Expected results are specific and verifiable
+- CRITICAL: testRecipe array is ordered by priority: ALL Happy Path first, then ALL Critical Path, then ALL Edge Case, then ALL Regression`;
 
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
