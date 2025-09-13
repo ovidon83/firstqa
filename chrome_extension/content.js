@@ -816,6 +816,24 @@
   }
   
   /**
+   * Convert HTML to plain text for copying
+   */
+  function htmlToPlainText(html) {
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Convert HTML elements to plain text equivalents
+    let text = tempDiv.innerText || tempDiv.textContent || '';
+    
+    // Clean up extra whitespace
+    text = text.replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive line breaks
+    text = text.trim();
+    
+    return text;
+  }
+
+  /**
    * Copy insights to clipboard as markdown
    */
   async function copyInsightsToClipboard(insights) {
@@ -831,11 +849,12 @@
     });
     
     try {
-      // Use the same HTML format as the panel, then convert to plain text
+      // Convert HTML to plain text for copying
       const htmlContent = formatAsMarkdown(insights);
-      console.log('📋 Generated HTML content:', htmlContent.substring(0, 200) + '...');
+      const plainText = htmlToPlainText(htmlContent);
+      console.log('📋 Generated plain text content:', plainText.substring(0, 200) + '...');
       
-      const success = await copyToClipboard(htmlContent);
+      const success = await copyToClipboard(plainText);
       
       if (success) {
         console.log('✅ Successfully copied to clipboard');
@@ -2953,6 +2972,12 @@
     const copyBtn = qaPanel.querySelector('#qa-copy-btn');
     if (copyBtn) {
       copyBtn.addEventListener('click', () => copyInsightsToClipboard(analysis));
+    }
+    
+    // Add close button listener
+    const closeBtn = qaPanel.querySelector('#qa-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeJiraPanel);
     }
   }
 
