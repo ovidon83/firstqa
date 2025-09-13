@@ -1028,9 +1028,9 @@
         html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🚀 Ready for Dev Pulse</h3>`;
         html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">`;
         html += `<thead><tr style="background-color: #f8f9fa; border-bottom: 2px solid #e9ecef;">`;
-        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057;">Metric</th>`;
-        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057;">Rating</th>`;
-        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057;">Summary</th>`;
+        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057; width: 35%;">Metric</th>`;
+        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057; width: 25%;">Rating</th>`;
+        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057; width: 40%;">Summary</th>`;
         html += `</tr></thead><tbody>`;
         
         // User Impact row
