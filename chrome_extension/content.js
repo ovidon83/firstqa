@@ -836,6 +836,12 @@
       }
       
       const tagName = element.tagName.toLowerCase();
+      
+      // Special handling for tables
+      if (tagName === 'table') {
+        return convertTableToJiraMarkdown(element);
+      }
+      
       const text = Array.from(element.childNodes).map(processElement).join('');
       
       switch (tagName) {
@@ -857,25 +863,45 @@
           return `\n${text}\n`;
         case 'li':
           return `* ${text}\n`;
-        case 'table':
-          return `\n\n${text}\n\n`;
-        case 'thead':
-          return `${text}`;
-        case 'tbody':
-          return `${text}`;
-        case 'tr':
-          // Add proper line break after each row and ensure table structure
-          const rowText = text.trim();
-          return rowText ? `${rowText}\n` : '\n';
-        case 'th':
-          return `||${text}`;
-        case 'td':
-          return `|${text}`;
         case 'div':
           return `${text}`;
         default:
           return text;
       }
+    }
+    
+    // Convert table to Jira markdown
+    function convertTableToJiraMarkdown(table) {
+      let tableMarkdown = '\n\n';
+      
+      // Get all rows
+      const rows = table.querySelectorAll('tr');
+      
+      rows.forEach((row, index) => {
+        const cells = row.querySelectorAll('th, td');
+        let rowMarkdown = '';
+        
+        cells.forEach((cell, cellIndex) => {
+          const cellText = cell.textContent.trim();
+          if (row.querySelector('th')) {
+            // Header row
+            rowMarkdown += `||${cellText}`;
+            if (cellIndex === cells.length - 1) {
+              rowMarkdown += '||';
+            }
+          } else {
+            // Data row
+            rowMarkdown += `|${cellText}`;
+            if (cellIndex === cells.length - 1) {
+              rowMarkdown += '|';
+            }
+          }
+        });
+        
+        tableMarkdown += rowMarkdown + '\n';
+      });
+      
+      return tableMarkdown + '\n';
     }
     
     markdown = Array.from(tempDiv.childNodes).map(processElement).join('');
@@ -884,10 +910,6 @@
     markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive line breaks
     markdown = markdown.replace(/^\s+|\s+$/g, ''); // Trim start/end
     markdown = markdown.replace(/\n\s+/g, '\n'); // Remove leading spaces from lines
-    
-    // Ensure proper line breaks for tables
-    markdown = markdown.replace(/\|\|([^|]*)\|\|([^|]*)\|\|([^|]*)\|\|([^|]*)\|\|([^|]*)\|\|/g, '||$1||$2||$3||$4||$5||\n');
-    markdown = markdown.replace(/\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|/g, '|$1|$2|$3|$4|$5|\n');
     
     return markdown;
   }
