@@ -1642,7 +1642,12 @@ For normal tickets:
 - Generate userValue: simple metric (High/Medium/Low) and short summary of user benefit
 - Generate scoreImpactFactors that explain your specific score for THIS ticket
 - Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
-- For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (edge cases)
+- For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (edge cases), "Regression" (regression testing)
+- CRITICAL: Order testRecipe scenarios by priority in this exact order:
+  1. Happy Path scenarios first
+  2. Critical Path scenarios second  
+  3. Edge Case scenarios third
+  4. Regression scenarios last
 
 **ENHANCED TEST RECIPE REQUIREMENTS:**
 - **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
@@ -1682,7 +1687,7 @@ For FULL analysis (sufficient info):
   "keyRisks": ["array of risks"],
   "scoreImpactFactors": ["array of score factors"],
   "improvementsNeeded": ["specific actionable items to bridge the gap between scores"],
-  "testRecipe": [{"scenario": "...", "steps": "...", "expected": "...", "priority": "Happy Path|Critical Path|Edge Case", "automation": "...", "reason": "..."}],
+  "testRecipe": [{"scenario": "...", "steps": "...", "expected": "...", "priority": "Happy Path|Critical Path|Edge Case|Regression", "automation": "...", "reason": "..."}],
   "initialReadinessScore": 1-5,
   "readyForDevelopmentScore": 1-5,
   "scoreBreakdown": {"clarity": 0.0-1.0, "dependencies": 0.0-1.0, "testability": 0.0-1.0, "riskProfile": 0.0-1.0, "scopeReadiness": 0.0-1.0, "rawTotal": 0.0-5.0, "scaledScore": 1-5},
@@ -1691,6 +1696,12 @@ For FULL analysis (sufficient info):
 }
 
 Generate ALL important test scenarios, not just 3. Ask the 'What if' questions that matter.
+
+IMPORTANT: When generating the testRecipe array, ensure scenarios are ordered by priority:
+1. Happy Path scenarios first (core functionality)
+2. Critical Path scenarios second (important scenarios)  
+3. Edge Case scenarios third (edge cases)
+4. Regression scenarios last (regression testing)
 
 **FINAL VERIFICATION:**
 Before completing the analysis, ensure:
