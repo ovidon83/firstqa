@@ -915,38 +915,41 @@
   }
 
   /**
-   * Copy insights to clipboard as markdown
+   * Copy insights to clipboard using native browser selection (like manual copy)
    */
   async function copyInsightsToClipboard(insights) {
     console.log('🔍 copyInsightsToClipboard called with data:', insights);
-    console.log('🔍 Copy data structure:', {
-      hasTopQuestions: !!insights.topQuestions,
-      hasKeyRisks: !!insights.keyRisks,
-      hasTestRecipe: !!insights.testRecipe,
-      testRecipeType: typeof insights.testRecipe,
-      hasSmartQuestions: !!insights.smartQuestions,
-      hasRiskAreas: !!insights.riskAreas,
-      hasReadyForDevelopmentScore: insights.readyForDevelopmentScore !== undefined
-    });
     
     try {
-      // Convert HTML to Jira-compatible markdown for copying
-      const htmlContent = formatAsMarkdown(insights);
-      console.log('📋 HTML content for conversion:', htmlContent);
-      const jiraMarkdown = htmlToJiraMarkdown(htmlContent);
-      console.log('📋 Generated Jira markdown content:', jiraMarkdown);
+      // Find the panel content div
+      const panelContent = document.querySelector('#qa-copilot-panel .qa-modal-content');
+      if (!panelContent) {
+        throw new Error('Panel content not found');
+      }
       
-      const success = await copyToClipboard(jiraMarkdown);
+      // Create a temporary selection
+      const selection = window.getSelection();
+      const range = document.createRange();
+      
+      // Select all content in the panel
+      range.selectNodeContents(panelContent);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Copy the selection (this uses browser's native copy which handles HTML->text conversion)
+      const success = document.execCommand('copy');
+      
+      // Clear the selection
+      selection.removeAllRanges();
       
       if (success) {
-        console.log('✅ Successfully copied to clipboard');
-        // Show a temporary notification with higher z-index
+        console.log('✅ Successfully copied to clipboard using native selection');
         showNotification('✅ Analysis copied to clipboard!', 'success');
       } else {
-        throw new Error('Copy failed');
+        throw new Error('Native copy failed');
       }
     } catch (error) {
-      console.error('Copy failed:', error);
+      console.error('Native copy failed:', error);
       showNotification('❌ Failed to copy analysis', 'error');
     }
   }
