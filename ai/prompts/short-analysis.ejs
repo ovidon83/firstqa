@@ -23,7 +23,6 @@ Based on THESE SPECIFIC CODE CHANGES (not assumptions), provide your analysis in
 
 <table style="width: 100%; border-collapse: collapse;">
 <tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Summary</th></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🎯 User Value</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 High / 🟡 Medium / 🔴 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">✅ Release Confidence</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 High / 🟡 Medium-High / 🟡 Medium / 🔴 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Change Impact</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium-High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
@@ -60,7 +59,6 @@ Based on THESE SPECIFIC CODE CHANGES (not assumptions), provide your analysis in
   - **Edge Case**: Edge cases and error conditions
   - **Regression**: Existing functionality that might be affected by these changes (based on Product Areas affected)
 - For Release Pulse Analysis:
-  - **User Value**: Infer from PR description and code diff. What is the meaningful value or benefit to the end user? MAX 15 words.
   - **Release Confidence**: Evaluate test coverage, presence of test files, handling of edge cases, and overall implementation confidence. MAX 15 words.
   - **Change Impact**: Evaluate scope of code diff — number of files, components/modules touched, shared or risky areas. MAX 15 words.
   - **Release Decision**: Recommend Go or No-Go based on a weighted judgment of the above. Go if value is meaningful, confidence is high/medium, and impact is low/medium. No-Go if confidence is low or impact is high without mitigations. MAX 15 words.
