@@ -816,21 +816,74 @@
   }
   
   /**
-   * Convert HTML to plain text for copying
+   * Convert HTML to Jira-compatible markdown for copying
    */
-  function htmlToPlainText(html) {
+  function htmlToJiraMarkdown(html) {
     // Create a temporary div to parse HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
     
-    // Convert HTML elements to plain text equivalents
-    let text = tempDiv.innerText || tempDiv.textContent || '';
+    let markdown = '';
     
-    // Clean up extra whitespace
-    text = text.replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive line breaks
-    text = text.trim();
+    // Process each child element
+    function processElement(element) {
+      if (element.nodeType === Node.TEXT_NODE) {
+        return element.textContent || '';
+      }
+      
+      if (element.nodeType !== Node.ELEMENT_NODE) {
+        return '';
+      }
+      
+      const tagName = element.tagName.toLowerCase();
+      const text = Array.from(element.childNodes).map(processElement).join('');
+      
+      switch (tagName) {
+        case 'h3':
+          return `\n\nh3. ${text}\n`;
+        case 'h4':
+          return `\n\nh4. ${text}\n`;
+        case 'p':
+          return `\n${text}\n`;
+        case 'strong':
+        case 'b':
+          return `*${text}*`;
+        case 'em':
+        case 'i':
+          return `_${text}_`;
+        case 'ul':
+          return `\n${text}\n`;
+        case 'ol':
+          return `\n${text}\n`;
+        case 'li':
+          return `* ${text}\n`;
+        case 'table':
+          return `\n\n${text}\n`;
+        case 'thead':
+          return `${text}`;
+        case 'tbody':
+          return `${text}`;
+        case 'tr':
+          return `${text}\n`;
+        case 'th':
+          return `||${text}`;
+        case 'td':
+          return `|${text}`;
+        case 'div':
+          return `${text}`;
+        default:
+          return text;
+      }
+    }
     
-    return text;
+    markdown = Array.from(tempDiv.childNodes).map(processElement).join('');
+    
+    // Clean up extra whitespace and line breaks
+    markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive line breaks
+    markdown = markdown.replace(/^\s+|\s+$/g, ''); // Trim start/end
+    markdown = markdown.replace(/\n\s+/g, '\n'); // Remove leading spaces from lines
+    
+    return markdown;
   }
 
   /**
@@ -849,12 +902,12 @@
     });
     
     try {
-      // Convert HTML to plain text for copying
+      // Convert HTML to Jira-compatible markdown for copying
       const htmlContent = formatAsMarkdown(insights);
-      const plainText = htmlToPlainText(htmlContent);
-      console.log('📋 Generated plain text content:', plainText.substring(0, 200) + '...');
+      const jiraMarkdown = htmlToJiraMarkdown(htmlContent);
+      console.log('📋 Generated Jira markdown content:', jiraMarkdown.substring(0, 200) + '...');
       
-      const success = await copyToClipboard(plainText);
+      const success = await copyToClipboard(jiraMarkdown);
       
       if (success) {
         console.log('✅ Successfully copied to clipboard');
