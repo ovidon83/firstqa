@@ -915,8 +915,31 @@
   }
 
   /**
-   * Copy insights to clipboard using native browser selection (like manual copy)
+   * Get badge styling for different metric types
    */
+  function getBadgeStyle(type, value) {
+    const styles = {
+      'User Impact': {
+        'High': 'background: #e3f2fd; color: #1976d2;',
+        'Medium': 'background: #fff3e0; color: #f57c00;',
+        'Low': 'background: #f3e5f5; color: #7b1fa2;'
+      },
+      'Ready for Dev': {
+        '5': 'background: #e8f5e8; color: #2e7d32;',
+        '4': 'background: #e8f5e8; color: #2e7d32;',
+        '3': 'background: #fff3cd; color: #856404;',
+        '2': 'background: #f8d7da; color: #721c24;',
+        '1': 'background: #f8d7da; color: #721c24;'
+      },
+      'Needs QA': {
+        'Mandatory': 'background: #f8d7da; color: #721c24;',
+        'Recommended': 'background: #fff3cd; color: #856404;',
+        'No': 'background: #d1e7dd; color: #0f5132;'
+      }
+    };
+    
+    return styles[type]?.[value] || 'background: #f8f9fa; color: #6c757d;';
+  }
   async function copyInsightsToClipboard(insights) {
     console.log('🔍 copyInsightsToClipboard called with data:', insights);
     
@@ -1003,39 +1026,32 @@
       // Ready for Dev Pulse section
       if (insights.readyForDevPulse) {
         html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">🚀 Ready for Dev Pulse</h3>`;
-        html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0;">`;
-        html += `<thead><tr style="background-color: #f5f5f5;">`;
-        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Metric</th>`;
-        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Level</th>`;
-        html += `<th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Summary</th>`;
+        html += `<table style="border-collapse: collapse; width: 100%; margin: 10px 0; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">`;
+        html += `<thead><tr style="background-color: #f8f9fa; border-bottom: 2px solid #e9ecef;">`;
+        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057;">Metric</th>`;
+        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057;">Rating</th>`;
+        html += `<th style="border: none; padding: 12px 16px; text-align: left; font-weight: 600; color: #495057;">Summary</th>`;
         html += `</tr></thead><tbody>`;
         
-        // User Value row
-        html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">🎯 User Value</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.userValue?.level || 'Unknown'}</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.userValue?.summary || 'No summary available'}</td>`;
+        // User Impact row
+        html += `<tr style="border-bottom: 1px solid #e9ecef;">`;
+        html += `<td style="border: none; padding: 12px 16px; font-weight: 500;">🎯 User Impact</td>`;
+        html += `<td style="border: none; padding: 12px 16px;"><span style="${getBadgeStyle('User Impact', insights.readyForDevPulse.userValue?.level)} padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${insights.readyForDevPulse.userValue?.level || 'Unknown'}</span></td>`;
+        html += `<td style="border: none; padding: 12px 16px; color: #6c757d;">${insights.readyForDevPulse.userValue?.summary || 'No summary available'}</td>`;
         html += `</tr>`;
         
-        // Ready for Dev Score Now row
-        html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">📊 Ready for Dev Score - Now</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.readyForDevScoreNow}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreNow)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreNow)})</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">Current readiness level</td>`;
-        html += `</tr>`;
-        
-        // Ready for Dev Score After row
-        html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">🚀 Ready for Dev Score - After Ovi-AI</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">Readiness after using Ovi-AI's input</td>`;
+        // Ready for Dev Score row
+        html += `<tr style="border-bottom: 1px solid #e9ecef;">`;
+        html += `<td style="border: none; padding: 12px 16px; font-weight: 500;">🛠️ Ready for Dev</td>`;
+        html += `<td style="border: none; padding: 12px 16px;"><span style="${getBadgeStyle('Ready for Dev', insights.readyForDevPulse.readyForDevScoreAfter)} padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})</span></td>`;
+        html += `<td style="border: none; padding: 12px 16px; color: #6c757d;">Score reflects spec clarity after <em>Ovi-AI's input</em> — scenarios and test plan are now solid.</td>`;
         html += `</tr>`;
         
         // Needs QA row
         html += `<tr>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">🔍 Needs QA</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.needsQA || 'No'}</td>`;
-        html += `<td style="border: 1px solid #ddd; padding: 8px;">${insights.readyForDevPulse.needsQAReason || 'No reason provided'}</td>`;
+        html += `<td style="border: none; padding: 12px 16px; font-weight: 500;">🧪 Needs QA</td>`;
+        html += `<td style="border: none; padding: 12px 16px;"><span style="${getBadgeStyle('Needs QA', insights.readyForDevPulse.needsQA)} padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${insights.readyForDevPulse.needsQA || 'No'}</span></td>`;
+        html += `<td style="border: none; padding: 12px 16px; color: #6c757d;">${insights.readyForDevPulse.needsQAReason || 'No reason provided'}</td>`;
         html += `</tr>`;
         
         html += `</tbody></table>`;
@@ -3148,11 +3164,10 @@ function getScoreEmoji(score) {
            // Ready for Dev Pulse section
            if (insights.readyForDevPulse) {
              text += '## 🚀 Ready for Dev Pulse\n\n';
-             text += '||Metric||Level||Summary||\n';
-             text += `|🎯 User Value|${insights.readyForDevPulse.userValue?.level || 'Unknown'}|${insights.readyForDevPulse.userValue?.summary || 'No summary available'}|\n`;
-             text += `|📊 Ready for Dev Score - Now|${insights.readyForDevPulse.readyForDevScoreNow}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreNow)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreNow)})|Current readiness level|\n`;
-             text += `|🚀 Ready for Dev Score - After Ovi-AI|${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})|Readiness after using Ovi-AI's input|\n`;
-             text += `|🔍 Needs QA|${insights.readyForDevPulse.needsQA || 'No'}|${insights.readyForDevPulse.needsQAReason || 'No reason provided'}|\n\n`;
+             text += '||Metric||Rating||Summary||\n';
+             text += `|🎯 User Impact|${insights.readyForDevPulse.userValue?.level || 'Unknown'}|${insights.readyForDevPulse.userValue?.summary || 'No summary available'}|\n`;
+             text += `|🛠️ Ready for Dev|${insights.readyForDevPulse.readyForDevScoreAfter}/5 ${getScoreEmoji(insights.readyForDevPulse.readyForDevScoreAfter)} (${getScoreLabel(insights.readyForDevPulse.readyForDevScoreAfter)})|Score reflects spec clarity after *Ovi-AI's input* — scenarios and test plan are now solid.|\n`;
+             text += `|🧪 Needs QA|${insights.readyForDevPulse.needsQA || 'No'}|${insights.readyForDevPulse.needsQAReason || 'No reason provided'}|\n\n`;
            }
 
     
