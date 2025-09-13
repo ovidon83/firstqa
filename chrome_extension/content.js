@@ -858,13 +858,15 @@
         case 'li':
           return `* ${text}\n`;
         case 'table':
-          return `\n\n${text}\n`;
+          return `\n\n${text}\n\n`;
         case 'thead':
           return `${text}`;
         case 'tbody':
           return `${text}`;
         case 'tr':
-          return `${text}\n`;
+          // Add proper line break after each row and ensure table structure
+          const rowText = text.trim();
+          return rowText ? `${rowText}\n` : '';
         case 'th':
           return `||${text}`;
         case 'td':
@@ -904,8 +906,9 @@
     try {
       // Convert HTML to Jira-compatible markdown for copying
       const htmlContent = formatAsMarkdown(insights);
+      console.log('📋 HTML content for conversion:', htmlContent.substring(0, 500) + '...');
       const jiraMarkdown = htmlToJiraMarkdown(htmlContent);
-      console.log('📋 Generated Jira markdown content:', jiraMarkdown.substring(0, 200) + '...');
+      console.log('📋 Generated Jira markdown content:', jiraMarkdown.substring(0, 500) + '...');
       
       const success = await copyToClipboard(jiraMarkdown);
       
