@@ -866,7 +866,7 @@
         case 'tr':
           // Add proper line break after each row and ensure table structure
           const rowText = text.trim();
-          return rowText ? `${rowText}\n` : '';
+          return rowText ? `${rowText}\n` : '\n';
         case 'th':
           return `||${text}`;
         case 'td':
@@ -884,6 +884,10 @@
     markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n'); // Remove excessive line breaks
     markdown = markdown.replace(/^\s+|\s+$/g, ''); // Trim start/end
     markdown = markdown.replace(/\n\s+/g, '\n'); // Remove leading spaces from lines
+    
+    // Ensure proper line breaks for tables
+    markdown = markdown.replace(/\|\|([^|]*)\|\|([^|]*)\|\|([^|]*)\|\|([^|]*)\|\|([^|]*)\|\|/g, '||$1||$2||$3||$4||$5||\n');
+    markdown = markdown.replace(/\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|/g, '|$1|$2|$3|$4|$5|\n');
     
     return markdown;
   }
