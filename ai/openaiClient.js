@@ -1642,7 +1642,7 @@ For normal tickets:
 - Generate userValue: simple metric (High/Medium/Low) and short summary of user benefit
 - Generate scoreImpactFactors that explain your specific score for THIS ticket
 - Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
-- For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (edge cases), "Regression" (regression testing)
+- For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (most impactful edge cases specific to this ticket), "Regression" (regression testing)
 - CRITICAL: Order testRecipe scenarios by priority in this exact order:
   1. Happy Path scenarios first
   2. Critical Path scenarios second  
@@ -1656,6 +1656,7 @@ For normal tickets:
 - **Error State Testing**: Test specific error scenarios and edge cases that could occur based on the ticket description
 - **User Workflow Testing**: Test complete user journeys described in the ticket with realistic data
 - **State Testing**: Test all possible states, statuses, or conditions mentioned in the ticket
+- **Edge Case Prioritization**: For Edge Case scenarios, focus ONLY on the most impactful edge cases specific to THIS ticket. Prioritize scenarios that could cause the highest risk, most user confusion, or biggest system failures based on the ticket's specific functionality
 - For each test scenario:
   - Use specific, realistic test data that matches the ticket context
   - Include exact input values, expected outputs, and validation criteria
@@ -1700,7 +1701,7 @@ Generate ALL important test scenarios, not just 3. Ask the 'What if' questions t
 CRITICAL ORDERING REQUIREMENT: You MUST order the testRecipe array by priority in this EXACT order:
 1. ALL Happy Path scenarios first (core functionality)
 2. ALL Critical Path scenarios second (important scenarios)  
-3. ALL Edge Case scenarios third (edge cases)
+3. ALL Edge Case scenarios third (most impactful edge cases specific to THIS ticket - focus on highest risk/impact scenarios)
 4. ALL Regression scenarios last (regression testing)
 
 DO NOT mix priorities - group all scenarios of the same priority together in the order above.
