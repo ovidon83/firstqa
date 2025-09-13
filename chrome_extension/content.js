@@ -906,9 +906,9 @@
     try {
       // Convert HTML to Jira-compatible markdown for copying
       const htmlContent = formatAsMarkdown(insights);
-      console.log('📋 HTML content for conversion:', htmlContent.substring(0, 500) + '...');
+      console.log('📋 HTML content for conversion:', htmlContent);
       const jiraMarkdown = htmlToJiraMarkdown(htmlContent);
-      console.log('📋 Generated Jira markdown content:', jiraMarkdown.substring(0, 500) + '...');
+      console.log('📋 Generated Jira markdown content:', jiraMarkdown);
       
       const success = await copyToClipboard(jiraMarkdown);
       
