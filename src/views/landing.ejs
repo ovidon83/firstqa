@@ -43,16 +43,12 @@
 <!-- Hero Section -->
     <section class="hero-section">
   <div class="container">
-            <div class="row align-items-center min-vh-75">
+            <div class="row align-items-start min-vh-75">
                 <div class="col-lg-6">
                     <div class="hero-content">
-                        <div class="hero-badge">
-                            <i class="fas fa-rocket me-2"></i>Built for Startups
-                        </div>
                         <h1 class="hero-title">
                             Every Startup's <span class="text-gradient">First QA</span>
                         </h1>
-                        <p class="hero-subtitle">Your first QA hire starting at $149/month - AI + Human QAs</p>
                         
                         <div class="hero-features">
                             <div class="feature-item">
@@ -61,7 +57,7 @@
                                     <span class="ai-badge">AI</span>
                                 </div>
                                 <div class="feature-content">
-                                    <span class="feature-title">Pre-Dev: Ticket Analysis</span>
+                                    <span class="feature-title">Ticket Analysis</span>
                                     <span class="feature-desc">Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements, unclear acceptance criteria, potential risks, and generates comprehensive test plans</span>
                                 </div>
                             </div>
@@ -71,7 +67,7 @@
                                     <span class="ai-badge">AI</span>
                                 </div>
                                 <div class="feature-content">
-                                    <span class="feature-title">Post-Dev: PR Review</span>
+                                    <span class="feature-title">PR Review</span>
                                     <span class="feature-desc">Ovi reviews GitHub PRs after development - catches bugs, security issues, missing test cases, and provides detailed test recipes for validation</span>
                                 </div>
                             </div>
@@ -87,41 +83,31 @@
                         </div>
         
                         <!-- Tool Badges/CTAs -->
-                        <div class="hero-tools">
-                            <div class="tools-header">
-                                <h4>Get Started with Both Tools</h4>
-                                <p>Install both tools for complete QA coverage</p>
-                            </div>
-                            <div class="tools-badges">
-                                <div class="tool-badge">
-                                    <div class="tool-icon">
-                                        <i class="fab fa-github"></i>
-                                    </div>
-                                    <div class="tool-content">
-                                        <h5>GitHub App</h5>
-                                        <p>Post-Dev PR Analysis</p>
-                                        <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
-                                            <i class="fas fa-download me-1"></i>Get Free Trial
-                                        </a>
-                                    </div>
+                        <div class="tools-badges">
+                            <div class="tool-badge">
+                                <div class="tool-icon">
+                                    <i class="fab fa-github"></i>
                                 </div>
-                                <div class="tool-badge">
-                                    <div class="tool-icon">
-                                        <i class="fab fa-chrome"></i>
-                                    </div>
-                                    <div class="tool-content">
-                                        <h5>Chrome Extension</h5>
-                                        <p>Pre-Dev Ticket Analysis</p>
-                                        <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
-                                            <i class="fas fa-download me-1"></i>Get Free Trial
-                                        </a>
-                                    </div>
+                                <div class="tool-content">
+                                    <h5>GitHub App</h5>
+                                    <p>PR Analysis</p>
+                                    <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
+                                        <i class="fas fa-download me-1"></i>Get Free Trial
+                                    </a>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="hero-trial-info">
-                            <i class="fas fa-clock me-2"></i>5-day free trial • No credit card required • Cancel anytime
+                            <div class="tool-badge">
+                                <div class="tool-icon">
+                                    <i class="fab fa-chrome"></i>
+                                </div>
+                                <div class="tool-content">
+                                    <h5>Chrome Extension</h5>
+                                    <p>Ticket Analysis</p>
+                                    <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
+                                        <i class="fas fa-download me-1"></i>Get Free Trial
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,7 +123,7 @@
                                     <div class="step-number">1</div>
                                     <div class="step-content">
                                         <h4>Connect Your Tools</h4>
-                                        <p>Install GitHub App and Chrome Extension in under 2 minutes</p>
+                                        <p>Install GitHub App and Chrome Extension</p>
                                     </div>
                                 </div>
                                 <div class="step">
@@ -146,8 +132,8 @@
                                         <span class="ai-badge">AI</span>
                                     </div>
                                     <div class="step-content">
-                                        <h4>Ovi Analyzes Everything</h4>
-                                        <p>Automatically reviews tickets before dev and PRs after dev</p>
+                                        <h4>Ovi AI Analyzes Everything</h4>
+                                        <p>Tickets review and PR analysis</p>
                                     </div>
                                 </div>
                                 <div class="step">
@@ -164,7 +150,7 @@
                                   <div class="step-number">4</div>
                                   <div class="step-content">
                                       <h4>Add Human QA When Needed</h4>
-                                      <p>Request QA pros for more complex and critical testing needs</p>
+                                      <p>Request human QAs for more complex testing needs</p>
                                   </div>
                               </div>
                             </div>
@@ -259,47 +245,39 @@
       </div>
     </div>
     
-            <!-- Human QA Add-on Section -->
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="human-qa-addon">
-                        <h3 class="text-center mb-4">Need Expert Human QA?</h3>
-                        <p class="text-center mb-4">Add senior QA engineers to any plan for comprehensive testing and quality assurance</p>
-                        
-                        <div class="row justify-content-center">
-                            <div class="col-lg-10">
-                                <div class="addon-pricing">
-                                    <div class="addon-card">
-                                        <h4>Human QA</h4>
-                                        <div class="addon-price">
-                                            <span class="price">$1589</span>
-                                            <span class="period">/month</span>
-                                        </div>
-                                        <div class="addon-hours">40 hours/month</div>
-                                        <ul class="addon-features">
-                                            <li>Expert QA engineers (5+ yrs experience)</li>
-                                            <li>Manual & Automated testing</li>
-                                            <li>Cross-browser & device testing</li>
-                                            <li>Detailed bug reports & screenshots</li>
-                                            <li>Free Onboarding</li>
-                                            <li>Embedded in your team</li>
-                                            <li>API & integration testing</li>
-                                            <li>Performance & load testing</li>
-                                            <li>Security testing</li>
-                                        </ul>
-                                        <div class="addon-cta">
-                                            <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" class="btn btn-primary" target="_blank">Get Started</a>
-                                            <div class="email-contact-option mt-2">
-                                                <small class="text-muted">or <a href="mailto:hello@firstqa.dev?subject=Human QA Plan Discussion&body=Hi, I'd like to discuss the Human QA plan before subscribing. Please let me know when you're available for a call." class="text-decoration-none">contact us first</a></small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        <!-- Human QA Add-on Section -->
+        <div class="row mt-5">
+            <div class="col-lg-4 col-md-6 mx-auto">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Human QA</h3>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="price">$1589</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <div class="pricing-hours">40 hours/month</div>
+                    <ul class="pricing-features">
+                        <li>Sr. QA engineers</li>
+                        <li>Manual & Automated testing</li>
+                        <li>Cross-browser & device testing</li>
+                        <li>Detailed bug reports & screenshots</li>
+                        <li>Free Onboarding</li>
+                        <li>Embedded in your team</li>
+                        <li>API & integration testing</li>
+                        <li>Performance & load testing</li>
+                        <li>Security testing</li>
+                    </ul>
+                    <div class="pricing-footer">
+                        <p>For teams needing expert QA</p>
+                        <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" class="btn btn-primary" target="_blank">Get Started</a>
+                        <div class="email-contact-option mt-2">
+                            <small class="text-muted">or <a href="mailto:hello@firstqa.dev?subject=Human QA Plan Discussion&body=Hi, I'd like to discuss the Human QA plan before subscribing. Please let me know when you're available for a call." class="text-decoration-none">contact us first</a></small>
                         </div>
                     </div>
                 </div>
-    </div>
+            </div>
+        </div>
   </div>
     </section>
 
@@ -327,7 +305,7 @@
                                 </div>
                                 <div>
                                     <h4>User Focused</h4>
-                                    <p>Ensures great user experience from day one</p>
+                                    <p>Ovi AI focuses on the user's perspective and real user flows</p>
                                 </div>
                             </div>
                             <div class="feature-card">
@@ -521,11 +499,6 @@
     </div>
   </div>
 </section>
-
-
-
-
-
 
     <!-- Demo Screenshots Section -->
     <section class="demo-screenshots-section">
@@ -1424,6 +1397,18 @@
       font-size: 1rem;
       color: #718096;
       font-weight: 400;
+    }
+
+    .pricing-hours {
+      text-align: center;
+      font-size: 1.125rem;
+      color: #3182ce;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      padding: 0.5rem;
+      background: #ebf8ff;
+      border-radius: 8px;
+      border: 1px solid #bee3f8;
     }
 
     .pricing-features {
