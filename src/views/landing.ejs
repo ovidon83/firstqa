@@ -178,7 +178,7 @@
                     <div class="pricing-card trial-card">
                         <div class="trial-badge">Free Trial</div>
                         <div class="pricing-header">
-                            <h3>Try FirstQA</h3>
+                            <h3>Try out Ovi AI</h3>
             </div>
                         <div class="pricing-price">
                             <span class="price">$0</span>
@@ -186,9 +186,9 @@
             </div>
                         <ul class="pricing-features">
                             <li>Up to 10 PR reviews</li>
-                            <li>Full Ovi AI analysis</li>
-                            <li>All integrations included</li>
-                            <li>No credit card required</li>
+                            <li>Up to 10 Linear/Jira ticket</li>
+                            <li>Full PR analysis</li>
+                            <li>Linear/Jira tickets analysis</li>
               </ul>
                         <div class="pricing-footer">
                             <p>Perfect for trying FirstQA</p>
@@ -233,8 +233,8 @@
                         <ul class="pricing-features">
                             <li>Unlimited PR reviews</li>
                             <li>Advanced Ovi AI analysis</li>
+                            <li>Linear/Jira tickets review</li>
                             <li>Priority support (1h response)</li>
-                            <li>Linear/Jira tickets <span class="coming-soon-badge">Coming Soon</span></li>
                             <li>Custom test scenarios</li>
                         </ul>
                         <div class="pricing-footer">
@@ -246,39 +246,58 @@
     </div>
     
         <!-- Human QA Add-on Section -->
-        <div class="row mt-5">
-            <div class="col-lg-4 col-md-6 mx-auto">
-                <div class="pricing-card">
-                    <div class="pricing-header">
-                        <h3>Human QA</h3>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="price">$1589</span>
-                        <span class="period">/month</span>
-                    </div>
-                    <div class="pricing-hours">40 hours/month</div>
-                    <ul class="pricing-features">
-                        <li>Sr. QA engineers</li>
-                        <li>Manual & Automated testing</li>
-                        <li>Cross-browser & device testing</li>
-                        <li>Detailed bug reports & screenshots</li>
-                        <li>Free Onboarding</li>
-                        <li>Embedded in your team</li>
-                        <li>API & integration testing</li>
-                        <li>Performance & load testing</li>
-                        <li>Security testing</li>
-                    </ul>
-                    <div class="pricing-footer">
-                        <p>For teams needing expert QA</p>
-                        <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" class="btn btn-primary" target="_blank">Get Started</a>
-                        <div class="email-contact-option mt-2">
-                            <small class="text-muted">or <a href="mailto:hello@firstqa.dev?subject=Human QA Plan Discussion&body=Hi, I'd like to discuss the Human QA plan before subscribing. Please let me know when you're available for a call." class="text-decoration-none">contact us first</a></small>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="human-qa-card">
+                    <div class="row align-items-center">
+                        <div class="col-lg-4">
+                            <div class="human-qa-header">
+                                <h3>Human QA</h3>
+                                <div class="human-qa-price">
+                                    <span class="price">$1589</span>
+                                    <span class="period">/month</span>
+                                </div>
+                                <div class="human-qa-hours">40 hours/month</div>
+                                <div class="human-qa-description">
+                                    <p>For teams needing expert QA</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="human-qa-features">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="feature-column">
+                                            <li>Sr. QA engineers</li>
+                                            <li>Manual & Automated testing</li>
+                                            <li>Cross-browser & device testing</li>
+                                            <li>Detailed bug reports & screenshots</li>
+                                            <li>Free Onboarding</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="feature-column">
+                                            <li>Embedded in your team</li>
+                                            <li>API & integration testing</li>
+                                            <li>Performance & load testing</li>
+                                            <li>Security testing</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="human-qa-cta">
+                                <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" class="btn btn-primary btn-lg" target="_blank">Get Started</a>
+                                <div class="email-contact-option mt-3">
+                                    <small class="text-muted">or <a href="mailto:hello@firstqa.dev?subject=Human QA Plan Discussion&body=Hi, I'd like to discuss the Human QA plan before subscribing. Please let me know when you're available for a call." class="text-decoration-none">contact us first</a></small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-  </div>
     </section>
 
 
@@ -1433,6 +1452,7 @@
       font-weight: 600;
     }
 
+
     .pricing-footer {
       margin-top: 2rem;
     }
@@ -1451,6 +1471,118 @@
 
     .pricing-footer a:hover {
       text-decoration: underline;
+    }
+
+    /* Human QA Card Styling */
+    .human-qa-card {
+      background: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin: 1.5rem 0;
+    }
+
+    .human-qa-header h3 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 0.75rem;
+    }
+
+    .human-qa-price {
+      margin-bottom: 0.75rem;
+    }
+
+    .human-qa-price .price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1a202c;
+      line-height: 1;
+    }
+
+    .human-qa-price .period {
+      font-size: 1.125rem;
+      color: #718096;
+      font-weight: 400;
+    }
+
+    .human-qa-hours {
+      text-align: left;
+      font-size: 1rem;
+      color: #3182ce;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding: 0.5rem 0.75rem;
+      background: #ebf8ff;
+      border-radius: 6px;
+      border: 1px solid #bee3f8;
+      display: inline-block;
+    }
+
+    .human-qa-description p {
+      font-size: 1rem;
+      color: #4a5568;
+      margin: 0;
+    }
+
+    .human-qa-features {
+      padding: 0.5rem 0;
+    }
+
+    .feature-column {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .feature-column li {
+      padding: 0.5rem 0;
+      color: #4a5568;
+      position: relative;
+      padding-left: 1.5rem;
+      font-weight: 400;
+      line-height: 1.4;
+      font-size: 0.9rem;
+    }
+
+    .feature-column li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #38a169;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .human-qa-cta {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .human-qa-cta .btn {
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 991.98px) {
+      .human-qa-card {
+        padding: 1.25rem;
+      }
+      
+      .human-qa-header h3 {
+        font-size: 1.5rem;
+      }
+      
+      .human-qa-price .price {
+        font-size: 2rem;
+      }
+      
+      .human-qa-cta {
+        margin-top: 1.5rem;
+      }
     }
     
     /* Custom Button Styling for Better Readability */
@@ -1512,7 +1644,7 @@
 
     /* Features Section */
     .features-section {
-      padding: 6rem 0;
+      padding: 4rem 0;
       background: #f7fafc;
       border-top: 1px solid #e2e8f0;
     }
@@ -1878,8 +2010,8 @@
 
     /* Demo Screenshots Section */
     .demo-screenshots-section {
-      margin-top: 6rem;
-      padding-top: 4rem;
+      margin-top: 2rem;
+      padding-top: 3rem;
       border-top: 1px solid #e2e8f0;
     }
 
