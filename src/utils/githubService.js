@@ -923,6 +923,81 @@ async function handleTestRequest(repository, issue, comment, sender) {
   // Add "Reviewed by Ovi" label after AI analysis is complete
   const labelResult = await addOviReviewedLabel(repository.full_name, issue.number);
   console.log(`✅ "Reviewed by Ovi" label ${labelResult.simulated ? 'would be' : 'was'} added`);
+  
+  // AUTOMATED TESTING: Check if we should run automated tests
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 AUTOMATED TESTING SECTION REACHED!');
+  console.log('='.repeat(60) + '\n');
+  
+  try {
+    const { shouldRunAutomatedTests, executeAutomatedTests } = require('../services/automatedTestOrchestrator');
+    
+    // Fetch PR details to get the SHA
+    const [owner, repo] = repository.full_name.split('/');
+    console.log(`🔍 Fetching PR details for automated testing: ${owner}/${repo}#${issue.number}`);
+    
+    let prDetails = null;
+    try {
+      const prUrl = `https://api.github.com/repos/${repository.full_name}/pulls/${issue.number}`;
+      const prResponse = await axios.get(prUrl, {
+        headers: {
+          'Authorization': `token ${process.env.GITHUB_TOKEN || ''}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'FirstQA'
+        }
+      });
+      prDetails = prResponse.data;
+      console.log(`✅ Fetched PR SHA: ${prDetails.head.sha}`);
+    } catch (fetchError) {
+      console.error(`❌ Error fetching PR details:`, fetchError.message);
+    }
+    
+    if (!prDetails) {
+      console.log('⚠️  Could not fetch PR details, skipping automated tests');
+      // Continue without automated tests
+    } else {
+      // Build a minimal PR object for shouldRunAutomatedTests
+      const prObject = {
+        number: issue.number,
+        labels: issue.labels || [],
+        head: { sha: prDetails.head.sha }
+      };
+      
+      // Debug: Log what we're checking
+      console.log('🔍 Checking if automated tests should run:');
+      console.log(`   - TEST_AUTOMATION_ENABLED: ${process.env.TEST_AUTOMATION_ENABLED}`);
+      console.log(`   - TEST_AUTOMATION_BASE_URL: ${process.env.TEST_AUTOMATION_BASE_URL}`);
+      console.log(`   - aiInsights.success: ${aiInsights?.success}`);
+      console.log(`   - aiInsights.data type: ${typeof aiInsights?.data}`);
+      console.log(`   - testRecipe exists: ${!!aiInsights?.data?.testRecipe}`);
+      console.log(`   - testRecipe length: ${aiInsights?.data?.testRecipe?.length || 0}`);
+      
+      if (shouldRunAutomatedTests(prObject, aiInsights)) {
+        console.log('🤖 Automated testing enabled - executing tests...');
+        
+        // Execute automated tests asynchronously (don't wait for completion)
+        executeAutomatedTests({
+          owner,
+          repo,
+          prNumber: issue.number,
+          sha: prDetails.head.sha,
+          testRecipe: aiInsights?.data?.testRecipe || [],
+          baseUrl: process.env.TEST_AUTOMATION_BASE_URL,
+          installationId: repository.installation?.id || null
+        }).catch(error => {
+          console.error('❌ Automated test execution failed:', error.message);
+        });
+        
+        console.log('✅ Automated tests triggered (running in background)');
+      } else {
+        console.log('⏭️  Automated testing not triggered (conditions not met)');
+        console.log('   Check the logs above to see which condition failed');
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error checking automated testing:', error.message);
+  }
+  
   // Send email notification - DISABLED to prevent spam
   // const emailResult = await sendEmailNotification(testRequest);
   // if (emailResult.success) {
@@ -1359,7 +1434,7 @@ async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights) {
 /**
  * Handle PR opened event - generate comprehensive analysis
  */
-async function handlePROpened(repository, pr) {
+async function handlePROpened(repository, pr, installationId) {
   console.log(`🔍 Handling PR opened event for ${repository.full_name}#${pr.number}`);
   // Get PR description and diff for analysis
   const prDescription = await fetchPRDescription(repository.full_name, pr.number);
@@ -1388,8 +1463,41 @@ async function handlePROpened(repository, pr) {
       details: error.message
     };
   }
-  // Use the same detailed analysis formatting and fallback as /ovi-details
-  return await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights);
+  
+  // Post the analysis first
+  const analysisResult = await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights);
+  
+  // Check if automated testing should run
+  const { shouldRunAutomatedTests, executeAutomatedTests } = require('../services/automatedTestOrchestrator');
+  
+  if (shouldRunAutomatedTests(pr, aiInsights)) {
+    console.log('🤖 Automated testing is enabled for this PR');
+    
+    // Extract test recipe from AI insights
+    const testRecipe = aiInsights?.data?.testRecipe || [];
+    
+    if (testRecipe.length > 0) {
+      // Parse repository owner and name
+      const [owner, repo] = repository.full_name.split('/');
+      
+      // Execute automated tests asynchronously (don't block)
+      executeAutomatedTests({
+        owner,
+        repo,
+        prNumber: pr.number,
+        sha: pr.head.sha,
+        testRecipe,
+        baseUrl: process.env.TEST_AUTOMATION_BASE_URL,
+        installationId
+      }).catch(error => {
+        console.error('❌ Automated test execution failed:', error.message);
+      });
+    } else {
+      console.log('⏭️  No test recipe available for automated testing');
+    }
+  }
+  
+  return analysisResult;
 }
 /**
  * Process a GitHub webhook event
@@ -1419,7 +1527,8 @@ async function processWebhookEvent(event) {
       }
       // Generate comprehensive analysis for ready-for-review PRs
       console.log(`⚡ PR #${pr.number} ready for review - generating comprehensive analysis`);
-      return await handlePROpened(repository, pr);
+      const installationId = payload.installation?.id;
+      return await handlePROpened(repository, pr, installationId);
     }
     // Handle issue comment event (for /qa commands)
     if (eventType === 'issue_comment' && payload.action === 'created') {

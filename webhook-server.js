@@ -70,6 +70,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/bootstrap-icons', express.static(path.join(__dirname, 'node_modules/bootstrap-icons/font')));
 
+// Serve test results (screenshots and videos)
+app.use('/test-screenshots', express.static(path.join(__dirname, 'public', 'test-screenshots')));
+app.use('/test-results', express.static(path.join(__dirname, 'test-results')));
+
 // Add error handling middleware
 app.use((err, req, res, next) => {
   if (err) {

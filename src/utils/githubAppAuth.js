@@ -17,10 +17,19 @@ const TOKEN_CACHE_TTL = 50 * 60 * 1000; // 50 minutes (GitHub tokens expire afte
 function getGitHubAppJWT() {
   try {
     const appId = process.env.GITHUB_APP_ID;
-    const privateKey = process.env.GITHUB_PRIVATE_KEY;
+    let privateKey = process.env.GITHUB_PRIVATE_KEY;
     
     if (!appId || !privateKey) {
       console.error('Missing GitHub App credentials (GITHUB_APP_ID or GITHUB_PRIVATE_KEY)');
+      return null;
+    }
+    
+    // Handle private key formatting - replace literal \n with actual newlines
+    privateKey = privateKey.replace(/\\n/g, '\n');
+    
+    // Validate private key format
+    if (!privateKey.includes('BEGIN') || !privateKey.includes('END')) {
+      console.error('GITHUB_PRIVATE_KEY appears to be malformed (missing BEGIN/END markers)');
       return null;
     }
     
@@ -37,6 +46,8 @@ function getGitHubAppJWT() {
     return token;
   } catch (error) {
     console.error('Error generating GitHub App JWT:', error.message);
+    console.error('This usually means GITHUB_PRIVATE_KEY is not properly formatted.');
+    console.error('Ensure the private key includes proper newlines (use \\n in .env file)');
     return null;
   }
 }

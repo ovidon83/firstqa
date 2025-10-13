@@ -59,4 +59,8 @@ Thumbs.db
 
 # Data files
 data/*.json
-data/backups/ 
+data/backups/
+
+# Test results (videos, screenshots)
+test-results/
+public/test-screenshots/ 
