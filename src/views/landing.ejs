@@ -3,2811 +3,979 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirstQA - Ovi AI + Human QA Experts | Your First QA Hire for Solo Founders & Startups</title>
-    <meta name="description" content="FirstQA offers Ovi AI for instant PR feedback and on-demand human QA experts for complex testing scenarios. The complete QA solution for startups.">
+    <title>FirstQA - AI + Human QA for Startups</title>
+    <meta name="description" content="Ovi AI analyzes every ticket and PR. Human QA experts handle complex testing. Ship faster with confidence.">
     
-    <!-- Favicon and Logo Assets -->
     <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
-    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-logo.svg">
-    <link rel="apple-touch-icon" href="/logos/firstqa-logo.svg">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+
 <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light">
-  <div class="container">
-                        <a class="navbar-brand" href="#">
-                <div class="d-flex align-items-center">
-                    <div class="brand-icon">
-                        <img src="/logos/firstqa-logo.svg" alt="FirstQA Logo" height="60" class="me-2">
-                    </div>
-                </div>
-            </a>
-            
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#features">Features</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#pricing">Pricing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-primary btn-sm" href="https://calendly.com/firstqa/demo" target="_blank">Book a Demo</a>
-                </li>
-            </ul>
-  </div>
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="logo">
+            <img src="/logos/firstqa-logo.svg" alt="FirstQA" height="36">
+        </a>
+        <div class="nav-menu">
+            <a href="#pricing" class="nav-link">Pricing</a>
+            <a href="/docs" class="nav-link">Docs</a>
+            <a href="https://calendly.com/firstqa/demo" class="btn-cta" target="_blank">Book Demo</a>
+        </div>
+    </div>
 </nav>
 
-<!-- Hero Section -->
-    <section class="hero-section">
-  <div class="container">
-            <div class="row align-items-start min-vh-75">
-                <div class="col-lg-6">
-                    <div class="hero-content">
-                        <h1 class="hero-title">
-                            Every Startup's <span class="text-gradient">First QA</span>
-                        </h1>
-                        
-                        <div class="hero-features">
-                            <div class="feature-item">
-                                <div class="feature-icon">
-                                    <i class="fas fa-robot"></i>
-                                    <span class="ai-badge">AI</span>
-                                </div>
-                                <div class="feature-content">
-                                    <span class="feature-title">Ticket Analysis</span>
-                                    <span class="feature-desc">Ovi analyzes Jira & Linear tickets before development starts - catches missing requirements, unclear acceptance criteria, potential risks, and generates comprehensive test plans</span>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon">
-                                    <i class="fas fa-brain"></i>
-                                    <span class="ai-badge">AI</span>
-                                </div>
-                                <div class="feature-content">
-                                    <span class="feature-title">PR Review</span>
-                                    <span class="feature-desc">Ovi reviews GitHub PRs after development - catches bugs, security issues, missing test cases, and provides detailed test recipes for validation</span>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <span class="feature-title">Human QA On-Demand</span>
-                                    <span class="feature-desc">When you need deep testing, test strategies, or QA processes - our QA pros are ready to help</span>
-                                </div>
-                            </div>
-                        </div>
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge">AI-Powered QA • Prevent Bugs Before They Happen</div>
+        <h1>The First QA Every <br><span class="gradient-text">Startup Needs</span></h1>
+        <div class="hero-features">
+            <div class="hero-feature-item">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Pre-Dev Ticket Analysis</span>
+                <span class="ai-tag">AI</span>
+            </div>
+            <div class="hero-divider">•</div>
+            <div class="hero-feature-item">
+                <i class="fas fa-code-branch"></i>
+                <span>PR QA Analysis</span>
+                <span class="ai-tag">AI</span>
+            </div>
+            <div class="hero-divider">•</div>
+            <div class="hero-feature-item">
+                <i class="fas fa-users"></i>
+                <span>Human QA On-Demand</span>
+            </div>
+        </div>
+        <div class="hero-actions">
+            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
+               class="btn-primary" target="_blank">
+                Try Free for 5 Days
+            </a>
+            <a href="https://calendly.com/firstqa/demo" class="btn-secondary" target="_blank">
+                Schedule Demo
+            </a>
+        </div>
+        <p class="hero-note">No credit card required • 5-day free trial</p>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-works">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Prevent bugs before they happen with AI-powered analysis</p>
         
-                        <!-- Tool Badges/CTAs -->
-                        <div class="tools-badges">
-                            <div class="tool-badge">
-                                <div class="tool-icon">
-                                    <i class="fab fa-github"></i>
-                                </div>
-                                <div class="tool-content">
-                                    <h5>GitHub App</h5>
-                                    <p>PR Analysis</p>
-                                    <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
-                                        <i class="fas fa-download me-1"></i>Get Free Trial
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="tool-badge">
-                                <div class="tool-icon">
-                                    <i class="fab fa-chrome"></i>
-                                </div>
-                                <div class="tool-content">
-                                    <h5>Chrome Extension</h5>
-                                    <p>Ticket Analysis</p>
-                                    <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="tool-cta" target="_blank">
-                                        <i class="fas fa-download me-1"></i>Get Free Trial
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-plug"></i>
                 </div>
-                
-                <div class="col-lg-6">
-                    <div class="hero-visual">
-                        <div class="workflow-card">
-                            <div class="workflow-header">
-                                <h3>How It Works</h3>
-                            </div>
-                            <div class="workflow-steps">
-                                <div class="step">
-                                    <div class="step-number">1</div>
-                                    <div class="step-content">
-                                        <h4>Connect Your Tools</h4>
-                                        <p>Install GitHub App and Chrome Extension</p>
-                                    </div>
-                                </div>
-                                <div class="step">
-                                    <div class="step-number">
-                                        <span class="step-num">2</span>
-                                        <span class="ai-badge">AI</span>
-                                    </div>
-                                    <div class="step-content">
-                                        <h4>Ovi AI Analyzes Everything</h4>
-                                        <p>Tickets review and PR analysis</p>
-                                    </div>
-                                </div>
-                                <div class="step">
-                                    <div class="step-number">
-                                        <span class="step-num">3</span>
-                                        <span class="ai-badge">AI</span>
-                                    </div>
-                                    <div class="step-content">
-                                        <h4>Get Instant Feedback</h4>
-                                        <p>Receive detailed reports with test plans, risk analysis, and improvement suggestions</p>
-                                    </div>
-                                </div>
-                                <div class="step">
-                                  <div class="step-number">4</div>
-                                  <div class="step-content">
-                                      <h4>Add Human QA When Needed</h4>
-                                      <p>Request human QAs for more complex testing needs</p>
-                                  </div>
-                              </div>
-                            </div>
-                            <div class="workflow-footer">
-                                <a href="/docs" class="docs-link">
-                                    <i class="fas fa-arrow-right me-2"></i>View Documentation →
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-</section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing-section">
-  <div class="container">
-            <div class="section-header">
-                <h2>Choose a plan for your team</h2>
-    </div>
-    
-            <div class="row justify-content-center">
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="pricing-card trial-card">
-                        <div class="trial-badge">Free Trial</div>
-                        <div class="pricing-header">
-                            <h3>Try out Ovi AI</h3>
-            </div>
-                        <div class="pricing-price">
-                            <span class="price">$0</span>
-                            <span class="period">for 5 days</span>
-            </div>
-                        <ul class="pricing-features">
-                            <li>Up to 10 PR reviews</li>
-                            <li>Up to 10 Linear/Jira ticket</li>
-                            <li>Full PR analysis</li>
-                            <li>Linear/Jira tickets analysis</li>
-              </ul>
-                        <div class="pricing-footer">
-                            <p>Perfect for trying FirstQA</p>
-                            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Free%20Trial&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-outline-primary" target="_blank">Start Free Trial</a>
-          </div>
-        </div>
-      </div>
-      
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="pricing-card featured">
-                        <div class="featured-badge">Most Popular</div>
-                        <div class="pricing-header">
-                            <h3>Starter</h3>
-            </div>
-                        <div class="pricing-price">
-                            <span class="price">$49</span>
-                            <span class="period">/month</span>
-            </div>
-                        <ul class="pricing-features">
-                            <li>Up to 30 PR reviews/month</li>
-                            <li>Ovi AI analysis & test recipes</li>
-                            <li>Email support (4h response)</li>
-                            <li>Basic integrations</li>
-                            <li>Standard test scenarios</li>
-              </ul>
-                        <div class="pricing-footer">
-                            <p>Ideal for growing startups</p>
-                            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-primary" target="_blank">Start Free Trial</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="pricing-card">
-                        <div class="pricing-header">
-                            <h3>Growth</h3>
-          </div>
-                        <div class="pricing-price">
-                            <span class="price">$149</span>
-                            <span class="period">/month</span>
-                        </div>
-                        <ul class="pricing-features">
-                            <li>Unlimited PR reviews</li>
-                            <li>Advanced Ovi AI analysis</li>
-                            <li>Linear/Jira tickets review</li>
-                            <li>Priority support (1h response)</li>
-                            <li>Custom test scenarios</li>
-                        </ul>
-                        <div class="pricing-footer">
-                            <p>For teams that need more</p>
-                            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Growth&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-outline-primary" target="_blank">Start Free Trial</a>
-                        </div>
-        </div>
-      </div>
-    </div>
-    
-        <!-- Human QA Add-on Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="human-qa-card">
-                    <div class="row align-items-center">
-                        <div class="col-lg-4">
-                            <div class="human-qa-header">
-                                <h3>Human QA</h3>
-                                <div class="human-qa-price">
-                                    <span class="price">$1589</span>
-                                    <span class="period">/month</span>
-                                </div>
-                                <div class="human-qa-hours">40 hours/month</div>
-                                <div class="human-qa-description">
-                                    <p>For teams needing expert QA</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="human-qa-features">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="feature-column">
-                                            <li>Sr. QA engineers</li>
-                                            <li>Manual & Automated testing</li>
-                                            <li>Cross-browser & device testing</li>
-                                            <li>Detailed bug reports & screenshots</li>
-                                            <li>Free Onboarding</li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ul class="feature-column">
-                                            <li>Embedded in your team</li>
-                                            <li>API & integration testing</li>
-                                            <li>Performance & load testing</li>
-                                            <li>Security testing</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-2">
-                            <div class="human-qa-cta">
-                                <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" class="btn btn-primary btn-lg" target="_blank">Get Started</a>
-                                <div class="email-contact-option mt-3">
-                                    <small class="text-muted">or <a href="mailto:hello@firstqa.dev?subject=Human QA Plan Discussion&body=Hi, I'd like to discuss the Human QA plan before subscribing. Please let me know when you're available for a call." class="text-decoration-none">contact us first</a></small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- Features Section -->
-    <section id="features" class="features-section">
-  <div class="container">
-            <div class="row">
-      <div class="col-lg-6">
-                    <div class="features-content">
-                        <h2>Why Startups Choose Ovi</h2>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-arrow-left"></i>
-                                </div>
-                                <div>
-                                    <h4>Shift-Left</h4>
-                                    <p>Ovi AI does QA early - analyzes tickets pre-dev to catch issues before coding starts</p>
-                                </div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-palette"></i>
-                                </div>
-                                <div>
-                                    <h4>User Focused</h4>
-                                    <p>Ovi AI focuses on the user's perspective and real user flows</p>
-                                </div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-robot"></i>
-                                </div>
-                                <div>
-                                    <h4>Powered by AI</h4>
-                                    <p>Instant analysis at scale - processes tickets and PRs in seconds, not hours</p>
-                                </div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <div>
-                                    <h4>Backed by Humans</h4>
-                                    <p>Sr. QAs with 5+ yrs experience handle complex needs and provide strategic guidance</p>
-                                </div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </div>
-                                <div>
-                                    <h4>Cost Effective</h4>
-                                    <p>Get enterprise-level QA at startup prices - $149/month vs $10k+ for QA team</p>
-                                </div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div>
-                                    <h4>Always Available</h4>
-                                    <p>24/7 AI analysis with instant feedback - no waiting for human availability</p>
-                                </div>
-                            </div>
-                        </div>
-        </div>
-      </div>
-      
-      <div class="col-lg-6">
-                    <div class="demo-card">
-                        <div class="demo-header">
-                            <div class="demo-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div>
-                <strong>Ovi AI - Example</strong>
-              </div>
-            </div>
-                        <div class="demo-content">
-                            <div class="demo-card-category">
-                                <div class="category-header">
-                                    <span class="category-icon">🔧</span>
-                                    <h5>Improvements Needed</h5>
-                                </div>
-                                <ul class="demo-examples">
-                                    <li>Missing acceptance criteria for password strength</li>
-                                    <li>No mockups for login error states</li>
-                                    <li>Token expiration time not specified</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="demo-card-category">
-                                <div class="category-header">
-                                    <span class="category-icon">❓</span>
-                                    <h5>QA Questions</h5>
-                                </div>
-                                <ul class="demo-examples">
-                                    <li>What hashing algorithm for password storage?</li>
-                                    <li>How to handle concurrent logins from devices?</li>
-                                    <li>What happens with expired reset tokens?</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="demo-card-category">
-                                <div class="category-header">
-                                    <span class="category-icon">⚠️</span>
-                                    <h5>Key Risks</h5>
-                                </div>
-                                <ul class="demo-examples">
-                                    <li>JWT token hijacking if not secured</li>
-                                    <li>Database bottleneck during peak login</li>
-                                    <li>User frustration if emails are delayed</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="demo-card-category">
-                                <div class="category-header">
-                                    <span class="category-icon">🧪</span>
-                                    <h5>Test Recipe</h5>
-                                </div>
-                                <ul class="demo-examples">
-                                    <li><strong>Happy Path:</strong> User logs in with valid credentials</li>
-                                    <li><strong>Critical Path:</strong> Access protected route with valid token</li>
-                                    <li><strong>Edge Case:</strong> Try to use expired token</li>
-                                </ul>
-                            </div>
-                        </div>
-    </div>
-    </div>
-            </div>
-  </div>
-</section>
-
-
-
-    <!-- Human QA Section -->
-    <section class="human-qa-section">
-  <div class="container">
-            <div class="row">
-      <div class="col-lg-6">
-                    <div class="human-qa-content">
-                        <h2>Human QA For The Win</h2>
-                        <div class="benefits-grid">
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-search"></i>
-                                </div>
-                  <div>
-                                    <h4>Exploratory Testing</h4>
-                                    <p>Deep-dive testing for critical user journeys</p>
-                  </div>
-                </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-mobile-alt"></i>
-              </div>
-                  <div>
-                                    <h4>Cross-Platform</h4>
-                                    <p>Real device testing across all platforms</p>
-                  </div>
-                </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-chart-line"></i>
-              </div>
-                  <div>
-                                    <h4>Strategy and Processes</h4>
-                                    <p>QA strategy development and process optimization</p>
-                  </div>
-                </div>
-                            <div class="benefit-item">
-                                <div class="benefit-icon">
-                                    <i class="fas fa-shield-alt"></i>
-              </div>
-                  <div>
-                                    <h4>Regression Testing</h4>
-                                    <p>Full/Partial regression testing for major releases</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="col-lg-6">
-                    <div class="partnership-card">
-                        <h3>The Perfect Partnership</h3>
-                        <div class="partnership-item">
-                            <div class="partnership-icon">
-                                <i class="fas fa-robot"></i>
-            </div>
-            <div>
-                                <h4>Ovi AI</h4>
-                                <p>Instant ticket/PR analysis and test plans 24/7</p>
-            </div>
-          </div>
-                        <div class="partnership-item">
-                            <div class="partnership-icon">
-                                <i class="fas fa-user-tie"></i>
-            </div>
-            <div>
-                                <h4>Expert QA Engineers</h4>
-                                <p>Test strategy, quality culture, Test setup, complex UX flows, exploratory QA —
-                                  No contracts, no overhead.</p>
-            </div>
-          </div>
-                        <div class="partnership-item">
-                            <div class="partnership-icon">
-                                <i class="fas fa-rocket"></i>
-                            </div>
-                            <div>
-                                <h4>Your Team</h4>
-                                <p>Focus on building and delivering fast with high confidence</p>
-                            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-    <!-- Demo Screenshots Section -->
-    <section class="demo-screenshots-section">
-        <div class="container">
-            <div class="section-header text-center">
-                <h3>Ovi AI In Action</h3>
-                <p class="lead">See Ovi AI analyzing GitHub PRs and Jira/Linear tickets</p>
+                <h3>Connect Your Tools</h3>
+                <p>Install GitHub App and Chrome Extension for Jira/Linear</p>
             </div>
             
-            <div class="screenshot-carousel-container">
-                <div class="carousel-wrapper">
-                    <div class="carousel-main">
-                        <div class="carousel-image-container">
-                            <img id="main-screenshot" src="/images/demo-pr-report-1.png" alt="Ovi AI PR Report" class="main-screenshot">
-                        </div>
-                    </div>
-                    
-                    <div class="carousel-thumbnails">
-                        <div class="thumbnail-item active" data-src="/images/demo-pr-report-1.png" data-title="GitHub PR Analysis" data-desc="Comprehensive code review with risk detection and test recipes">
-                            <img src="/images/demo-pr-report-1.png" alt="PR Report 1">
-                            <span class="thumbnail-label">PR Report</span>
-                        </div>
-                        <div class="thumbnail-item" data-src="/images/demo-pr-report-2.png" data-title="GitHub PR Analysis" data-desc="Detailed risk analysis and security vulnerability detection">
-                            <img src="/images/demo-pr-report-2.png" alt="PR Report 2">
-                            <span class="thumbnail-label">PR Analysis</span>
-                        </div>
-                        <div class="thumbnail-item" data-src="/images/demo-ticket-general.png" data-title="Ticket Analysis" data-desc="Pre-development ticket review with readiness assessment">
-                            <img src="/images/demo-ticket-general.png" alt="General Ticket">
-                            <span class="thumbnail-label">Ticket Review</span>
-                        </div>
-                        <div class="thumbnail-item" data-src="/images/demo-ticket-general-2.png" data-title="Ticket Analysis" data-desc="Comprehensive test recipe generation and risk identification">
-                            <img src="/images/demo-ticket-general-2.png" alt="General Ticket 2">
-                            <span class="thumbnail-label">Test Planning</span>
-                        </div>
-                        <div class="thumbnail-item" data-src="/images/demo-ticket-jira-1.png" data-title="Jira Ticket Analysis" data-desc="Jira ticket analysis with improvements and QA questions">
-                            <img src="/images/demo-ticket-jira-1.png" alt="Jira Ticket">
-                            <span class="thumbnail-label">Jira Analysis</span>
-                        </div>
-                        <div class="thumbnail-item" data-src="/images/demo-ticket-linear-1.png" data-title="Linear Ticket Analysis" data-desc="Linear ticket review with readiness scoring and test scenarios">
-                            <img src="/images/demo-ticket-linear-1.png" alt="Linear Ticket">
-                            <span class="thumbnail-label">Linear Analysis</span>
-                        </div>
-                    </div>
+            <div class="step">
+                <div class="step-icon ai">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span class="ai-badge">AI</span>
+                </div>
+                <h3>Analyze Tickets</h3>
+                <p>Ovi reviews tickets before dev—catches missing requirements and risks</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-icon ai">
+                    <i class="fas fa-code-branch"></i>
+                    <span class="ai-badge">AI</span>
+                </div>
+                <h3>Review PRs</h3>
+                <p>Ovi analyzes code changes and generates detailed test recipes</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Human QA On-Demand</h3>
+                <p>Expert QA engineers for complex testing scenarios</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Everything You Need</h2>
+        <p class="section-subtitle">Shift-left testing that catches issues before coding starts</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>AI-Powered Analysis</h3>
+                <p>Instant feedback on tickets and PRs. No waiting for human availability.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <h3>Smart Test Plans</h3>
+                <p>Generates comprehensive test recipes covering all critical scenarios.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Risk Detection</h3>
+                <p>Identifies security vulnerabilities and potential breaking changes.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <h3>Expert QA Team</h3>
+                <p>Senior QA engineers with 5+ years experience for complex testing.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <h3>Prevent, Don't Just Detect</h3>
+                <p>Analyze tickets before dev starts—catch missing requirements and unclear specs before they become bugs.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3>Ship Faster</h3>
+                <p>Reduce QA bottlenecks and deploy with confidence every time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="pricing">
+    <div class="container">
+        <h2 class="section-title">Simple, Transparent Pricing</h2>
+        <p class="section-subtitle">Start free, scale as you grow</p>
+        
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-badge free">Free Trial</div>
+                <h3>Try It Free</h3>
+                <div class="price">
+                    <span class="amount">$0</span>
+                    <span class="period">/5 days</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> 10 PR reviews</li>
+                    <li><i class="fas fa-check"></i> 10 Ticket analyses</li>
+                    <li><i class="fas fa-check"></i> Full AI features</li>
+                    <li><i class="fas fa-check"></i> Email support</li>
+                </ul>
+                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Free%20Trial&email={CHECKOUT_SESSION_EMAIL}') %>" 
+                   class="btn-outline" target="_blank">
+                    Start Free Trial
+                </a>
+            </div>
+            
+            <div class="pricing-card featured">
+                <div class="pricing-badge popular">Most Popular</div>
+                <h3>Starter</h3>
+                <div class="price">
+                    <span class="amount">$49</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> 30 PR reviews/month</li>
+                    <li><i class="fas fa-check"></i> Ovi AI analysis</li>
+                    <li><i class="fas fa-check"></i> Test recipes</li>
+                    <li><i class="fas fa-check"></i> Email support (4h)</li>
+                </ul>
+                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
+                   class="btn-primary" target="_blank">
+                    Get Started
+                </a>
+            </div>
+            
+            <div class="pricing-card">
+                <div style="height: 28px; margin-bottom: 20px;"></div>
+                <h3>Growth</h3>
+                <div class="price">
+                    <span class="amount">$149</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Unlimited PR reviews</li>
+                    <li><i class="fas fa-check"></i> Advanced AI analysis</li>
+                    <li><i class="fas fa-check"></i> Ticket reviews</li>
+                    <li><i class="fas fa-check"></i> Priority support (1h)</li>
+                </ul>
+                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Growth&email={CHECKOUT_SESSION_EMAIL}') %>" 
+                   class="btn-outline" target="_blank">
+                    Get Started
+                </a>
+            </div>
+            
+            <div class="pricing-card">
+                <div style="height: 28px; margin-bottom: 20px;"></div>
+                <h3>Human QA</h3>
+                <div class="price">
+                    <span class="amount">$1,589</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> 40 hours/month</li>
+                    <li><i class="fas fa-check"></i> Sr. QA engineers</li>
+                    <li><i class="fas fa-check"></i> Manual + automated testing</li>
+                    <li><i class="fas fa-check"></i> Embedded in your team</li>
+                </ul>
+                <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" 
+                   class="btn-outline" target="_blank">
+                    Get Started
+                </a>
+                <p class="pricing-note">or <a href="mailto:hello@firstqa.dev">contact us</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Screenshots -->
+<section class="screenshots">
+    <div class="container">
+        <h2 class="section-title">Ovi AI In Action</h2>
+        <div class="screenshot-grid">
+            <div class="screenshot-item">
+                <img src="/images/demo-pr-report-1.png" alt="PR Analysis">
+                <p>GitHub PR Analysis</p>
+            </div>
+            <div class="screenshot-item">
+                <img src="/images/demo-ticket-jira-1.png" alt="Jira Ticket">
+                <p>Jira Ticket Review</p>
+            </div>
+            <div class="screenshot-item">
+                <img src="/images/demo-ticket-linear-1.png" alt="Linear Ticket">
+                <p>Linear Ticket Analysis</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <div class="container">
+        <h2>Stop Bugs Before They Start</h2>
+        <p>Join startups using AI to prevent bugs in tickets and PRs—with human QA experts on standby</p>
+        <div class="cta-actions">
+            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
+               class="btn-primary" target="_blank">
+                Start Free Trial
+            </a>
+            <a href="https://calendly.com/firstqa/demo" class="btn-secondary" target="_blank">
+                Schedule Demo
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="/logos/firstqa-logo-transparent.svg" alt="FirstQA" height="32">
+                <p>Prevent bugs before they happen. AI + Human QA for startups.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="/about">About</a>
+                    <a href="/contact">Contact</a>
+                    <a href="/pricing">Pricing</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <a href="/docs">Documentation</a>
+                    <a href="/support">Support</a>
+                    <a href="https://github.com/ovidon83/firstqa" target="_blank">GitHub</a>
                 </div>
             </div>
         </div>
-    </section>
-
-
-
-    <!-- CTA Section -->
-    <section id="cta" class="cta-section">
-        <div class="container text-center">
-            <h2>Ready to Ship with Confidence?</h2>
-            <p class="lead">Join startups using Ovi (AI QA) + Human QA to deliver better products faster</p>
-            <div class="cta-buttons d-flex justify-content-center gap-3">
-                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn btn-primary btn-lg" target="_blank">Start Free Trial</a>
-                <a href="https://calendly.com/firstqa/demo" class="btn btn-outline-primary btn-lg" target="_blank">Schedule Demo</a>
-            </div>
-            <div class="cta-trial-info">
-                <i class="fas fa-clock me-2"></i>5-day free trial • No credit card required • Cancel anytime
-            </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 FirstQA. All rights reserved.</p>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-  <div class="container">
-            <div class="row align-items-start">
-                <div class="col-lg-6 mb-4">
-                    <div class="footer-brand">
-                                                <div class="brand-icon">
-                            <img src="/logos/firstqa-logo-transparent.svg" alt="FirstQA Logo" height="60" class="me-2">
-                        </div>
-      </div>
-                    <div class="footer-copyright">
-                        © 2025 FirstQA. All rights reserved.
     </div>
-                    <div class="footer-built-by">
-                        Built with ❤️ for fast-moving startups
-  </div>
-                </div>
-
-                <div class="col-lg-6">
-    <div class="row">
-                        <div class="col-6 mb-3">
-                            <h5 class="footer-section-title">Company</h5>
-                            <div class="footer-links">
-                                <a href="/about" class="footer-link">About</a>
-                                <a href="/contact" class="footer-link">Contact</a>
-                                <a href="/pricing" class="footer-link">Pricing</a>
-                                <a href="/docs" class="footer-link">Documentation</a>
-      </div>
-        </div>
-                        <div class="col-6 mb-3">
-                            <h5 class="footer-section-title">Connect</h5>
-                            <div class="footer-links">
-                                <a href="/support" class="footer-link">Support</a>
-                                <a href="https://calendly.com/firstqa/demo" class="footer-link" target="_blank">Schedule Demo</a>
-                                <a href="https://github.com/ovidon83/firstqa" class="footer-link" target="_blank">GitHub</a>
-                            </div>
-                        </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #ffffff;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* Navigation */
+.navbar {
+    padding: 20px 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img {
+    display: block;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.nav-link {
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: #1a1a1a;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-cta {
+    display: inline-block;
+    padding: 16px 36px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    color: white;
+}
+
+.btn-secondary,
+.btn-outline {
+    background: white;
+    color: #667eea;
+    border: 2px solid #e0e0e0;
+}
+
+.btn-secondary:hover,
+.btn-outline:hover {
+    background: white;
+    transform: translateY(-2px);
+    border-color: #667eea;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.btn-cta {
+    background: #1a1a1a;
+    color: white;
+}
+
+.btn-cta:hover {
+    background: #333;
+}
+
+/* Hero */
+.hero {
+    padding: 120px 0 140px;
+    text-align: center;
+    background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.hero h1 {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+    letter-spacing: -0.03em;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-features {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto 48px;
+    flex-wrap: wrap;
+}
+
+.hero-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.hero-feature-item i {
+    font-size: 20px;
+    color: #667eea;
+}
+
+.ai-tag {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hero-divider {
+    color: #ddd;
+    font-size: 20px;
+    user-select: none;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.hero-note {
+    color: #999;
+    font-size: 15px;
+}
+
+/* How It Works */
+.how-works {
+    padding: 100px 0;
+    background: white;
+}
+
+.section-title {
+    font-size: 42px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+}
+
+.section-subtitle {
+    font-size: 18px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+}
+
+.step {
+    text-align: center;
+}
+
+.step-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #667eea;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.step:hover .step-icon {
+    transform: translateY(-4px);
+}
+
+.step-icon.ai .ai-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.step h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.step p {
+    font-size: 15px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Features */
+.features {
+    padding: 100px 0;
+    background: #fafbff;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.feature-card {
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.feature-card p {
+    font-size: 15px;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Pricing */
+.pricing {
+    padding: 100px 0;
+    background: white;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.pricing-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 40px 32px;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+}
+
+.pricing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.12);
+}
+
+.pricing-card.featured {
+    border-color: #667eea;
+    border-width: 3px;
+    position: relative;
+}
+
+.pricing-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: fit-content;
+    height: 28px;
+    line-height: 16px;
+}
+
+.pricing-badge.free {
+    background: #d4edda;
+    color: #155724;
+}
+
+.pricing-badge.popular {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.pricing-card h3 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+    min-height: 36px;
+}
+
+.price {
+    margin-bottom: 36px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-height: 60px;
+}
+
+.price .amount {
+    font-size: 52px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.price .period {
+    font-size: 18px;
+    color: #999;
+    font-weight: 400;
+}
+
+.features-list {
+    list-style: none;
+    margin-bottom: auto;
+    padding-bottom: 32px;
+}
+
+.features-list li {
+    padding: 10px 0;
+    color: #666;
+    font-size: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+}
+
+.features-list i {
+    color: #667eea;
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.pricing-card .btn-primary,
+.pricing-card .btn-outline {
+    width: 100%;
+    text-align: center;
+    padding: 14px 24px;
+    font-size: 16px;
+}
+
+.pricing-note {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #999;
+    text-align: center;
+}
+
+.pricing-note a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.pricing-note a:hover {
+    text-decoration: underline;
+}
+
+/* Screenshots */
+.screenshots {
+    padding: 100px 0;
+    background: #fafbff;
+}
+
+.screenshot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.screenshot-item img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 12px;
+    transition: transform 0.3s;
+}
+
+.screenshot-item:hover img {
+    transform: scale(1.02);
+}
+
+.screenshot-item p {
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+}
+
+/* CTA */
+.cta {
+    padding: 100px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    text-align: center;
+    color: white;
+}
+
+.cta h2 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.cta p {
+    font-size: 20px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.cta .btn-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid white;
+}
+
+.cta .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Footer */
+.footer {
+    padding: 60px 0 30px;
+    background: #1a1a1a;
+    color: #999;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.footer-brand img {
+    margin-bottom: 16px;
+}
+
+.footer-brand p {
+    font-size: 15px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 80px;
+}
+
+.footer-col h4 {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer-col a {
+    display: block;
+    color: #999;
+    text-decoration: none;
+    font-size: 15px;
+    margin-bottom: 12px;
+    transition: color 0.2s;
+}
+
+.footer-col a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    padding-top: 30px;
+    border-top: 1px solid #333;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 38px;
+    }
     
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Carousel functionality
-        const thumbnailItems = document.querySelectorAll('.thumbnail-item');
-        const mainScreenshot = document.getElementById('main-screenshot');
-        
-        thumbnailItems.forEach(item => {
-          item.addEventListener('click', function() {
-            // Remove active class from all thumbnails
-            thumbnailItems.forEach(thumb => thumb.classList.remove('active'));
-            
-            // Add active class to clicked thumbnail
-            this.classList.add('active');
-            
-            // Update main image
-            const src = this.getAttribute('data-src');
-            mainScreenshot.src = src;
-            
-            // Add smooth transition effect
-            mainScreenshot.style.opacity = '0.7';
-            setTimeout(() => {
-              mainScreenshot.style.opacity = '1';
-            }, 150);
-          });
-        });
-      });
-    </script>
+    .hero-features {
+        flex-direction: column;
+        gap: 16px;
+    }
     
+    .hero-divider {
+        display: none;
+    }
     
-    <!-- Crisp Chat Plugin -->
-    <script type="text/javascript">
-      window.$crisp=[];
-      window.CRISP_WEBSITE_ID="ca41fe4c-d770-4c1d-94f4-0fcc32a7067f";
-      (function(){
+    .hero-feature-item {
+        font-size: 16px;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+    }
+    
+    .steps,
+    .feature-grid,
+    .pricing-grid,
+    .screenshot-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-menu {
+        gap: 16px;
+    }
+    
+    .section-title {
+        font-size: 32px;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    .footer-links {
+        gap: 40px;
+    }
+}
+</style>
+
+<script>
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
+
+<!-- Crisp Chat -->
+<script type="text/javascript">
+    window.$crisp=[];
+    window.CRISP_WEBSITE_ID="ca41fe4c-d770-4c1d-94f4-0fcc32a7067f";
+    (function(){
         d=document;
         s=d.createElement("script");
         s.src="https://client.crisp.chat/l.js";
         s.async=1;
         d.getElementsByTagName("head")[0].appendChild(s);
-      })();
-    </script>
-
-<style>
-    /* Reset and base styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #1a202c;
-      background-color: #ffffff;
-      overflow-x: hidden;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* Typography */
-    h1, h2, h3, h4, h5, h6 {
-      font-weight: 600;
-      line-height: 1.2;
-      letter-spacing: -0.01em;
-      color: #1a202c;
-    }
-
-    .lead {
-      font-size: 1.25rem;
-      font-weight: 400;
-      line-height: 1.6;
-      color: #4a5568;
-    }
-
-    .text-gradient {
-      background: linear-gradient(135deg, #3182ce 0%, #805ad5 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      position: relative;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: #1a202c;
-      color: white;
-      box-shadow: 0 4px 12px rgba(26, 32, 44, 0.15);
-    }
-
-    .btn-primary:hover {
-      background: #2d3748;
-      box-shadow: 0 6px 20px rgba(26, 32, 44, 0.2);
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      border: none;
-      font-weight: 600;
-    }
-
-    .btn-success:hover {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .btn-outline-primary {
-      background: transparent;
-      color: #3182ce;
-      border: 2px solid #3182ce;
-      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.15);
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-outline-primary:hover {
-      background: #3182ce;
-      border-color: #3182ce;
-      color: #ffffff;
-      box-shadow: 0 6px 20px rgba(49, 130, 206, 0.25);
-      transform: translateY(-2px);
-    }
-
-    .btn-lg {
-      padding: 16px 32px;
-      font-size: 1.125rem;
-  font-weight: 600;
-    }
-
-    .btn-sm {
-      padding: 8px 16px;
-      font-size: 0.875rem;
-    }
-
-    /* Navigation */
-    .navbar {
-      padding: 0.5rem 0;
-      background: rgba(255, 255, 255, 0.98);
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-    }
-
-    .navbar-brand {
-      text-decoration: none;
-      color: #1a202c;
-    }
-
-    .brand-icon {
-  display: flex;
-  align-items: center;
-      justify-content: center;
-      width: auto;
-      height: 44px;
-      position: relative;
-  transition: all 0.2s ease;
-}
-
-    .brand-icon:hover {
-  transform: translateY(-1px);
-}
-
-    .logo-complete {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      height: 100%;
-    }
-
-    .logo-symbol {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #3182ce 0%, #805ad5 100%);
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      display: flex;
-  align-items: center;
-      justify-content: center;
-  position: relative;
-      flex-shrink: 0;
-      box-shadow: 0 4px 16px rgba(49, 130, 206, 0.3);
-      transition: all 0.3s ease;
-    }
-
-    .logo-symbol:hover {
-  transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(49, 130, 206, 0.4);
-    }
-
-    .logo-network {
-      color: white;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1;
-      text-align: center;
-    }
-
-    .logo-text {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #1a202c;
-      letter-spacing: -0.01em;
-      margin: 0;
-      white-space: nowrap;
-    }
-
-    .brand-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #1a202c;
-      letter-spacing: -0.01em;
-      margin: 0;
-    }
-
-    .brand-tagline {
-      font-size: 0.7rem;
-      color: #718096;
-      margin: 0;
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: 0.2px;
-    }
-
-    .navbar-nav {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin: 0;
-    }
-
-    .nav-link {
-      color: #4a5568;
-  text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
-      font-size: 0.9rem;
-      padding: 0.5rem 0;
-  position: relative;
-    }
-
-    .nav-link:hover {
-      color: #3182ce;
-    }
-
-    .nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-      width: 0;
-      height: 2px;
-      background: #3182ce;
-      transition: width 0.2s ease;
-    }
-
-    .nav-link:hover::after {
-      width: 100%;
-    }
-
-    /* Hero Section */
-    .hero-section {
-      padding: 3rem 0;
-      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-      min-height: 65vh;
-      display: flex;
-  align-items: center;
-  position: relative;
-    }
-
-    .hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233182ce' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .min-vh-75 {
-      min-height: 65vh;
-    }
-
-    .hero-content {
-      max-width: 550px;
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .hero-badge {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #4a5568;
-      border: 1px solid #e2e8f0;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .hero-title {
-      font-size: 2.75rem;
-      font-weight: 700;
-      color: #1a202c;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-      letter-spacing: -0.02em;
-    }
-
-    .hero-subtitle {
-      font-size: 1.125rem;
-      color: #4a5568;
-      margin-bottom: 2rem;
-      line-height: 1.5;
-      font-weight: 500;
-    }
-
-    
-    .ai-highlight {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 6px;
-      font-weight: 500;
-      display: inline-block;
-      margin: 0 0.25rem;
-      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-    }
-    
-    .human-highlight {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 6px;
-      font-weight: 500;
-      display: inline-block;
-      margin: 0 0.25rem;
-      box-shadow: 0 2px 4px rgba(240, 147, 251, 0.3);
-    }
-
-    .hero-features {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .feature-item:hover {
-      background: rgba(255, 255, 255, 0.95);
-      border-color: #cbd5e0;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .feature-icon {
-      font-size: 1.5rem;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f7fafc;
-      border-radius: 8px;
-      color: #3182ce;
-      flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      position: relative;
-    }
-
-    .ai-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 0.6rem;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 8px;
-      line-height: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-content {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      flex: 1;
-    }
-
-    .feature-title {
-      font-weight: 600;
-      color: #1a202c;
-      font-size: 1rem;
-    }
-
-    .feature-desc {
-      color: #4a5568;
-      font-size: 0.875rem;
-      line-height: 1.4;
-    }
-
-
-    .hero-trial-info {
-      font-size: 0.75rem;
-      color: #718096;
-      font-weight: 400;
-    }
-
-    /* Hero Tools */
-    .hero-tools {
-      margin: 2rem 0;
-      padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      backdrop-filter: blur(10px);
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .tools-header {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .tools-header h4 {
-      color: #1a202c;
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-
-    .tools-header p {
-      color: #4a5568;
-      font-size: 0.875rem;
-      margin-bottom: 0;
-    }
-
-    .tools-badges {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-    }
-
-    .tool-badge {
-      flex: 1;
-      max-width: 200px;
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: center;
-      border: 1px solid #e2e8f0;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .tool-badge:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      border-color: #3182ce;
-    }
-
-    .tool-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 0.75rem;
-      font-size: 1.25rem;
-    }
-
-    .tool-badge:first-child .tool-icon {
-      background: #24292e;
-      color: white;
-    }
-
-    .tool-badge:last-child .tool-icon {
-      background: #4285f4;
-      color: white;
-    }
-
-    .tool-content h5 {
-      color: #1a202c;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .tool-content p {
-      color: #4a5568;
-      font-size: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .tool-cta {
-      display: inline-block;
-      background: #3182ce;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 0.75rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-
-    .tool-cta:hover {
-      background: #2c5aa0;
-      color: white;
-      text-decoration: none;
-      transform: translateY(-1px);
-    }
-
-    /* Hero Visual */
-    .hero-visual {
-      display: flex;
-  justify-content: center;
-      align-items: center;
-  position: relative;
-      z-index: 2;
-      height: 100%;
-    }
-
-    .workflow-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.75rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      max-width: 450px;
-      width: 100%;
-      border: 1px solid #e2e8f0;
-    }
-
-    .workflow-header {
-      text-align: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .workflow-header h3 {
-      color: #1a202c;
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .workflow-steps {
-      margin-bottom: 2rem;
-    }
-
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      padding: 1rem;
-      background: #f7fafc;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
-    }
-
-    .step:hover {
-      background: #edf2f7;
-    }
-
-    .step:last-child {
-      margin-bottom: 0;
-    }
-
-    .step-number {
-      width: 32px;
-      height: 32px;
-      background: #3182ce;
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.875rem;
-      flex-shrink: 0;
-      position: relative;
-    }
-
-    .step-num {
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    .step-number .ai-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 0.5rem;
-      font-weight: 600;
-      padding: 2px 4px;
-      border-radius: 6px;
-      line-height: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .step-content h4 {
-      font-size: 1rem;
-      margin-bottom: 0.25rem;
-      color: #1a202c;
-      font-weight: 600;
-    }
-
-    .step-content p {
-  font-size: 0.875rem;
-      color: #4a5568;
-      margin: 0;
-      line-height: 1.4;
-    }
-
-    .workflow-footer {
-      text-align: center;
-    }
-
-    .docs-link {
-      color: #3182ce;
-  text-decoration: none;
-      font-weight: 500;
-  font-size: 0.875rem;
-      padding: 8px 16px;
-      background: #f7fafc;
-      border-radius: 6px;
-  transition: all 0.2s ease;
-      display: inline-block;
-      border: 1px solid #e2e8f0;
-    }
-
-    .docs-link:hover {
-      background: #edf2f7;
-      border-color: #cbd5e0;
-    }
-
-    /* Pricing Section */
-    .pricing-section {
-      padding: 6rem 0;
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .section-header {
-      margin-bottom: 4rem;
-      text-align: center;
-    }
-
-    .section-header h2 {
-      font-size: 2.5rem;
-      color: #1a202c;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-
-    .section-header p {
-      font-size: 1.25rem;
-      color: #4a5568;
-      font-weight: 400;
-    }
-
-    .pricing-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2.5rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      transition: all 0.3s ease;
-      position: relative;
-      height: 100%;
-      border: 1px solid #e2e8f0;
-    }
-
-    .pricing-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-      border-color: #cbd5e0;
-    }
-
-    .pricing-card.featured {
-      border: 2px solid #3182ce;
-      box-shadow: 0 8px 32px rgba(49, 130, 206, 0.15);
-    }
-
-    .featured-badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #3182ce;
-      color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .pricing-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .pricing-header h3 {
-      font-size: 1.5rem;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-    }
-
-    .pricing-badge {
-      display: inline-block;
-      background: #f7fafc;
-      color: #4a5568;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      border: 1px solid #e2e8f0;
-    }
-
-    .pricing-price {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .price {
-      font-size: 3rem;
-      font-weight: 700;
-      color: #1a202c;
-      line-height: 1;
-    }
-
-    .period {
-      font-size: 1rem;
-      color: #718096;
-      font-weight: 400;
-    }
-
-    .pricing-hours {
-      text-align: center;
-      font-size: 1.125rem;
-      color: #3182ce;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      padding: 0.5rem;
-      background: #ebf8ff;
-      border-radius: 8px;
-      border: 1px solid #bee3f8;
-    }
-
-    .pricing-features {
-      list-style: none;
-      margin-bottom: 2rem;
-    }
-
-    .pricing-features li {
-      padding: 0.5rem 0;
-      color: #4a5568;
-      position: relative;
-      padding-left: 1.5rem;
-      font-weight: 400;
-      line-height: 1.4;
-    }
-
-    .pricing-features li::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: #38a169;
-      font-weight: 600;
-    }
-
-
-    .pricing-footer {
-      margin-top: 2rem;
-    }
-
-    .pricing-footer p {
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-      font-weight: 400;
-    }
-
-    .pricing-footer a {
-      color: #3182ce;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .pricing-footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Human QA Card Styling */
-    .human-qa-card {
-      background: #fff;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      margin: 1.5rem 0;
-    }
-
-    .human-qa-header h3 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 0.75rem;
-    }
-
-    .human-qa-price {
-      margin-bottom: 0.75rem;
-    }
-
-    .human-qa-price .price {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #1a202c;
-      line-height: 1;
-    }
-
-    .human-qa-price .period {
-      font-size: 1.125rem;
-      color: #718096;
-      font-weight: 400;
-    }
-
-    .human-qa-hours {
-      text-align: left;
-      font-size: 1rem;
-      color: #3182ce;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      padding: 0.5rem 0.75rem;
-      background: #ebf8ff;
-      border-radius: 6px;
-      border: 1px solid #bee3f8;
-      display: inline-block;
-    }
-
-    .human-qa-description p {
-      font-size: 1rem;
-      color: #4a5568;
-      margin: 0;
-    }
-
-    .human-qa-features {
-      padding: 0.5rem 0;
-    }
-
-    .feature-column {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .feature-column li {
-      padding: 0.5rem 0;
-      color: #4a5568;
-      position: relative;
-      padding-left: 1.5rem;
-      font-weight: 400;
-      line-height: 1.4;
-      font-size: 0.9rem;
-    }
-
-    .feature-column li::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: #38a169;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .human-qa-cta {
-      text-align: center;
-      padding: 0.5rem 0;
-    }
-
-    .human-qa-cta .btn {
-      width: 100%;
-      padding: 0.75rem 1.25rem;
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    @media (max-width: 991.98px) {
-      .human-qa-card {
-        padding: 1.25rem;
-      }
-      
-      .human-qa-header h3 {
-        font-size: 1.5rem;
-      }
-      
-      .human-qa-price .price {
-        font-size: 2rem;
-      }
-      
-      .human-qa-cta {
-        margin-top: 1.5rem;
-      }
-    }
-    
-    /* Custom Button Styling for Better Readability */
-    .pricing-footer .btn {
-      font-weight: 600;
-      padding: 12px 24px;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
-      width: 100%;
-      text-align: center;
-    }
-    
-    .pricing-footer .btn-primary {
-      background: #3182ce;
-      color: white;
-      border: 2px solid #3182ce;
-    }
-    
-    .pricing-footer .btn-primary:hover {
-      background: #2c5aa0;
-      border-color: #2c5aa0;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
-    }
-    
-    .pricing-footer .btn-outline-primary {
-      background: transparent;
-      color: #3182ce;
-      border: 2px solid #3182ce;
-    }
-    
-    .pricing-footer .btn-outline-primary:hover {
-      background: #3182ce;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
-    }
-
-    .trial-card {
-      border: 2px solid #38a169;
-      background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
-    }
-    
-    .trial-badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #38a169;
-      color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    /* Features Section */
-    .features-section {
-      padding: 4rem 0;
-      background: #f7fafc;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .features-content h2 {
-      font-size: 2.5rem;
-      color: #1a202c;
-      margin-bottom: 1.5rem;
-      font-weight: 600;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .feature-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1.5rem;
-      background: white;
-      border-radius: 12px;
-      transition: all 0.2s ease;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .feature-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      border-color: #cbd5e0;
-    }
-
-    .feature-card .feature-icon {
-      font-size: 1.5rem;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f7fafc;
-      border-radius: 8px;
-      flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      color: #3182ce;
-    }
-
-    .feature-card h4 {
-      font-size: 1rem;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-    }
-
-    .feature-card p {
-      font-size: 0.875rem;
-      color: #4a5568;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    /* Demo Card */
-    .demo-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-
-    .demo-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-  margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .demo-avatar {
-      width: 40px;
-      height: 40px;
-      background: #3182ce;
-      color: white;
-      border-radius: 50%;
-      display: flex;
-  align-items: center;
-      justify-content: center;
-  font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .demo-header strong {
-      color: #1a202c;
-      display: block;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .demo-header span {
-      font-size: 0.875rem;
-      color: #718096;
-      font-weight: 400;
-    }
-
-    .demo-section-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .demo-section-header h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-    }
-
-    .demo-section-header p {
-      color: #718096;
-      font-size: 0.95rem;
-      margin: 0;
-    }
-
-    .demo-card-category {
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1rem;
-      transition: all 0.2s ease;
-    }
-
-    .demo-card-category:hover {
-      background: #edf2f7;
-      border-color: #cbd5e0;
-      transform: translateY(-1px);
-    }
-
-    .category-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .category-icon {
-      font-size: 1.25rem;
-    }
-
-    .category-header h5 {
-      margin: 0;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #4a5568;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .demo-examples {
-      margin: 0;
-      padding-left: 1.25rem;
-      list-style: none;
-    }
-
-    .demo-examples li {
-      font-size: 0.875rem;
-      color: #1a202c;
-      line-height: 1.5;
-      margin-bottom: 0.5rem;
-      position: relative;
-    }
-
-    .demo-examples li:before {
-      content: "•";
-      color: #718096;
-      font-weight: bold;
-      position: absolute;
-      left: -1rem;
-    }
-
-    .demo-examples li:last-child {
-      margin-bottom: 0;
-    }
-
-    @media (max-width: 768px) {
-      .demo-content {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-      }
-      
-      .demo-card-category {
-        padding: 0.75rem;
-      }
-    }
-
-    .demo-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 1rem;
-      background: #f7fafc;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
-    }
-
-    .demo-item:hover {
-      background: #edf2f7;
-      border-color: #cbd5e0;
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      flex-shrink: 0;
-      margin-top: 2px;
-      letter-spacing: 0.5px;
-    }
-
-    .badge.risk {
-      background: #fef5e7;
-      color: #c05621;
-      border: 1px solid #fed7aa;
-    }
-
-    .badge.question {
-      background: #ebf8ff;
-      color: #2b6cb0;
-      border: 1px solid #bee3f8;
-    }
-
-    .badge.plan {
-      background: #f0fff4;
-      color: #22543d;
-      border: 1px solid #c6f6d5;
-    }
-
-    .badge.example {
-      background: #faf5ff;
-      color: #553c9a;
-      border: 1px solid #e9d8fd;
-    }
-
-    .badge.improvement {
-      background: #fef2f2;
-      color: #c53030;
-      border: 1px solid #fecaca;
-    }
-
-    .badge.happy-path {
-      background: #f0fff4;
-      color: #22543d;
-      border: 1px solid #c6f6d5;
-    }
-
-    .badge.critical-path {
-      background: #fffaf0;
-      color: #c05621;
-      border: 1px solid #fed7aa;
-    }
-
-    .badge.edge-case {
-      background: #f7fafc;
-      color: #4a5568;
-      border: 1px solid #e2e8f0;
-    }
-
-    .demo-item p {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #1a202c;
-      line-height: 1.5;
-      font-weight: 400;
-    }
-
-    /* Testimonials Section */
-    .testimonials-section {
-      padding: 6rem 0;
-      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .testimonial-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      transition: all 0.3s ease;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .testimonial-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-      border-color: #cbd5e0;
-    }
-
-    .testimonial-content {
-      flex: 1;
-      margin-bottom: 1.5rem;
-    }
-
-    .stars {
-      display: flex;
-      gap: 0.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .stars i {
-      color: #f6ad55;
-      font-size: 0.875rem;
-    }
-
-    .testimonial-content p {
-      font-size: 0.95rem;
-      color: #4a5568;
-      line-height: 1.6;
-      font-style: italic;
-      margin: 0;
-    }
-
-    .testimonial-author {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-top: auto;
-    }
-
-    .author-avatar {
-      width: 48px;
-      height: 48px;
-      background: #3182ce;
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 1.125rem;
-      flex-shrink: 0;
-    }
-
-    .author-info h4 {
-      font-size: 1rem;
-      color: #1a202c;
-      margin: 0 0 0.25rem 0;
-      font-weight: 600;
-    }
-
-    .author-info span {
-      font-size: 0.875rem;
-      color: #718096;
-      font-weight: 400;
-    }
-
-    /* Demo Screenshots Section */
-    .demo-screenshots-section {
-      margin-top: 2rem;
-      padding-top: 3rem;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    /* Screenshot Carousel Styles */
-    .screenshot-carousel-container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .carousel-wrapper {
-      background: white;
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-
-    .carousel-main {
-      margin-bottom: 2rem;
-    }
-
-    .carousel-image-container {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-    }
-
-    .main-screenshot {
-      width: 100%;
-      height: auto;
-      max-height: 500px;
-      object-fit: contain;
-      display: block;
-    }
-
-    .carousel-caption {
-      text-align: center;
-    }
-
-    .carousel-caption h4 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-    }
-
-    .carousel-caption p {
-      color: #718096;
-      font-size: 0.95rem;
-      margin: 0;
-    }
-
-    .carousel-thumbnails {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.75rem;
-    }
-
-    .thumbnail-item {
-      cursor: pointer;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 2px solid transparent;
-      transition: all 0.2s ease;
-      background: #f7fafc;
-    }
-
-    .thumbnail-item:hover {
-      border-color: #cbd5e0;
-      transform: translateY(-2px);
-    }
-
-    .thumbnail-item.active {
-      border-color: #3182ce;
-      box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
-    }
-
-    .thumbnail-item img {
-      width: 100%;
-      height: 60px;
-      object-fit: cover;
-      display: block;
-    }
-
-    .thumbnail-label {
-      display: block;
-      text-align: center;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #4a5568;
-      padding: 0.25rem 0.5rem;
-      background: white;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .thumbnail-item.active .thumbnail-label {
-      color: #3182ce;
-      font-weight: 600;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .carousel-wrapper {
-        padding: 1.5rem;
-      }
-      
-      .carousel-thumbnails {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-      }
-      
-      .thumbnail-item img {
-        height: 50px;
-      }
-      
-      .main-screenshot {
-        max-height: 300px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .carousel-thumbnails {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-
-    /* Human QA Section */
-    .human-qa-section {
-      padding: 6rem 0;
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .human-qa-content h2 {
-      font-size: 2.5rem;
-      color: #1a202c;
-      margin-bottom: 1.5rem;
-      font-weight: 600;
-    }
-
-    .benefits-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .benefit-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1.5rem;
-      background: white;
-  border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      transition: all 0.2s ease;
-      border: 1px solid #e2e8f0;
-    }
-
-    .benefit-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      border-color: #cbd5e0;
-    }
-
-    .benefit-icon {
-      font-size: 1.5rem;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f7fafc;
-      border-radius: 8px;
-      flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      color: #3182ce;
-    }
-
-    .benefit-item h4 {
-      font-size: 1rem;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-    }
-
-    .benefit-item p {
-      font-size: 0.875rem;
-      color: #4a5568;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    /* Partnership Card */
-    .partnership-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-
-    .partnership-card h3 {
-      font-size: 1.5rem;
-      color: #1a202c;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .partnership-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-  margin-bottom: 1.5rem;
-      padding: 1rem;
-      background: #f7fafc;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      transition: all 0.2s ease;
-    }
-
-    .partnership-item:hover {
-      background: #edf2f7;
-      border-color: #cbd5e0;
-    }
-
-    .partnership-item:last-child {
-      margin-bottom: 2rem;
-    }
-
-    .partnership-icon {
-      font-size: 1.5rem;
-      width: 40px;
-      height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-      background: #f7fafc;
-      border-radius: 8px;
-      flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      color: #3182ce;
-    }
-
-    .partnership-item h4 {
-  font-size: 1rem;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-}
-
-    .partnership-item p {
-      font-size: 0.875rem;
-      color: #4a5568;
-  margin: 0;
-      line-height: 1.5;
-    }
-
-    /* CTA Section */
-    .cta-section {
-      padding: 5rem 0;
-      background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-section::before {
-      content: '';
-  position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .cta-section h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-  font-weight: 700;
-      position: relative;
-      z-index: 2;
-      color: #ffffff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    .cta-section .lead {
-      font-size: 1.25rem;
-      margin-bottom: 2rem;
-      opacity: 1;
-  font-weight: 500;
-  position: relative;
-      z-index: 2;
-      color: #e2e8f0;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-
-    .cta-buttons {
-      margin-bottom: 2rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .cta-trial-info {
-      font-size: 0.875rem;
-      opacity: 1;
-      font-weight: 500;
-      position: relative;
-      z-index: 2;
-      color: #cbd5e0;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Human QA Add-on Section */
-    .human-qa-addon {
-      padding: 4rem 0;
-      background: #f7fafc;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .human-qa-addon h3 {
-      font-size: 2rem;
-      color: #1a202c;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-
-    .human-qa-addon p {
-      font-size: 1.125rem;
-      color: #4a5568;
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-
-    .addon-pricing {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      width: 100%;
-    }
-    
-    .addon-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-      width: 100%;
-      max-width: 600px;
-      position: relative;
-    }
-    
-    .addon-card.featured {
-      border: 2px solid #3182ce;
-      box-shadow: 0 8px 32px rgba(49, 130, 206, 0.15);
-    }
-    
-    .addon-card h4 {
-      font-size: 1.25rem;
-      color: #1a202c;
-      margin-bottom: 1rem;
-  font-weight: 600;
-      text-align: center;
-    }
-    
-    .addon-price {
-      text-align: center;
-      margin-bottom: 0.5rem;
-    }
-    
-    .addon-price .price {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #1a202c;
-      line-height: 1;
-    }
-    
-    .addon-price .period {
-      font-size: 0.875rem;
-      color: #718096;
-      font-weight: 400;
-    }
-    
-    .addon-hours {
-      text-align: center;
-      font-size: 1.125rem;
-      color: #3182ce;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      padding: 0.5rem;
-      background: #ebf8ff;
-      border-radius: 8px;
-      border: 1px solid #bee3f8;
-    }
-    
-    .addon-features {
-      list-style: none;
-      margin-bottom: 1.5rem;
-    }
-    
-    .addon-features li {
-      padding: 0.5rem 0;
-      color: #4a5568;
-      position: relative;
-      padding-left: 1.5rem;
-      font-weight: 400;
-      font-size: 0.875rem;
-    }
-    
-    .addon-features li::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: #38a169;
-      font-weight: 600;
-    }
-    
-    .addon-cta {
-      text-align: center;
-    }
-    
-    .addon-cta .btn {
-      padding: 12px 24px;
-      font-size: 0.9rem;
-      width: 100%;
-    }
-    
-    .email-contact-option {
-      text-align: center;
-    }
-    
-    .email-contact-option small {
-  font-size: 0.8rem;
-      color: #718096;
-    }
-    
-    .email-contact-option a {
-      color: #3182ce;
-      transition: color 0.2s ease;
-    }
-    
-    .email-contact-option a:hover {
-      color: #1a202c;
-      text-decoration: underline !important;
-    }
-
-    .addon-info {
-      margin-top: 2rem;
-    }
-    
-    .addon-info .alert {
-      border: 1px solid #bee3f8;
-      background: #ebf8ff;
-    }
-    
-    .addon-info h5 {
-      color: #2b6cb0;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-    
-    .addon-info ul {
-      padding-left: 1.5rem;
-    }
-    
-    .addon-info li {
-      margin-bottom: 0.5rem;
-      color: #2d3748;
-      line-height: 1.5;
-    }
-     
-     /* Coming Soon Badge */
-     .coming-soon-badge {
-       display: inline-block;
-       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-       color: white;
-       font-size: 0.65rem;
-       font-weight: 600;
-       padding: 1px 6px;
-       border-radius: 10px;
-       margin-left: 4px;
-       text-transform: uppercase;
-       letter-spacing: 0.2px;
-       box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-       animation: pulse-glow 2s ease-in-out infinite alternate;
-       vertical-align: middle;
-       line-height: 1.2;
-     }
-     
-     @keyframes pulse-glow {
-       0% {
-         box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-       }
-       100% {
-         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-       }
-     }
-
-    /* Footer */
-    .footer {
-      background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-      color: white;
-      padding: 3.5rem 0 2.5rem;
-      border-top: 1px solid #4a5568;
-      position: relative;
-    }
-
-    .footer::before {
-  content: '';
-  position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .footer-brand {
-  display: flex;
-  align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-brand .brand-icon {
-      width: auto;
-      height: 44px;
-      margin-bottom: 1rem;
-    }
-
-    .footer-brand .logo-complete {
-      gap: 0.75rem;
-      height: 100%;
-    }
-
-    .footer-brand .logo-symbol {
-      width: 40px;
-      height: 40px;
-      flex-shrink: 0;
-      box-shadow: 0 4px 16px rgba(49, 130, 206, 0.3);
-    }
-
-    .footer-brand .logo-text {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.01em;
-      margin: 0;
-      white-space: nowrap;
-      opacity: 0.95;
-    }
-
-    .footer-brand h4 {
-      color: white;
-      margin: 0;
-      font-weight: 600;
-      font-size: 1.25rem;
-    }
-
-    .footer-brand p {
-      color: #a0aec0;
-      margin: 0;
-      font-size: 0.875rem;
-      font-weight: 400;
-    }
-
-    .footer-copyright {
-      color: #a0aec0;
-      font-size: 0.875rem;
-      margin-bottom: 0.75rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-built-by {
-      color: #a0aec0;
-      font-size: 0.875rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-built-by a {
-      color: #63b3ed;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
-    }
-
-    .footer-built-by a:hover {
-      color: #90cdf4;
-    }
-
-    .footer-section-title {
-      color: #e2e8f0;
-      font-size: 0.875rem;
-      margin-bottom: 1rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-links {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-link {
-      color: #a0aec0;
-      text-decoration: none;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      font-weight: 400;
-      padding: 0.25rem 0;
-    }
-
-    .footer-link:hover {
-      color: white;
-      transform: translateX(4px);
-    }
-
-    .footer-social {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .social-link {
-      color: #a0aec0;
-      text-decoration: none;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      font-weight: 400;
-      padding: 0.25rem 0;
-    }
-
-    .social-link:hover {
-      color: white;
-      transform: translateX(4px);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 20px;
-      }
-      
-      .hero-title {
-        font-size: 2.75rem;
-      }
-      
-      .section-header h2 {
-        font-size: 2.25rem;
-      }
-      
-      .hero-features {
-        gap: 0.75rem;
-      }
-      
-      .feature-item {
-        padding: 0.75rem;
-      }
-      
-      .feature-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1.25rem;
-      }
-      
-      .hero-tools {
-        margin: 1.5rem 0;
-        padding: 1rem;
-      }
-      
-      .tools-badges {
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-      
-      .tool-badge {
-        max-width: none;
-      }
-      
-      .features-grid,
-      .benefits-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .testimonial-card {
-        margin-bottom: 2rem;
-      }
-      
-      
-      .hero-cta {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .cta-buttons {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .navbar-nav {
-        gap: 1rem;
-      }
-      
-      .pricing-card.featured {
-        transform: none;
-      }
-      
-      .addon-pricing {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .addon-card {
-        width: 100%;
-        max-width: 100%;
-      }
-      
-      .footer-links,
-      .footer-social {
-        justify-content: flex-start;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .hero-section {
-        padding: 4rem 0;
-      }
-      
-      .pricing-section,
-      .features-section,
-      .human-qa-section,
-      .cta-section {
-        padding: 4rem 0;
-      }
-      
-      .hero-title {
-        font-size: 2.25rem;
-      }
-      
-      .section-header h2 {
-        font-size: 2rem;
-      }
-      
-      .cta-section h2 {
-        font-size: 2rem;
-      }
-      
-      .workflow-card,
-      .pricing-card,
-      .demo-card,
-      .partnership-card {
-        padding: 1.5rem;
-      }
-      
-      .btn-lg {
-        padding: 14px 24px;
-        font-size: 1rem;
-      }
-      
-      .brand-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
-      }
-      
-      .brand-name {
-        font-size: 1.25rem;
-  }
-}
-</style>
-
-<!-- DataFast Analytics -->
-<script
-  defer
-  data-website-id="68b5d8fdc45c08d68dd53e66"
-  data-domain="www.firstqa.dev"
-  src="https://datafa.st/js/script.js">
+    })();
 </script>
 
+<!-- DataFast Analytics -->
+<script defer data-website-id="68b5d8fdc45c08d68dd53e66" data-domain="www.firstqa.dev" src="https://datafa.st/js/script.js"></script>
+
 </body>
-</html> 
+</html>
