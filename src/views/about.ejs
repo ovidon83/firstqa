@@ -1,61 +1,373 @@
 <%- include('partials/header', { title: 'About FirstQA' }) %>
 
-<div class="container py-5">
-  <div class="row">
-    <div class="col-lg-8 mx-auto">
-      <h1 class="text-center mb-5">About FirstQA</h1>
-      
-      <div class="card shadow-sm mb-5">
-        <div class="card-body p-4 p-md-5">
-          <h2 class="mb-4">Our Mission</h2>
-          <p class="lead">We believe that quality software requires thorough testing. Automated tests are essential, but they can't catch everything.</p>
-          <p>FirstQA was founded with a simple mission: to make expert manual testing accessible to all development teams. We bridge the gap between automated testing and real-world usage, finding the issues that automation misses.</p>
-          <p>By providing on-demand manual testing directly integrated with GitHub, we help development teams ship with confidence, knowing their changes have been thoroughly tested by experts.</p>
-        </div>
-      </div>
-      
-      <div class="row mb-5">
-        <div class="col-md-6 mb-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
-              <h3 class="mb-3">Why Manual Testing Matters</h3>
-              <p>While automated tests are crucial for regression testing and continuous integration, they have limitations:</p>
-              <ul class="mb-0">
-                <li>They only test what you've programmed them to test</li>
-                <li>They can't evaluate subjective aspects like user experience</li>
-                <li>They don't mimic real user behavior and unexpected paths</li>
-                <li>They don't catch visual or cross-browser issues</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 mb-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
-              <h3 class="mb-3">Our Approach</h3>
-              <p>FirstQA provides a team of expert manual testers who:</p>
-              <ul class="mb-0">
-                <li>Follow real-world usage patterns</li>
-                <li>Test across multiple devices and browsers</li>
-                <li>Find edge cases and rare scenarios</li>
-                <li>Evaluate the user experience</li>
-                <li>Provide detailed, actionable reports</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card shadow-sm">
-        <div class="card-body p-4 p-md-5">
-          <h2 class="mb-4">Our Team</h2>
-          <p>FirstQA is built by a team of experienced developers and QA professionals who understand the challenges of shipping high-quality software.</p>
-          <p>Our testers are carefully selected for their attention to detail, technical knowledge, and ability to think like users. They come from diverse backgrounds in software development, quality assurance, and UX design.</p>
-          <p>We're committed to providing the highest quality manual testing services, helping development teams find and fix issues before they reach users.</p>
-        </div>
-      </div>
+<style>
+.about-hero {
+    background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+    padding: 80px 0 60px;
+    text-align: center;
+}
+
+.about-hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+}
+
+.about-hero .lead {
+    font-size: 22px;
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.value-card {
+    background: white;
+    border: 2px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 30px;
+    transition: all 0.3s;
+}
+
+.value-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    border-color: #667eea;
+}
+
+.value-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+}
+
+.section-subtitle {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 50px;
+}
+
+.stat-box {
+    text-align: center;
+    padding: 24px;
+}
+
+.stat-number {
+    font-size: 48px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 16px;
+    color: #666;
+}
+
+.timeline-item {
+    padding-left: 40px;
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+}
+
+.timeline-item h4 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.cta-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 60px 40px;
+    text-align: center;
+    color: white;
+    margin-top: 60px;
+}
+
+.cta-box h2 {
+    color: white;
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.cta-box p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    opacity: 0.95;
+}
+
+.btn-white {
+    background: white;
+    color: #667eea;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.btn-white:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    color: #667eea;
+    text-decoration: none;
+}
+
+.text-purple {
+    color: #a855f7;
+}
+
+.text-danger {
+    color: #ef4444;
+}
+
+.text-warning {
+    color: #f97316;
+}
+
+.text-primary {
+    color: #3b82f6;
+}
+</style>
+
+<div class="about-hero">
+    <div class="container">
+        <h1>Prevent Bugs <span class="gradient-text">Before They Happen</span></h1>
+        <p class="lead">FirstQA empowers developers with clear requirements, comprehensive test scenarios, and AI-powered PR analysis—catching issues before they become expensive bugs.</p>
     </div>
-  </div>
 </div>
 
-<%- include('partials/footer') %> 
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="text-center mb-5">
+                <h2 class="section-title">The Problems We Solve</h2>
+                <p class="section-subtitle">Most bugs don't need to exist in the first place</p>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-4 mb-4">
+                    <div class="stat-box">
+                        <span class="stat-number">70%</span>
+                        <span class="stat-label">Of bugs come from unclear requirements</span>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-box">
+                        <span class="stat-number">10x</span>
+                        <span class="stat-label">More expensive to fix bugs in production</span>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="stat-box">
+                        <span class="stat-number">60%</span>
+                        <span class="stat-label">Of developer time spent on rework</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0" style="background: #fff3f3; border-left: 4px solid #ef4444 !important;">
+                        <div class="card-body p-4">
+                            <h4 class="mb-3"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Unclear Requirements</h4>
+                            <p class="mb-0">Tickets lack essential details, acceptance criteria, and edge case considerations. Developers make assumptions, leading to bugs and rework.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0" style="background: #fff8f3; border-left: 4px solid #f97316 !important;">
+                        <div class="card-body p-4">
+                            <h4 class="mb-3"><i class="fas fa-clock text-warning me-2"></i>Rushed Development</h4>
+                            <p class="mb-0">Pressure to ship fast means corners get cut. Testing is rushed or skipped. Issues slip through that would've been caught with proper QA.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0" style="background: #fef3ff; border-left: 4px solid #a855f7 !important;">
+                        <div class="card-body p-4">
+                            <h4 class="mb-3"><i class="fas fa-search text-purple me-2"></i>Incomplete Code Reviews</h4>
+                            <p class="mb-0">PR reviews focus on code quality but miss functional issues, edge cases, performance impacts, and security vulnerabilities that affect real users.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0" style="background: #f0f9ff; border-left: 4px solid #3b82f6 !important;">
+                        <div class="card-body p-4">
+                            <h4 class="mb-3"><i class="fas fa-flask text-primary me-2"></i>Missing Test Scenarios</h4>
+                            <p class="mb-0">Developers lack clear test plans and scenarios. They don't know what to test or how to test it, leading to inadequate testing before merging.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="text-center mb-5">
+                <h2 class="section-title">How FirstQA Works</h2>
+                <p class="section-subtitle">AI-powered prevention + human expertise when you need it</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <h3>Pre-Dev Ticket Analysis</h3>
+                        <p>Ovi AI analyzes Jira and Linear tickets <strong>before development starts</strong>, catching missing requirements, unclear acceptance criteria, edge cases, and potential risks.</p>
+                        <p class="text-muted mb-0"><small>✓ Complete requirements ✓ Clear test scenarios ✓ Edge cases identified</small></p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <h3>Comprehensive PR Review</h3>
+                        <p>Ovi AI reviews every GitHub PR for functional issues, non-functional concerns (performance, security), and generates <strong>detailed test recipes</strong> developers can follow immediately.</p>
+                        <p class="text-muted mb-0"><small>✓ Functional bugs ✓ Security & performance ✓ Ready-to-use test plans</small></p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Human QA On-Demand</h3>
+                        <p>When you need deep testing, test automation setup, or QA strategy—our senior QA engineers (5+ years experience) are ready to help.</p>
+                        <p class="text-muted mb-0"><small>Result: Expert testing when complexity demands it</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm border-0" style="background: #f7fafc;">
+                <div class="card-body p-5">
+                    <h2 class="section-title text-center mb-4">Why We Built FirstQA</h2>
+                    <p class="lead text-center mb-4">Founded by engineers who've felt the pain of shipping broken software</p>
+                    
+                    <div class="timeline-item">
+                        <h4>The Realization</h4>
+                        <p>After years of building products, we noticed a pattern: most bugs were preventable. They came from unclear tickets, rushed development, incomplete code reviews, and developers lacking clear test scenarios to validate their work early.</p>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h4>The Traditional Approach Doesn't Work</h4>
+                        <p>Testing <em>after</em> development is too late. By then, code is written based on incomplete requirements. Code reviews focus on syntax but miss functional issues. Developers ship without testing because they don't know what to test. Fixing bugs becomes expensive rework instead of prevention.</p>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h4>The FirstQA Solution</h4>
+                        <p>We built Ovi AI to analyze tickets <strong>before development</strong>—ensuring developers have complete requirements and clear test scenarios. Then we review PRs for both functional and non-functional issues, providing actionable test plans developers can execute immediately. When needed, human QA experts step in for complex scenarios.</p>
+                    </div>
+
+                    <div class="timeline-item" style="border: none;">
+                        <h4>The Result</h4>
+                        <p>Startups ship faster with fewer bugs. Developers spend less time on rework. Product quality improves. Everyone wins.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Who We Help</h2>
+                <p class="section-subtitle">Built for fast-moving startups and small teams</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="mb-3">Solo Founders & Small Teams</h4>
+                            <p>You're wearing multiple hats. You don't have time or budget for a full-time QA team. FirstQA gives you AI-powered QA from day one.</p>
+                            <ul class="mb-0">
+                                <li>Ship with confidence</li>
+                                <li>Catch issues early</li>
+                                <li>Scale QA as you grow</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="mb-3">Growing Startups</h4>
+                            <p>You're shipping fast but quality is suffering. Bugs are slipping through. Customer complaints are increasing. FirstQA prevents issues before they happen.</p>
+                            <ul class="mb-0">
+                                <li>Reduce production bugs</li>
+                                <li>Save developer time</li>
+                                <li>Improve product quality</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="cta-box">
+                <h2>Ready to Prevent Bugs Instead of Chasing Them?</h2>
+                <p>Join startups using FirstQA to ship faster with higher quality</p>
+                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn-white" target="_blank">
+                    Start Free Trial
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
