@@ -115,6 +115,21 @@
     </div>
 </section>
 
+<!-- Subscribe -->
+<section class="subscribe-section">
+    <div class="container">
+        <div class="subscribe-box">
+            <h3>Interested in FirstQA?</h3>
+            <p>Not ready to start yet? Drop your email and we'll keep you posted on new features, early access, and tips for shipping quality code faster.</p>
+            <form class="subscribe-form" id="subscribe-form" action="/subscribe" method="POST">
+                <input type="email" name="email" placeholder="Enter your email" required>
+                <button type="submit" class="btn-primary">Keep Me Posted</button>
+            </form>
+            <p class="subscribe-note" id="subscribe-message"></p>
+        </div>
+    </div>
+</section>
+
 <!-- The Problem -->
 <section class="problem-section">
     <div class="container">
@@ -307,7 +322,7 @@
 <section class="cta">
     <div class="container">
         <h2>Ready to Break the Bug-Fix Cycle?</h2>
-        <p>Give your developers the clarity they need to ship quality code—without slowing down</p>
+        <p>Give your engineers the clarity they need to ship quality code—without slowing down</p>
         <div class="cta-actions">
             <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
                class="btn-primary" target="_blank">
@@ -562,6 +577,71 @@ body {
 .hero-note {
     color: #999;
     font-size: 15px;
+}
+
+/* Subscribe Section */
+.subscribe-section {
+    padding: 60px 0;
+    background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+.subscribe-box {
+    max-width: 540px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.subscribe-box h3 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+}
+
+.subscribe-box > p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+.subscribe-form {
+    display: flex;
+    gap: 12px;
+    max-width: 440px;
+    margin: 0 auto;
+}
+
+.subscribe-form input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.subscribe-form input:focus {
+    border-color: #667eea;
+}
+
+.subscribe-form .btn-primary {
+    white-space: nowrap;
+}
+
+.subscribe-note {
+    margin-top: 14px;
+    font-size: 14px;
+    color: #888;
+}
+
+.subscribe-note.success {
+    color: #22c55e;
+}
+
+.subscribe-note.error {
+    color: #ef4444;
 }
 
 /* How It Works */
@@ -1055,6 +1135,14 @@ body {
     .footer-links {
         gap: 40px;
     }
+    
+    .subscribe-form {
+        flex-direction: column;
+    }
+    
+    .subscribe-form .btn-primary {
+        width: 100%;
+    }
 }
 </style>
 
@@ -1068,6 +1156,44 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
+});
+
+// Newsletter subscription
+document.getElementById('subscribe-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = this;
+    const email = form.email.value;
+    const message = document.getElementById('subscribe-message');
+    const button = form.querySelector('button');
+    const originalText = button.textContent;
+    
+    button.disabled = true;
+    button.textContent = 'Sending...';
+    
+    try {
+        const response = await fetch('/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            message.textContent = '✓ You\'re on the list! We\'ll keep you posted.';
+            message.className = 'subscribe-note success';
+            form.email.value = '';
+        } else {
+            message.textContent = data.error || 'Something went wrong. Please try again.';
+            message.className = 'subscribe-note error';
+        }
+    } catch (error) {
+        message.textContent = 'Something went wrong. Please try again.';
+        message.className = 'subscribe-note error';
+    }
+    
+    button.disabled = false;
+    button.textContent = originalText;
 });
 </script>
 

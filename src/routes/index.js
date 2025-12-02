@@ -4,6 +4,11 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
+
+// Subscribers file path
+const subscribersFile = path.join(__dirname, '../../data/subscribers.json');
 
 // Email configuration
 let transporter;
@@ -215,6 +220,90 @@ router.get('/about', (req, res) => {
   res.render('about', { 
             title: 'About FirstQA' 
   });
+});
+
+// Newsletter subscription
+router.post('/subscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Validate email
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter a valid email address'
+      });
+    }
+    
+    // Load existing subscribers
+    let subscribers = [];
+    try {
+      if (fs.existsSync(subscribersFile)) {
+        const data = fs.readFileSync(subscribersFile, 'utf8');
+        subscribers = JSON.parse(data);
+      }
+    } catch (err) {
+      console.log('Creating new subscribers file');
+    }
+    
+    // Check if email already exists
+    const existingSubscriber = subscribers.find(s => s.email.toLowerCase() === email.toLowerCase());
+    if (existingSubscriber) {
+      return res.json({
+        success: true,
+        message: 'You are already subscribed!'
+      });
+    }
+    
+    // Add new subscriber
+    const newSubscriber = {
+      email: email.toLowerCase(),
+      subscribedAt: new Date().toISOString(),
+      source: 'landing-page'
+    };
+    subscribers.push(newSubscriber);
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(subscribersFile);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    // Save subscribers
+    fs.writeFileSync(subscribersFile, JSON.stringify(subscribers, null, 2));
+    console.log(`✅ New subscriber added: ${email}`);
+    
+    // Send notification email
+    if (transporter) {
+      const mailOptions = {
+        from: process.env.EMAIL_FROM || 'noreply@firstqa.dev',
+        to: 'hello@firstqa.dev',
+        subject: `[FirstQA] New Subscriber: ${email}`,
+        html: `
+          <h2>New Newsletter Subscriber</h2>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Subscribed at:</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>Total subscribers:</strong> ${subscribers.length}</p>
+        `,
+        text: `New subscriber: ${email}\nSubscribed at: ${new Date().toLocaleString()}\nTotal subscribers: ${subscribers.length}`
+      };
+      
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Notification email sent for new subscriber: ${email}`);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Thanks for subscribing!'
+    });
+    
+  } catch (error) {
+    console.error('Error processing subscription:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Something went wrong. Please try again.'
+    });
+  }
 });
 
 // GET waitlist thank you page
