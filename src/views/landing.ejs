@@ -16,12 +16,12 @@
 <nav class="navbar">
     <div class="container">
         <a href="/" class="logo">
-            <img src="/logos/firstqa-logo.svg" alt="FirstQA" height="36">
+            <img src="/logos/firstqa-logo.svg" alt="FirstQA" height="48">
         </a>
         <div class="nav-menu">
             <a href="#pricing" class="nav-link">Pricing</a>
             <a href="/docs" class="nav-link">Docs</a>
-            <a href="https://calendly.com/firstqa/demo" class="btn-cta" target="_blank">Book Demo</a>
+            <a href="https://calendly.com/firstqa/demo" class="btn-cta" target="_blank">Discovery Call</a>
         </div>
     </div>
 </nav>
@@ -29,274 +29,217 @@
 <!-- Hero -->
 <section class="hero">
     <div class="container">
-        <div class="hero-badge">Ship Fast Without Breaking Things</div>
-        <h1>Stop the Bug-Fix Slowdown. <br><span class="gradient-text">No More Rework.</span></h1>
-        <p class="hero-subtitle">
-            Startups move fast—but bug-fixing slows you down. Ship quality at speed.
+        <div class="hero-badge-wrapper">
+            <span class="hero-badge">AI-Powered QA for Startups</span>
+        </div>
+        <h1>Meet <em>Ovi</em> — Your<br><span class="gradient-text">First QA Hire</span></h1>
+        <p class="hero-tagline">
+            The AI QA Engineer that prevents bugs<br>and gives you confidence to ship fast.
         </p>
-        <div class="hero-features">
-            <div class="hero-feature-item">
-                <i class="fas fa-ticket-alt"></i>
-                <span>Clear Requirements</span>
-                <span class="ai-tag">AI</span>
-            </div>
-            <div class="hero-divider">•</div>
-            <div class="hero-feature-item">
-                <i class="fas fa-clipboard-check"></i>
-                <span>Test Scenarios</span>
-                <span class="ai-tag">AI</span>
-            </div>
-            <div class="hero-divider">•</div>
-            <div class="hero-feature-item">
-                <i class="fas fa-rocket"></i>
-                <span>QA Review</span>
-                <span class="ai-tag">AI</span>
-            </div>
-            <div class="hero-divider">•</div>
-            <div class="hero-feature-item">
-                <i class="fas fa-users"></i>
-                <span>Human QA</span>
-            </div>
-        </div>
         <div class="hero-actions">
-            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
-               class="btn-primary" target="_blank">
-                Try Free for 5 Days
-            </a>
-            <a href="https://calendly.com/firstqa/demo" class="btn-secondary" target="_blank">
-                Schedule Demo
+            <a href="#early-access" class="btn-hero">
+                Get Early Access <i class="fas fa-arrow-right"></i>
             </a>
         </div>
-        <p class="hero-note">No credit card required • 5-day free trial</p>
+        <p class="hero-note">Join the waitlist • Shape the product • Launch access</p>
     </div>
 </section>
 
 <!-- How It Works -->
-<section class="how-works">
+<section id="how-it-works" class="how-it-works">
     <div class="container">
-        <h2 class="section-title">How It Works</h2>
-        <p class="section-subtitle">Empower developers with clarity at every stage of development</p>
+        <div class="section-header">
+            <span class="section-eyebrow">How It Works</span>
+            <h2 class="section-title-modern">From setup to shipping</h2>
+        </div>
         
-        <div class="steps">
-            <div class="step">
-                <div class="step-icon">
-                    <i class="fas fa-plug"></i>
+        <div class="workflow-split">
+            <div class="workflow-you">
+                <span class="workflow-group-label">You</span>
+                <div class="flow-item flow-item-you">
+                    <div class="flow-icon"><i class="fas fa-plug"></i></div>
+                    <span class="flow-label">Connect Your Tools</span>
+                    <span class="flow-tools">GitHub • Bitbucket • Jira • Linear</span>
                 </div>
-                <h3>Connect Your Tools</h3>
-                <p>Install GitHub App and Chrome Extension for Jira/Linear in minutes</p>
             </div>
             
-            <div class="step">
-                <div class="step-icon ai">
-                    <i class="fas fa-ticket-alt"></i>
-                    <span class="ai-badge">AI</span>
+            <div class="workflow-ovi">
+                <span class="workflow-group-label">Ovi AI</span>
+                <div class="ovi-flow">
+                    <div class="flow-item">
+                        <div class="flow-icon flow-icon-ovi"><i class="fas fa-ticket-alt"></i></div>
+                        <span class="flow-label">Ticket Review</span>
+                    </div>
+                    <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                    <div class="flow-item">
+                        <div class="flow-icon flow-icon-ovi"><i class="fas fa-list-check"></i></div>
+                        <span class="flow-label">Test Recipe</span>
+                    </div>
+                    <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                    <div class="flow-item">
+                        <div class="flow-icon flow-icon-ovi"><i class="fas fa-code-pull-request"></i></div>
+                        <span class="flow-label">PR Review</span>
+                    </div>
+                    <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                    <div class="flow-item">
+                        <div class="flow-icon flow-icon-ovi"><i class="fas fa-robot"></i></div>
+                        <span class="flow-label">Automated Tests</span>
+                    </div>
+                    <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                    <div class="flow-item">
+                        <div class="flow-icon flow-icon-ovi"><i class="fas fa-user-check"></i></div>
+                        <span class="flow-label">Manual Testing</span>
+                    </div>
                 </div>
-                <h3>Understand What to Build</h3>
-                <p>Ovi analyzes tickets before dev starts—clarifying requirements, edge cases, and what success looks like</p>
-            </div>
-            
-            <div class="step">
-                <div class="step-icon ai">
-                    <i class="fas fa-code-branch"></i>
-                    <span class="ai-badge">AI</span>
-                </div>
-                <h3>Know What to Test</h3>
-                <p>Ovi reviews every PR with test scenarios developers can execute before code review—catching issues early</p>
-            </div>
-            
-            <div class="step">
-                <div class="step-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3>Human QA On-Demand</h3>
-                <p>Expert QA engineers for complex flows, regression testing, and QA strategy</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Subscribe -->
-<section class="subscribe-section">
+<!-- Early Access -->
+<section id="early-access" class="early-access-section">
     <div class="container">
-        <div class="subscribe-box">
-            <h3>Interested in FirstQA?</h3>
-            <p>Not ready to start yet? Drop your email and we'll keep you posted on new features, early access, and tips for shipping quality code faster.</p>
-            <form class="subscribe-form" id="subscribe-form" action="/subscribe" method="POST">
-                <input type="email" name="email" placeholder="Enter your email" required>
-                <button type="submit" class="btn-primary">Keep Me Posted</button>
+        <div class="early-access-box">
+            <span class="early-access-badge">🚀 Launching Soon</span>
+            <h2>Get Early Access to Ovi</h2>
+            <p>Join the waitlist and help shape the future of AI-powered QA</p>
+            
+            <form class="early-access-form" id="subscribe-form" action="/subscribe" method="POST">
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn-access-primary">Join Waitlist</button>
+                </div>
+                <p class="access-note" id="subscribe-message"></p>
             </form>
-            <p class="subscribe-note" id="subscribe-message"></p>
+            
+            <div class="discovery-call-cta">
+                <p>Want to share your QA challenges?</p>
+                <a href="https://calendly.com/firstqa/demo" class="btn-discovery" target="_blank">
+                    Schedule Discovery Call
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- The Problem -->
-<section class="problem-section">
+<!-- Problem & Solution -->
+<section class="problem-solution-section">
     <div class="container">
-        <h2 class="section-title">The Startup Quality Problem</h2>
-        <p class="section-subtitle">MVP messiness is ok. But growth? Bugs kill retention, trust, and momentum.</p>
+        <p class="ps-intro">MVP messiness is ok. But growth demands quality—here's how FirstQA & Ovi helps.</p>
         
-        <div class="problem-grid">
-            <div class="problem-card">
-                <div class="problem-number">01</div>
-                <h3>Bug-Fixing Kills Velocity</h3>
-                <p>The biggest slowdown isn't building—it's the endless cycle of bug reports, investigations, fixes, and re-testing.</p>
+        <div class="problem-solution-grid">
+            <!-- Problems Column -->
+            <div class="ps-column problems">
+                <div class="ps-column-header">
+                    <span class="ps-label problem-label">Without Ovi</span>
+                </div>
+                
+                <div class="ps-card problem-card">
+                    <span class="ps-num">01</span>
+                    <h4>Bug-Fixing Kills Velocity</h4>
+                    <p>The biggest slowdown isn't building—it's the endless cycle of bug reports, investigations, fixes, and re-testing.</p>
+                </div>
+                
+                <div class="ps-card problem-card">
+                    <span class="ps-num">02</span>
+                    <h4>Misalignment = Bugs</h4>
+                    <p>Engineer thinks it works one way. QA expects another. PM wanted something else. Bugs are inevitable.</p>
+                </div>
+                
+                <div class="ps-card problem-card">
+                    <span class="ps-num">03</span>
+                    <h4>Endless Back-and-Forth</h4>
+                    <p>Code review → rework → QA finds bug → more rework → context lost → still broken → repeat.</p>
+                </div>
             </div>
-            <div class="problem-card">
-                <div class="problem-number">02</div>
-                <h3>Misalignment = Bugs</h3>
-                <p>Engineer thinks it works one way. QA expects another. PM wanted something else. Without shared understanding, bugs are inevitable.</p>
-            </div>
-            <div class="problem-card">
-                <div class="problem-number">03</div>
-                <h3>Endless Back-and-Forth</h3>
-                <p>Code review comments → rework → QA finds bug → more rework → context lost → still broken → repeat.</p>
+            
+            <!-- Solutions Column -->
+            <div class="ps-column solutions">
+                <div class="ps-column-header">
+                    <span class="ps-label solution-label">With Ovi</span>
+                </div>
+                
+                <div class="ps-card solution-card">
+                    <span class="ps-num">01</span>
+                    <h4>AI-Powered Bug Prevention</h4>
+                    <p>Ovi AI analyzes tickets <em>before</em> coding—surfacing gaps, risks, and misalignment that would become bugs.</p>
+                </div>
+                
+                <div class="ps-card solution-card">
+                    <span class="ps-num">02</span>
+                    <h4>AI-Driven Alignment</h4>
+                    <p>Engineers, QA, and PM share the same AI-generated understanding upfront. Prevention beats detection.</p>
+                </div>
+                
+                <div class="ps-card solution-card">
+                    <span class="ps-num">03</span>
+                    <h4>Test Scenarios for Every PR</h4>
+                    <p>Engineers get AI-generated test cases to validate their work before code review. Bugs caught early.</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Features -->
-<section class="features">
-    <div class="container">
-        <h2 class="section-title">How FirstQA Solves This</h2>
-        <p class="section-subtitle">Ovi AI prevents bugs by creating alignment and confidence—so engineers ship right the first time</p>
-        
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h3>AI-Powered Bug Prevention</h3>
-                <p>Ovi AI analyzes tickets <em>before</em> coding starts—surfacing gaps, risks, and misalignment that would become bugs later.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-clipboard-check"></i>
-                </div>
-                <h3>AI Test Scenarios for Every PR</h3>
-                <p>Engineers get clear, AI-generated test cases to validate their own work before code review. Bugs caught early, not in QA.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-                <h3>AI QA Review</h3>
-                <p>Risk level. Test coverage. Edge cases. Ovi AI reviews your changes like a senior QA would—no surprises in production.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bullseye"></i>
-                </div>
-                <h3>AI-Driven Alignment</h3>
-                <p>When engineers, QA, and PM share the same AI-generated understanding upfront, bugs don't happen. Prevention beats detection.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <h3>AI Speed, 24/7</h3>
-                <p>Comprehensive analysis in seconds—not days. Ovi AI works around the clock, never misses a PR, never slows you down.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <h3>Human QA When It Matters</h3>
-                <p>Complex user flows, regression testing, QA strategy—expert human engineers (5+ years) step in when AI alone isn't enough.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Pricing -->
+<!-- Pricing Sneak Peek -->
 <section id="pricing" class="pricing">
     <div class="container">
-        <h2 class="section-title">Simple, Transparent Pricing</h2>
-        <p class="section-subtitle">Start free, scale as you grow</p>
+        <div class="pricing-header">
+            <span class="section-eyebrow">Pricing Preview</span>
+            <h2 class="section-title">Simple, transparent pricing</h2>
+            <p class="section-subtitle">Here's what we're thinking. Final pricing confirmed before launch.</p>
+        </div>
         
         <div class="pricing-grid">
             <div class="pricing-card">
-                <div class="pricing-badge free">Free Trial</div>
-                <h3>Try It Free</h3>
+                <div class="pricing-badge-spacer"></div>
+                <h3>Starter</h3>
                 <div class="price">
-                    <span class="amount">$0</span>
-                    <span class="period">/5 days</span>
+                    <span class="amount">~$49</span>
+                    <span class="period">/month</span>
                 </div>
                 <ul class="features-list">
-                    <li><i class="fas fa-check"></i> 10 PR reviews</li>
-                    <li><i class="fas fa-check"></i> 10 Ticket analyses</li>
-                    <li><i class="fas fa-check"></i> Full AI features</li>
+                    <li><i class="fas fa-check"></i> 30 PR reviews</li>
+                    <li><i class="fas fa-check"></i> 30 Ticket analyses</li>
+                    <li><i class="fas fa-check"></i> Test recipes</li>
                     <li><i class="fas fa-check"></i> Email support</li>
                 </ul>
-                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Free%20Trial&email={CHECKOUT_SESSION_EMAIL}') %>" 
-                   class="btn-outline" target="_blank">
-                    Start Free Trial
-                </a>
             </div>
             
             <div class="pricing-card featured">
                 <div class="pricing-badge popular">Most Popular</div>
-                <h3>Starter</h3>
-                <div class="price">
-                    <span class="amount">$49</span>
-                    <span class="period">/month</span>
-                </div>
-                <ul class="features-list">
-                    <li><i class="fas fa-check"></i> 30 PR reviews/month</li>
-                    <li><i class="fas fa-check"></i> Ovi AI analysis</li>
-                    <li><i class="fas fa-check"></i> Test recipes</li>
-                    <li><i class="fas fa-check"></i> Email support (4h)</li>
-                </ul>
-                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
-                   class="btn-primary" target="_blank">
-                    Get Started
-                </a>
-            </div>
-            
-            <div class="pricing-card">
-                <div style="height: 28px; margin-bottom: 20px;"></div>
                 <h3>Growth</h3>
                 <div class="price">
-                    <span class="amount">$149</span>
+                    <span class="amount">~$149</span>
                     <span class="period">/month</span>
                 </div>
                 <ul class="features-list">
                     <li><i class="fas fa-check"></i> Unlimited PR reviews</li>
-                    <li><i class="fas fa-check"></i> Advanced AI analysis</li>
-                    <li><i class="fas fa-check"></i> Ticket reviews</li>
-                    <li><i class="fas fa-check"></i> Priority support (1h)</li>
+                    <li><i class="fas fa-check"></i> Unlimited ticket analysis</li>
+                    <li><i class="fas fa-check"></i> Test automation (E2E)</li>
+                    <li><i class="fas fa-check"></i> Priority support</li>
                 </ul>
-                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Growth&email={CHECKOUT_SESSION_EMAIL}') %>" 
-                   class="btn-outline" target="_blank">
-                    Get Started
-                </a>
             </div>
             
             <div class="pricing-card">
-                <div style="height: 28px; margin-bottom: 20px;"></div>
+                <div class="pricing-badge-spacer"></div>
                 <h3>Human QA</h3>
                 <div class="price">
-                    <span class="amount">$1,589</span>
+                    <span class="amount">~$1,589</span>
                     <span class="period">/month</span>
                 </div>
                 <ul class="features-list">
                     <li><i class="fas fa-check"></i> 40 hours/month</li>
                     <li><i class="fas fa-check"></i> Sr. QA engineers</li>
-                    <li><i class="fas fa-check"></i> Manual + automated testing</li>
+                    <li><i class="fas fa-check"></i> Manual & Automated testing</li>
                     <li><i class="fas fa-check"></i> Embedded in your team</li>
                 </ul>
-                <a href="https://buy.stripe.com/3cI4gz4Z8bcFcpy8OmbAs02" 
-                   class="btn-outline" target="_blank">
-                    Get Started
-                </a>
-                <p class="pricing-note">or <a href="mailto:hello@firstqa.dev">contact us</a></p>
             </div>
+        </div>
+        
+        <div class="pricing-note-box">
+            <p><strong>Note:</strong> Final pricing will be confirmed before launch. Early access users get special pricing and can help shape the final plans.</p>
+            <a href="#early-access" class="btn-primary">Get Early Access</a>
         </div>
     </div>
 </section>
@@ -304,32 +247,47 @@
 <!-- Screenshots -->
 <section class="screenshots">
     <div class="container">
-        <h2 class="section-title">Ovi AI In Action</h2>
-        <div class="screenshot-grid two-col">
-            <div class="screenshot-item">
-                <img src="/images/demo-pr-report-1.png" alt="PR Analysis">
-                <p>GitHub PR Analysis</p>
+        <div class="screenshots-header">
+            <span class="section-eyebrow">See Ovi in Action</span>
+            <h2 class="section-title">Real results. Real time.</h2>
+            <p class="section-subtitle">Watch Ovi prevent bugs before they happen</p>
+        </div>
+        
+        <div class="screenshot-showcase">
+            <div class="screenshot-card">
+                <div class="screenshot-image-wrapper">
+                    <img src="/images/demo-ticket-linear-1.png" alt="Ticket Analysis" loading="lazy" class="screenshot-img">
+                </div>
+                <div class="screenshot-content">
+                    <h3>Ticket Analysis</h3>
+                    <p>Requirements reviewed before coding starts—surfacing gaps and edge cases early.</p>
+                </div>
             </div>
-            <div class="screenshot-item">
-                <img src="/images/demo-ticket-linear-1.png" alt="Ticket Analysis">
-                <p>Ticket Analysis</p>
+            
+            <div class="screenshot-card">
+                <div class="screenshot-image-wrapper">
+                    <img src="/images/demo-pr-report-1.png" alt="PR Analysis" loading="lazy" class="screenshot-img">
+                </div>
+                <div class="screenshot-content">
+                    <h3>PR Review</h3>
+                    <p>Every pull request analyzed for bugs, risks, and release readiness—before merge.</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- CTA -->
+<!-- Final CTA -->
 <section class="cta">
     <div class="container">
-        <h2>Ready to Break the Bug-Fix Cycle?</h2>
-        <p>Give your engineers the clarity they need to ship quality code—without slowing down</p>
+        <h2>Ready to Prevent Bugs Before They Happen?</h2>
+        <p>Join early access and help shape the future of AI-powered QA</p>
         <div class="cta-actions">
-            <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" 
-               class="btn-primary" target="_blank">
-                Start Free Trial
+            <a href="#early-access" class="btn-primary">
+                Get Early Access
             </a>
             <a href="https://calendly.com/firstqa/demo" class="btn-secondary" target="_blank">
-                Schedule Demo
+                Schedule Discovery Call
             </a>
         </div>
     </div>
@@ -340,7 +298,7 @@
     <div class="container">
         <div class="footer-content">
             <div class="footer-brand">
-                <img src="/logos/firstqa-logo-transparent.svg" alt="FirstQA" height="32">
+                <img src="/logos/firstqa-logo-transparent.svg" alt="FirstQA" height="44">
                 <p>Ship quality at startup speed. Clear requirements. Test scenarios. Release confidence.</p>
             </div>
             <div class="footer-links">
@@ -441,21 +399,21 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     color: white;
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
     color: white;
 }
 
 .btn-secondary,
 .btn-outline {
     background: white;
-    color: #667eea;
+    color: #0d9488;
     border: 2px solid #e0e0e0;
 }
 
@@ -463,7 +421,7 @@ body {
 .btn-outline:hover {
     background: white;
     transform: translateY(-2px);
-    border-color: #667eea;
+    border-color: #0d9488;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
@@ -478,178 +436,252 @@ body {
 
 /* Hero */
 .hero {
-    padding: 80px 0 100px;
+    padding: 100px 0 120px;
     text-align: center;
-    background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+    background: linear-gradient(180deg, #e8f4f8 0%, #f0faf8 50%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-badge-wrapper {
+    margin-bottom: 32px;
 }
 
 .hero-badge {
     display: inline-block;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    padding: 8px 18px;
-    border-radius: 20px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    padding: 10px 20px;
+    border-radius: 30px;
     font-size: 13px;
     font-weight: 600;
-    margin-bottom: 32px;
-    border: 1px solid rgba(102, 126, 234, 0.2);
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .hero h1 {
     font-size: 64px;
     font-weight: 700;
-    line-height: 1.1;
-    margin-bottom: 24px;
+    line-height: 1.15;
+    margin-bottom: 28px;
     color: #1a1a1a;
     letter-spacing: -0.03em;
 }
 
+.hero h1 em {
+    font-style: italic;
+    font-weight: 700;
+}
+
 .gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.hero-subtitle {
-    font-size: 20px;
-    color: #555;
-    max-width: 720px;
+.hero-tagline {
+    font-size: 24px;
+    color: #374151;
+    margin-bottom: 20px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.hero-description {
+    font-size: 18px;
+    color: #6b7280;
+    max-width: 600px;
     margin: 0 auto 40px;
-    line-height: 1.6;
-}
-
-.hero-subtitle em {
-    font-style: normal;
-    font-weight: 600;
-    color: #667eea;
-}
-
-.hero-features {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    max-width: 100%;
-    margin: 0 auto 48px;
-    flex-wrap: nowrap;
-}
-
-.hero-feature-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #1a1a1a;
-    white-space: nowrap;
-}
-
-.hero-feature-item i {
-    font-size: 16px;
-    color: #667eea;
-}
-
-.ai-tag {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.hero-divider {
-    color: #ddd;
-    font-size: 16px;
-    user-select: none;
+    line-height: 1.7;
 }
 
 .hero-actions {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 36px;
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3);
+}
+
+.btn-hero:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(5, 150, 105, 0.4);
+    color: white;
+}
+
+.btn-hero i {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.btn-hero:hover i {
+    transform: translateX(4px);
 }
 
 .hero-note {
-    color: #999;
-    font-size: 15px;
+    color: #9ca3af;
+    font-size: 14px;
+    letter-spacing: 0.3px;
 }
 
-/* Subscribe Section */
-.subscribe-section {
-    padding: 60px 0;
-    background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+/* Early Access Section */
+.early-access-section {
+    padding: 100px 0;
+    background: white;
 }
 
-.subscribe-box {
-    max-width: 540px;
+.early-access-box {
+    max-width: 560px;
     margin: 0 auto;
     text-align: center;
 }
 
-.subscribe-box h3 {
-    font-size: 28px;
+.early-access-badge {
+    display: inline-block;
+    font-size: 11px;
     font-weight: 700;
-    margin-bottom: 12px;
-    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #0d9488;
+    margin-bottom: 20px;
+    padding: 6px 16px;
+    background: rgba(13, 148, 136, 0.08);
+    border-radius: 20px;
 }
 
-.subscribe-box > p {
-    font-size: 16px;
-    color: #666;
-    margin-bottom: 28px;
+.early-access-box h2 {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #111827;
+    letter-spacing: -0.02em;
+}
+
+.early-access-box > p {
+    font-size: 17px;
+    color: #6b7280;
+    margin-bottom: 32px;
     line-height: 1.6;
 }
 
-.subscribe-form {
-    display: flex;
-    gap: 12px;
-    max-width: 440px;
-    margin: 0 auto;
+.early-access-form {
+    margin-bottom: 32px;
 }
 
-.subscribe-form input {
+.form-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.early-access-form input {
     flex: 1;
     padding: 14px 18px;
-    border: 2px solid #e0e0e0;
+    border: 1px solid #d1d5db;
     border-radius: 10px;
     font-size: 16px;
     outline: none;
     transition: border-color 0.2s;
 }
 
-.subscribe-form input:focus {
-    border-color: #667eea;
+.early-access-form input:focus {
+    border-color: #0d9488;
 }
 
-.subscribe-form .btn-primary {
+.btn-access-primary {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
     white-space: nowrap;
 }
 
-.subscribe-note {
-    margin-top: 14px;
+.btn-access-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.access-note {
     font-size: 14px;
-    color: #888;
+    color: #6b7280;
+    min-height: 20px;
 }
 
-.subscribe-note.success {
+.access-note.success {
     color: #22c55e;
+    font-weight: 500;
 }
 
-.subscribe-note.error {
+.access-note.error {
     color: #ef4444;
 }
 
-/* How It Works */
-.how-works {
-    padding: 70px 0;
-    background: white;
+.discovery-call-cta {
+    padding-top: 32px;
+    border-top: 1px solid #e5e7eb;
 }
 
+.discovery-call-cta p {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+.btn-discovery {
+    display: inline-block;
+    padding: 12px 24px;
+    color: #0d9488;
+    border: 1px solid #0d9488;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-discovery:hover {
+    background: #0d9488;
+    color: white;
+}
+
+/* Section Titles */
 .section-title {
     font-size: 42px;
     font-weight: 700;
@@ -665,174 +697,308 @@ body {
     margin-bottom: 40px;
 }
 
-.steps {
+/* Problem & Solution Section */
+.problem-solution-section {
+    padding: 80px 0;
+    background: #fafbfc;
+}
+
+.ps-intro {
+    text-align: center;
+    font-size: 20px;
+    color: #4b5563;
+    margin-bottom: 48px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.problem-solution-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 40px;
 }
 
-.step {
-    text-align: center;
-}
-
-.step-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 24px;
-    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
-    border-radius: 16px;
+.ps-column {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    color: #667eea;
-    position: relative;
-    transition: all 0.3s;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.step:hover .step-icon {
-    transform: translateY(-4px);
-}
-
-.step-icon.ai .ai-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 8px;
-}
-
-.step h3 {
-    font-size: 18px;
-    font-weight: 600;
+.ps-column-header {
     margin-bottom: 8px;
-    color: #1a1a1a;
 }
 
-.step p {
-    font-size: 15px;
-    color: #666;
-    line-height: 1.5;
+.ps-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 8px 16px;
+    border-radius: 6px;
 }
 
-/* Problem Section */
-.problem-section {
-    padding: 70px 0;
-    background: white;
+.problem-label {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
-.problem-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+.solution-label {
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    color: white;
+}
+
+.ps-card {
+    position: relative;
+    padding: 24px 24px 24px 28px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
 .problem-card {
-    background: #fafafa;
-    border-radius: 16px;
-    padding: 32px;
-    text-align: left;
-    position: relative;
-    transition: all 0.3s;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-left: 3px solid #fca5a5;
 }
 
 .problem-card:hover {
-    background: #f5f5f5;
-    transform: translateY(-2px);
+    border-left-color: #f87171;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
-.problem-number {
-    font-size: 48px;
+.solution-card {
+    background: white;
+    border: 1px solid rgba(13, 148, 136, 0.2);
+    border-left: 3px solid #0d9488;
+}
+
+.solution-card:hover {
+    border-color: rgba(13, 148, 136, 0.3);
+    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.1);
+}
+
+.ps-num {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+    font-size: 12px;
     font-weight: 700;
-    color: #e0e0e0;
-    line-height: 1;
+    color: #d1d5db;
+    letter-spacing: 0.5px;
+}
+
+.ps-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.ps-card p {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ps-card em {
+    font-style: normal;
+    color: #0d9488;
+    font-weight: 500;
+}
+
+/* How It Works - Steps */
+.how-it-works {
+    padding: 80px 0;
+    background: #fafbfc;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.section-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: #0d9488;
     margin-bottom: 16px;
 }
 
-.problem-card h3 {
-    font-size: 18px;
+.section-title-modern {
+    font-size: 36px;
     font-weight: 600;
-    margin-bottom: 12px;
-    color: #1a1a1a;
+    color: #111827;
+    letter-spacing: -0.02em;
 }
 
-.problem-card p {
-    font-size: 15px;
-    color: #666;
-    line-height: 1.6;
-}
-
-/* Features */
-.features {
-    padding: 70px 0;
-    background: #fafbff;
-}
-
-.feature-card em {
-    font-style: normal;
-    font-weight: 600;
-    color: #667eea;
-}
-
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* Modern Split Flow Design */
+.workflow-split {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
     gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.feature-card {
+.workflow-you {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.workflow-group-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #9ca3af;
+    padding: 6px 16px;
     background: white;
-    padding: 32px;
-    border-radius: 12px;
-    border: 1px solid #f0f0f0;
-    transition: all 0.3s;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
 }
 
-.feature-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+.workflow-ovi .workflow-group-label {
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    color: white;
+    border: none;
 }
 
-.feature-icon {
+.flow-tools {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+    letter-spacing: 0.3px;
+}
+
+.workflow-ovi {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.ovi-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(13, 148, 136, 0.04);
+    padding: 24px 32px;
+    border-radius: 20px;
+    border: 1px solid rgba(13, 148, 136, 0.1);
+}
+
+.flow-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+}
+
+.flow-item-you {
+    padding: 24px 32px;
+    background: white;
+    border-radius: 16px;
+    border: 2px solid #e5e7eb;
+}
+
+.flow-icon {
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
+    background: white;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 22px;
+    color: #6b7280;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.flow-icon-ovi {
+    color: #0d9488;
+}
+
+.flow-item:hover .flow-icon {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(13, 148, 136, 0.15);
+}
+
+.flow-item:hover .flow-icon-ovi {
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     color: white;
-    margin-bottom: 20px;
 }
 
-.feature-card h3 {
-    font-size: 20px;
+.flow-label {
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 8px;
-    color: #1a1a1a;
+    color: #374151;
+    white-space: nowrap;
 }
 
-.feature-card p {
-    font-size: 15px;
-    color: #666;
-    line-height: 1.6;
+.flow-arrow {
+    color: #d1d5db;
+    font-size: 11px;
+    padding: 0 2px;
+}
+
+.ovi-flow:hover .flow-arrow {
+    color: #0d9488;
 }
 
 /* Pricing */
 .pricing {
-    padding: 70px 0;
-    background: white;
+    padding: 100px 0;
+    background: #fafbfc;
+}
+
+.pricing-header {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.pricing-header .section-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: #0d9488;
+    margin-bottom: 16px;
+}
+
+.pricing-header .section-title {
+    font-size: 42px;
+    font-weight: 600;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+}
+
+.pricing-header .section-subtitle {
+    font-size: 17px;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto 48px;
 }
 
 .pricing-card {
@@ -843,16 +1009,16 @@ body {
     transition: all 0.3s;
     display: flex;
     flex-direction: column;
-    min-height: 600px;
+    min-height: 500px;
 }
 
 .pricing-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.12);
+    box-shadow: 0 12px 32px rgba(13, 148, 136, 0.12);
 }
 
 .pricing-card.featured {
-    border-color: #667eea;
+    border-color: #0d9488;
     border-width: 3px;
     position: relative;
 }
@@ -871,13 +1037,18 @@ body {
     line-height: 16px;
 }
 
+.pricing-badge-spacer {
+    height: 28px;
+    margin-bottom: 20px;
+}
+
 .pricing-badge.free {
     background: #d4edda;
     color: #155724;
 }
 
 .pricing-badge.popular {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     color: white;
 }
 
@@ -927,7 +1098,7 @@ body {
 }
 
 .features-list i {
-    color: #667eea;
+    color: #0d9488;
     font-size: 16px;
     margin-top: 2px;
     flex-shrink: 0;
@@ -949,7 +1120,7 @@ body {
 }
 
 .pricing-note a {
-    color: #667eea;
+    color: #0d9488;
     text-decoration: none;
 }
 
@@ -957,46 +1128,135 @@ body {
     text-decoration: underline;
 }
 
+.pricing-note-box {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 32px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+.pricing-note-box p {
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.pricing-note-box strong {
+    color: #111827;
+}
+
 /* Screenshots */
 .screenshots {
-    padding: 70px 0;
-    background: #fafbff;
+    padding: 100px 0;
+    background: white;
 }
 
-.screenshot-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
+.screenshots-header {
+    text-align: center;
+    margin-bottom: 64px;
 }
 
-.screenshot-grid.two-col {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 900px;
+.screenshots-header .section-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: #0d9488;
+    margin-bottom: 16px;
+}
+
+.screenshots-header .section-title {
+    font-size: 42px;
+    font-weight: 600;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+}
+
+.screenshots-header .section-subtitle {
+    font-size: 18px;
+    color: #6b7280;
+    max-width: 500px;
     margin: 0 auto;
 }
 
-.screenshot-item img {
+.screenshot-showcase {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.screenshot-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.screenshot-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    border-color: rgba(13, 148, 136, 0.2);
+}
+
+.screenshot-image-wrapper {
+    position: relative;
     width: 100%;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    margin-bottom: 12px;
-    transition: transform 0.3s;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+    background: #f9fafb;
+    overflow: hidden;
 }
 
-.screenshot-item:hover img {
-    transform: scale(1.02);
+.screenshot-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: top;
+    display: block;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.screenshot-item p {
+.screenshot-card:hover .screenshot-img {
+    transform: scale(1.05);
+}
+
+.screenshot-content {
+    padding: 32px;
     text-align: center;
-    color: #666;
-    font-size: 15px;
+}
+
+.screenshot-content h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+}
+
+.screenshot-content p {
+    font-size: 16px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
 }
 
 /* CTA */
 .cta {
     padding: 70px 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     text-align: center;
     color: white;
 }
@@ -1021,7 +1281,7 @@ body {
 
 .cta .btn-secondary {
     background: white;
-    color: #667eea;
+    color: #0d9488;
     border: 2px solid white;
 }
 
@@ -1085,38 +1345,188 @@ body {
 }
 
 /* Responsive */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .pricing-card:last-child {
+        grid-column: 1 / -1;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .screenshot-showcase {
+        gap: 32px;
+    }
+    
+    .screenshots-header .section-title {
+        font-size: 36px;
+    }
+    
+    .workflow-split {
+        gap: 24px;
+    }
+    
+    .ovi-flow {
+        padding: 20px 24px;
+    }
+    
+    .flow-item {
+        padding: 0 10px;
+    }
+    
+    .flow-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+    
+    .flow-label {
+        font-size: 11px;
+    }
+    
+    .flow-arrow {
+        font-size: 10px;
+    }
+    
+    .flow-tools {
+        font-size: 10px;
+    }
+}
+
 @media (max-width: 768px) {
+    .hero {
+        padding: 60px 0 80px;
+    }
+    
     .hero h1 {
-        font-size: 34px;
+        font-size: 36px;
     }
     
-    .hero-subtitle {
-        font-size: 17px;
-    }
-    
-    .hero-features {
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-    
-    .hero-divider {
+    .hero h1 br {
         display: none;
     }
     
-    .hero-feature-item {
-        font-size: 14px;
+    .hero-tagline {
+        font-size: 18px;
+    }
+    
+    .hero-tagline br,
+    .hero-description br {
+        display: none;
+    }
+    
+    .hero-description {
+        font-size: 16px;
     }
     
     .hero-actions {
         flex-direction: column;
+        align-items: center;
+    }
+    
+    .section-title-modern {
+        font-size: 32px;
+    }
+    
+    .workflow-split {
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .ovi-flow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px 12px;
+        padding: 20px;
+        justify-items: center;
+    }
+    
+    .flow-arrow {
+        display: none;
+    }
+    
+    .flow-item {
+        padding: 0;
+    }
+    
+    .flow-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+    
+    .flow-label {
+        font-size: 11px;
+        text-align: center;
+    }
+    
+    .section-title-modern {
+        font-size: 28px;
+    }
+    
+    .flow-item-you {
+        padding: 20px 28px;
     }
     
     .steps,
-    .feature-grid,
     .pricing-grid,
-    .screenshot-grid,
-    .problem-grid {
+    .screenshot-showcase,
+    .problem-solution-grid {
         grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .pricing-header .section-title {
+        font-size: 32px;
+    }
+    
+    .pricing-header .section-subtitle {
+        font-size: 16px;
+    }
+    
+    .pricing-note-box {
+        padding: 24px;
+    }
+    
+    .screenshots-header .section-title {
+        font-size: 32px;
+    }
+    
+    .screenshots-header .section-subtitle {
+        font-size: 16px;
+    }
+    
+    .screenshot-content {
+        padding: 24px;
+    }
+    
+    .screenshot-content h3 {
+        font-size: 20px;
+    }
+    
+    .screenshot-content p {
+        font-size: 15px;
+    }
+    
+    .ps-intro {
+        font-size: 18px;
+        margin-bottom: 32px;
+    }
+    
+    .ps-card {
+        padding: 20px 20px 20px 24px;
+    }
+    
+    .step-number-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+    }
+    
+    .step-connector {
+        display: none;
     }
     
     .nav-menu {
@@ -1136,12 +1546,21 @@ body {
         gap: 40px;
     }
     
-    .subscribe-form {
+    .form-group {
         flex-direction: column;
     }
     
-    .subscribe-form .btn-primary {
+    .early-access-form input,
+    .btn-access-primary {
         width: 100%;
+    }
+    
+    .early-access-box h2 {
+        font-size: 32px;
+    }
+    
+    .early-access-box > p {
+        font-size: 16px;
     }
 }
 </style>
@@ -1180,16 +1599,16 @@ document.getElementById('subscribe-form').addEventListener('submit', async funct
         const data = await response.json();
         
         if (data.success) {
-            message.textContent = '✓ You\'re on the list! We\'ll keep you posted.';
-            message.className = 'subscribe-note success';
+            message.textContent = '✓ You\'re on the waitlist! We\'ll be in touch soon.';
+            message.className = 'access-note success';
             form.email.value = '';
         } else {
             message.textContent = data.error || 'Something went wrong. Please try again.';
-            message.className = 'subscribe-note error';
+            message.className = 'access-note error';
         }
     } catch (error) {
         message.textContent = 'Something went wrong. Please try again.';
-        message.className = 'subscribe-note error';
+        message.className = 'access-note error';
     }
     
     button.disabled = false;

@@ -2,145 +2,374 @@
 
 <style>
 .about-hero {
-    background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
-    padding: 80px 0 60px;
+    background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
+    padding: 100px 0 80px;
     text-align: center;
 }
 
 .about-hero h1 {
-    font-size: 48px;
+    font-size: 52px;
     font-weight: 700;
-    margin-bottom: 20px;
-    color: #1a1a1a;
+    margin-bottom: 24px;
+    color: #111827;
+    letter-spacing: -0.02em;
 }
 
 .about-hero .lead {
-    font-size: 22px;
-    color: #666;
-    max-width: 700px;
+    font-size: 20px;
+    color: #4b5563;
+    max-width: 640px;
     margin: 0 auto;
+    line-height: 1.6;
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.value-card {
-    background: white;
-    border: 2px solid #f0f0f0;
-    border-radius: 12px;
-    padding: 32px;
-    margin-bottom: 30px;
-    transition: all 0.3s;
-}
-
-.value-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    border-color: #667eea;
-}
-
-.value-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    color: white;
-    margin-bottom: 20px;
+.section-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #0d9488;
+    margin-bottom: 16px;
 }
 
 .section-title {
     font-size: 36px;
     font-weight: 700;
     margin-bottom: 16px;
-    color: #1a1a1a;
+    color: #111827;
+    letter-spacing: -0.02em;
 }
 
 .section-subtitle {
     font-size: 18px;
-    color: #666;
-    margin-bottom: 50px;
+    color: #6b7280;
+    margin-bottom: 48px;
 }
 
-.stat-box {
+/* Mission Section */
+.mission-section {
+    padding: 80px 0;
+    background: white;
+}
+
+.mission-card {
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 48px;
     text-align: center;
-    padding: 24px;
+}
+
+.mission-card h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 20px;
+}
+
+.mission-card p {
+    font-size: 18px;
+    color: #4b5563;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Problem Stats */
+.stats-section {
+    padding: 60px 0;
+    background: white;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 32px 24px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
 }
 
 .stat-number {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 700;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     display: block;
     margin-bottom: 8px;
+    line-height: 1;
 }
 
 .stat-label {
-    font-size: 16px;
-    color: #666;
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.5;
 }
 
-.timeline-item {
-    padding-left: 40px;
-    position: relative;
-    margin-bottom: 40px;
+/* How Ovi Works */
+.ovi-section {
+    padding: 80px 0;
+    background: #fafbfc;
 }
 
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
+.ovi-intro {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    margin-bottom: 60px;
 }
 
-.timeline-item h4 {
-    font-size: 20px;
+.ovi-intro-content {
+    flex: 1;
+}
+
+.ovi-intro-content h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 16px;
+}
+
+.ovi-intro-content p {
+    font-size: 17px;
+    color: #4b5563;
+    line-height: 1.7;
+}
+
+.ovi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 8px;
-    color: #1a1a1a;
+    margin-bottom: 16px;
 }
 
-.cta-box {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    padding: 60px 40px;
-    text-align: center;
-    color: white;
-    margin-top: 60px;
+.workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
 }
 
-.cta-box h2 {
+.workflow-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.workflow-card:hover {
+    border-color: #0d9488;
+    box-shadow: 0 8px 30px rgba(13, 148, 136, 0.1);
+}
+
+.workflow-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
     color: white;
-    font-size: 36px;
     margin-bottom: 20px;
 }
 
-.cta-box p {
+.workflow-card h3 {
     font-size: 18px;
-    margin-bottom: 30px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 12px;
+}
+
+.workflow-card p {
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.workflow-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.workflow-feature {
+    font-size: 12px;
+    color: #0d9488;
+    background: rgba(13, 148, 136, 0.08);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* Story Section */
+.story-section {
+    padding: 80px 0;
+    background: white;
+}
+
+.story-card {
+    background: linear-gradient(135deg, #f0fdfa 0%, #f9fafb 100%);
+    border-radius: 20px;
+    padding: 56px;
+    border: 1px solid rgba(13, 148, 136, 0.1);
+}
+
+.story-card h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.story-item {
+    margin-bottom: 32px;
+    padding-left: 32px;
+    position: relative;
+}
+
+.story-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    background: #0d9488;
+    border-radius: 50%;
+}
+
+.story-item::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 22px;
+    width: 2px;
+    height: calc(100% + 12px);
+    background: #e5e7eb;
+}
+
+.story-item:last-child::after {
+    display: none;
+}
+
+.story-item h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.story-item p {
+    font-size: 15px;
+    color: #4b5563;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Who We Help */
+.audience-section {
+    padding: 80px 0;
+    background: #fafbfc;
+}
+
+.audience-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+}
+
+.audience-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    border: 1px solid #e5e7eb;
+}
+
+.audience-card h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 12px;
+}
+
+.audience-card > p {
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.audience-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.audience-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.audience-list li i {
+    color: #0d9488;
+    font-size: 12px;
+}
+
+/* CTA */
+.cta-section {
+    padding: 80px 0;
+    background: white;
+}
+
+.cta-card {
+    background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+    border-radius: 20px;
+    padding: 64px 48px;
+    text-align: center;
+    color: white;
+}
+
+.cta-card h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: white;
+}
+
+.cta-card p {
+    font-size: 18px;
+    margin-bottom: 32px;
     opacity: 0.95;
 }
 
 .btn-white {
     background: white;
-    color: #667eea;
-    padding: 14px 32px;
-    border-radius: 8px;
+    color: #0d9488;
+    padding: 16px 36px;
+    border-radius: 10px;
     font-weight: 600;
+    font-size: 16px;
     text-decoration: none;
     display: inline-block;
     transition: all 0.3s;
@@ -148,226 +377,293 @@
 
 .btn-white:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    color: #667eea;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    color: #0d9488;
     text-decoration: none;
 }
 
-.text-purple {
-    color: #a855f7;
+/* Responsive */
+@media (max-width: 992px) {
+    .workflow-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .audience-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ovi-intro {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
-.text-danger {
-    color: #ef4444;
-}
-
-.text-warning {
-    color: #f97316;
-}
-
-.text-primary {
-    color: #3b82f6;
+@media (max-width: 768px) {
+    .about-hero h1 {
+        font-size: 36px;
+    }
+    
+    .section-title {
+        font-size: 28px;
+    }
+    
+    .story-card {
+        padding: 32px 24px;
+    }
+    
+    .cta-card {
+        padding: 48px 24px;
+    }
+    
+    .cta-card h2 {
+        font-size: 28px;
+    }
 }
 </style>
 
-<div class="about-hero">
+<!-- Hero -->
+<section class="about-hero">
     <div class="container">
-        <h1>Prevent Bugs <span class="gradient-text">Before They Happen</span></h1>
-        <p class="lead">FirstQA empowers developers with clear requirements, comprehensive test scenarios, and AI-powered PR analysis—catching issues before they become expensive bugs.</p>
+        <h1>Meet <span class="gradient-text">Ovi</span> — Your First QA Hire</h1>
+        <p class="lead">The AI QA Engineer that gives you confidence at speed—preventing bugs through alignment, test automation, and expert QA when you need it.</p>
     </div>
-</div>
+</section>
 
-<div class="container py-5">
-    <div class="row mb-5">
-        <div class="col-lg-10 mx-auto">
-            <div class="text-center mb-5">
-                <h2 class="section-title">The Problems We Solve</h2>
-                <p class="section-subtitle">Most bugs don't need to exist in the first place</p>
-            </div>
-            
-            <div class="row mb-4">
-                <div class="col-md-4 mb-4">
-                    <div class="stat-box">
-                        <span class="stat-number">70%</span>
-                        <span class="stat-label">Of bugs come from unclear requirements</span>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="stat-box">
-                        <span class="stat-number">10x</span>
-                        <span class="stat-label">More expensive to fix bugs in production</span>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="stat-box">
-                        <span class="stat-number">60%</span>
-                        <span class="stat-label">Of developer time spent on rework</span>
-                    </div>
+<!-- Mission -->
+<section class="mission-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="mission-card">
+                    <span class="section-label">Our Mission</span>
+                    <h2>Confidence at speed</h2>
+                    <p>Startups need to move fast—but bug-fixing slows everything down. We built Ovi to give you confidence at speed: AI-driven alignment before coding, automated test generation, and expert QA when you need it. Ship faster without sacrificing quality.</p>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0" style="background: #fff3f3; border-left: 4px solid #ef4444 !important;">
-                        <div class="card-body p-4">
-                            <h4 class="mb-3"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Unclear Requirements</h4>
-                            <p class="mb-0">Tickets lack essential details, acceptance criteria, and edge case considerations. Developers make assumptions, leading to bugs and rework.</p>
+<!-- Stats -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <span class="section-label">The Reality</span>
+                    <h2 class="section-title">Most bugs don't need to exist</h2>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card">
+                            <span class="stat-number">70%</span>
+                            <span class="stat-label">of bugs come from misalignment between what was expected and what was built</span>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0" style="background: #fff8f3; border-left: 4px solid #f97316 !important;">
-                        <div class="card-body p-4">
-                            <h4 class="mb-3"><i class="fas fa-clock text-warning me-2"></i>Rushed Development</h4>
-                            <p class="mb-0">Pressure to ship fast means corners get cut. Testing is rushed or skipped. Issues slip through that would've been caught with proper QA.</p>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card">
+                            <span class="stat-number">10x</span>
+                            <span class="stat-label">more expensive to fix bugs after they reach production</span>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0" style="background: #fef3ff; border-left: 4px solid #a855f7 !important;">
-                        <div class="card-body p-4">
-                            <h4 class="mb-3"><i class="fas fa-search text-purple me-2"></i>Incomplete Code Reviews</h4>
-                            <p class="mb-0">PR reviews focus on code quality but miss functional issues, edge cases, performance impacts, and security vulnerabilities that affect real users.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0" style="background: #f0f9ff; border-left: 4px solid #3b82f6 !important;">
-                        <div class="card-body p-4">
-                            <h4 class="mb-3"><i class="fas fa-flask text-primary me-2"></i>Missing Test Scenarios</h4>
-                            <p class="mb-0">Developers lack clear test plans and scenarios. They don't know what to test or how to test it, leading to inadequate testing before merging.</p>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card">
+                            <span class="stat-number">40%</span>
+                            <span class="stat-label">of engineering time spent on rework and bug-fixing cycles</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="row mb-5">
-        <div class="col-lg-10 mx-auto">
-            <div class="text-center mb-5">
-                <h2 class="section-title">How FirstQA Works</h2>
-                <p class="section-subtitle">AI-powered prevention + human expertise when you need it</p>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
+<!-- How Ovi Works -->
+<section class="ovi-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <span class="section-label">How It Works</span>
+                    <h2 class="section-title">From setup to shipping</h2>
+                    <p class="section-subtitle">You connect your tools. Ovi handles the rest.</p>
+                </div>
+                
+                <div class="workflow-grid">
+                    <div class="workflow-card">
+                        <div class="workflow-icon">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <h3>Connect Your Tools</h3>
+                        <p>One-time setup. Connect GitHub, Bitbucket, Jira, or Linear—and Ovi starts working immediately.</p>
+                        <div class="workflow-features">
+                            <span class="workflow-feature">GitHub</span>
+                            <span class="workflow-feature">Bitbucket</span>
+                            <span class="workflow-feature">Jira</span>
+                            <span class="workflow-feature">Linear</span>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-card">
+                        <div class="workflow-icon">
                             <i class="fas fa-ticket-alt"></i>
                         </div>
-                        <h3>Pre-Dev Ticket Analysis</h3>
-                        <p>Ovi AI analyzes Jira and Linear tickets <strong>before development starts</strong>, catching missing requirements, unclear acceptance criteria, edge cases, and potential risks.</p>
-                        <p class="text-muted mb-0"><small>✓ Complete requirements ✓ Clear test scenarios ✓ Edge cases identified</small></p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-code-branch"></i>
+                        <h3>Ticket Review</h3>
+                        <p>Ovi analyzes tickets before coding starts—surfacing gaps, edge cases, and risks that would become bugs.</p>
+                        <div class="workflow-features">
+                            <span class="workflow-feature">Edge cases</span>
+                            <span class="workflow-feature">Missing requirements</span>
+                            <span class="workflow-feature">Risk flags</span>
                         </div>
-                        <h3>Comprehensive PR Review</h3>
-                        <p>Ovi AI reviews every GitHub PR for functional issues, non-functional concerns (performance, security), and generates <strong>detailed test recipes</strong> developers can follow immediately.</p>
-                        <p class="text-muted mb-0"><small>✓ Functional bugs ✓ Security & performance ✓ Ready-to-use test plans</small></p>
                     </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h3>Human QA On-Demand</h3>
-                        <p>When you need deep testing, test automation setup, or QA strategy—our senior QA engineers (5+ years experience) are ready to help.</p>
-                        <p class="text-muted mb-0"><small>Result: Expert testing when complexity demands it</small></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-5">
-        <div class="col-lg-10 mx-auto">
-            <div class="card shadow-sm border-0" style="background: #f7fafc;">
-                <div class="card-body p-5">
-                    <h2 class="section-title text-center mb-4">Why We Built FirstQA</h2>
-                    <p class="lead text-center mb-4">Founded by engineers who've felt the pain of shipping broken software</p>
                     
-                    <div class="timeline-item">
-                        <h4>The Realization</h4>
-                        <p>After years of building products, we noticed a pattern: most bugs were preventable. They came from unclear tickets, rushed development, incomplete code reviews, and developers lacking clear test scenarios to validate their work early.</p>
-                    </div>
-
-                    <div class="timeline-item">
-                        <h4>The Traditional Approach Doesn't Work</h4>
-                        <p>Testing <em>after</em> development is too late. By then, code is written based on incomplete requirements. Code reviews focus on syntax but miss functional issues. Developers ship without testing because they don't know what to test. Fixing bugs becomes expensive rework instead of prevention.</p>
-                    </div>
-
-                    <div class="timeline-item">
-                        <h4>The FirstQA Solution</h4>
-                        <p>We built Ovi AI to analyze tickets <strong>before development</strong>—ensuring developers have complete requirements and clear test scenarios. Then we review PRs for both functional and non-functional issues, providing actionable test plans developers can execute immediately. When needed, human QA experts step in for complex scenarios.</p>
-                    </div>
-
-                    <div class="timeline-item" style="border: none;">
-                        <h4>The Result</h4>
-                        <p>Startups ship faster with fewer bugs. Developers spend less time on rework. Product quality improves. Everyone wins.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-5">
-        <div class="col-lg-10 mx-auto">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Who We Help</h2>
-                <p class="section-subtitle">Built for fast-moving startups and small teams</p>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <h4 class="mb-3">Solo Founders & Small Teams</h4>
-                            <p>You're wearing multiple hats. You don't have time or budget for a full-time QA team. FirstQA gives you AI-powered QA from day one.</p>
-                            <ul class="mb-0">
-                                <li>Ship with confidence</li>
-                                <li>Catch issues early</li>
-                                <li>Scale QA as you grow</li>
-                            </ul>
+                    <div class="workflow-card">
+                        <div class="workflow-icon">
+                            <i class="fas fa-list-check"></i>
+                        </div>
+                        <h3>Test Recipe</h3>
+                        <p>Actionable test scenarios engineers can run before code review—bugs caught early, before they're merged.</p>
+                        <div class="workflow-features">
+                            <span class="workflow-feature">Step-by-step tests</span>
+                            <span class="workflow-feature">Edge case coverage</span>
+                            <span class="workflow-feature">Expected results</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <h4 class="mb-3">Growing Startups</h4>
-                            <p>You're shipping fast but quality is suffering. Bugs are slipping through. Customer complaints are increasing. FirstQA prevents issues before they happen.</p>
-                            <ul class="mb-0">
-                                <li>Reduce production bugs</li>
-                                <li>Save developer time</li>
-                                <li>Improve product quality</li>
-                            </ul>
+                    
+                    <div class="workflow-card">
+                        <div class="workflow-icon">
+                            <i class="fas fa-code-pull-request"></i>
+                        </div>
+                        <h3>PR Review</h3>
+                        <p>Every pull request analyzed for functional bugs, performance issues, security risks, and test coverage.</p>
+                        <div class="workflow-features">
+                            <span class="workflow-feature">Bug detection</span>
+                            <span class="workflow-feature">Risk assessment</span>
+                            <span class="workflow-feature">Test suggestions</span>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-card">
+                        <div class="workflow-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>Test Automation</h3>
+                        <p>Ovi generates and maintains E2E automated tests—integrated into your CI/CD pipeline. Test coverage that scales with your codebase.</p>
+                        <div class="workflow-features">
+                            <span class="workflow-feature">E2E tests</span>
+                            <span class="workflow-feature">CI/CD integration</span>
+                            <span class="workflow-feature">Auto-maintained</span>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-card">
+                        <div class="workflow-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <h3>Manual Testing</h3>
+                        <p>When you need human expertise—senior QA engineers for complex flows, regression testing, and deep validation.</p>
+                        <div class="workflow-features">
+                            <span class="workflow-feature">5+ years experience</span>
+                            <span class="workflow-feature">Complex flows</span>
+                            <span class="workflow-feature">On-demand</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <div class="cta-box">
-                <h2>Ready to Prevent Bugs Instead of Chasing Them?</h2>
-                <p>Join startups using FirstQA to ship faster with higher quality</p>
-                <a href="https://buy.stripe.com/bJecN59fo1C54X67KibAs00?success_url=<%= encodeURIComponent('https://firstqa.dev/success?plan=Starter&email={CHECKOUT_SESSION_EMAIL}') %>" class="btn-white" target="_blank">
-                    Start Free Trial
-                </a>
+<!-- Story -->
+<section class="story-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="story-card">
+                    <h2>Why We Built Ovi</h2>
+                    
+                    <div class="story-item">
+                        <h4>The Problem We Lived</h4>
+                        <p>Engineer thinks it works one way. QA expects another. PM wanted something else. The result? Bugs that shouldn't exist. Endless back-and-forth. Rework that kills velocity and morale.</p>
+                    </div>
+                    
+                    <div class="story-item">
+                        <h4>Testing After Is Too Late</h4>
+                        <p>The traditional approach—build first, test later—doesn't work. By the time QA finds issues, code is written, reviewed, and merged. Context is lost. Fixing becomes expensive rework.</p>
+                    </div>
+                    
+                    <div class="story-item">
+                        <h4>Alignment Beats Detection</h4>
+                        <p>We realized the problem isn't testing—it's alignment. If everyone shares the same understanding upfront, most bugs never happen. AI can create that alignment at scale.</p>
+                    </div>
+                    
+                    <div class="story-item">
+                        <h4>The Result: Ovi</h4>
+                        <p>Ovi gives you confidence at speed. AI-driven alignment, test recipes, automated E2E tests, and PR analysis—plus expert human QA when you need it. Prevention, not just detection. Your first QA hire.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Who We Help -->
+<section class="audience-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5">
+                    <span class="section-label">Who We Help</span>
+                    <h2 class="section-title">Built for startups that need to move fast</h2>
+                </div>
+                
+                <div class="audience-grid">
+                    <div class="audience-card">
+                        <h3>Early-Stage Startups</h3>
+                        <p>Moving fast with a small team. No budget for dedicated QA. Ovi gives you AI-powered quality from day one—your first QA hire without the headcount.</p>
+                        <ul class="audience-list">
+                            <li><i class="fas fa-check"></i> Ship with confidence</li>
+                            <li><i class="fas fa-check"></i> Prevent bugs before they happen</li>
+                            <li><i class="fas fa-check"></i> Clear test scenarios for every change</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="audience-card">
+                        <h3>Scaling Teams</h3>
+                        <p>Growing fast but quality is slipping. Bug-fixing cycles are killing velocity. Customers expect more. Ovi breaks the cycle and scales quality with you.</p>
+                        <ul class="audience-list">
+                            <li><i class="fas fa-check"></i> Reduce rework and back-and-forth</li>
+                            <li><i class="fas fa-check"></i> AI-driven alignment across teams</li>
+                            <li><i class="fas fa-check"></i> Human QA on-demand when needed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="cta-card">
+                    <h2>Ready for confidence at speed?</h2>
+                    <p>Join early access and help shape the future of AI-powered QA</p>
+                    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                        <a href="/#early-access" class="btn-white">
+                            Get Early Access
+                        </a>
+                        <a href="https://calendly.com/firstqa/demo" class="btn-white" style="background: transparent; border: 2px solid white; color: white;" target="_blank">
+                            Schedule Discovery Call
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <%- include('partials/footer') %>

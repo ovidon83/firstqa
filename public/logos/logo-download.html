@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstQA Logo Downloads</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(180deg, #e8f4f8 0%, #f0faf8 50%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            margin-bottom: 48px;
+        }
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        .section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .section .desc {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        .logo-preview {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo-preview.dark {
+            background: #1a1a1a;
+        }
+        .logo-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+        .download-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        }
+        .download-btn.secondary {
+            background: white;
+            color: #0d9488;
+            border: 2px solid #e5e7eb;
+        }
+        .download-btn.secondary:hover {
+            border-color: #0d9488;
+        }
+        .sizes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .size-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .size-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+        .size-card p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>FirstQA Brand Assets</h1>
+    <p class="subtitle">Download logos in various formats and sizes for your social media accounts.</p>
+
+    <!-- Main Logo -->
+    <div class="section">
+        <h2>Main Logo</h2>
+        <p class="desc">Use this for websites, presentations, and general branding.</p>
+        <div class="logo-preview">
+            <img src="firstqa-logo.svg" alt="FirstQA Logo" style="max-height: 80px;">
+        </div>
+        <div class="download-links">
+            <a href="firstqa-logo.svg" download class="download-btn">Download SVG</a>
+        </div>
+    </div>
+
+    <!-- Social Media Square -->
+    <div class="section">
+        <h2>Social Media Profile Picture</h2>
+        <p class="desc">Square format perfect for Twitter, LinkedIn, Facebook, and Instagram profile pictures.</p>
+        <div class="logo-preview">
+            <img src="firstqa-social-square.svg" alt="FirstQA Square Logo" style="max-height: 200px;">
+        </div>
+        <div class="download-links">
+            <a href="firstqa-social-square.svg" download class="download-btn">Download SVG</a>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-social-square.svg', 400, 400, 'firstqa-profile-400.png')">PNG 400×400</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-social-square.svg', 500, 500, 'firstqa-profile-500.png')">PNG 500×500</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-social-square.svg', 1000, 1000, 'firstqa-profile-1000.png')">PNG 1000×1000</button>
+        </div>
+    </div>
+
+    <!-- Icon Only -->
+    <div class="section">
+        <h2>Icon Only</h2>
+        <p class="desc">Clean checkmark icon for favicons, app icons, and small spaces.</p>
+        <div class="logo-preview">
+            <img src="firstqa-icon.svg" alt="FirstQA Icon" style="max-height: 100px;">
+        </div>
+        <div class="download-links">
+            <a href="firstqa-icon.svg" download class="download-btn">Download SVG</a>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-icon.svg', 64, 64, 'firstqa-icon-64.png')">PNG 64×64</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-icon.svg', 128, 128, 'firstqa-icon-128.png')">PNG 128×128</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-icon.svg', 256, 256, 'firstqa-icon-256.png')">PNG 256×256</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-icon.svg', 512, 512, 'firstqa-icon-512.png')">PNG 512×512</button>
+        </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="section">
+        <h2>Banner / Cover Image</h2>
+        <p class="desc">Wide format for Twitter header, LinkedIn banner, and website hero sections.</p>
+        <div class="logo-preview">
+            <img src="firstqa-banner.svg" alt="FirstQA Banner" style="max-height: 167px;">
+        </div>
+        <div class="download-links">
+            <a href="firstqa-banner.svg" download class="download-btn">Download SVG</a>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-banner.svg', 1500, 500, 'firstqa-banner-1500x500.png')">PNG 1500×500 (Twitter)</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-banner.svg', 1584, 396, 'firstqa-banner-linkedin.png')">PNG 1584×396 (LinkedIn)</button>
+        </div>
+    </div>
+
+    <!-- Favicon -->
+    <div class="section">
+        <h2>Favicon</h2>
+        <p class="desc">Browser tab icon.</p>
+        <div class="logo-preview">
+            <img src="firstqa-favicon.svg" alt="FirstQA Favicon" style="max-height: 64px;">
+        </div>
+        <div class="download-links">
+            <a href="firstqa-favicon.svg" download class="download-btn">Download SVG</a>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-favicon.svg', 32, 32, 'favicon-32.png')">PNG 32×32</button>
+            <button class="download-btn secondary" onclick="downloadPNG('firstqa-favicon.svg', 16, 16, 'favicon-16.png')">PNG 16×16</button>
+        </div>
+    </div>
+
+    <!-- Recommended Sizes -->
+    <div class="section">
+        <h2>Recommended Sizes by Platform</h2>
+        <div class="sizes">
+            <div class="size-card">
+                <h4>Twitter</h4>
+                <p>Profile: 400×400<br>Header: 1500×500</p>
+            </div>
+            <div class="size-card">
+                <h4>LinkedIn</h4>
+                <p>Profile: 400×400<br>Banner: 1584×396</p>
+            </div>
+            <div class="size-card">
+                <h4>Facebook</h4>
+                <p>Profile: 180×180<br>Cover: 820×312</p>
+            </div>
+            <div class="size-card">
+                <h4>Instagram</h4>
+                <p>Profile: 320×320</p>
+            </div>
+            <div class="size-card">
+                <h4>GitHub</h4>
+                <p>Profile: 500×500</p>
+            </div>
+            <div class="size-card">
+                <h4>Favicon</h4>
+                <p>16×16, 32×32, 48×48</p>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        async function downloadPNG(svgPath, width, height, filename) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            img.src = svgPath;
+        }
+    </script>
+</body>
+</html>
+
