@@ -33,10 +33,41 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 <table style="width: 100%; border-collapse: collapse;">
 <tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Summary</th></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">✅ Release Confidence</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 High / 🟡 Medium-High / 🟡 Medium / 🔴 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Change Impact</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium-High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">✅ Release Confidence</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 High / 🟡 Medium-High / 🟡 Medium / 🔴 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary considering code review findings, risks, bugs, affected areas, and critical path impact]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Change Impact</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium-High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary considering affected areas, critical path flows, and scope of changes]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary weighing code quality, risks, bugs, and impact]</td></tr>
 </table>
+
+## 🔍 Code Review
+
+[AI will generate bullet points about code review findings:
+- Code quality issues (missing error handling, potential memory leaks, code smells)
+- Implementation concerns (architecture, patterns, best practices)
+- Performance implications (inefficient algorithms, potential bottlenecks)
+- Security considerations (input validation, data sanitization)
+- Maintainability issues (complex logic, unclear code, missing comments)
+- Specific code locations and line numbers when relevant]
+
+## ⚠️ Risks
+
+[AI will list real potential risks based on the code:
+- Runtime risks (null pointer exceptions, race conditions, memory leaks)
+- Integration risks (API failures, data consistency, external dependencies)
+- User experience risks (UI flicker, data loss, confusing flows)
+- Regression risks (affected areas that might break, related features impacted)
+- Performance risks (slow operations, resource consumption)
+- Data risks (corruption, loss, inconsistency)
+- Specific scenarios and affected areas]
+
+## 🐛 Bugs
+
+[AI will list clear bugs in code and functionality:
+- Actual code defects (missing null checks, incorrect logic, off-by-one errors)
+- Functional bugs (incorrect behavior, missing features, broken flows)
+- Edge case failures (unhandled scenarios, boundary condition issues)
+- Integration bugs (API mismatches, data sync issues)
+- UI bugs (layout issues, broken interactions, visual glitches)
+- Specific file names, line numbers, and how to reproduce when possible]
 
 ## 🧪 Test Recipe
 
@@ -51,9 +82,6 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - Reference specific code elements (filters, badges, buttons, etc.) by their actual names
 - Understand the exact state flow and transitions by analyzing the code logic
 
-## ⚠️ Key Questions, Risks & Bugs
-
-[AI will generate exactly 3 items: 1 Risk, 1 Bug, 1 Question based on the code changes]
 
 ## 🎯 Product Areas Affected
 
@@ -233,26 +261,42 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors extracted from code
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
 
-- For Questions, Risks & Bugs: 
-  - ACTUALLY ANALYZE the code changes to see if they affect other modules/components/files
-  - If dependencies are found, specify exactly which files/modules are affected and how
-  - If no dependencies found, don't mention generic "could affect" statements
-  - Look for actual code issues like missing error handling, potential null pointer exceptions, security vulnerabilities, performance bottlenecks, or integration problems that are visible in the diff
-  - Give concrete results, not generic questions
-  - Avoid duplication between questions/risks and bugs - consolidate similar concerns
-  - **IMPORTANT**: Always provide exactly 3 items total, with this specific format:
-    - 1 Risk: Focus on potential runtime issues, security vulnerabilities, or performance problems
-    - 1 Bug: Focus on actual code defects or missing error handling
-    - 1 Question: Focus on edge cases or integration concerns
-  - **Example format**:
-    - **Risk**: "Missing null check for user input could cause runtime errors (line 45)"
-    - **Bug**: "No error handling when API call fails (lines 67-72)"
-    - **Question**: "How does this handle concurrent user access?"
+- For Code Review:
+  - Analyze code quality, patterns, and best practices
+  - Identify code smells, missing error handling, potential memory leaks
+  - Note performance implications, security considerations
+  - Mention maintainability concerns (complex logic, unclear code, missing comments)
+  - Include specific file names and line numbers when relevant
+  - Focus on actionable code review feedback
+  - Use bullet points for clarity
+
+- For Risks:
+  - Identify REAL potential risks based on actual code analysis
+  - Include runtime risks (null pointers, race conditions, memory leaks, unhandled exceptions)
+  - Include integration risks (API failures, data consistency, external dependencies)
+  - Include UX risks (UI flicker, data loss, confusing flows, poor error messages)
+  - Include regression risks (affected areas that might break, related features impacted)
+  - Include performance risks (slow operations, resource consumption, scalability)
+  - Include data risks (corruption, loss, inconsistency)
+  - Be specific about scenarios and affected areas
+  - Prioritize by likelihood and impact
+  - Use bullet points with clear descriptions
+
+- For Bugs:
+  - List CLEAR bugs found in code and functionality
+  - Include actual code defects (missing null checks, incorrect logic, off-by-one errors, wrong variable usage)
+  - Include functional bugs (incorrect behavior, missing features, broken flows)
+  - Include edge case failures (unhandled scenarios, boundary condition issues)
+  - Include integration bugs (API mismatches, data sync issues, webhook problems)
+  - Include UI bugs (layout issues, broken interactions, visual glitches)
+  - Include specific file names, line numbers, and reproduction steps when possible
+  - Focus on actionable, fixable bugs
+  - Use bullet points with clear descriptions
 - For Product Areas: Identify specific features, modules, user flows, or business processes that are directly affected by the code changes
 - For Release Pulse Analysis:
-  - **Release Confidence**: Evaluate test coverage, presence of test files, handling of edge cases, and overall implementation confidence. MAX 15 words.
-  - **Change Impact**: Evaluate scope of code diff — number of files, components/modules touched, shared or risky areas. MAX 15 words.
-  - **Release Decision**: Recommend Go or No-Go based on a weighted judgment of the above. Go if value is meaningful, confidence is high/medium, and impact is low/medium. No-Go if confidence is low or impact is high without mitigations. MAX 15 words.
+  - **Release Confidence**: Evaluate based on code review findings (quality, maintainability), number/severity of risks, number/severity of bugs, affected areas (critical vs non-critical), whether changes are in critical path flows, test coverage, edge case handling, and overall implementation confidence. MAX 15 words.
+  - **Change Impact**: Evaluate based on affected areas (how many, how critical), whether changes touch critical path flows (auth, payment, core features), scope of changes (files, components, modules), user-facing vs backend-only, integration points touched, and potential for cascading effects. MAX 15 words.
+  - **Release Decision**: Make Go/No-Go recommendation based on weighted judgment of Release Confidence and Change Impact, severity of bugs and risks, whether critical path is affected, mitigations available, and value vs risk trade-off. Go if value is meaningful, confidence is high/medium, impact is low/medium, and bugs/risks are manageable. No-Go if confidence is low, critical path has high risk, or severe bugs/risks without mitigations. MAX 15 words.
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
@@ -260,3 +304,53 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - This ensures the table displays steps as proper numbered lists
 
 **REMEMBER: STOP YOUR OUTPUT AFTER THE "🎯 Product Areas Affected" SECTION. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
+
+**RELEASE PULSE EVALUATION REQUIREMENTS:**
+- **Release Confidence**: Evaluate based on:
+  - Code review findings (quality, maintainability, best practices)
+  - Number and severity of risks identified
+  - Number and severity of bugs found
+  - Affected areas (critical vs. non-critical)
+  - Whether changes are in critical path flows
+  - Test coverage and edge case handling
+  - Overall code quality and implementation confidence
+- **Change Impact**: Evaluate based on:
+  - Affected areas (how many, how critical)
+  - Whether changes touch critical path flows (user authentication, payment, core features)
+  - Scope of changes (files, components, modules affected)
+  - User-facing vs. backend-only changes
+  - Integration points touched
+  - Potential for cascading effects
+- **Release Decision**: Make Go/No-Go recommendation based on:
+  - Weighted judgment of Release Confidence and Change Impact
+  - Severity of bugs and risks
+  - Whether critical path is affected
+  - Mitigations available for identified issues
+  - Value vs. risk trade-off
+
+**CODE REVIEW REQUIREMENTS:**
+- Analyze code quality, patterns, best practices
+- Identify missing error handling, potential memory leaks, code smells
+- Note performance implications, security considerations
+- Mention maintainability concerns (complex logic, unclear code)
+- Include specific file names and line numbers when relevant
+- Focus on actionable code review feedback
+
+**RISKS REQUIREMENTS:**
+- Identify REAL potential risks based on actual code analysis
+- Include runtime risks (null pointers, race conditions, memory leaks)
+- Include integration risks (API failures, data consistency)
+- Include UX risks (UI flicker, data loss, confusing flows)
+- Include regression risks (what might break)
+- Include performance risks, data risks
+- Be specific about scenarios and affected areas
+- Prioritize by likelihood and impact
+
+**BUGS REQUIREMENTS:**
+- List CLEAR bugs found in code and functionality
+- Include actual code defects (missing null checks, incorrect logic)
+- Include functional bugs (incorrect behavior, broken flows)
+- Include edge case failures, integration bugs, UI bugs
+- Include specific file names and line numbers when possible
+- Include reproduction steps when relevant
+- Focus on actionable, fixable bugs
