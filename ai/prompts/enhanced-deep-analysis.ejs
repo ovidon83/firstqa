@@ -40,24 +40,28 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🔍 Code Review
 
-[AI will generate bullet points about code review findings:
-- Code quality issues (missing error handling, potential memory leaks, code smells)
-- Implementation concerns (architecture, patterns, best practices)
-- Performance implications (inefficient algorithms, potential bottlenecks)
-- Security considerations (input validation, data sanitization)
-- Maintainability issues (complex logic, unclear code, missing comments)
-- Specific code locations and line numbers when relevant]
+[AI will generate bullet points ONLY about REAL code review findings based on ACTUAL code analysis:
+- MUST include specific file names and line numbers for every item
+- Only mention code quality issues if you can point to SPECIFIC code examples (e.g., "Missing error handling in `handleApiCall()` at line 45 in `src/utils/api.js`")
+- Only mention implementation concerns if you can identify SPECIFIC problematic patterns in the code
+- Only mention performance implications if you can point to SPECIFIC inefficient code (e.g., "Nested loop in `processData()` at line 120 in `src/processors/data.js` - O(n²) complexity")
+- Only mention security considerations if you can identify SPECIFIC vulnerabilities in the code (e.g., "No input validation on user data at line 78 in `src/handlers/user.js`")
+- Only mention maintainability issues if you can point to SPECIFIC complex/unclear code sections
+- If nothing specific is found, write "No significant code review findings." - DO NOT make generic statements
+- Every bullet point MUST reference actual code from the diff]
 
 ## ⚠️ Risks
 
-[AI will list real potential risks based on the code:
-- Runtime risks (null pointer exceptions, race conditions, memory leaks)
-- Integration risks (API failures, data consistency, external dependencies)
-- User experience risks (UI flicker, data loss, confusing flows)
-- Regression risks (affected areas that might break, related features impacted)
-- Performance risks (slow operations, resource consumption)
-- Data risks (corruption, loss, inconsistency)
-- Specific scenarios and affected areas]
+[AI will list ONLY REAL potential risks based on ACTUAL code analysis:
+- MUST include specific file names, line numbers, and code examples for every risk
+- Only mention runtime risks if you can identify SPECIFIC code that could cause them (e.g., "Potential null pointer at line 56 in `src/components/Button.js` where `user.profile` is accessed without null check")
+- Only mention integration risks if you can point to SPECIFIC integration points that could fail (e.g., "API call at line 89 in `src/api/user.js` has no timeout, could hang indefinitely")
+- Only mention UX risks if you can identify SPECIFIC code that could cause them (e.g., "State update at line 123 in `src/hooks/useFilter.js` happens asynchronously without loading indicator")
+- Only mention regression risks if you can identify SPECIFIC affected areas/files from the diff
+- Only mention performance risks if you can point to SPECIFIC inefficient code patterns (e.g., "Event listener at line 45 in `src/components/List.js` not cleaned up, could cause memory leak")
+- Only mention data risks if you can identify SPECIFIC code paths that could corrupt data
+- Every risk MUST be backed by actual code evidence from the diff
+- If nothing specific is found, write "No significant risks identified." - DO NOT make generic statements like "could potentially" without evidence]
 
 ## 🐛 Bugs
 
@@ -262,25 +266,31 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
 
 - For Code Review:
-  - Analyze code quality, patterns, and best practices
-  - Identify code smells, missing error handling, potential memory leaks
-  - Note performance implications, security considerations
-  - Mention maintainability concerns (complex logic, unclear code, missing comments)
-  - Include specific file names and line numbers when relevant
-  - Focus on actionable code review feedback
-  - Use bullet points for clarity
+  - **CRITICAL**: Only list findings that you can point to SPECIFIC code examples from the diff
+  - **REQUIRED**: Every item MUST include file name and line number
+  - Only mention code quality issues if you can show the exact problematic code (e.g., "Missing error handling in `functionName()` at line X in `file.js`")
+  - Only mention implementation concerns if you can identify specific patterns in the actual code
+  - Only mention performance if you can point to specific inefficient code (e.g., "O(n²) nested loop at line X")
+  - Only mention security if you can identify specific vulnerabilities (e.g., "No input validation at line X")
+  - Only mention maintainability if you can point to specific complex code sections
+  - **DO NOT make generic statements** like "ensure error handling is robust" without pointing to specific missing error handling
+  - **If nothing specific found**: Write "No significant code review findings." - it's fine to have nothing
+  - Focus on actionable, evidence-based feedback with code examples
+  - Use bullet points with file names and line numbers for every item
 
 - For Risks:
-  - Identify REAL potential risks based on actual code analysis
-  - Include runtime risks (null pointers, race conditions, memory leaks, unhandled exceptions)
-  - Include integration risks (API failures, data consistency, external dependencies)
-  - Include UX risks (UI flicker, data loss, confusing flows, poor error messages)
-  - Include regression risks (affected areas that might break, related features impacted)
-  - Include performance risks (slow operations, resource consumption, scalability)
-  - Include data risks (corruption, loss, inconsistency)
-  - Be specific about scenarios and affected areas
-  - Prioritize by likelihood and impact
-  - Use bullet points with clear descriptions
+  - **CRITICAL**: Only list risks that you can point to SPECIFIC code examples from the diff
+  - **REQUIRED**: Every risk MUST include file name, line number, and specific code evidence
+  - Only mention runtime risks if you can identify SPECIFIC code that could cause them (e.g., "Null pointer risk: `user.profile.name` accessed at line 45 in `src/components/Header.js` without null check")
+  - Only mention integration risks if you can point to SPECIFIC integration code that could fail (e.g., "API call at line 89 in `src/api/fetch.js` has no error handling for network timeouts")
+  - Only mention UX risks if you can identify SPECIFIC code that could cause them (e.g., "State update at line 123 causes UI flicker due to synchronous DOM manipulation")
+  - Only mention regression risks if you can identify SPECIFIC files/areas from the diff that might be affected
+  - Only mention performance risks if you can point to SPECIFIC inefficient code (e.g., "Memory leak: Event listener at line 67 in `src/hooks/useEffect.js` not cleaned up in cleanup function")
+  - Only mention data risks if you can identify SPECIFIC code paths that could corrupt data
+  - **DO NOT make generic statements** like "could potentially cause issues" without specific code evidence
+  - **If nothing specific found**: Write "No significant risks identified." - it's fine to have nothing
+  - Every risk must be backed by actual code from the diff
+  - Use bullet points with file names, line numbers, and specific code examples
 
 - For Bugs:
   - List CLEAR bugs found in code and functionality
@@ -329,22 +339,28 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Value vs. risk trade-off
 
 **CODE REVIEW REQUIREMENTS:**
-- Analyze code quality, patterns, best practices
-- Identify missing error handling, potential memory leaks, code smells
-- Note performance implications, security considerations
-- Mention maintainability concerns (complex logic, unclear code)
-- Include specific file names and line numbers when relevant
-- Focus on actionable code review feedback
+- **STRICT RULE**: Only list findings backed by SPECIFIC code evidence from the diff
+- **REQUIRED**: Every item MUST include exact file name and line number
+- Only mention issues if you can point to the exact problematic code (e.g., "Missing error handling in `handleApiCall()` at line 45 in `src/utils/api.js`: `fetch(url)` has no try-catch")
+- **NO GENERIC STATEMENTS**: Don't say "ensure error handling is robust" - instead say "Missing error handling at line X in file Y where function Z could throw"
+- Only mention performance if you can identify specific inefficient code (e.g., "O(n²) complexity: nested loop at lines 120-125 in `src/processors/data.js`")
+- Only mention security if you can identify specific vulnerabilities (e.g., "No input validation: user input `data.email` used directly in query at line 78 in `src/handlers/user.js`")
+- Only mention maintainability if you can point to specific complex code (e.g., "Complex conditional logic: 5 nested if statements at lines 200-250 in `src/utils/validator.js`")
+- **If nothing specific found**: Write "No significant code review findings." - it's perfectly fine to have nothing
+- Focus on actionable, evidence-based feedback with code examples
 
 **RISKS REQUIREMENTS:**
-- Identify REAL potential risks based on actual code analysis
-- Include runtime risks (null pointers, race conditions, memory leaks)
-- Include integration risks (API failures, data consistency)
-- Include UX risks (UI flicker, data loss, confusing flows)
-- Include regression risks (what might break)
-- Include performance risks, data risks
-- Be specific about scenarios and affected areas
-- Prioritize by likelihood and impact
+- **STRICT RULE**: Only list risks backed by SPECIFIC code evidence from the diff
+- **REQUIRED**: Every risk MUST include exact file name, line number, and code example
+- Only mention runtime risks if you can identify SPECIFIC code that could cause them (e.g., "Null pointer risk at line 56: `user.profile.name` accessed without checking `user.profile` exists in `src/components/Button.js`")
+- Only mention integration risks if you can point to SPECIFIC code that could fail (e.g., "API timeout risk: `fetch()` call at line 89 in `src/api/user.js` has no timeout configuration, could hang indefinitely")
+- Only mention UX risks if you can identify SPECIFIC code that could cause them (e.g., "UI flicker risk: State update at line 123 in `src/hooks/useFilter.js` triggers re-render without `useMemo`, causing visual flicker")
+- Only mention regression risks if you can identify SPECIFIC files/areas from the diff that might break
+- Only mention performance risks if you can point to SPECIFIC inefficient code (e.g., "Memory leak risk: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared in cleanup function")
+- Only mention data risks if you can identify SPECIFIC code paths that could corrupt data
+- **NO GENERIC STATEMENTS**: Don't say "could potentially cause issues" - instead provide specific code evidence
+- **If nothing specific found**: Write "No significant risks identified." - it's perfectly fine to have nothing
+- Every risk must be backed by actual code from the diff with file name and line number
 
 **BUGS REQUIREMENTS:**
 - List CLEAR bugs found in code and functionality
