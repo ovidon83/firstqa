@@ -51,13 +51,21 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **Test recipe based on the diff + other impacted files — no guessing, no overtesting**
 - **Identify assumptions, missing context, suspicious diffs**
 - Prioritize tests using unified system:
-  - **Happy Path**: Core functionality that works as intended
-  - **Critical Path**: Important scenarios that must work correctly
-  - **Edge Case**: Edge cases and error conditions
-  - **Regression**: Existing functionality that might be affected by these changes (based on Product Areas affected)
+  - **Happy Path**: Core user workflows and functionality that must work as intended (HIGH PRIORITY)
+  - **Critical Path**: Important user-facing scenarios that affect user experience (HIGH PRIORITY)
+  - **Edge Case**: Important error handling and boundary conditions (MEDIUM PRIORITY - avoid obscure cases)
+  - **Regression**: Existing functionality that might be affected by these changes (HIGH PRIORITY)
+- **PRIORITIZE USER-FACING CHANGES**: Focus test cases on features users directly interact with (UI, navigation, visibility, buttons, forms)
+- **COVER ALL CHANGES**: Ensure test cases cover ALL added, fixed, changed, and REMOVED features across ALL commits
+- **VERIFY ADDITIONS**: Test that added features are present and working correctly
+- **VERIFY REMOVALS**: Test that removed features are actually gone/not present (negative testing)
+- **AVOID LOW-PRIORITY**: Skip obscure edge cases that users won't encounter in normal usage
 - Provide concrete, actionable test steps based on the real changes
-- Consider the full user journey and potential impact areas
-- Include comprehensive test coverage while being specific to this PR
+- Consider the full user journey and how ALL changes work together
+- Include comprehensive test coverage that addresses the complete change set
+- Generate tests that verify fixes work and don't regress
+- Generate tests that verify new features function correctly
+- Generate tests that verify modified features still work as expected
 - Always specify file names with line numbers in questions and risks
 - Focus on real, code-based risks, not potential or generic ones
 

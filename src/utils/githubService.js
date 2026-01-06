@@ -628,15 +628,32 @@ async function fetchCommitsSince(repository, prNumber, sinceSHA) {
     const baseSHA = prResponse.data.base.sha;
     const headSHA = prResponse.data.head.sha;
 
-    // Get all commits for the PR
-    const commitsResponse = await repoOctokit.pulls.listCommits({
-      owner,
-      repo: repoName,
-      pull_number: prNumber,
-      per_page: 100
-    });
-
-    const allCommits = commitsResponse.data;
+    // Get all commits for the PR (handle pagination)
+    let allCommits = [];
+    let page = 1;
+    const perPage = 100;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const commitsResponse = await repoOctokit.pulls.listCommits({
+        owner,
+        repo: repoName,
+        pull_number: prNumber,
+        per_page: perPage,
+        page: page
+      });
+      
+      const commits = commitsResponse.data;
+      allCommits = allCommits.concat(commits);
+      
+      // Check if there are more pages
+      hasMore = commits.length === perPage;
+      page++;
+      
+      console.log(`📄 Fetched page ${page - 1}: ${commits.length} commits (total so far: ${allCommits.length})`);
+    }
+    
+    console.log(`✅ Fetched ${allCommits.length} total commit(s) from PR`);
     
     // GitHub API returns commits in reverse chronological order (newest first)
     // So allCommits[0] = latest commit (HEAD), allCommits[N] = oldest commit
@@ -644,21 +661,41 @@ async function fetchCommitsSince(repository, prNumber, sinceSHA) {
     // If sinceSHA is provided, filter commits after that SHA
     if (sinceSHA) {
       // Find the index of the sinceSHA commit
-      const sinceIndex = allCommits.findIndex(commit => commit.sha === sinceSHA);
+      // Try exact match first
+      let sinceIndex = allCommits.findIndex(commit => commit.sha === sinceSHA);
+      
+      // If not found, try matching just the first 7 chars (short SHA)
+      if (sinceIndex === -1) {
+        const shortSHA = sinceSHA.substring(0, 7);
+        sinceIndex = allCommits.findIndex(commit => commit.sha.startsWith(shortSHA));
+        if (sinceIndex >= 0) {
+          console.log(`🔍 Found last analyzed SHA by short match: ${shortSHA} → ${allCommits[sinceIndex].sha.substring(0, 7)}`);
+        }
+      }
+      
       console.log(`🔍 Looking for last analyzed SHA: ${sinceSHA.substring(0, 7)}`);
-      console.log(`📋 All commit SHAs: ${allCommits.map(c => c.sha.substring(0, 7)).join(', ')}`);
+      console.log(`📋 All ${allCommits.length} commit SHAs (newest first): ${allCommits.map(c => `${c.sha.substring(0, 7)}`).join(', ')}`);
+      console.log(`📋 Commit messages (newest first): ${allCommits.map(c => `${c.commit?.message?.split('\n')[0] || 'N/A'}`).join(' | ')}`);
       
       if (sinceIndex >= 0) {
         // Return commits that came AFTER sinceSHA (indices 0 to sinceIndex-1)
         // These are the NEWER commits
         const newCommits = allCommits.slice(0, sinceIndex);
-        console.log(`📊 Commit filtering: Found ${allCommits.length} total commits, last analyzed at index ${sinceIndex} (${allCommits[sinceIndex].sha.substring(0, 7)}), returning ${newCommits.length} new commit(s):`);
+        console.log(`📊 Commit filtering: Found ${allCommits.length} total commits`);
+        console.log(`   Last analyzed commit: index ${sinceIndex} - ${allCommits[sinceIndex].sha.substring(0, 7)} (${allCommits[sinceIndex].commit?.message?.split('\n')[0] || 'N/A'})`);
+        console.log(`   Returning ${newCommits.length} NEW commit(s) (indices 0-${sinceIndex - 1}):`);
         newCommits.forEach((c, i) => {
-          console.log(`   ${i + 1}. ${c.sha.substring(0, 7)} - ${c.commit?.message?.split('\n')[0] || 'N/A'}`);
+          console.log(`   ${i + 1}. [${i}] ${c.sha.substring(0, 7)} - ${c.commit?.message?.split('\n')[0] || 'N/A'}`);
         });
+        
+        if (newCommits.length === 0 && sinceIndex === 0) {
+          console.log(`⚠️ WARNING: sinceIndex is 0, meaning the HEAD commit was already analyzed. This shouldn't happen if new commits were added.`);
+        }
+        
         return newCommits;
       } else {
-        console.log(`⚠️ Last analyzed SHA ${sinceSHA.substring(0, 7)} not found in commit list - might be rebased`);
+        console.log(`⚠️ Last analyzed SHA ${sinceSHA.substring(0, 7)} not found in commit list - might be rebased or force-pushed`);
+        console.log(`   Will analyze all ${allCommits.length} commits`);
       }
       // If sinceSHA not found, it might be a rebase or force push
       console.log(`⚠️ Commit SHA ${sinceSHA} not found in PR commits (might be rebased/force-pushed), analyzing all ${allCommits.length} commits`);
@@ -1048,52 +1085,198 @@ async function handleTestRequest(repository, issue, comment, sender) {
   const prDiff = await fetchPRDiff(repository.full_name, issue.number);
   console.log(`📝 PR diff: ${prDiff ? `Success (${prDiff.length} chars)` : 'Failed'}`);
   
-  // Prepare new commits information for AI context
+  // Prepare comprehensive commits context for AI analysis
   let newCommitsContext = '';
   
   if (newCommits.length > 0) {
-    // Build detailed context about new commits for the AI
     const isUpdate = lastAnalyzedSHA !== null;
-    newCommitsContext = '\n\n## 🔄 ' + (isUpdate ? 'NEW COMMITS ADDED SINCE LAST ANALYSIS' : 'ALL COMMITS IN THIS PR') + ':\n\n';
+    
+    // Analyze all commits to build a comprehensive change summary
+    const chronologicalCommits = [...newCommits].reverse(); // Oldest first
+    
+    // Extract change types from commit messages and diffs
+    const changesSummary = {
+      added: [],
+      removed: [],
+      fixed: [],
+      changed: [],
+      userFacing: []
+    };
+    
+    chronologicalCommits.forEach(commit => {
+      const msg = commit.message.toLowerCase();
+      const msgFirstLine = commit.message.split('\n')[0];
+      
+      // Categorize changes
+      if (msg.includes('add') || msg.includes('implement') || msg.includes('create') || msg.includes('introduce')) {
+        changesSummary.added.push(msgFirstLine);
+        if (msg.includes('ui') || msg.includes('view') || msg.includes('component') || msg.includes('button') || msg.includes('navigation')) {
+          changesSummary.userFacing.push(msgFirstLine);
+        }
+      }
+      if (msg.includes('remove') || msg.includes('delete') || msg.includes('drop')) {
+        changesSummary.removed.push(msgFirstLine);
+      }
+      if (msg.includes('fix') || msg.includes('bug') || msg.includes('issue') || msg.includes('resolve')) {
+        changesSummary.fixed.push(msgFirstLine);
+      }
+      if (msg.includes('update') || msg.includes('modify') || msg.includes('change') || msg.includes('improve') || msg.includes('refactor')) {
+        changesSummary.changed.push(msgFirstLine);
+        if (msg.includes('ui') || msg.includes('view') || msg.includes('component') || msg.includes('button') || msg.includes('navigation') || msg.includes('visible')) {
+          changesSummary.userFacing.push(msgFirstLine);
+        }
+      }
+    });
+    
+    newCommitsContext = '\n\n## 🔄 ' + (isUpdate ? 'COMPREHENSIVE ANALYSIS UPDATE - NEW COMMITS DETECTED' : 'COMPLETE PR ANALYSIS - ALL COMMITS') + ':\n\n';
     
     if (isUpdate) {
-      newCommitsContext += `**⚠️ CRITICAL: ${newCommits.length} new commit(s) have been added since the last analysis.**\n\n`;
+      newCommitsContext += `**⚠️ CRITICAL UPDATE: ${newCommits.length} new commit(s) have been added since the last analysis.**\n\n`;
+      newCommitsContext += `**You MUST regenerate a COMPLETE analysis considering ALL commits (previous + new) as a unified set of changes.**\n\n`;
+    } else {
+      newCommitsContext += `**This PR contains ${newCommits.length} commit(s). Analyze ALL of them together as a cohesive change set.**\n\n`;
     }
     
-    newCommitsContext += `**⚠️ REGENERATE COMPLETE ANALYSIS:** Review the FULL PR diff below and provide a COMPLETE, fresh analysis of the ENTIRE PR (all commits, old + new).\n\n`;
-    newCommitsContext += `**⚠️ IMPORTANT:** Pay special attention to what was REMOVED or CHANGED in these commits. If a commit message says "remove X", do NOT suggest tests for X. Analyze the ACTUAL CURRENT STATE of the code.\n\n`;
+    // Build comprehensive change summary
+    newCommitsContext += `### 📊 COMPREHENSIVE CHANGE SUMMARY (All Commits Combined):\n\n`;
     
-    newCommitsContext += `### Commit Details (in chronological order):\n\n`;
-    // Reverse order to show oldest first (chronological)
-    const chronologicalCommits = [...newCommits].reverse();
+    if (changesSummary.added.length > 0) {
+      newCommitsContext += `**✅ ADDED/NEW Features:**\n`;
+      changesSummary.added.forEach(msg => {
+        newCommitsContext += `- ${msg}\n`;
+      });
+      newCommitsContext += `\n`;
+    }
+    
+    if (changesSummary.removed.length > 0) {
+      newCommitsContext += `**❌ REMOVED/DELETED Features (VERIFY they are actually removed/not present):**\n`;
+      changesSummary.removed.forEach(msg => {
+        newCommitsContext += `- ${msg}\n`;
+      });
+      newCommitsContext += `\n`;
+    }
+    
+    if (changesSummary.fixed.length > 0) {
+      newCommitsContext += `**🔧 FIXED Issues/Bugs:**\n`;
+      changesSummary.fixed.forEach(msg => {
+        newCommitsContext += `- ${msg}\n`;
+      });
+      newCommitsContext += `\n`;
+    }
+    
+    if (changesSummary.changed.length > 0) {
+      newCommitsContext += `**🔄 CHANGED/UPDATED Features:**\n`;
+      changesSummary.changed.forEach(msg => {
+        newCommitsContext += `- ${msg}\n`;
+      });
+      newCommitsContext += `\n`;
+    }
+    
+    if (changesSummary.userFacing.length > 0) {
+      newCommitsContext += `**👤 USER-FACING Changes (PRIORITY for testing):**\n`;
+      changesSummary.userFacing.forEach(msg => {
+        newCommitsContext += `- ${msg}\n`;
+      });
+      newCommitsContext += `\n`;
+    }
+    
+    newCommitsContext += `---\n\n### 📝 COMMIT HISTORY (Chronological Order - Oldest First):\n\n`;
+    
+    // Show commits in chronological order with key details
     chronologicalCommits.forEach((commit, index) => {
-      const commitNum = isUpdate ? index + 1 : chronologicalCommits.length - index;
-      newCommitsContext += `**Commit ${commitNum}: \`${commit.sha.substring(0, 7)}\`**\n`;
+      const commitNum = index + 1;
+      const msgFirstLine = commit.message.split('\n')[0];
+      const msgLower = commit.message.toLowerCase();
+      
+      newCommitsContext += `**Commit ${commitNum}/${chronologicalCommits.length}: \`${commit.sha.substring(0, 7)}\`**\n`;
       newCommitsContext += `- **Message:** ${commit.message}\n`;
       newCommitsContext += `- **Author:** ${commit.author || 'Unknown'}\n`;
       newCommitsContext += `- **Date:** ${commit.date || 'Unknown'}\n`;
       
-      // Extract key changes from commit message and diff
-      const commitMessage = commit.message.toLowerCase();
-      if (commitMessage.includes('remove') || commitMessage.includes('delete')) {
-        newCommitsContext += `- **⚠️ NOTE: This commit REMOVES or DELETES functionality - do NOT suggest tests for removed features!**\n`;
+      // Add change type indicators
+      if (msgLower.includes('remove') || msgLower.includes('delete')) {
+        newCommitsContext += `- **⚠️ REMOVAL:** This commit removes functionality - VERIFY it's actually removed/not present in the UI\n`;
+      }
+      if (msgLower.includes('fix') || msgLower.includes('bug')) {
+        newCommitsContext += `- **🔧 FIX:** This commit fixes an issue - ensure fix works and doesn't regress\n`;
+      }
+      if (msgLower.includes('ui') || msgLower.includes('visible') || msgLower.includes('navigation') || msgLower.includes('component')) {
+        newCommitsContext += `- **👤 USER-FACING:** This affects user-visible behavior - HIGH PRIORITY for testing\n`;
       }
       
-      // Show full diff (truncated if too long)
-      const maxDiffLength = 2000;
+      // Show key code changes (full diff if not too long, otherwise preview)
+      const maxDiffLength = 1500;
       const commitDiff = commit.diff.length > maxDiffLength 
-        ? commit.diff.substring(0, maxDiffLength) + `\n... [truncated, ${commit.diff.length - maxDiffLength} more chars in full diff]`
+        ? commit.diff.substring(0, maxDiffLength) + `\n... [${commit.diff.length - maxDiffLength} more chars in full PR diff]`
         : commit.diff;
-      newCommitsContext += `- **Code Changes:**\n\`\`\`diff\n${commitDiff}\n\`\`\`\n\n`;
+      
+      if (commitDiff && commitDiff.trim().length > 0) {
+        newCommitsContext += `- **Code Changes:**\n\`\`\`diff\n${commitDiff}\n\`\`\`\n`;
+      }
+      newCommitsContext += `\n`;
     });
     
-    newCommitsContext += `---\n\n**Analysis Instructions:**\n`;
-    newCommitsContext += `1. Review the FULL PR diff below (current state of ALL files after all commits)\n`;
-    newCommitsContext += `2. **CRITICAL**: If any commit mentions "remove", "delete", or shows code deletion, those features are GONE - do NOT suggest tests for them\n`;
-    newCommitsContext += `3. Analyze the ACTUAL CURRENT STATE of the code (after all commits are applied)\n`;
-    newCommitsContext += `4. Regenerate a COMPLETE, comprehensive analysis considering ALL changes\n`;
-    newCommitsContext += `5. Provide fresh test recipes, risk analysis, and recommendations based on the FINAL state\n`;
-    newCommitsContext += `6. Only suggest tests for features that EXIST in the current code, not removed ones\n\n`;
+    newCommitsContext += `---\n\n## 🎯 COMPREHENSIVE ANALYSIS REQUIREMENTS:\n\n`;
+    newCommitsContext += `**You MUST analyze the ENTIRE PR considering ALL commits above, not just individual commits.**\n\n`;
+    
+    newCommitsContext += `### 1. Understanding the Full Change Set:\n`;
+    newCommitsContext += `- Review the FULL PR diff below (represents the FINAL state after ALL commits)\n`;
+    newCommitsContext += `- Understand how each commit builds upon previous ones\n`;
+    newCommitsContext += `- Identify the EVOLUTION of changes (what was added, then modified, then fixed, then removed)\n`;
+    newCommitsContext += `- Note what was REMOVED - verify it's actually gone (test that removed features don't appear)\n`;
+    newCommitsContext += `- Note what was ADDED - verify it's present and working (test that new features appear and function)\n`;
+    newCommitsContext += `\n`;
+    
+    newCommitsContext += `### 2. Test Case Generation Requirements:\n`;
+    newCommitsContext += `- **COVER ALL USER-FACING CHANGES**: Prioritize test cases for features users interact with\n`;
+    newCommitsContext += `- **COVER ALL FIXES**: Ensure fixes work correctly and don't regress\n`;
+    newCommitsContext += `- **COVER ALL NEW FEATURES**: Test all added functionality thoroughly - verify features are present and working\n`;
+    newCommitsContext += `- **COVER ALL REMOVALS**: Verify removed features are actually gone/not present - test that they don't appear in UI or code\n`;
+    newCommitsContext += `- **COVER ALL MODIFICATIONS**: Verify changed features still work as expected\n`;
+    newCommitsContext += `- **FOCUS ON HIGH PRIORITY**: Prioritize Happy Path and Critical Path scenarios\n`;
+    newCommitsContext += `- **AVOID LOW-PRIORITY EDGE CASES**: Focus on real user scenarios, not obscure edge cases\n`;
+    newCommitsContext += `- **CONSIDER INTEGRATION**: How do all changes work together? Test the complete flow\n`;
+    newCommitsContext += `\n`;
+    
+    newCommitsContext += `### 3. Test Priority Guidelines:\n`;
+    newCommitsContext += `- **Happy Path (HIGH)**: Core user workflows that must work (e.g., user clicks button → expected result)\n`;
+    newCommitsContext += `- **Critical Path (HIGH)**: Important functionality that affects user experience (e.g., navigation, data display)\n`;
+    newCommitsContext += `- **Edge Case (MEDIUM)**: Important error handling and boundary conditions\n`;
+    newCommitsContext += `- **Regression (HIGH)**: Existing features that might be affected by these changes\n`;
+    newCommitsContext += `- **AVOID**: Obscure edge cases, theoretical issues, or features that were removed\n`;
+    newCommitsContext += `\n`;
+    
+    newCommitsContext += `### 4. What to Test:\n`;
+    if (changesSummary.added.length > 0) {
+      newCommitsContext += `- ✅ All NEW features added across commits (verify they are present and work correctly)\n`;
+    }
+    if (changesSummary.removed.length > 0) {
+      newCommitsContext += `- ❌ All REMOVED features (verify they are actually gone/not present in UI or functionality)\n`;
+    }
+    if (changesSummary.fixed.length > 0) {
+      newCommitsContext += `- 🔧 All BUGS that were fixed (verify fix works, no regressions)\n`;
+    }
+    if (changesSummary.changed.length > 0) {
+      newCommitsContext += `- 🔄 All MODIFIED features (verify they still work correctly)\n`;
+    }
+    if (changesSummary.userFacing.length > 0) {
+      newCommitsContext += `- 👤 All USER-FACING changes (UI, navigation, visibility, interactions)\n`;
+    }
+    newCommitsContext += `- 🔗 Integration between all changes (how they work together)\n`;
+    newCommitsContext += `\n`;
+    
+    newCommitsContext += `### 5. What NOT to Test:\n`;
+    newCommitsContext += `- ❌ Low-priority edge cases that users won't encounter in normal usage\n`;
+    newCommitsContext += `- ❌ Theoretical scenarios not based on actual code changes\n`;
+    newCommitsContext += `\n`;
+    
+    newCommitsContext += `### 6. Final Analysis Approach:\n`;
+    newCommitsContext += `- Analyze the FULL PR diff (final state after all commits)\n`;
+    newCommitsContext += `- Consider the COMPLETE change journey (all commits together)\n`;
+    newCommitsContext += `- Generate test cases that cover ALL changes comprehensively\n`;
+    newCommitsContext += `- Focus on USER-FACING and HIGH-PRIORITY scenarios\n`;
+    newCommitsContext += `- Provide actionable, specific test steps based on actual code changes\n`;
+    newCommitsContext += `\n`;
   }
   
   // ALWAYS use the full PR diff - we want complete analysis

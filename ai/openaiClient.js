@@ -104,10 +104,26 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
       console.log('✅ Using enhanced deep analysis template with algorithm-aware testing');
       const promptTemplate = fs.readFileSync(enhancedPromptTemplatePath, 'utf8');
       
-      // Add update analysis instruction if new commits detected
+      // Add comprehensive analysis instruction if commits are provided
       let analysisInstruction = '';
-      if (isUpdateAnalysis && newCommits && newCommits.length > 0) {
-        analysisInstruction = `\n\n⚠️ **UPDATE ANALYSIS MODE**: ${newCommits.length} new commit(s) have been added since the last review. You MUST regenerate a COMPLETE, fresh analysis of the ENTIRE PR considering ALL changes (including the new commits). Do not just analyze the new commits in isolation - review the whole PR as a cohesive unit with the new changes integrated.\n\n`;
+      if (newCommits && newCommits.length > 0) {
+        if (isUpdateAnalysis) {
+          analysisInstruction = `\n\n⚠️ **COMPREHENSIVE UPDATE ANALYSIS MODE**: ${newCommits.length} new commit(s) have been added since the last review.\n\n`;
+        } else {
+          analysisInstruction = `\n\n⚠️ **COMPREHENSIVE PR ANALYSIS MODE**: This PR contains ${newCommits.length} commit(s).\n\n`;
+        }
+        
+        analysisInstruction += `**CRITICAL REQUIREMENTS:**\n`;
+        analysisInstruction += `1. Analyze ALL commits together as a unified change set, not individually\n`;
+        analysisInstruction += `2. Consider the EVOLUTION of changes across commits (what was added → modified → fixed)\n`;
+        analysisInstruction += `3. Generate test cases that cover ALL changes comprehensively\n`;
+        analysisInstruction += `4. PRIORITIZE user-facing changes and high-priority scenarios\n`;
+        analysisInstruction += `5. FOCUS on Happy Path, Critical Path, and important Edge Cases\n`;
+        analysisInstruction += `6. VERIFY removals: Test that removed features are actually gone/not present\n`;
+        analysisInstruction += `7. VERIFY additions: Test that added features are present and working\n`;
+        analysisInstruction += `8. AVOID low-priority edge cases that users won't encounter\n`;
+        analysisInstruction += `9. Consider how all changes work TOGETHER (integration testing)\n`;
+        analysisInstruction += `8. Base test cases on the FINAL state of the code after all commits\n\n`;
       }
       
       prompt = ejs.render(promptTemplate, {
