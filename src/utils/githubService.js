@@ -638,16 +638,23 @@ async function fetchCommitsSince(repository, prNumber, sinceSHA) {
 
     const allCommits = commitsResponse.data;
     
+    // GitHub API returns commits in reverse chronological order (newest first)
+    // So allCommits[0] = latest commit (HEAD), allCommits[N] = oldest commit
+    
     // If sinceSHA is provided, filter commits after that SHA
     if (sinceSHA) {
       // Find the index of the sinceSHA commit
       const sinceIndex = allCommits.findIndex(commit => commit.sha === sinceSHA);
       if (sinceIndex >= 0) {
-        // Return commits after this one
-        return allCommits.slice(0, sinceIndex);
+        // Return commits that came AFTER sinceSHA (indices 0 to sinceIndex-1)
+        // These are the NEWER commits
+        const newCommits = allCommits.slice(0, sinceIndex);
+        console.log(`📊 Commit filtering: Found ${allCommits.length} total commits, last analyzed at index ${sinceIndex}, returning ${newCommits.length} new commit(s)`);
+        return newCommits;
       }
-      // If sinceSHA not found, return all commits (might be a rebase)
-      console.log(`⚠️ Commit SHA ${sinceSHA} not found in PR commits, analyzing all commits`);
+      // If sinceSHA not found, it might be a rebase or force push
+      console.log(`⚠️ Commit SHA ${sinceSHA} not found in PR commits (might be rebased/force-pushed), analyzing all ${allCommits.length} commits`);
+      console.log(`   Available commit SHAs: ${allCommits.slice(0, 5).map(c => c.sha.substring(0, 7)).join(', ')}...`);
     }
 
     return allCommits;
@@ -1020,18 +1027,39 @@ async function handleTestRequest(repository, issue, comment, sender) {
   const prDiff = await fetchPRDiff(repository.full_name, issue.number);
   console.log(`📝 PR diff: ${prDiff ? `Success (${prDiff.length} chars)` : 'Failed'}`);
   
-  // Prepare new commits information for AI
-  let newCommitsInfo = '';
+  // Prepare new commits information for AI context
+  let newCommitsContext = '';
+  
   if (newCommits.length > 0) {
-    newCommitsInfo = '\n\n## 🔄 NEW COMMITS SINCE LAST ANALYSIS:\n\n';
+    // Build detailed context about new commits for the AI
+    newCommitsContext = '\n\n## 🔄 NEW COMMITS ADDED SINCE LAST ANALYSIS:\n\n';
+    newCommitsContext += `**⚠️ IMPORTANT: ${newCommits.length} new commit(s) have been added to this PR since the last analysis.**\n\n`;
+    newCommitsContext += `**Please regenerate a COMPLETE analysis of the ENTIRE PR, considering all changes including these new commits.**\n\n`;
+    
+    newCommitsContext += `### New Commits Details:\n\n`;
     newCommits.forEach((commit, index) => {
-      newCommitsInfo += `### Commit ${index + 1}: ${commit.sha.substring(0, 7)}\n`;
-      newCommitsInfo += `**Message:** ${commit.message.split('\n')[0]}\n`;
-      newCommitsInfo += `**Author:** ${commit.author || 'Unknown'}\n`;
-      newCommitsInfo += `**Date:** ${commit.date || 'Unknown'}\n\n`;
-      newCommitsInfo += `**Code Changes:**\n\`\`\`diff\n${commit.diff}\n\`\`\`\n\n`;
+      newCommitsContext += `**Commit ${index + 1}: \`${commit.sha.substring(0, 7)}\`**\n`;
+      newCommitsContext += `- **Message:** ${commit.message.split('\n')[0]}\n`;
+      newCommitsContext += `- **Author:** ${commit.author || 'Unknown'}\n`;
+      newCommitsContext += `- **Date:** ${commit.date || 'Unknown'}\n`;
+      
+      // Add key changes from this commit (first 500 chars of diff for context)
+      const commitDiffPreview = commit.diff.length > 500 
+        ? commit.diff.substring(0, 500) + '...\n[Additional changes in full diff below]'
+        : commit.diff;
+      newCommitsContext += `- **Key Changes:**\n\`\`\`\n${commitDiffPreview}\n\`\`\`\n\n`;
     });
+    
+    newCommitsContext += `---\n\n**Analysis Instructions:**\n`;
+    newCommitsContext += `1. Review the FULL PR diff below (includes all commits, old + new)\n`;
+    newCommitsContext += `2. Pay special attention to the new commits listed above\n`;
+    newCommitsContext += `3. Regenerate a COMPLETE, comprehensive analysis considering ALL changes\n`;
+    newCommitsContext += `4. Update your assessment based on how the new commits affect the overall PR\n`;
+    newCommitsContext += `5. Provide fresh test recipes, risk analysis, and recommendations\n\n`;
   }
+  
+  // ALWAYS use the full PR diff - we want complete analysis
+  const diffToAnalyze = prDiff;
   
   // Debug what we're sending to AI
   console.log('🔍 AI Input Debug:');
@@ -1039,27 +1067,32 @@ async function handleTestRequest(repository, issue, comment, sender) {
   console.log(`   PR #: ${issue.number}`);
   console.log(`   Title: ${issue.title}`);
   console.log(`   Body length: ${prDescription?.length || 0}`);
-  console.log(`   Diff length: ${prDiff?.length || 0}`);
+  console.log(`   Full PR diff length: ${prDiff?.length || 0}`);
   console.log(`   New commits: ${newCommits.length}`);
   if (newCommits.length > 0) {
-    console.log(`   New commits info length: ${newCommitsInfo.length}`);
+    console.log(`   ⚠️ NEW COMMITS DETECTED - Will regenerate COMPLETE analysis with full PR diff`);
+    console.log(`   New commits context length: ${newCommitsContext.length}`);
+    console.log(`   New commits: ${newCommits.map(c => c.sha.substring(0, 7)).join(', ')}`);
+  } else {
+    console.log(`   ✅ No new commits - Standard full PR analysis`);
   }
   
   // Generate AI insights for the PR via API endpoint
-  console.log('🤖 FirstQA Ovi AI analyzing PR with new commits...');
+  console.log('🤖 FirstQA Ovi AI analyzing PR (regenerating complete analysis)...');
   let aiInsights;
   try {
-    // Add new commits information to the PR description for context
+    // Enrich description with new commits context - but still analyze FULL PR
     const enrichedDescription = newCommits.length > 0 
-      ? `${prDescription}\n\n---\n\n${newCommitsInfo}` 
+      ? `${prDescription}${newCommitsContext}`
       : prDescription;
     
+    // Always pass full PR diff - we want complete analysis
     aiInsights = await callTestRecipeEndpoint({
       repo: repository.full_name,
       pr_number: issue.number,
-      title: issue.title,
+      title: issue.title + (newCommits.length > 0 ? ` [Updated: ${newCommits.length} new commit(s)]` : ''),
       body: enrichedDescription,
-      diff: prDiff,
+      diff: diffToAnalyze, // FULL PR diff - complete analysis
       newCommits: newCommits.length > 0 ? newCommits : undefined
     });
     if (aiInsights && aiInsights.success) {

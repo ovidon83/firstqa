@@ -75,13 +75,25 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
       };
     }
 
+    // Check if this is an update analysis (new commits detected)
+    const isUpdateAnalysis = newCommits && newCommits.length > 0;
+    
     // Sanitize inputs with much higher limits for deep analysis
     const sanitizedTitle = (title || 'No title provided').substring(0, 300);
-    const sanitizedBody = (body || 'No description provided').substring(0, 2000);
-    const sanitizedDiff = diff.substring(0, 8000); // Much higher limit
+    let sanitizedBody = (body || 'No description provided').substring(0, 3000); // Higher limit for update context
+    
+    // Note: The body already contains new commits context from githubService.js
+    // We're analyzing the FULL PR diff, but with awareness of what's new
+    
+    const sanitizedDiff = diff.substring(0, 12000); // Full PR diff
     const sanitizedContext = JSON.stringify(codeContext).substring(0, 6000); // Code context
 
     console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars, Context=${sanitizedContext.length} chars`);
+    if (isUpdateAnalysis) {
+      console.log(`🔄 REGENERATING COMPLETE ANALYSIS: ${newCommits.length} new commit(s) detected - analyzing FULL PR with new commits context`);
+    } else {
+      console.log(`✅ Standard analysis: Full PR review`);
+    }
 
     // Load and render the enhanced deep analysis prompt template
     const enhancedPromptTemplatePath = path.join(__dirname, 'prompts', 'enhanced-deep-analysis.ejs');
@@ -91,14 +103,23 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     if (fs.existsSync(enhancedPromptTemplatePath)) {
       console.log('✅ Using enhanced deep analysis template with algorithm-aware testing');
       const promptTemplate = fs.readFileSync(enhancedPromptTemplatePath, 'utf8');
+      
+      // Add update analysis instruction if new commits detected
+      let analysisInstruction = '';
+      if (isUpdateAnalysis && newCommits && newCommits.length > 0) {
+        analysisInstruction = `\n\n⚠️ **UPDATE ANALYSIS MODE**: ${newCommits.length} new commit(s) have been added since the last review. You MUST regenerate a COMPLETE, fresh analysis of the ENTIRE PR considering ALL changes (including the new commits). Do not just analyze the new commits in isolation - review the whole PR as a cohesive unit with the new changes integrated.\n\n`;
+      }
+      
       prompt = ejs.render(promptTemplate, {
         repo,
         pr_number,
         title: sanitizedTitle,
-        body: sanitizedBody,
+        body: sanitizedBody + analysisInstruction,
         diff: sanitizedDiff,
         codeContext: sanitizedContext,
-        changedFiles: changedFiles
+        changedFiles: changedFiles,
+        isUpdateAnalysis: isUpdateAnalysis,
+        newCommitsCount: isUpdateAnalysis && newCommits ? newCommits.length : 0
       });
     } else if (fs.existsSync(deepPromptTemplatePath)) {
       console.log('✅ Using deep analysis template for comprehensive code review');
