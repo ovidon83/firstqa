@@ -645,12 +645,20 @@ async function fetchCommitsSince(repository, prNumber, sinceSHA) {
     if (sinceSHA) {
       // Find the index of the sinceSHA commit
       const sinceIndex = allCommits.findIndex(commit => commit.sha === sinceSHA);
+      console.log(`🔍 Looking for last analyzed SHA: ${sinceSHA.substring(0, 7)}`);
+      console.log(`📋 All commit SHAs: ${allCommits.map(c => c.sha.substring(0, 7)).join(', ')}`);
+      
       if (sinceIndex >= 0) {
         // Return commits that came AFTER sinceSHA (indices 0 to sinceIndex-1)
         // These are the NEWER commits
         const newCommits = allCommits.slice(0, sinceIndex);
-        console.log(`📊 Commit filtering: Found ${allCommits.length} total commits, last analyzed at index ${sinceIndex}, returning ${newCommits.length} new commit(s)`);
+        console.log(`📊 Commit filtering: Found ${allCommits.length} total commits, last analyzed at index ${sinceIndex} (${allCommits[sinceIndex].sha.substring(0, 7)}), returning ${newCommits.length} new commit(s):`);
+        newCommits.forEach((c, i) => {
+          console.log(`   ${i + 1}. ${c.sha.substring(0, 7)} - ${c.commit?.message?.split('\n')[0] || 'N/A'}`);
+        });
         return newCommits;
+      } else {
+        console.log(`⚠️ Last analyzed SHA ${sinceSHA.substring(0, 7)} not found in commit list - might be rebased`);
       }
       // If sinceSHA not found, it might be a rebase or force push
       console.log(`⚠️ Commit SHA ${sinceSHA} not found in PR commits (might be rebased/force-pushed), analyzing all ${allCommits.length} commits`);
@@ -1005,7 +1013,7 @@ async function handleTestRequest(repository, issue, comment, sender) {
   // Fetch new commits since last analysis (if any)
   let newCommits = [];
   if (lastAnalyzedSHA) {
-    console.log(`🔄 Checking for new commits since last analysis...`);
+    console.log(`🔄 Checking for new commits since last analysis (last analyzed: ${lastAnalyzedSHA.substring(0, 7)})...`);
     newCommits = await fetchNewCommitsWithDetails(repository.full_name, issue.number, lastAnalyzedSHA);
     if (newCommits.length > 0) {
       console.log(`✅ Found ${newCommits.length} new commit(s) to analyze:`);
@@ -1014,9 +1022,22 @@ async function handleTestRequest(repository, issue, comment, sender) {
       });
     } else {
       console.log(`ℹ️ No new commits since last analysis`);
+      // Double-check: if current HEAD is different from last analyzed, we should detect it
+      if (currentHeadSHA && currentHeadSHA !== lastAnalyzedSHA) {
+        console.log(`⚠️ WARNING: HEAD SHA (${currentHeadSHA.substring(0, 7)}) differs from last analyzed (${lastAnalyzedSHA.substring(0, 7)}) but no commits detected - might be a rebase or force push`);
+      }
     }
   } else {
     console.log(`ℹ️ First analysis for this PR - analyzing all changes`);
+    // For first analysis, still fetch all commits for context
+    const allCommitsList = await fetchCommitsSince(repository.full_name, issue.number, null);
+    if (allCommitsList.length > 0) {
+      console.log(`📋 PR has ${allCommitsList.length} total commit(s) - fetching details for context`);
+      newCommits = await Promise.all(
+        allCommitsList.map(commit => fetchCommitDetails(repository.full_name, commit.sha))
+      );
+      console.log(`✅ Fetched details for all ${newCommits.length} commit(s) for initial analysis`);
+    }
   }
   
   // Get PR description and diff
@@ -1032,30 +1053,47 @@ async function handleTestRequest(repository, issue, comment, sender) {
   
   if (newCommits.length > 0) {
     // Build detailed context about new commits for the AI
-    newCommitsContext = '\n\n## 🔄 NEW COMMITS ADDED SINCE LAST ANALYSIS:\n\n';
-    newCommitsContext += `**⚠️ IMPORTANT: ${newCommits.length} new commit(s) have been added to this PR since the last analysis.**\n\n`;
-    newCommitsContext += `**Please regenerate a COMPLETE analysis of the ENTIRE PR, considering all changes including these new commits.**\n\n`;
+    const isUpdate = lastAnalyzedSHA !== null;
+    newCommitsContext = '\n\n## 🔄 ' + (isUpdate ? 'NEW COMMITS ADDED SINCE LAST ANALYSIS' : 'ALL COMMITS IN THIS PR') + ':\n\n';
     
-    newCommitsContext += `### New Commits Details:\n\n`;
-    newCommits.forEach((commit, index) => {
-      newCommitsContext += `**Commit ${index + 1}: \`${commit.sha.substring(0, 7)}\`**\n`;
-      newCommitsContext += `- **Message:** ${commit.message.split('\n')[0]}\n`;
+    if (isUpdate) {
+      newCommitsContext += `**⚠️ CRITICAL: ${newCommits.length} new commit(s) have been added since the last analysis.**\n\n`;
+    }
+    
+    newCommitsContext += `**⚠️ REGENERATE COMPLETE ANALYSIS:** Review the FULL PR diff below and provide a COMPLETE, fresh analysis of the ENTIRE PR (all commits, old + new).\n\n`;
+    newCommitsContext += `**⚠️ IMPORTANT:** Pay special attention to what was REMOVED or CHANGED in these commits. If a commit message says "remove X", do NOT suggest tests for X. Analyze the ACTUAL CURRENT STATE of the code.\n\n`;
+    
+    newCommitsContext += `### Commit Details (in chronological order):\n\n`;
+    // Reverse order to show oldest first (chronological)
+    const chronologicalCommits = [...newCommits].reverse();
+    chronologicalCommits.forEach((commit, index) => {
+      const commitNum = isUpdate ? index + 1 : chronologicalCommits.length - index;
+      newCommitsContext += `**Commit ${commitNum}: \`${commit.sha.substring(0, 7)}\`**\n`;
+      newCommitsContext += `- **Message:** ${commit.message}\n`;
       newCommitsContext += `- **Author:** ${commit.author || 'Unknown'}\n`;
       newCommitsContext += `- **Date:** ${commit.date || 'Unknown'}\n`;
       
-      // Add key changes from this commit (first 500 chars of diff for context)
-      const commitDiffPreview = commit.diff.length > 500 
-        ? commit.diff.substring(0, 500) + '...\n[Additional changes in full diff below]'
+      // Extract key changes from commit message and diff
+      const commitMessage = commit.message.toLowerCase();
+      if (commitMessage.includes('remove') || commitMessage.includes('delete')) {
+        newCommitsContext += `- **⚠️ NOTE: This commit REMOVES or DELETES functionality - do NOT suggest tests for removed features!**\n`;
+      }
+      
+      // Show full diff (truncated if too long)
+      const maxDiffLength = 2000;
+      const commitDiff = commit.diff.length > maxDiffLength 
+        ? commit.diff.substring(0, maxDiffLength) + `\n... [truncated, ${commit.diff.length - maxDiffLength} more chars in full diff]`
         : commit.diff;
-      newCommitsContext += `- **Key Changes:**\n\`\`\`\n${commitDiffPreview}\n\`\`\`\n\n`;
+      newCommitsContext += `- **Code Changes:**\n\`\`\`diff\n${commitDiff}\n\`\`\`\n\n`;
     });
     
     newCommitsContext += `---\n\n**Analysis Instructions:**\n`;
-    newCommitsContext += `1. Review the FULL PR diff below (includes all commits, old + new)\n`;
-    newCommitsContext += `2. Pay special attention to the new commits listed above\n`;
-    newCommitsContext += `3. Regenerate a COMPLETE, comprehensive analysis considering ALL changes\n`;
-    newCommitsContext += `4. Update your assessment based on how the new commits affect the overall PR\n`;
-    newCommitsContext += `5. Provide fresh test recipes, risk analysis, and recommendations\n\n`;
+    newCommitsContext += `1. Review the FULL PR diff below (current state of ALL files after all commits)\n`;
+    newCommitsContext += `2. **CRITICAL**: If any commit mentions "remove", "delete", or shows code deletion, those features are GONE - do NOT suggest tests for them\n`;
+    newCommitsContext += `3. Analyze the ACTUAL CURRENT STATE of the code (after all commits are applied)\n`;
+    newCommitsContext += `4. Regenerate a COMPLETE, comprehensive analysis considering ALL changes\n`;
+    newCommitsContext += `5. Provide fresh test recipes, risk analysis, and recommendations based on the FINAL state\n`;
+    newCommitsContext += `6. Only suggest tests for features that EXIST in the current code, not removed ones\n\n`;
   }
   
   // ALWAYS use the full PR diff - we want complete analysis
@@ -1193,10 +1231,19 @@ async function handleTestRequest(repository, issue, comment, sender) {
   
   // Add header mentioning new commits if any
   if (newCommits.length > 0) {
-    acknowledgmentComment += `## 🔄 Analysis Update - New Commits Detected\n\n`;
-    acknowledgmentComment += `✅ **${newCommits.length} new commit(s)** analyzed since last review:\n\n`;
+    const isUpdate = lastAnalyzedSHA !== null;
+    acknowledgmentComment += `## 🔄 ${isUpdate ? 'Analysis Update - New Commits Detected' : 'Complete PR Analysis'}\n\n`;
+    
+    if (isUpdate) {
+      acknowledgmentComment += `✅ **${newCommits.length} new commit(s)** added since last review:\n\n`;
+    } else {
+      acknowledgmentComment += `✅ Analyzing **${newCommits.length} commit(s)** in this PR:\n\n`;
+    }
+    
+    // Show commits in reverse chronological order (newest first)
     newCommits.forEach((commit, index) => {
-      acknowledgmentComment += `${index + 1}. \`${commit.sha.substring(0, 7)}\` - ${commit.message.split('\n')[0]}\n`;
+      const commitMessage = commit.message.split('\n')[0];
+      acknowledgmentComment += `${index + 1}. \`${commit.sha.substring(0, 7)}\` - ${commitMessage}\n`;
     });
     acknowledgmentComment += `\n---\n\n`;
   }
