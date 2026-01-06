@@ -36,7 +36,7 @@ try {
  * @param {string} options.diff - Code diff
  * @returns {Promise<Object>} QA insights or error object
  */
-async function generateQAInsights({ repo, pr_number, title, body, diff }) {
+async function generateQAInsights({ repo, pr_number, title, body, diff, newCommits }) {
   try {
     // Validate OpenAI client
     if (!openai) {

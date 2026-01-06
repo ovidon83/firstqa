@@ -566,6 +566,188 @@ async function fetchPRDiff(repository, prNumber) {
     return 'Error fetching PR diff';
   }
 }
+
+/**
+ * Get the last analyzed commit SHA for a PR
+ * @param {string} repository - Repository name (e.g., "owner/repo")
+ * @param {number} prNumber - Pull request number
+ * @returns {string|null} - Last analyzed commit SHA or null if not found
+ */
+function getLastAnalyzedCommitSHA(repository, prNumber) {
+  try {
+    const testRequests = loadTestRequests();
+    // Find the most recent test request for this PR that has a lastAnalyzedCommitSHA
+    const prRequests = testRequests
+      .filter(req => req.repository === repository && req.prNumber === prNumber)
+      .filter(req => req.lastAnalyzedCommitSHA) // Only those with tracked commits
+      .sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt)); // Most recent first
+    
+    if (prRequests.length > 0) {
+      return prRequests[0].lastAnalyzedCommitSHA;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error getting last analyzed commit SHA for ${repository}#${prNumber}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Fetch commits for a PR since a specific commit SHA
+ * @param {string} repository - Repository name (e.g., "owner/repo")
+ * @param {number} prNumber - Pull request number
+ * @param {string} sinceSHA - Commit SHA to start from (exclusive)
+ * @returns {Promise<Array>} - Array of commit objects
+ */
+async function fetchCommitsSince(repository, prNumber, sinceSHA) {
+  try {
+    if (simulatedMode || !octokit) {
+      console.error(`❌ Cannot fetch commits for ${repository}#${prNumber} - Authentication not available`);
+      return [];
+    }
+    
+    const [owner, repoName] = repository.split('/');
+    if (!owner || !repoName) {
+      console.error(`Invalid repository format: ${repository}`);
+      return [];
+    }
+
+    let repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    if (!repoOctokit) {
+      console.error(`❌ Failed to get authentication for ${repository}`);
+      return [];
+    }
+
+    // Get PR details to find the base and head refs
+    const prResponse = await repoOctokit.pulls.get({
+      owner,
+      repo: repoName,
+      pull_number: prNumber
+    });
+
+    const baseSHA = prResponse.data.base.sha;
+    const headSHA = prResponse.data.head.sha;
+
+    // Get all commits for the PR
+    const commitsResponse = await repoOctokit.pulls.listCommits({
+      owner,
+      repo: repoName,
+      pull_number: prNumber,
+      per_page: 100
+    });
+
+    const allCommits = commitsResponse.data;
+    
+    // If sinceSHA is provided, filter commits after that SHA
+    if (sinceSHA) {
+      // Find the index of the sinceSHA commit
+      const sinceIndex = allCommits.findIndex(commit => commit.sha === sinceSHA);
+      if (sinceIndex >= 0) {
+        // Return commits after this one
+        return allCommits.slice(0, sinceIndex);
+      }
+      // If sinceSHA not found, return all commits (might be a rebase)
+      console.log(`⚠️ Commit SHA ${sinceSHA} not found in PR commits, analyzing all commits`);
+    }
+
+    return allCommits;
+  } catch (error) {
+    console.error(`Failed to fetch commits for ${repository}#${prNumber}:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * Fetch commit details including diff and message
+ * @param {string} repository - Repository name (e.g., "owner/repo")
+ * @param {string} commitSHA - Commit SHA
+ * @returns {Promise<Object>} - Commit details with message and diff
+ */
+async function fetchCommitDetails(repository, commitSHA) {
+  try {
+    if (simulatedMode || !octokit) {
+      console.error(`❌ Cannot fetch commit details for ${commitSHA} - Authentication not available`);
+      return { sha: commitSHA, message: '', diff: '' };
+    }
+
+    const [owner, repoName] = repository.split('/');
+    if (!owner || !repoName) {
+      return { sha: commitSHA, message: '', diff: '' };
+    }
+
+    let repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    if (!repoOctokit) {
+      return { sha: commitSHA, message: '', diff: '' };
+    }
+
+    // Get commit details
+    const commitResponse = await repoOctokit.repos.getCommit({
+      owner,
+      repo: repoName,
+      ref: commitSHA
+    });
+
+    const commit = commitResponse.data;
+    const message = commit.commit.message || '';
+    
+    // Get the diff for this commit (parent to commit)
+    let diff = '';
+    if (commit.files && commit.files.length > 0) {
+      commit.files.forEach(file => {
+        if (file.patch) {
+          diff += `diff --git a/${file.filename} b/${file.filename}\n`;
+          diff += file.patch + '\n\n';
+        } else if (file.status === 'added' || file.status === 'removed') {
+          diff += `${file.status === 'added' ? '+++' : '---'} ${file.filename}\n`;
+        }
+      });
+    }
+
+    return {
+      sha: commitSHA,
+      message: message,
+      diff: diff || 'No changes in this commit',
+      author: commit.commit.author.name || '',
+      date: commit.commit.author.date || ''
+    };
+  } catch (error) {
+    console.error(`Failed to fetch commit details for ${commitSHA}:`, error.message);
+    return { sha: commitSHA, message: '', diff: '', error: error.message };
+  }
+}
+
+/**
+ * Fetch new commits with their details since last analysis
+ * @param {string} repository - Repository name
+ * @param {number} prNumber - Pull request number
+ * @param {string} lastAnalyzedSHA - Last analyzed commit SHA
+ * @returns {Promise<Array>} - Array of commit details with diffs and messages
+ */
+async function fetchNewCommitsWithDetails(repository, prNumber, lastAnalyzedSHA) {
+  try {
+    console.log(`🔍 Fetching new commits since ${lastAnalyzedSHA || 'beginning'} for ${repository}#${prNumber}`);
+    
+    const newCommits = await fetchCommitsSince(repository, prNumber, lastAnalyzedSHA);
+    
+    if (newCommits.length === 0) {
+      console.log('✅ No new commits found');
+      return [];
+    }
+
+    console.log(`📦 Found ${newCommits.length} new commit(s), fetching details...`);
+
+    // Fetch details for each commit
+    const commitDetails = await Promise.all(
+      newCommits.map(commit => fetchCommitDetails(repository, commit.sha))
+    );
+
+    console.log(`✅ Fetched details for ${commitDetails.length} commit(s)`);
+    return commitDetails;
+  } catch (error) {
+    console.error(`❌ Error fetching new commits with details:`, error.message);
+    return [];
+  }
+}
 /**
  * Post a comment on a GitHub PR
  */
@@ -790,6 +972,46 @@ async function handleTestRequest(repository, issue, comment, sender) {
   console.log(`Comment: ${comment.body}`);
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
+  
+  // Get the last analyzed commit SHA for this PR
+  const lastAnalyzedSHA = getLastAnalyzedCommitSHA(repository.full_name, issue.number);
+  console.log(`🔍 Last analyzed commit SHA: ${lastAnalyzedSHA || 'none (first analysis)'}`);
+  
+  // Get PR head SHA to track the latest commit
+  let currentHeadSHA = null;
+  try {
+    const [owner, repoName] = repository.full_name.split('/');
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    if (repoOctokit) {
+      const prResponse = await repoOctokit.pulls.get({
+        owner,
+        repo: repoName,
+        pull_number: issue.number
+      });
+      currentHeadSHA = prResponse.data.head.sha;
+      console.log(`📌 Current PR head SHA: ${currentHeadSHA}`);
+    }
+  } catch (error) {
+    console.error(`⚠️ Could not fetch PR head SHA: ${error.message}`);
+  }
+  
+  // Fetch new commits since last analysis (if any)
+  let newCommits = [];
+  if (lastAnalyzedSHA) {
+    console.log(`🔄 Checking for new commits since last analysis...`);
+    newCommits = await fetchNewCommitsWithDetails(repository.full_name, issue.number, lastAnalyzedSHA);
+    if (newCommits.length > 0) {
+      console.log(`✅ Found ${newCommits.length} new commit(s) to analyze:`);
+      newCommits.forEach(commit => {
+        console.log(`   - ${commit.sha.substring(0, 7)}: ${commit.message.split('\n')[0]}`);
+      });
+    } else {
+      console.log(`ℹ️ No new commits since last analysis`);
+    }
+  } else {
+    console.log(`ℹ️ First analysis for this PR - analyzing all changes`);
+  }
+  
   // Get PR description and diff
   console.log(`📄 Fetching PR description for ${repository.full_name}#${issue.number}`);
   const prDescription = await fetchPRDescription(repository.full_name, issue.number);
@@ -797,6 +1019,20 @@ async function handleTestRequest(repository, issue, comment, sender) {
   console.log(`📝 Fetching PR diff for ${repository.full_name}#${issue.number}`);
   const prDiff = await fetchPRDiff(repository.full_name, issue.number);
   console.log(`📝 PR diff: ${prDiff ? `Success (${prDiff.length} chars)` : 'Failed'}`);
+  
+  // Prepare new commits information for AI
+  let newCommitsInfo = '';
+  if (newCommits.length > 0) {
+    newCommitsInfo = '\n\n## 🔄 NEW COMMITS SINCE LAST ANALYSIS:\n\n';
+    newCommits.forEach((commit, index) => {
+      newCommitsInfo += `### Commit ${index + 1}: ${commit.sha.substring(0, 7)}\n`;
+      newCommitsInfo += `**Message:** ${commit.message.split('\n')[0]}\n`;
+      newCommitsInfo += `**Author:** ${commit.author || 'Unknown'}\n`;
+      newCommitsInfo += `**Date:** ${commit.date || 'Unknown'}\n\n`;
+      newCommitsInfo += `**Code Changes:**\n\`\`\`diff\n${commit.diff}\n\`\`\`\n\n`;
+    });
+  }
+  
   // Debug what we're sending to AI
   console.log('🔍 AI Input Debug:');
   console.log(`   Repo: ${repository.full_name}`);
@@ -804,16 +1040,27 @@ async function handleTestRequest(repository, issue, comment, sender) {
   console.log(`   Title: ${issue.title}`);
   console.log(`   Body length: ${prDescription?.length || 0}`);
   console.log(`   Diff length: ${prDiff?.length || 0}`);
+  console.log(`   New commits: ${newCommits.length}`);
+  if (newCommits.length > 0) {
+    console.log(`   New commits info length: ${newCommitsInfo.length}`);
+  }
+  
   // Generate AI insights for the PR via API endpoint
-  console.log('🤖 FirstQA Ovi AI analyzing PR...');
+  console.log('🤖 FirstQA Ovi AI analyzing PR with new commits...');
   let aiInsights;
   try {
+    // Add new commits information to the PR description for context
+    const enrichedDescription = newCommits.length > 0 
+      ? `${prDescription}\n\n---\n\n${newCommitsInfo}` 
+      : prDescription;
+    
     aiInsights = await callTestRecipeEndpoint({
       repo: repository.full_name,
       pr_number: issue.number,
       title: issue.title,
-      body: prDescription,
-      diff: prDiff
+      body: enrichedDescription,
+      diff: prDiff,
+      newCommits: newCommits.length > 0 ? newCommits : undefined
     });
     if (aiInsights && aiInsights.success) {
       console.log('✅ FirstQA Ovi AI analysis completed successfully');
@@ -889,7 +1136,15 @@ async function handleTestRequest(repository, issue, comment, sender) {
     aiInsights: aiInsights, // Include AI insights in test request
     status: 'pending',
     prUrl: issue.html_url || `https://github.com/${repository.full_name}/pull/${issue.number}`,
-    labels: []
+    labels: [],
+    // Track commit analysis
+    lastAnalyzedCommitSHA: currentHeadSHA || null,
+    newCommitsAnalyzed: newCommits.length,
+    newCommitsDetails: newCommits.length > 0 ? newCommits.map(c => ({
+      sha: c.sha,
+      message: c.message.split('\n')[0],
+      author: c.author
+    })) : []
   };
   // Parse request details from comment
   testRequest.parsedDetails = parseTestRequestComment(comment.body);
@@ -901,8 +1156,18 @@ async function handleTestRequest(repository, issue, comment, sender) {
   const saveResult = saveTestRequests(testRequests);
   console.log(`✅ Test request saved to database: ${saveResult ? 'success' : 'failed'}`);
   // Post acknowledgment comment with AI insights if available
-  let acknowledgmentComment = `
-  `;
+  let acknowledgmentComment = ``;
+  
+  // Add header mentioning new commits if any
+  if (newCommits.length > 0) {
+    acknowledgmentComment += `## 🔄 Analysis Update - New Commits Detected\n\n`;
+    acknowledgmentComment += `✅ **${newCommits.length} new commit(s)** analyzed since last review:\n\n`;
+    newCommits.forEach((commit, index) => {
+      acknowledgmentComment += `${index + 1}. \`${commit.sha.substring(0, 7)}\` - ${commit.message.split('\n')[0]}\n`;
+    });
+    acknowledgmentComment += `\n---\n\n`;
+  }
+  
   // Add AI insights to the comment if they were generated successfully
   if (aiInsights && aiInsights.success) {
     // Debug logging to see what we're getting
