@@ -1094,11 +1094,11 @@ async function handleTestRequest(repository, issue, comment, sender) {
     // Analyze all commits to build a comprehensive change summary
     const chronologicalCommits = [...newCommits].reverse(); // Oldest first
     
-    // Extract change types from commit messages and diffs
+    // Extract change types from commit messages and diffs with detailed parsing
     const changesSummary = {
       added: [],
       removed: [],
-      fixed: [],
+      fixed: [], // Array of objects: {commit: string, fixes: string[]}
       changed: [],
       userFacing: []
     };
@@ -1106,23 +1106,101 @@ async function handleTestRequest(repository, issue, comment, sender) {
     chronologicalCommits.forEach(commit => {
       const msg = commit.message.toLowerCase();
       const msgFirstLine = commit.message.split('\n')[0];
+      const fullMessage = commit.message;
       
-      // Categorize changes
+      // Enhanced parsing for fixes - extract what was actually fixed
+      if (msg.includes('fix') || msg.includes('bug') || msg.includes('issue') || msg.includes('resolve')) {
+        // Extract specific fixes mentioned in commit message with enhanced parsing
+        const fixes = [];
+        const fullMsgLower = fullMessage.toLowerCase();
+        
+        // Enhanced fix pattern extraction
+        const fixPatterns = [
+          /prevent\s+([^,\.:]+)/gi,
+          /remove\s+([^,\.:]+)/gi,
+          /fix\s+([^,\.:]+)/gi,
+          /handle\s+([^,\.:]+)/gi,
+          /resolve\s+([^,\.:]+)/gi,
+          /avoid\s+([^,\.:]+)/gi,
+          /stop\s+([^,\.:]+)/gi,
+          /correct\s+([^,\.:]+)/gi,
+          /add\s+([^,\.:]+)/gi, // Sometimes fixes add functionality
+          /improve\s+([^,\.:]+)/gi,
+          /ensure\s+([^,\.:]+)/gi
+        ];
+        
+        fixPatterns.forEach(pattern => {
+          let match;
+          while ((match = pattern.exec(fullMessage)) !== null) {
+            const fixDesc = match[1].trim();
+            // Filter out very short or very long descriptions
+            if (fixDesc && fixDesc.length > 3 && fixDesc.length < 100) {
+              // Avoid duplicates and generic words
+              if (!fixes.includes(fixDesc) && 
+                  !fixDesc.match(/^(the|a|an|and|or|but|to|from|for|with|without|by)$/i)) {
+                fixes.push(fixDesc);
+              }
+            }
+          }
+        });
+        
+        // Extract fixes from colon-separated format (e.g., "Fix: description")
+        if (fullMessage.includes(':') && !fullMessage.includes('://')) {
+          const parts = fullMessage.split(':');
+          if (parts.length > 1) {
+            const afterColon = parts.slice(1).join(':');
+            // Split by commas, semicolons, or periods to get individual fixes
+            const fixParts = afterColon.split(/[,;\.]/).map(s => s.trim()).filter(s => s.length > 5 && s.length < 150);
+            fixParts.forEach(part => {
+              if (!fixes.includes(part)) {
+                fixes.push(part);
+              }
+            });
+          }
+        }
+        
+        // If commit message has specific fix descriptions, use them
+        // Otherwise, try to extract from the first line
+        if (fixes.length === 0) {
+          // Try to extract meaningful parts from the commit message
+          const meaningfulParts = msgFirstLine.split(/[:,]/).slice(1);
+          if (meaningfulParts.length > 0) {
+            meaningfulParts.forEach(part => {
+              const trimmed = part.trim();
+              if (trimmed.length > 5 && trimmed.length < 150) {
+                fixes.push(trimmed);
+              }
+            });
+          }
+          
+          // Last resort: use a cleaned version of the first line
+          if (fixes.length === 0) {
+            const cleaned = msgFirstLine.replace(/^(fix|fixes?|fixing?)\s*:?\s*/i, '').trim();
+            if (cleaned && cleaned.length > 10) {
+              fixes.push(cleaned);
+            }
+          }
+        }
+        
+        changesSummary.fixed.push({
+          commit: msgFirstLine,
+          fixes: [...new Set(fixes)] // Remove duplicates
+        });
+      }
+      
+      // Categorize other changes
       if (msg.includes('add') || msg.includes('implement') || msg.includes('create') || msg.includes('introduce')) {
         changesSummary.added.push(msgFirstLine);
-        if (msg.includes('ui') || msg.includes('view') || msg.includes('component') || msg.includes('button') || msg.includes('navigation')) {
+        if (msg.includes('ui') || msg.includes('view') || msg.includes('component') || msg.includes('button') || msg.includes('navigation') || msg.includes('toast') || msg.includes('notification')) {
           changesSummary.userFacing.push(msgFirstLine);
         }
       }
       if (msg.includes('remove') || msg.includes('delete') || msg.includes('drop')) {
         changesSummary.removed.push(msgFirstLine);
       }
-      if (msg.includes('fix') || msg.includes('bug') || msg.includes('issue') || msg.includes('resolve')) {
-        changesSummary.fixed.push(msgFirstLine);
-      }
-      if (msg.includes('update') || msg.includes('modify') || msg.includes('change') || msg.includes('improve') || msg.includes('refactor')) {
+      if (msg.includes('update') || msg.includes('modify') || msg.includes('change') || msg.includes('improve') || msg.includes('refactor') || msg.includes('enhance')) {
         changesSummary.changed.push(msgFirstLine);
-        if (msg.includes('ui') || msg.includes('view') || msg.includes('component') || msg.includes('button') || msg.includes('navigation') || msg.includes('visible')) {
+        if (msg.includes('ui') || msg.includes('view') || msg.includes('component') || msg.includes('button') || msg.includes('navigation') || msg.includes('visible') || msg.includes('toast') || msg.includes('notification') || msg.includes('flow')) {
           changesSummary.userFacing.push(msgFirstLine);
         }
       }
@@ -1157,9 +1235,18 @@ async function handleTestRequest(repository, issue, comment, sender) {
     }
     
     if (changesSummary.fixed.length > 0) {
-      newCommitsContext += `**🔧 FIXED Issues/Bugs:**\n`;
-      changesSummary.fixed.forEach(msg => {
-        newCommitsContext += `- ${msg}\n`;
+      newCommitsContext += `**🔧 FIXED Issues/Bugs (CRITICAL - MUST test each fix with specific test cases):**\n`;
+      changesSummary.fixed.forEach((fixObj, idx) => {
+        newCommitsContext += `- **Fix ${idx + 1} - Commit:** ${fixObj.commit}\n`;
+        newCommitsContext += `  - **Specific Issues Fixed:**\n`;
+        fixObj.fixes.forEach(fix => {
+          newCommitsContext += `    - "${fix}"\n`;
+        });
+        newCommitsContext += `  - **REQUIRED TEST CASE:** Generate a test case that:\n`;
+        newCommitsContext += `    - Directly tests this fix (e.g., if fix says "prevent flicker", test that flicker doesn't occur)\n`;
+        newCommitsContext += `    - Includes specific expected results (exact UI states, messages, behaviors)\n`;
+        newCommitsContext += `    - Covers the scenario where the fix was needed\n`;
+        newCommitsContext += `    - Tests edge cases related to this fix\n`;
       });
       newCommitsContext += `\n`;
     }
@@ -1193,25 +1280,87 @@ async function handleTestRequest(repository, issue, comment, sender) {
       newCommitsContext += `- **Author:** ${commit.author || 'Unknown'}\n`;
       newCommitsContext += `- **Date:** ${commit.date || 'Unknown'}\n`;
       
-      // Add change type indicators
+      // Extract and highlight specific fixes/issues from commit message
+      if (msgLower.includes('fix') || msgLower.includes('bug') || msgLower.includes('issue')) {
+        // Parse what was fixed
+        const fixDetails = [];
+        const fullMsgLower = commit.message.toLowerCase();
+        
+        // Extract specific fix descriptions
+        if (fullMsgLower.includes('prevent')) {
+          const preventMatch = commit.message.match(/prevent\s+([^,\.:]+)/i);
+          if (preventMatch) fixDetails.push(`Prevents: ${preventMatch[1].trim()}`);
+        }
+        if (fullMsgLower.includes('remove')) {
+          const removeMatch = commit.message.match(/remove\s+([^,\.:]+)/i);
+          if (removeMatch) fixDetails.push(`Removes: ${removeMatch[1].trim()}`);
+        }
+        if (fullMsgLower.includes('handle')) {
+          const handleMatch = commit.message.match(/handle\s+([^,\.:]+)/i);
+          if (handleMatch) fixDetails.push(`Handles: ${handleMatch[1].trim()}`);
+        }
+        if (fullMsgLower.includes('fix')) {
+          const fixMatch = commit.message.match(/fix\s+([^,\.:]+)/i);
+          if (fixMatch && !fullMsgLower.includes('fix:')) fixDetails.push(`Fixes: ${fixMatch[1].trim()}`);
+        }
+        
+        newCommitsContext += `- **🔧 FIX:** This commit fixes issues - MUST generate test cases that verify:\n`;
+        if (fixDetails.length > 0) {
+          fixDetails.forEach(detail => {
+            newCommitsContext += `  - ✅ ${detail} - Test that this fix actually works\n`;
+          });
+        } else {
+          newCommitsContext += `  - ✅ Test that the fix mentioned in the commit message actually works\n`;
+          newCommitsContext += `  - ✅ Verify no regressions in related functionality\n`;
+        }
+      }
+      
       if (msgLower.includes('remove') || msgLower.includes('delete')) {
-        newCommitsContext += `- **⚠️ REMOVAL:** This commit removes functionality - VERIFY it's actually removed/not present in the UI\n`;
+        newCommitsContext += `- **⚠️ REMOVAL:** This commit removes functionality - VERIFY it's actually removed/not present\n`;
       }
-      if (msgLower.includes('fix') || msgLower.includes('bug')) {
-        newCommitsContext += `- **🔧 FIX:** This commit fixes an issue - ensure fix works and doesn't regress\n`;
-      }
-      if (msgLower.includes('ui') || msgLower.includes('visible') || msgLower.includes('navigation') || msgLower.includes('component')) {
+      if (msgLower.includes('ui') || msgLower.includes('visible') || msgLower.includes('navigation') || msgLower.includes('component') || msgLower.includes('toast') || msgLower.includes('notification') || msgLower.includes('filter') || msgLower.includes('flow')) {
         newCommitsContext += `- **👤 USER-FACING:** This affects user-visible behavior - HIGH PRIORITY for testing\n`;
       }
       
       // Show key code changes (full diff if not too long, otherwise preview)
-      const maxDiffLength = 1500;
-      const commitDiff = commit.diff.length > maxDiffLength 
-        ? commit.diff.substring(0, maxDiffLength) + `\n... [${commit.diff.length - maxDiffLength} more chars in full PR diff]`
-        : commit.diff;
+      // Prioritize showing changes relevant to the commit message
+      let commitDiff = commit.diff;
       
       if (commitDiff && commitDiff.trim().length > 0) {
-        newCommitsContext += `- **Code Changes:**\n\`\`\`diff\n${commitDiff}\n\`\`\`\n`;
+        // Try to find relevant parts of the diff based on commit message keywords
+        const msgKeywords = commit.message.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+        let relevantDiff = commitDiff;
+        
+        // If diff is very long, try to extract relevant sections
+        if (commitDiff.length > 2000) {
+          const lines = commitDiff.split('\n');
+          const relevantLines = [];
+          let foundRelevant = false;
+          
+          // Look for lines that might match commit message keywords
+          lines.forEach((line, idx) => {
+            const lineLower = line.toLowerCase();
+            const matchesKeyword = msgKeywords.some(keyword => lineLower.includes(keyword));
+            if (matchesKeyword || (!foundRelevant && idx < 100)) {
+              relevantLines.push(line);
+              if (matchesKeyword) foundRelevant = true;
+            } else if (foundRelevant && idx < 150) {
+              // Include some context after finding relevant lines
+              relevantLines.push(line);
+            }
+          });
+          
+          if (relevantLines.length > 50) {
+            relevantDiff = relevantLines.slice(0, 100).join('\n') + `\n... [${commitDiff.length - relevantLines.join('\n').length} more chars in full PR diff]`;
+          }
+        }
+        
+        const maxDiffLength = 2000;
+        const finalDiff = relevantDiff.length > maxDiffLength 
+          ? relevantDiff.substring(0, maxDiffLength) + `\n... [${relevantDiff.length - maxDiffLength} more chars in full PR diff]`
+          : relevantDiff;
+        
+        newCommitsContext += `- **Code Changes:**\n\`\`\`diff\n${finalDiff}\n\`\`\`\n`;
       }
       newCommitsContext += `\n`;
     });
@@ -1227,42 +1376,78 @@ async function handleTestRequest(repository, issue, comment, sender) {
     newCommitsContext += `- Note what was ADDED - verify it's present and working (test that new features appear and function)\n`;
     newCommitsContext += `\n`;
     
-    newCommitsContext += `### 2. Test Case Generation Requirements:\n`;
-    newCommitsContext += `- **COVER ALL USER-FACING CHANGES**: Prioritize test cases for features users interact with\n`;
-    newCommitsContext += `- **COVER ALL FIXES**: Ensure fixes work correctly and don't regress\n`;
-    newCommitsContext += `- **COVER ALL NEW FEATURES**: Test all added functionality thoroughly - verify features are present and working\n`;
-    newCommitsContext += `- **COVER ALL REMOVALS**: Verify removed features are actually gone/not present - test that they don't appear in UI or code\n`;
-    newCommitsContext += `- **COVER ALL MODIFICATIONS**: Verify changed features still work as expected\n`;
-    newCommitsContext += `- **FOCUS ON HIGH PRIORITY**: Prioritize Happy Path and Critical Path scenarios\n`;
-    newCommitsContext += `- **AVOID LOW-PRIORITY EDGE CASES**: Focus on real user scenarios, not obscure edge cases\n`;
-    newCommitsContext += `- **CONSIDER INTEGRATION**: How do all changes work together? Test the complete flow\n`;
+    newCommitsContext += `### 2. Test Case Generation Requirements (CRITICAL - Follow Exactly):\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `**A. FIX-SPECIFIC TEST GENERATION (HIGHEST PRIORITY):**\n`;
+    newCommitsContext += `For EACH fix mentioned in commit messages, generate a test case that:\n`;
+    newCommitsContext += `- **Tests the specific fix directly** (e.g., if fix says "prevent flicker", test that flicker doesn't occur)\n`;
+    newCommitsContext += `- **Includes exact expected behaviors** (e.g., "No UI flicker occurs", "Thought remains visible", "Toast notification appears with message 'X'")\n`;
+    newCommitsContext += `- **Covers the scenario where the fix was needed** (e.g., if fix was for "Mark as Shared", test that specific flow)\n`;
+    newCommitsContext += `- **Verifies edge cases related to the fix** (e.g., rapid actions, concurrent operations, boundary conditions)\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `**B. TEST CASE SPECIFICITY REQUIREMENTS:**\n`;
+    newCommitsContext += `Each test case MUST include:\n`;
+    newCommitsContext += `- **Setup**: Exact initial state (filter selected, data state, UI state)\n`;
+    newCommitsContext += `- **Action**: Specific user actions with exact details (click button X, select item Y)\n`;
+    newCommitsContext += `- **Expected Result**: DETAILED expected behaviors including:\n`;
+    newCommitsContext += `  - Exact UI states (what should be visible/hidden)\n`;
+    newCommitsContext += `  - Exact messages/notifications (copy text, toast content)\n`;
+    newCommitsContext += `  - Exact state changes (filter switches, data updates, selections)\n`;
+    newCommitsContext += `  - Exact behaviors (no flicker, smooth transitions, error handling)\n`;
+    newCommitsContext += `  - Visual indicators (badges, highlights, colors)\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `**C. COMPREHENSIVE COVERAGE:**\n`;
+    newCommitsContext += `- **COVER ALL FIXES**: Generate test cases for EVERY fix mentioned in commit messages\n`;
+    newCommitsContext += `- **COVER USER-FACING CHANGES**: Prioritize test cases for features users interact with\n`;
+    newCommitsContext += `- **COVER NEW FEATURES**: Test all added functionality thoroughly\n`;
+    newCommitsContext += `- **COVER REMOVALS**: Verify removed features are actually gone\n`;
+    newCommitsContext += `- **COVER MODIFICATIONS**: Verify changed features still work\n`;
+    newCommitsContext += `- **EDGE CASES**: Include important edge cases (multiple states, rapid actions, boundary conditions)\n`;
+    newCommitsContext += `- **NEGATIVE TESTS**: Include negative tests (error conditions, invalid states, failure scenarios)\n`;
+    newCommitsContext += `- **INTEGRATION**: Test complete user flows and how changes work together\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `**D. TEST CASE COUNT AND PRIORITIZATION:**\n`;
+    newCommitsContext += `- Generate **5-7 comprehensive test cases** total\n`;
+    newCommitsContext += `- Prioritize: Fixes > User-facing changes > Edge cases > Negative tests\n`;
+    newCommitsContext += `- Each test case should be detailed and actionable\n`;
+    newCommitsContext += `- Focus on HIGH IMPACT scenarios users will encounter\n`;
     newCommitsContext += `\n`;
     
     newCommitsContext += `### 3. Test Priority Guidelines:\n`;
-    newCommitsContext += `- **Happy Path (HIGH)**: Core user workflows that must work (e.g., user clicks button → expected result)\n`;
-    newCommitsContext += `- **Critical Path (HIGH)**: Important functionality that affects user experience (e.g., navigation, data display)\n`;
-    newCommitsContext += `- **Edge Case (MEDIUM)**: Important error handling and boundary conditions\n`;
-    newCommitsContext += `- **Regression (HIGH)**: Existing features that might be affected by these changes\n`;
-    newCommitsContext += `- **AVOID**: Obscure edge cases, theoretical issues, or features that were removed\n`;
+    newCommitsContext += `- **Happy Path (HIGH)**: Core user workflows that must work - include exact expected results\n`;
+    newCommitsContext += `- **Critical Path (HIGH)**: Important functionality affecting UX - include specific UI states and behaviors\n`;
+    newCommitsContext += `- **Edge Case (MEDIUM-HIGH)**: Important edge cases like rapid actions, multiple states, boundary conditions\n`;
+    newCommitsContext += `- **Negative Tests (MEDIUM-HIGH)**: Error conditions, failure scenarios, invalid states\n`;
+    newCommitsContext += `- **Regression (HIGH)**: Existing features that might be affected - verify no breakage\n`;
+    newCommitsContext += `- **AVOID**: Obscure edge cases users won't encounter, theoretical scenarios\n`;
     newCommitsContext += `\n`;
     
-    newCommitsContext += `### 4. What to Test:\n`;
+    newCommitsContext += `### 4. What to Test (Specific Focus Areas):\n`;
+    if (changesSummary.fixed.length > 0) {
+      newCommitsContext += `- 🔧 **HIGHEST PRIORITY**: Test EVERY fix mentioned in commits with specific test cases:\n`;
+      changesSummary.fixed.forEach(fixObj => {
+        fixObj.fixes.forEach(fix => {
+          newCommitsContext += `  - Generate test that verifies: "${fix}" is actually fixed\n`;
+        });
+      });
+      newCommitsContext += `  - Include edge cases and negative tests for each fix\n`;
+      newCommitsContext += `\n`;
+    }
     if (changesSummary.added.length > 0) {
-      newCommitsContext += `- ✅ All NEW features added across commits (verify they are present and work correctly)\n`;
+      newCommitsContext += `- ✅ All NEW features (verify presence, functionality, exact UI states)\n`;
     }
     if (changesSummary.removed.length > 0) {
-      newCommitsContext += `- ❌ All REMOVED features (verify they are actually gone/not present in UI or functionality)\n`;
-    }
-    if (changesSummary.fixed.length > 0) {
-      newCommitsContext += `- 🔧 All BUGS that were fixed (verify fix works, no regressions)\n`;
+      newCommitsContext += `- ❌ All REMOVED features (negative tests - verify absence)\n`;
     }
     if (changesSummary.changed.length > 0) {
-      newCommitsContext += `- 🔄 All MODIFIED features (verify they still work correctly)\n`;
+      newCommitsContext += `- 🔄 All MODIFIED features (verify they work with exact expected behaviors)\n`;
     }
     if (changesSummary.userFacing.length > 0) {
-      newCommitsContext += `- 👤 All USER-FACING changes (UI, navigation, visibility, interactions)\n`;
+      newCommitsContext += `- 👤 All USER-FACING changes (test with specific UI states, messages, behaviors)\n`;
     }
-    newCommitsContext += `- 🔗 Integration between all changes (how they work together)\n`;
+    newCommitsContext += `- 🔗 Integration flows (complete user journeys across all changes)\n`;
+    newCommitsContext += `- ⚠️ Edge cases (rapid actions, concurrent operations, boundary conditions)\n`;
+    newCommitsContext += `- ❌ Negative scenarios (error conditions, failure cases, invalid states)\n`;
     newCommitsContext += `\n`;
     
     newCommitsContext += `### 5. What NOT to Test:\n`;
@@ -1273,9 +1458,30 @@ async function handleTestRequest(repository, issue, comment, sender) {
     newCommitsContext += `### 6. Final Analysis Approach:\n`;
     newCommitsContext += `- Analyze the FULL PR diff (final state after all commits)\n`;
     newCommitsContext += `- Consider the COMPLETE change journey (all commits together)\n`;
-    newCommitsContext += `- Generate test cases that cover ALL changes comprehensively\n`;
-    newCommitsContext += `- Focus on USER-FACING and HIGH-PRIORITY scenarios\n`;
-    newCommitsContext += `- Provide actionable, specific test steps based on actual code changes\n`;
+    newCommitsContext += `- **Generate exactly 5-7 comprehensive test cases** (prioritize fixes and user-facing changes)\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `**MANDATORY TEST CASE REQUIREMENTS:**\n`;
+    newCommitsContext += `1. **Fix Verification**: For EACH major fix in commit messages, generate a test case that directly verifies it works\n`;
+    newCommitsContext += `2. **Specific Expected Results** - MUST include:\n`;
+    newCommitsContext += `   - Exact UI states: "Thought remains visible", "Filter switches to 'All'", "Badge appears/disappears"\n`;
+    newCommitsContext += `   - Exact messages: "Toast notification appears with message 'Marked as shared! ✔'", exact copy/text\n`;
+    newCommitsContext += `   - Exact behaviors: "No UI flicker occurs", "Smooth transition", "Auto-switches filter"\n`;
+    newCommitsContext += `   - Exact state changes: "Filter automatically switches", "Thought remains selected", "Auto-selects another thought"\n`;
+    newCommitsContext += `3. **Edge Cases**: Include important edge cases (rapid actions, multiple states, concurrent operations, boundary conditions)\n`;
+    newCommitsContext += `4. **Negative Tests**: Include negative test cases (error conditions, failure scenarios, invalid states, things that should NOT happen)\n`;
+    newCommitsContext += `5. **Complete Flows**: Test full user journeys from start to finish\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `**Test Case Format:**\n`;
+    newCommitsContext += `- **Scenario**: Clear, descriptive name (e.g., "Mark as Shared from Draft Filter", "Rapid Toggle Mark/Unmark")\n`;
+    newCommitsContext += `- **Steps**: Detailed numbered steps with:\n`;
+    newCommitsContext += `  - Setup: Initial state (filter selected, thought selected, data state)\n`;
+    newCommitsContext += `  - Action: Specific user actions (click "Mark as Shared", select platform, etc.)\n`;
+    newCommitsContext += `- **Expected Result**: Comprehensive list of exact expected behaviors (use the examples above as format)\n`;
+    newCommitsContext += `- **Priority**: Based on impact (Critical Path/Happy Path/Edge Case/Negative Test/Regression)\n`;
+    newCommitsContext += `\n`;
+    newCommitsContext += `- Focus on USER-FACING and HIGH-IMPACT scenarios\n`;
+    newCommitsContext += `- Base test cases on actual code changes and commit messages, not assumptions\n`;
+    newCommitsContext += `- Never use generic descriptions like "works correctly" - be specific about UI states, messages, behaviors\n`;
     newCommitsContext += `\n`;
   }
   

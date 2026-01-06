@@ -113,17 +113,20 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
           analysisInstruction = `\n\n⚠️ **COMPREHENSIVE PR ANALYSIS MODE**: This PR contains ${newCommits.length} commit(s).\n\n`;
         }
         
-        analysisInstruction += `**CRITICAL REQUIREMENTS:**\n`;
-        analysisInstruction += `1. Analyze ALL commits together as a unified change set, not individually\n`;
-        analysisInstruction += `2. Consider the EVOLUTION of changes across commits (what was added → modified → fixed)\n`;
-        analysisInstruction += `3. Generate test cases that cover ALL changes comprehensively\n`;
-        analysisInstruction += `4. PRIORITIZE user-facing changes and high-priority scenarios\n`;
-        analysisInstruction += `5. FOCUS on Happy Path, Critical Path, and important Edge Cases\n`;
-        analysisInstruction += `6. VERIFY removals: Test that removed features are actually gone/not present\n`;
-        analysisInstruction += `7. VERIFY additions: Test that added features are present and working\n`;
-        analysisInstruction += `8. AVOID low-priority edge cases that users won't encounter\n`;
-        analysisInstruction += `9. Consider how all changes work TOGETHER (integration testing)\n`;
-        analysisInstruction += `8. Base test cases on the FINAL state of the code after all commits\n\n`;
+        analysisInstruction += `**CRITICAL REQUIREMENTS FOR TEST GENERATION:**\n`;
+        analysisInstruction += `1. Generate **5-7 comprehensive test cases** total\n`;
+        analysisInstruction += `2. **HIGHEST PRIORITY**: For EACH fix mentioned in commit messages, generate a test case that specifically verifies that fix works\n`;
+        analysisInstruction += `3. Include **specific, detailed expected results** with:\n`;
+        analysisInstruction += `   - Exact UI states (what's visible/hidden/selected)\n`;
+        analysisInstruction += `   - Exact messages and notifications (toast text, error messages)\n`;
+        analysisInstruction += `   - Exact state changes (filter switches, data updates, navigation)\n`;
+        analysisInstruction += `   - Exact behaviors (no flicker, smooth transitions, error handling)\n`;
+        analysisInstruction += `4. Include **edge cases** (rapid actions, multiple states, concurrent operations, boundary conditions)\n`;
+        analysisInstruction += `5. Include **negative test cases** (error conditions, failure scenarios, invalid states)\n`;
+        analysisInstruction += `6. Test **complete user flows**, not just isolated actions\n`;
+        analysisInstruction += `7. Focus on **user-facing changes** and **fixes** as highest priority\n`;
+        analysisInstruction += `8. Base test cases on the **actual code changes** and **commit messages**, not assumptions\n`;
+        analysisInstruction += `9. Consider how all changes work **TOGETHER** (integration testing)\n\n`;
       }
       
       prompt = ejs.render(promptTemplate, {

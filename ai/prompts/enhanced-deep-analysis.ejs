@@ -59,13 +59,21 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **COVER ALL CHANGES**: Ensure test cases cover ALL added, fixed, changed, and REMOVED features across ALL commits
 - **VERIFY ADDITIONS**: Test that added features are present and working correctly
 - **VERIFY REMOVALS**: Test that removed features are actually gone/not present (negative testing)
+- **TEST EVERY FIX**: For EACH fix mentioned in commit messages, generate a specific test case that verifies that fix works
 - **AVOID LOW-PRIORITY**: Skip obscure edge cases that users won't encounter in normal usage
-- Provide concrete, actionable test steps based on the real changes
+- **SPECIFIC EXPECTED RESULTS**: Include EXACT expected behaviors:
+  - Exact UI states (what's visible/hidden/selected)
+  - Exact messages and notifications (toast text, error messages, success messages)
+  - Exact state changes (filter switches, data updates, navigation)
+  - Exact behaviors (no flicker, smooth transitions, proper error handling)
+  - Visual indicators (badges, highlights, colors, icons)
+- **EDGE CASES**: Include important edge cases (rapid actions, multiple states, concurrent operations, boundary conditions)
+- **NEGATIVE TESTS**: Include negative test cases (error conditions, failure scenarios, invalid states)
+- **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions
+- Generate 5-7 comprehensive test cases total, prioritizing fixes and user-facing changes
+- Provide concrete, actionable test steps with specific details based on the real changes
 - Consider the full user journey and how ALL changes work together
 - Include comprehensive test coverage that addresses the complete change set
-- Generate tests that verify fixes work and don't regress
-- Generate tests that verify new features function correctly
-- Generate tests that verify modified features still work as expected
 - Always specify file names with line numbers in questions and risks
 - Focus on real, code-based risks, not potential or generic ones
 
@@ -125,22 +133,36 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **Concurrency Testing**: Add tests for race conditions and thread safety when applicable
 
 - For Test Recipe: 
-  - Include ALL priority levels: Happy Path, Critical Path, Edge Case, and Regression
-  - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case, then Regression)
-  - Within each priority level, order by relevance to the actual PR changes
-  - **For each priority level, include BOTH positive and negative scenarios:**
-    - Start with **positive test cases** (happy path, successful workflows)
-    - Then include **negative test cases** (error conditions, edge cases, failure scenarios)
-  - **IMPORTANT**: Scenario names should be descriptive and concise WITHOUT prefixes like "Positive Scenario:" or "Negative Scenario:"
-  - Examples: "User Login Success", "Invalid Credentials", "Password Reset Flow", "Session Timeout"
-  - Focus on scenarios that directly test the changed functionality and affected product areas
-  - Make steps detailed, actionable, and multiline-friendly
-  - Evaluate which scenarios make most sense given the specific changes in the PR
-  - **Priority Examples**: User login = Happy Path, form validation = Critical Path, network timeout = Edge Case, existing user flows = Regression
-  - **Enhanced Test Data**: Include specific input examples only when they help clarify test execution
-  - **Algorithmic Tests**: Add tests for sorting, searching, hashing, and other algorithmic operations
-  - **Boundary Tests**: Include tests for numeric boundaries, array bounds, string lengths, and data limits
-  - **Complexity Tests**: Prioritize tests for high-complexity functions and critical user-facing features
+  - Generate **5-7 comprehensive test cases** total, prioritizing fixes and user-facing changes
+  - **CRITICAL**: For each fix mentioned in commit messages, generate a test case that specifically verifies that fix
+  - Include ALL priority levels: Happy Path, Critical Path, Edge Case, Negative Test, and Regression
+  - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case/Negative Test, then Regression)
+  - **TEST CASE STRUCTURE REQUIREMENTS:**
+    - **Scenario Name**: Descriptive name focusing on what's being tested (e.g., "Mark as Shared from Draft Filter", "Rapid Toggle Mark/Unmark")
+    - **Steps**: Detailed, numbered steps with specific actions:
+      - Include Setup/Initial State (filter selected, data state, UI state)
+      - Include specific Actions (exact button clicks, selections, inputs)
+      - Use multiline format with `<br>` tags for readability
+    - **Expected Result**: COMPREHENSIVE expected behaviors including:
+      - Exact UI states: "Thought remains visible", "Filter switches to 'All'", "Badge appears/disappears"
+      - Exact messages: "Toast notification appears with message 'Marked as shared! ✔'", "Error message displays 'X'"
+      - Exact behaviors: "No UI flicker occurs", "Smooth transition", "Thought scrolls into view"
+      - Exact state changes: "Filter automatically switches to 'All'", "Thought remains selected", "Another thought is auto-selected"
+      - Visual indicators: "Badge 'In Share Journey' visible", "Thought highlighted with ring"
+    - **Priority**: Appropriate priority based on impact (Happy Path/Critical Path/Edge Case/Negative Test/Regression)
+  - **INCLUDE EDGE CASES**: Important edge cases like rapid actions, multiple states, concurrent operations, boundary conditions
+  - **INCLUDE NEGATIVE TESTS**: Error conditions, failure scenarios, invalid states, things that should NOT happen
+  - Focus on scenarios that directly test the changed functionality, especially fixes mentioned in commits
+  - Make steps detailed, actionable, and specific to the actual code changes
+  - **Priority Examples**: 
+    - Fix verification = Critical Path (HIGH)
+    - Core user workflow = Happy Path (HIGH)
+    - Error handling = Negative Test (MEDIUM-HIGH)
+    - Rapid actions/multiple states = Edge Case (MEDIUM-HIGH)
+    - Existing features = Regression (HIGH)
+  - **Test Fixes Directly**: If commit says "prevent thoughts from disappearing", test case should verify thoughts don't disappear
+  - **Test Complete Flows**: Test full user journeys, not just isolated actions
+  - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors
 
 - For Questions, Risks & Bugs: 
   - ACTUALLY ANALYZE the code changes to see if they affect other modules/components/files
