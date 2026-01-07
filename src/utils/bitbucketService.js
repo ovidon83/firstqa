@@ -272,7 +272,15 @@ async function formatAndPostDetailedAnalysis(workspace, repoSlug, prId, aiInsigh
       return { success: false, error: errorMsg };
     }
 
-    const analysis = aiInsights.data || {};
+    const analysis = aiInsights.data;
+    
+    // If the AI returned markdown directly (string), post it as-is
+    if (typeof analysis === 'string') {
+      console.log('📝 Posting AI markdown response directly');
+      return await postComment(workspace, repoSlug, prId, analysis);
+    }
+
+    // Otherwise, format the structured response
     let commentBody = '# 🎯 QA Analysis - by Ovi (the AI QA)\n\n';
 
     // Add Release Pulse if available
