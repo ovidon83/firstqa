@@ -40,28 +40,24 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🔍 Code Review
 
-[AI will generate bullet points ONLY about REAL code review findings based on ACTUAL code analysis:
+[AI will generate bullet points ONLY about CRITICAL code review findings based on ACTUAL code analysis:
+- Focus on CRITICAL issues: bugs, security vulnerabilities, data corruption risks, memory leaks, performance bottlenecks, missing error handling that could cause crashes
 - MUST include specific file names and line numbers for every item
-- Only mention code quality issues if you can point to SPECIFIC code examples (e.g., "Missing error handling in `handleApiCall()` at line 45 in `src/utils/api.js`")
-- Only mention implementation concerns if you can identify SPECIFIC problematic patterns in the code
-- Only mention performance implications if you can point to SPECIFIC inefficient code (e.g., "Nested loop in `processData()` at line 120 in `src/processors/data.js` - O(n²) complexity")
-- Only mention security considerations if you can identify SPECIFIC vulnerabilities in the code (e.g., "No input validation on user data at line 78 in `src/handlers/user.js`")
-- Only mention maintainability issues if you can point to SPECIFIC complex/unclear code sections
-- If nothing specific is found, write "No significant code review findings." - DO NOT make generic statements
-- Every bullet point MUST reference actual code from the diff]
-
-## ⚠️ Risks
-
-[AI will list ONLY REAL potential risks based on ACTUAL code analysis:
-- MUST include specific file names, line numbers, and code examples for every risk
-- Only mention runtime risks if you can identify SPECIFIC code that could cause them (e.g., "Potential null pointer at line 56 in `src/components/Button.js` where `user.profile` is accessed without null check")
-- Only mention integration risks if you can point to SPECIFIC integration points that could fail (e.g., "API call at line 89 in `src/api/user.js` has no timeout, could hang indefinitely")
-- Only mention UX risks if you can identify SPECIFIC code that could cause them (e.g., "State update at line 123 in `src/hooks/useFilter.js` happens asynchronously without loading indicator")
-- Only mention regression risks if you can identify SPECIFIC affected areas/files from the diff
-- Only mention performance risks if you can point to SPECIFIC inefficient code patterns (e.g., "Event listener at line 45 in `src/components/List.js` not cleaned up, could cause memory leak")
-- Only mention data risks if you can identify SPECIFIC code paths that could corrupt data
-- Every risk MUST be backed by actual code evidence from the diff
-- If nothing specific is found, write "No significant risks identified." - DO NOT make generic statements like "could potentially" without evidence]
+- Only mention issues if they are IMPORTANT and you can point to SPECIFIC code examples
+- Include:
+  - Critical bugs or code defects (missing null checks that could crash, incorrect logic that breaks functionality)
+  - Security vulnerabilities (injection risks, missing input validation in security-sensitive areas)
+  - Memory leaks (event listeners, timers, subscriptions not cleaned up)
+  - Performance bottlenecks (inefficient algorithms, unnecessary re-renders, blocking operations)
+  - Critical missing error handling (async operations, API calls, file operations that could crash the app)
+  - Data corruption risks (race conditions, unsafe state mutations)
+- Examples of what to include:
+  - "Missing error handling: `fetch()` at line 45 in `src/api/user.js` has no try-catch, could crash app on network failure"
+  - "Memory leak: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared in cleanup function"
+  - "Null pointer risk: `user.profile.name` accessed at line 56 in `src/components/Button.js` without null check, could crash"
+- If nothing critical is found, write "No critical code review findings." - DO NOT make generic statements
+- Every bullet point MUST reference actual code from the diff with file name and line number
+- Prioritize by severity and impact - only list issues that matter]
 
 ## 🐛 Bugs
 
@@ -250,10 +246,14 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
           - "Filter should NOT switch unless explicitly triggered by the logic"
           - "No errors should appear in console"
       - **Priority**: Appropriate priority based on impact (Happy Path/Critical Path/Edge Case/Negative Test/Regression)
-    - **INCLUDE EDGE CASES**: Important edge cases like rapid actions, multiple states, concurrent operations, boundary conditions
-    - **INCLUDE NEGATIVE TESTS**: Error conditions, failure scenarios, invalid states, things that should NOT happen
+    - **ONLY INCLUDE RELEVANT TEST CASES**: Test cases must be directly related to the changes in the PR/commits
+    - **AVOID GENERIC TEST CASES**: Don't include generic test cases like "Error Handling on Update Failure" or "Memory Leak Prevention" unless they are specifically related to the actual changes
+    - **FOCUS ON CHANGES**: Every test case should test something that was actually changed, added, fixed, or removed in this PR
+    - **INCLUDE EDGE CASES**: Important edge cases that are directly related to the changes (rapid actions, multiple states, boundary conditions for the changed functionality)
+    - **INCLUDE NEGATIVE TESTS**: Error conditions, failure scenarios for the specific changes made
     - Focus on scenarios that directly test the changed functionality, especially fixes mentioned in commits
     - Make steps detailed, actionable, and specific to the actual code changes
+    - If a test case doesn't clearly relate to the changes, don't include it
     - **Priority Examples**: 
       - Fix verification = Critical Path (HIGH) - each fix gets its own test case
       - Core user workflow = Happy Path (HIGH)
@@ -265,32 +265,29 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors extracted from code
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
 
-- For Code Review:
-  - **CRITICAL**: Only list findings that you can point to SPECIFIC code examples from the diff
+- For Code Review (combined Code Review and Risks):
+  - **CRITICAL**: Only list findings that are IMPORTANT and you can point to SPECIFIC code examples from the diff
   - **REQUIRED**: Every item MUST include file name and line number
-  - Only mention code quality issues if you can show the exact problematic code (e.g., "Missing error handling in `functionName()` at line X in `file.js`")
-  - Only mention implementation concerns if you can identify specific patterns in the actual code
-  - Only mention performance if you can point to specific inefficient code (e.g., "O(n²) nested loop at line X")
-  - Only mention security if you can identify specific vulnerabilities (e.g., "No input validation at line X")
-  - Only mention maintainability if you can point to specific complex code sections
-  - **DO NOT make generic statements** like "ensure error handling is robust" without pointing to specific missing error handling
-  - **If nothing specific found**: Write "No significant code review findings." - it's fine to have nothing
-  - Focus on actionable, evidence-based feedback with code examples
+  - **FOCUS ON CRITICAL ISSUES**: Only include things that could cause crashes, data loss, security vulnerabilities, memory leaks, or significant performance problems
+  - Include:
+    - Critical bugs: missing null checks that could crash, incorrect logic that breaks core functionality
+    - Security vulnerabilities: injection risks, missing input validation in security-sensitive code
+    - Memory leaks: event listeners, timers, subscriptions not cleaned up properly
+    - Performance bottlenecks: inefficient algorithms (O(n²) or worse), unnecessary expensive operations
+    - Critical missing error handling: async operations, API calls, file operations that could crash without error handling
+    - Data corruption risks: race conditions, unsafe state mutations that could corrupt data
+  - Examples:
+    - "Missing error handling: `fetch()` at line 45 in `src/api/user.js` has no try-catch, app could crash on network failure"
+    - "Memory leak: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared, will accumulate timers"
+    - "Null pointer risk: `user.profile.name` at line 56 in `src/components/Button.js` accessed without null check, will crash if profile is null"
+  - **DO NOT include**:
+    - Minor code style issues
+    - Maintainability concerns that don't cause bugs
+    - Generic "could potentially" statements without evidence
+    - Issues that are unlikely to cause problems
+  - **If nothing critical found**: Write "No critical code review findings." - it's fine to have nothing
+  - Prioritize by severity - only list issues that really matter
   - Use bullet points with file names and line numbers for every item
-
-- For Risks:
-  - **CRITICAL**: Only list risks that you can point to SPECIFIC code examples from the diff
-  - **REQUIRED**: Every risk MUST include file name, line number, and specific code evidence
-  - Only mention runtime risks if you can identify SPECIFIC code that could cause them (e.g., "Null pointer risk: `user.profile.name` accessed at line 45 in `src/components/Header.js` without null check")
-  - Only mention integration risks if you can point to SPECIFIC integration code that could fail (e.g., "API call at line 89 in `src/api/fetch.js` has no error handling for network timeouts")
-  - Only mention UX risks if you can identify SPECIFIC code that could cause them (e.g., "State update at line 123 causes UI flicker due to synchronous DOM manipulation")
-  - Only mention regression risks if you can identify SPECIFIC files/areas from the diff that might be affected
-  - Only mention performance risks if you can point to SPECIFIC inefficient code (e.g., "Memory leak: Event listener at line 67 in `src/hooks/useEffect.js` not cleaned up in cleanup function")
-  - Only mention data risks if you can identify SPECIFIC code paths that could corrupt data
-  - **DO NOT make generic statements** like "could potentially cause issues" without specific code evidence
-  - **If nothing specific found**: Write "No significant risks identified." - it's fine to have nothing
-  - Every risk must be backed by actual code from the diff
-  - Use bullet points with file names, line numbers, and specific code examples
 
 - For Bugs:
   - List CLEAR bugs found in code and functionality
@@ -338,29 +335,20 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Mitigations available for identified issues
   - Value vs. risk trade-off
 
-**CODE REVIEW REQUIREMENTS:**
-- **STRICT RULE**: Only list findings backed by SPECIFIC code evidence from the diff
+**CODE REVIEW REQUIREMENTS (Combined Code Review and Risks):**
+- **STRICT RULE**: Only list CRITICAL findings backed by SPECIFIC code evidence from the diff
 - **REQUIRED**: Every item MUST include exact file name and line number
-- Only mention issues if you can point to the exact problematic code (e.g., "Missing error handling in `handleApiCall()` at line 45 in `src/utils/api.js`: `fetch(url)` has no try-catch")
-- **NO GENERIC STATEMENTS**: Don't say "ensure error handling is robust" - instead say "Missing error handling at line X in file Y where function Z could throw"
-- Only mention performance if you can identify specific inefficient code (e.g., "O(n²) complexity: nested loop at lines 120-125 in `src/processors/data.js`")
-- Only mention security if you can identify specific vulnerabilities (e.g., "No input validation: user input `data.email` used directly in query at line 78 in `src/handlers/user.js`")
-- Only mention maintainability if you can point to specific complex code (e.g., "Complex conditional logic: 5 nested if statements at lines 200-250 in `src/utils/validator.js`")
-- **If nothing specific found**: Write "No significant code review findings." - it's perfectly fine to have nothing
+- **FOCUS ON CRITICAL ISSUES ONLY**: Bugs, security vulnerabilities, memory leaks, performance bottlenecks, missing critical error handling, data corruption risks
+- Only mention issues if they are IMPORTANT and you can point to exact problematic code:
+  - Critical bugs: "Missing null check: `user.profile.name` accessed at line 56 in `src/components/Button.js` without checking `user.profile` exists, will crash"
+  - Security: "No input validation: user input `data.email` used directly in SQL query at line 78 in `src/handlers/user.js`, SQL injection risk"
+  - Memory leaks: "Memory leak: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared in cleanup function, timers will accumulate"
+  - Performance: "O(n²) complexity: nested loop at lines 120-125 in `src/processors/data.js`, will be slow with large datasets"
+  - Critical error handling: "Missing error handling: `fetch()` at line 45 in `src/api/user.js` has no try-catch, app could crash on network failure"
+- **DO NOT include** minor issues, style concerns, or generic statements
+- **If nothing critical found**: Write "No critical code review findings." - it's perfectly fine to have nothing
+- Prioritize by severity - only list issues that really matter and could cause real problems
 - Focus on actionable, evidence-based feedback with code examples
-
-**RISKS REQUIREMENTS:**
-- **STRICT RULE**: Only list risks backed by SPECIFIC code evidence from the diff
-- **REQUIRED**: Every risk MUST include exact file name, line number, and code example
-- Only mention runtime risks if you can identify SPECIFIC code that could cause them (e.g., "Null pointer risk at line 56: `user.profile.name` accessed without checking `user.profile` exists in `src/components/Button.js`")
-- Only mention integration risks if you can point to SPECIFIC code that could fail (e.g., "API timeout risk: `fetch()` call at line 89 in `src/api/user.js` has no timeout configuration, could hang indefinitely")
-- Only mention UX risks if you can identify SPECIFIC code that could cause them (e.g., "UI flicker risk: State update at line 123 in `src/hooks/useFilter.js` triggers re-render without `useMemo`, causing visual flicker")
-- Only mention regression risks if you can identify SPECIFIC files/areas from the diff that might break
-- Only mention performance risks if you can point to SPECIFIC inefficient code (e.g., "Memory leak risk: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared in cleanup function")
-- Only mention data risks if you can identify SPECIFIC code paths that could corrupt data
-- **NO GENERIC STATEMENTS**: Don't say "could potentially cause issues" - instead provide specific code evidence
-- **If nothing specific found**: Write "No significant risks identified." - it's perfectly fine to have nothing
-- Every risk must be backed by actual code from the diff with file name and line number
 
 **BUGS REQUIREMENTS:**
 - List CLEAR bugs found in code and functionality
