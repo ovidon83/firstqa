@@ -63,4 +63,11 @@ data/backups/
 
 # Test results (videos, screenshots)
 test-results/
-public/test-screenshots/ 
+public/test-screenshots/ add-secrets.sh
+generate-secrets.js
+show-secrets.sh
+update-env-secrets.sh
+add-secrets.sh
+generate-secrets.js
+show-secrets.sh
+update-env-secrets.sh

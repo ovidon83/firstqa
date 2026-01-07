@@ -443,7 +443,18 @@ app.get('/github/health', (req, res) => {
 });
 
 // Bitbucket routes
-app.use('/bitbucket', bitbucketRoutes);
+app.use('/api/auth/bitbucket', bitbucketRoutes);
+
+// Bitbucket install shortcut route (redirects to OAuth flow)
+const bitbucketAppAuth = require('./src/utils/bitbucketAppAuth');
+app.get('/bitbucket/install', (req, res) => {
+  const crypto = require('crypto');
+  const state = crypto.randomBytes(16).toString('hex');
+  req.session = req.session || {};
+  req.session.bitbucketOAuthState = state;
+  const authUrl = bitbucketAppAuth.getAuthorizationUrl(state);
+  res.redirect(authUrl);
+});
 
 // Environment validation for AI integration
 console.log('🔍 AI Environment Check:');
