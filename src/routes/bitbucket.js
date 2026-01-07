@@ -73,16 +73,33 @@ router.post('/webhook', express.json({ limit: '10mb' }), verifyBitbucketWebhook,
 // OAuth installation endpoint - redirects to Bitbucket authorization
 router.get('/install', (req, res) => {
   try {
+    // Check if credentials are configured
+    if (!process.env.BITBUCKET_CLIENT_ID) {
+      console.error('BITBUCKET_CLIENT_ID not configured in environment');
+      return res.status(500).json({ 
+        error: 'Bitbucket OAuth not configured',
+        message: 'BITBUCKET_CLIENT_ID is missing from environment variables'
+      });
+    }
+
     const state = crypto.randomBytes(16).toString('hex');
-    // Store state in session or pass as query param
-    req.session = req.session || {};
-    req.session.bitbucketOAuthState = state;
+    
+    // Try to store state in session if available
+    if (req.session) {
+      req.session.bitbucketOAuthState = state;
+    }
     
     const authUrl = bitbucketAppAuth.getAuthorizationUrl(state);
+    console.log(`🔗 Redirecting to Bitbucket OAuth: ${authUrl.substring(0, 100)}...`);
     res.redirect(authUrl);
   } catch (error) {
     console.error('Error generating authorization URL:', error);
-    res.status(500).json({ error: 'Failed to generate authorization URL' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Failed to generate authorization URL',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

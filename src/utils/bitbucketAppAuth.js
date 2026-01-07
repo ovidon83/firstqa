@@ -89,21 +89,32 @@ function getAuthorizationUrl(state) {
   const callbackUrl = process.env.BITBUCKET_CALLBACK_URL || 'https://firstqa.dev/api/auth/bitbucket/callback';
   
   if (!clientId) {
-    throw new Error('BITBUCKET_CLIENT_ID not configured');
+    console.error('BITBUCKET_CLIENT_ID is not set in environment variables');
+    throw new Error('BITBUCKET_CLIENT_ID not configured - please set it in your .env file');
+  }
+
+  if (!callbackUrl) {
+    console.error('BITBUCKET_CALLBACK_URL is not set');
+    throw new Error('BITBUCKET_CALLBACK_URL not configured');
   }
 
   const scopes = ['repository', 'pullrequest', 'webhook'];
   const scopeParam = scopes.join(' ');
+  
+  const finalState = state || crypto.randomBytes(16).toString('hex');
   
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: callbackUrl,
     response_type: 'code',
     scope: scopeParam,
-    state: state || crypto.randomBytes(16).toString('hex')
+    state: finalState
   });
 
-  return `https://bitbucket.org/site/oauth2/authorize?${params.toString()}`;
+  const authUrl = `https://bitbucket.org/site/oauth2/authorize?${params.toString()}`;
+  console.log(`Generated OAuth URL with client_id: ${clientId.substring(0, 10)}... and callback: ${callbackUrl}`);
+  
+  return authUrl;
 }
 
 /**
