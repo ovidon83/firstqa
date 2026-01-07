@@ -155,7 +155,9 @@ router.get('/callback', async (req, res) => {
       workspaces = [{ slug: user.username, name: user.display_name, uuid: user.uuid }];
     }
 
-    // Save installation for each workspace the user has access to
+    // Save installation for each workspace and setup webhooks automatically
+    let totalWebhooksCreated = 0;
+    
     for (const workspace of workspaces) {
       const installation = {
         workspace: workspace.slug,
@@ -172,9 +174,23 @@ router.get('/callback', async (req, res) => {
 
       bitbucketAppAuth.saveInstallation(installation);
       console.log(`✅ Bitbucket OAuth installation saved for workspace: ${workspace.slug}`);
+      
+      // Automatically setup webhooks for all repositories in this workspace
+      try {
+        const webhookResults = await bitbucketAppAuth.setupWebhooksForWorkspace(
+          workspace.slug, 
+          tokenData.access_token
+        );
+        const created = webhookResults.filter(r => r.success && !r.alreadyExists).length;
+        totalWebhooksCreated += created;
+      } catch (webhookError) {
+        console.error(`⚠️ Error setting up webhooks for ${workspace.slug}:`, webhookError.message);
+        // Continue with other workspaces even if one fails
+      }
     }
 
-    console.log(`✅ Bitbucket OAuth completed for user: ${user.username} (${workspaces.length} workspaces)`);
+    console.log(`✅ Bitbucket OAuth completed for user: ${user.username}`);
+    console.log(`📊 Summary: ${workspaces.length} workspace(s), ${totalWebhooksCreated} webhook(s) created`);
 
     // Redirect to success page or dashboard
     res.redirect('/?success=bitbucket_installed');
