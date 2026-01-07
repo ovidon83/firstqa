@@ -21,6 +21,7 @@ const emailRoutes = require('./src/routes/email');
 const contactRoutes = require('./src/routes/contact');
 const adminRoutes = require('./src/routes/admin');
 const stripeRoutes = require('./src/routes/stripe');
+const bitbucketRoutes = require('./src/routes/bitbucket');
 // customerRoutes will be imported AFTER directory fix
 
 // Create Express app
@@ -428,6 +429,9 @@ app.post('/github/webhook', async (req, res) => {
 app.get('/github/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
+// Bitbucket routes
+app.use('/bitbucket', bitbucketRoutes);
 
 // Environment validation for AI integration
 console.log('🔍 AI Environment Check:');
