@@ -274,10 +274,30 @@ async function formatAndPostDetailedAnalysis(workspace, repoSlug, prId, aiInsigh
 
     const analysis = aiInsights.data;
     
-    // If the AI returned markdown directly (string), post it as-is
+    // If the AI returned markdown directly (string), post it
     if (typeof analysis === 'string') {
-      console.log('📝 Posting AI markdown response directly');
-      return await postComment(workspace, repoSlug, prId, analysis);
+      console.log('📝 Posting AI markdown response');
+      
+      // Bitbucket doesn't render HTML well - convert HTML tables to markdown
+      let cleanedAnalysis = analysis;
+      
+      // Remove HTML table tags and convert to simpler format
+      // Replace <table> structure with markdown-friendly format
+      cleanedAnalysis = cleanedAnalysis
+        .replace(/<table[^>]*>/gi, '')
+        .replace(/<\/table>/gi, '')
+        .replace(/<tr>/gi, '')
+        .replace(/<\/tr>/gi, '\n')
+        .replace(/<th[^>]*>/gi, '**')
+        .replace(/<\/th>/gi, '** | ')
+        .replace(/<td[^>]*>/gi, '')
+        .replace(/<\/td>/gi, ' | ')
+        .replace(/\| \n/g, '\n')
+        .replace(/\| $/gm, '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, ''); // Remove any remaining HTML tags
+      
+      return await postComment(workspace, repoSlug, prId, cleanedAnalysis);
     }
 
     // Otherwise, format the structured response
