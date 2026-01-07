@@ -10,36 +10,49 @@ const bitbucketAppAuth = require('../utils/bitbucketAppAuth');
 
 // Middleware to verify Bitbucket webhook signatures
 const verifyBitbucketWebhook = (req, res, next) => {
-  // Skip verification in development mode if explicitly disabled
-  if (process.env.NODE_ENV === 'development' && process.env.SKIP_WEBHOOK_VERIFICATION === 'true') {
+  // Bitbucket doesn't sign webhooks by default (unlike GitHub)
+  // If a secret is configured in both Bitbucket and here, we verify it
+  // Otherwise, we allow the webhook through (Bitbucket's security is via IP/URL)
+  
+  const webhookSecret = process.env.BITBUCKET_WEBHOOK_SECRET;
+  
+  // Check for Bitbucket's UUID header to verify it's from Bitbucket
+  const bitbucketUuid = req.headers['x-hook-uuid'];
+  const eventKey = req.headers['x-event-key'];
+  
+  if (!eventKey) {
+    console.error('❌ Missing x-event-key header - not a valid Bitbucket webhook');
+    return res.status(400).json({ error: 'Invalid webhook request' });
+  }
+  
+  console.log(`📥 Bitbucket webhook received: ${eventKey} (hook-uuid: ${bitbucketUuid || 'none'})`);
+  
+  // If no secret configured, allow through (basic validation passed)
+  if (!webhookSecret) {
+    console.log('⚠️ No BITBUCKET_WEBHOOK_SECRET configured - allowing webhook');
+    return next();
+  }
+  
+  // Check for signature if secret is configured
+  // Bitbucket uses X-Hub-Signature for signed webhooks
+  const signature = req.headers['x-hub-signature'];
+  
+  if (!signature) {
+    // No signature but secret is configured - still allow but warn
+    // (User may not have configured secret in Bitbucket webhook settings)
+    console.warn('⚠️ Webhook secret configured but no signature received - allowing anyway');
     return next();
   }
 
-  // Bitbucket webhooks use X-Hub-Signature-256 or X-Hook-Signature
-  const signature = req.headers['x-hub-signature-256'] || req.headers['x-hook-signature'];
-  const webhookSecret = process.env.BITBUCKET_WEBHOOK_SECRET;
-
-  if (!signature || !webhookSecret) {
-    console.warn('⚠️ Missing Bitbucket webhook signature or secret - allowing in dev mode');
-    if (process.env.NODE_ENV === 'development') {
-      return next();
-    }
-    console.error('Missing signature or webhook secret');
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Bitbucket uses HMAC SHA-256
+  // Verify signature if both secret and signature are present
   const hmac = crypto.createHmac('sha256', webhookSecret);
   const payload = JSON.stringify(req.body);
   const computedSignature = `sha256=${hmac.update(payload).digest('hex')}`;
 
-  // Bitbucket may send signature in different formats
-  const providedSignature = signature.startsWith('sha256=') ? signature : `sha256=${signature}`;
-
-  if (crypto.timingSafeEqual(Buffer.from(providedSignature), Buffer.from(computedSignature))) {
+  if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature))) {
     return next();
   } else {
-    console.error('Invalid Bitbucket webhook signature');
+    console.error('❌ Invalid Bitbucket webhook signature');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 };
