@@ -133,34 +133,48 @@ router.get('/callback', async (req, res) => {
     // Exchange code for token
     const tokenData = await bitbucketAppAuth.exchangeCodeForToken(code);
     
-    // Get user info to determine workspace
+    // Get user info
     const user = await bitbucketAppAuth.getCurrentUser(tokenData.access_token);
     
     if (!user) {
       return res.redirect('/?error=bitbucket_user_fetch_failed');
     }
 
-    // Get workspace info - Bitbucket user might have a workspace
-    // For now, we'll use the username as workspace identifier
-    // In production, you might want to let users select workspace
-    const workspaceSlug = user.username;
+    // Fetch user's workspaces to save installations for all of them
+    let workspaces = [];
+    try {
+      const axios = require('axios');
+      const workspacesResponse = await axios.get('https://api.bitbucket.org/2.0/workspaces', {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+      });
+      workspaces = workspacesResponse.data.values || [];
+      console.log(`📋 Found ${workspaces.length} workspaces for user ${user.username}`);
+    } catch (wsError) {
+      console.error('Error fetching workspaces:', wsError.message);
+      // Fall back to using username as workspace
+      workspaces = [{ slug: user.username, name: user.display_name, uuid: user.uuid }];
+    }
 
-    // Save installation
-    const installation = {
-      workspace: workspaceSlug,
-      workspaceUuid: user.uuid,
-      username: user.username,
-      displayName: user.display_name,
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresAt: tokenData.expires_in ? Date.now() + (tokenData.expires_in * 1000) : null,
-      installedAt: new Date().toISOString(),
-      scopes: tokenData.scopes || []
-    };
+    // Save installation for each workspace the user has access to
+    for (const workspace of workspaces) {
+      const installation = {
+        workspace: workspace.slug,
+        workspaceUuid: workspace.uuid,
+        workspaceName: workspace.name,
+        username: user.username,
+        displayName: user.display_name,
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token,
+        expiresAt: tokenData.expires_in ? Date.now() + (tokenData.expires_in * 1000) : null,
+        installedAt: new Date().toISOString(),
+        scopes: tokenData.scopes || []
+      };
 
-    bitbucketAppAuth.saveInstallation(installation);
+      bitbucketAppAuth.saveInstallation(installation);
+      console.log(`✅ Bitbucket OAuth installation saved for workspace: ${workspace.slug}`);
+    }
 
-    console.log(`✅ Bitbucket OAuth installation completed for workspace: ${workspaceSlug}`);
+    console.log(`✅ Bitbucket OAuth completed for user: ${user.username} (${workspaces.length} workspaces)`);
 
     // Redirect to success page or dashboard
     res.redirect('/?success=bitbucket_installed');
