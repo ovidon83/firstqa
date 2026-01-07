@@ -98,7 +98,7 @@ function getAuthorizationUrl(state) {
     throw new Error('BITBUCKET_CALLBACK_URL not configured');
   }
 
-  const scopes = ['repository', 'pullrequest', 'webhook'];
+  const scopes = ['account', 'repository', 'pullrequest', 'webhook'];
   const scopeParam = scopes.join(' ');
   
   const finalState = state || crypto.randomBytes(16).toString('hex');
