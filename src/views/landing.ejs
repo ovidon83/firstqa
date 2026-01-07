@@ -52,8 +52,8 @@
                 is an AI
             </h1>
             <p class="hero-sub">
-                Meet <strong>Ovi</strong> — the AI that reviews your tickets, analyzes PRs, 
-                generates test cases, and catches bugs before they ship.
+                Meet <strong>Ovi</strong> — the AI that reviews PRs, writes tests, 
+                <em>runs them</em>, and catches bugs before they ship. Not just test cases — actual testing.
             </p>
             <div class="hero-cta">
                 <a href="#early-access" class="btn-primary">
@@ -92,23 +92,26 @@
                 <div class="terminal-body">
                     <div class="terminal-line">
                         <span class="prompt">$</span>
-                        <span class="command">ovi analyze PR #142</span>
+                        <span class="command">ovi test PR #142</span>
                     </div>
                     <div class="terminal-output">
                         <div class="output-line fade-in-1">
                             <span class="icon">🔍</span> Analyzing code changes...
                         </div>
                         <div class="output-line fade-in-2">
-                            <span class="icon">📋</span> Generated 7 test cases
+                            <span class="icon">📋</span> Generated 7 test scenarios
                         </div>
                         <div class="output-line fade-in-3">
-                            <span class="icon">⚠️</span> Found 2 potential risks
+                            <span class="icon">🎭</span> Running tests in browser...
                         </div>
                         <div class="output-line fade-in-4">
-                            <span class="icon">✅</span> Release confidence: <span class="success">HIGH</span>
+                            <span class="icon">✅</span> 6 passed <span class="warning">• 1 flaky</span>
                         </div>
                         <div class="output-line fade-in-5">
-                            <span class="icon">📝</span> Comment posted to PR
+                            <span class="icon">🎬</span> Video report: <span class="link">view recording</span>
+                        </div>
+                        <div class="output-line fade-in-6">
+                            <span class="icon">📝</span> Results posted to PR
                         </div>
                     </div>
                 </div>
@@ -681,6 +684,12 @@ body {
     color: var(--text-primary);
 }
 
+.hero-sub em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 600;
+}
+
 .hero-cta {
     display: flex;
     gap: 16px;
@@ -849,6 +858,7 @@ body {
 .fade-in-3 { animation-delay: 1.5s; }
 .fade-in-4 { animation-delay: 2s; }
 .fade-in-5 { animation-delay: 2.5s; }
+.fade-in-6 { animation-delay: 3s; }
 
 @keyframes fadeIn {
     to { opacity: 1; }
@@ -861,6 +871,16 @@ body {
 .output-line .success {
     color: var(--success);
     font-weight: 600;
+}
+
+.output-line .warning {
+    color: var(--warning);
+}
+
+.output-line .link {
+    color: var(--accent);
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 /* ============================================
