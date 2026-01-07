@@ -213,16 +213,21 @@ async function fetchCommitDetails(workspace, repoSlug, commitHash) {
 async function postComment(workspace, repoSlug, prId, body) {
   try {
     console.log(`📝 Posting comment to ${workspace}/${repoSlug}#${prId}`);
+    console.log(`📝 Comment length: ${body.length} chars`);
+    
+    // Bitbucket API expects just content.raw (no markup field)
     const comment = await bitbucketRequest('POST', `/repositories/${workspace}/${repoSlug}/pullrequests/${prId}/comments`, workspace, {
       content: {
-        raw: body,
-        markup: 'markdown'
+        raw: body
       }
     });
-    console.log(`✅ Comment posted successfully`);
+    console.log(`✅ Comment posted successfully, id: ${comment.id}`);
     return { success: true, commentId: comment.id };
   } catch (error) {
     console.error(`❌ Failed to post comment:`, error.message);
+    if (error.response?.data) {
+      console.error(`❌ Bitbucket error details:`, JSON.stringify(error.response.data));
+    }
     return { success: false, error: error.message };
   }
 }
