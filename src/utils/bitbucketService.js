@@ -418,18 +418,41 @@ async function processWebhookEvent(event) {
       if (commentBody.trim().startsWith('/qa')) {
         console.log('🧪 /qa command detected!');
         
-        // Extract workspace - Bitbucket payload structure
-        const workspace = pullrequest.destination?.repository?.workspace?.slug || 
+        // Debug: Log payload structure to understand Bitbucket's format
+        console.log('📦 Payload keys:', Object.keys(payload));
+        console.log('📦 PR destination repo:', JSON.stringify(pullrequest.destination?.repository, null, 2));
+        if (payload.repository) {
+          console.log('📦 Repository from payload:', JSON.stringify(payload.repository, null, 2));
+        }
+        
+        // Extract workspace - try multiple paths (Bitbucket payload varies)
+        const workspace = pullrequest.destination?.repository?.workspace?.slug ||
+                         pullrequest.source?.repository?.workspace?.slug ||
+                         payload.repository?.workspace?.slug ||
                          pullrequest.destination?.repository?.owner?.username ||
-                         pullrequest.destination?.repository?.owner?.slug;
+                         pullrequest.destination?.repository?.owner?.nickname ||
+                         payload.repository?.owner?.username ||
+                         payload.repository?.owner?.nickname ||
+                         // Try extracting from full_name (format: "workspace/repo")
+                         pullrequest.destination?.repository?.full_name?.split('/')[0] ||
+                         payload.repository?.full_name?.split('/')[0];
         
         if (!workspace) {
           console.error('Could not determine workspace from webhook payload');
+          console.error('Available paths tried - all undefined');
           return { success: false, message: 'Workspace not found in webhook payload' };
         }
         
-        const repoSlug = pullrequest.destination?.repository?.slug;
+        console.log(`✅ Found workspace: ${workspace}`);
+        
+        // Extract repo slug - try multiple paths
+        const repoSlug = pullrequest.destination?.repository?.slug ||
+                        pullrequest.source?.repository?.slug ||
+                        payload.repository?.slug ||
+                        pullrequest.destination?.repository?.name;
         const prId = pullrequest.id;
+        
+        console.log(`📋 Processing PR #${prId} in ${workspace}/${repoSlug}`);
         
         // Verify installation exists
         const installation = bitbucketAppAuth.getInstallation(workspace);
