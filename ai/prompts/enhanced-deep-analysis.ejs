@@ -73,44 +73,33 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 <table style="width: 100%; border-collapse: collapse;">
 <tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Details</th></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[If Go: "Ready after reviewing analysis and all tests pass." If No-Go: specific blocker reason]</td></tr>
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Affected Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[List 2-4 specific components/services/modules affected, e.g., "Auth API, User Dashboard, Session Store"]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 10 words: brief reason based on code quality, risks, and impact]</td></tr>
 </table>
 
 ## 🔍 Code Review & Bugs
 
-[AI will generate a focused list of code issues and bugs based on ACTUAL code analysis:
-
-**CRITICAL CODE ISSUES** (with file:line for each):
-- Bugs: missing null checks, incorrect logic, off-by-one errors, wrong variable usage
-- Security: injection risks, missing input validation, exposed secrets
-- Memory leaks: uncleaned event listeners, timers, subscriptions
-- Performance: O(n²) loops, blocking operations, unnecessary re-renders
-- Missing error handling: unhandled promises, API calls without try-catch
-
-**FUNCTIONAL BUGS** (with reproduction steps):
-- Incorrect behavior, broken user flows, edge case failures
-- UI bugs: layout issues, broken interactions, visual glitches
-- Integration bugs: API mismatches, data sync issues
-
-**FORMAT REQUIREMENTS:**
-- Every item MUST include file name and line number
-- Be specific: "Null check missing: `user.profile.name` at `src/Button.js:56` crashes if profile is null"
-- If nothing found, write "✅ No critical issues found." — that's perfectly fine
-- MAX 5 items total — only the most critical ones that affect quality]
+[AI will generate a bullet list of code issues and bugs (no sub-headings):
+- Every item MUST include `file:line` reference
+- Format: "Issue description at `file.js:line` — impact"
+- Example: "Null check missing: `user.profile.name` at `src/Button.js:56` — crashes if profile is null"
+- If nothing found: "✅ No critical issues found."
+- MAX 5 items — only issues that affect quality]
 
 ## 🧪 Test Recipe
 
 | Scenario | Steps | Expected Result | Priority |
 |----------|-------|-----------------|----------|
-[AI will generate enhanced test scenarios here based on the code changes]
+[AI will generate test cases here — ORDERED BY PRIORITY (High first, then Medium)]
 
-**CRITICAL FOR TEST GENERATION:**
-- Analyze the CODE DIFF above to extract EXACT details before writing test cases
-- Use actual function names, variable names, UI element names from the code
-- Include exact strings/messages found in the code (toast text, button labels, etc.)
-- Reference specific code elements (filters, badges, buttons, etc.) by their actual names
-- Understand the exact state flow and transitions by analyzing the code logic
+**TEST CASE REQUIREMENTS:**
+- **ORDER BY PRIORITY**: High priority tests first, then Medium
+- **SCENARIO**: Clear, specific name describing what's being tested (e.g., "Verify thought stays visible after marking as shared")
+- **STEPS**: Numbered steps using exact UI names from code. Use `<br>` for line breaks:
+  - `1. Navigate to ActView<br>2. Select thought "My First Thought"<br>3. Click "Mark as Shared" button`
+- **EXPECTED RESULT**: Specific, verifiable outcomes with exact details from code. Use `<br>` for multiple expectations:
+  - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
+- **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)
 
 
 ---
@@ -280,9 +269,10 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Focus on scenarios that directly test the changed functionality, especially fixes mentioned in commits
     - Make steps detailed, actionable, and specific to the actual code changes
     - If a test case doesn't clearly relate to the changes, don't include it
+    - **ORDER TEST CASES BY PRIORITY**: High priority tests MUST come first in the table, then Medium
     - **Priority Examples**: 
-      - Fix verification = Critical Path (HIGH) - each fix gets its own test case
-      - Core user workflow = Happy Path (HIGH)
+      - Fix verification = High (each fix gets its own test case)
+      - Core user workflow = High
       - Error handling = Negative Test (MEDIUM-HIGH)
       - Rapid actions/multiple states = Edge Case (MEDIUM-HIGH)
       - Existing features = Regression (HIGH)
@@ -298,8 +288,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **FORMAT**: `Issue: Description at \`file:line\` - impact`
   - **If nothing found**: Write "✅ No critical issues found."
 - For Release Pulse:
-  - **Affected Areas**: List 2-4 specific components/services touched. Use actual names from code. Level based on criticality.
-  - **Release Decision**: Default to Go. Only No-Go for critical security/data issues. MAX 10 words reason.
+  - **Release Decision**: First row. If Go: "Ready after reviewing analysis and all tests pass." If No-Go: specific blocker.
+  - **Affected Areas**: Second row. List 2-4 specific components/services touched. Use actual names from code.
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
@@ -312,15 +302,14 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 **IMPORTANT: Be REALISTIC. Not every PR is risky! Default to "Go" unless there's a clear reason not to.**
 
-- **Affected Areas**: List 2-4 SPECIFIC components/services/modules touched by the changes
+- **Release Decision** (FIRST ROW):
+  - **🟢 Go**: "Ready after reviewing analysis and all tests pass." — default for most PRs
+  - **🔴 No-Go**: Only for CRITICAL blockers (security vulnerabilities, data corruption, broken critical paths) — state the specific blocker
+
+- **Affected Areas** (SECOND ROW):
+  - List 2-4 SPECIFIC components/services/modules touched by the changes
   - Use actual names from the codebase (e.g., "Auth API", "UserService", "Dashboard Component", "Webhook Handler")
   - Level: 🔴 High = critical path (auth, payment, core business logic), 🟡 Medium = important features, 🟢 Low = non-critical
-  - For non-code changes (docs, configs, text files): list "Documentation" or "Configuration" and mark as 🟢 Low
-
-- **Release Decision**:
-  - **🟢 Go**: Default for most PRs. Non-code changes, simple fixes, isolated changes, well-scoped features
-  - **🔴 No-Go**: Only when there are CRITICAL issues: security vulnerabilities, data corruption risks, broken critical paths
-  - Keep the reason brief (MAX 10 words)
 
 **CODE REVIEW & BUGS REQUIREMENTS:**
 - **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real issues.
