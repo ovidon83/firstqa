@@ -72,42 +72,32 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 ## 🧪 Release Pulse
 
 <table style="width: 100%; border-collapse: collapse;">
-<tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Summary</th></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">✅ Release Confidence</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 High / 🟡 Medium-High / 🟡 Medium / 🔴 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary considering code review findings, risks, bugs, affected areas, and critical path impact]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Change Impact</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium-High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary considering affected areas, critical path flows, and scope of changes]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 15 words summary weighing code quality, risks, bugs, and impact]</td></tr>
+<tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Details</th></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Affected Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[List 2-4 specific components/services/modules affected, e.g., "Auth API, User Dashboard, Session Store"]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[MAX 10 words: brief reason based on code quality, risks, and impact]</td></tr>
 </table>
 
-## 🔍 Code Review
+## 🔍 Code Review & Bugs
 
-[AI will generate bullet points ONLY about CRITICAL code review findings based on ACTUAL code analysis:
-- Focus on CRITICAL issues: bugs, security vulnerabilities, data corruption risks, memory leaks, performance bottlenecks, missing error handling that could cause crashes
-- MUST include specific file names and line numbers for every item
-- Only mention issues if they are IMPORTANT and you can point to SPECIFIC code examples
-- Include:
-  - Critical bugs or code defects (missing null checks that could crash, incorrect logic that breaks functionality)
-  - Security vulnerabilities (injection risks, missing input validation in security-sensitive areas)
-  - Memory leaks (event listeners, timers, subscriptions not cleaned up)
-  - Performance bottlenecks (inefficient algorithms, unnecessary re-renders, blocking operations)
-  - Critical missing error handling (async operations, API calls, file operations that could crash the app)
-  - Data corruption risks (race conditions, unsafe state mutations)
-- Examples of what to include:
-  - "Missing error handling: `fetch()` at line 45 in `src/api/user.js` has no try-catch, could crash app on network failure"
-  - "Memory leak: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared in cleanup function"
-  - "Null pointer risk: `user.profile.name` accessed at line 56 in `src/components/Button.js` without null check, could crash"
-- If nothing critical is found, write "No critical code review findings." - DO NOT make generic statements
-- Every bullet point MUST reference actual code from the diff with file name and line number
-- Prioritize by severity and impact - only list issues that matter]
+[AI will generate a focused list of code issues and bugs based on ACTUAL code analysis:
 
-## 🐛 Bugs
+**CRITICAL CODE ISSUES** (with file:line for each):
+- Bugs: missing null checks, incorrect logic, off-by-one errors, wrong variable usage
+- Security: injection risks, missing input validation, exposed secrets
+- Memory leaks: uncleaned event listeners, timers, subscriptions
+- Performance: O(n²) loops, blocking operations, unnecessary re-renders
+- Missing error handling: unhandled promises, API calls without try-catch
 
-[AI will list clear bugs in code and functionality:
-- Actual code defects (missing null checks, incorrect logic, off-by-one errors)
-- Functional bugs (incorrect behavior, missing features, broken flows)
-- Edge case failures (unhandled scenarios, boundary condition issues)
-- Integration bugs (API mismatches, data sync issues)
-- UI bugs (layout issues, broken interactions, visual glitches)
-- Specific file names, line numbers, and how to reproduce when possible]
+**FUNCTIONAL BUGS** (with reproduction steps):
+- Incorrect behavior, broken user flows, edge case failures
+- UI bugs: layout issues, broken interactions, visual glitches
+- Integration bugs: API mismatches, data sync issues
+
+**FORMAT REQUIREMENTS:**
+- Every item MUST include file name and line number
+- Be specific: "Null check missing: `user.profile.name` at `src/Button.js:56` crashes if profile is null"
+- If nothing found, write "✅ No critical issues found." — that's perfectly fine
+- MAX 5 items total — only the most critical ones that affect quality]
 
 ## 🧪 Test Recipe
 
@@ -122,10 +112,6 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - Reference specific code elements (filters, badges, buttons, etc.) by their actual names
 - Understand the exact state flow and transitions by analyzing the code logic
 
-
-## 🎯 Product Areas Affected
-
-[AI will identify product areas affected by the code changes]
 
 ---
 
@@ -305,120 +291,46 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors extracted from code
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
 
-- For Code Review (combined Code Review and Risks):
-  - **CRITICAL**: Only list findings that are IMPORTANT and you can point to SPECIFIC code examples from the diff
-  - **REQUIRED**: Every item MUST include file name and line number
-  - **FOCUS ON CRITICAL ISSUES**: Only include things that could cause crashes, data loss, security vulnerabilities, memory leaks, or significant performance problems
-  - Include:
-    - Critical bugs: missing null checks that could crash, incorrect logic that breaks core functionality
-    - Security vulnerabilities: injection risks, missing input validation in security-sensitive code
-    - Memory leaks: event listeners, timers, subscriptions not cleaned up properly
-    - Performance bottlenecks: inefficient algorithms (O(n²) or worse), unnecessary expensive operations
-    - Critical missing error handling: async operations, API calls, file operations that could crash without error handling
-    - Data corruption risks: race conditions, unsafe state mutations that could corrupt data
-  - Examples:
-    - "Missing error handling: `fetch()` at line 45 in `src/api/user.js` has no try-catch, app could crash on network failure"
-    - "Memory leak: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared, will accumulate timers"
-    - "Null pointer risk: `user.profile.name` at line 56 in `src/components/Button.js` accessed without null check, will crash if profile is null"
-  - **DO NOT include**:
-    - Minor code style issues
-    - Maintainability concerns that don't cause bugs
-    - Generic "could potentially" statements without evidence
-    - Issues that are unlikely to cause problems
-  - **If nothing critical found**: Write "No critical code review findings." - it's fine to have nothing
-  - Prioritize by severity - only list issues that really matter
-  - Use bullet points with file names and line numbers for every item
-
-- For Bugs:
-  - List CLEAR bugs found in code and functionality
-  - Include actual code defects (missing null checks, incorrect logic, off-by-one errors, wrong variable usage)
-  - Include functional bugs (incorrect behavior, missing features, broken flows)
-  - Include edge case failures (unhandled scenarios, boundary condition issues)
-  - Include integration bugs (API mismatches, data sync issues, webhook problems)
-  - Include UI bugs (layout issues, broken interactions, visual glitches)
-  - Include specific file names, line numbers, and reproduction steps when possible
-  - Focus on actionable, fixable bugs
-  - Use bullet points with clear descriptions
-- For Product Areas: Identify specific features, modules, user flows, or business processes that are directly affected by the code changes
-- For Release Pulse Analysis:
-  - **Release Confidence**: Evaluate based on code review findings (quality, maintainability), number/severity of risks, number/severity of bugs, affected areas (critical vs non-critical), whether changes are in critical path flows, test coverage, edge case handling, and overall implementation confidence. MAX 15 words.
-  - **Change Impact**: Evaluate based on affected areas (how many, how critical), whether changes touch critical path flows (auth, payment, core features), scope of changes (files, components, modules), user-facing vs backend-only, integration points touched, and potential for cascading effects. MAX 15 words.
-  - **Release Decision**: Make Go/No-Go recommendation based on weighted judgment of Release Confidence and Change Impact, severity of bugs and risks, whether critical path is affected, mitigations available, and value vs risk trade-off. Go if value is meaningful, confidence is high/medium, impact is low/medium, and bugs/risks are manageable. No-Go if confidence is low, critical path has high risk, or severe bugs/risks without mitigations. MAX 15 words.
+- For Code Review & Bugs (MERGED SECTION):
+  - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real issues.
+  - **REQUIRED**: Every item MUST include file:line (e.g., `src/api/user.js:45`)
+  - **MAX 5 ITEMS**: Only the most critical. Less is more.
+  - **FORMAT**: `Issue: Description at \`file:line\` - impact`
+  - **If nothing found**: Write "✅ No critical issues found."
+- For Release Pulse:
+  - **Affected Areas**: List 2-4 specific components/services touched. Use actual names from code. Level based on criticality.
+  - **Release Decision**: Default to Go. Only No-Go for critical security/data issues. MAX 10 words reason.
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
   - NOT: "1. Open form 2. Fill fields 3. Submit"
   - This ensures the table displays steps as proper numbered lists
 
-**REMEMBER: STOP YOUR OUTPUT AFTER THE "🎯 Product Areas Affected" SECTION. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
+**REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
 **RELEASE PULSE EVALUATION REQUIREMENTS:**
 
-**IMPORTANT: Be REALISTIC about risk. Not every PR is risky!**
+**IMPORTANT: Be REALISTIC. Not every PR is risky! Default to "Go" unless there's a clear reason not to.**
 
-- **🟢 High Confidence / Go** scenarios (use liberally when appropriate):
-  - Non-code changes (docs, text files, images, configs)
-  - Simple bug fixes with clear scope
-  - Small, isolated changes
-  - Changes to non-critical paths
-  - Well-tested, straightforward additions
-  - Refactoring without behavior change
+- **Affected Areas**: List 2-4 SPECIFIC components/services/modules touched by the changes
+  - Use actual names from the codebase (e.g., "Auth API", "UserService", "Dashboard Component", "Webhook Handler")
+  - Level: 🔴 High = critical path (auth, payment, core business logic), 🟡 Medium = important features, 🟢 Low = non-critical
+  - For non-code changes (docs, configs, text files): list "Documentation" or "Configuration" and mark as 🟢 Low
 
-- **🔴 Low Confidence / No-Go** scenarios (use sparingly, only when justified):
-  - Critical security vulnerabilities found
-  - Changes to payment/auth flows without proper review
-  - Missing error handling in critical paths
-  - Data corruption risks identified
-  - Untested changes to core business logic
+- **Release Decision**:
+  - **🟢 Go**: Default for most PRs. Non-code changes, simple fixes, isolated changes, well-scoped features
+  - **🔴 No-Go**: Only when there are CRITICAL issues: security vulnerabilities, data corruption risks, broken critical paths
+  - Keep the reason brief (MAX 10 words)
 
-- **Release Confidence**: Evaluate based on:
-  - **First check**: Are these code changes or non-code? Non-code = High confidence
-  - Code review findings (quality, maintainability, best practices)
-  - Number and severity of risks identified
-  - Number and severity of bugs found
-  - Affected areas (critical vs. non-critical)
-  - Whether changes are in critical path flows
-  - Test coverage and edge case handling
-  - Overall code quality and implementation confidence
-  
-- **Change Impact**: Evaluate based on:
-  - **First check**: Are these code changes or non-code? Non-code = Low impact
-  - Affected areas (how many, how critical)
-  - Whether changes touch critical path flows (user authentication, payment, core features)
-  - Scope of changes (files, components, modules affected)
-  - User-facing vs. backend-only changes
-  - Integration points touched
-  - Potential for cascading effects
-  
-- **Release Decision**: Make Go/No-Go recommendation based on:
-  - **Default to "Go"** unless there's a specific, concrete reason not to
-  - Weighted judgment of Release Confidence and Change Impact
-  - Severity of bugs and risks
-  - Whether critical path is affected
-  - Mitigations available for identified issues
-  - Value vs. risk trade-off
-  - **Non-code changes should almost always be "Go"**
-
-**CODE REVIEW REQUIREMENTS (Combined Code Review and Risks):**
-- **STRICT RULE**: Only list CRITICAL findings backed by SPECIFIC code evidence from the diff
-- **REQUIRED**: Every item MUST include exact file name and line number
-- **FOCUS ON CRITICAL ISSUES ONLY**: Bugs, security vulnerabilities, memory leaks, performance bottlenecks, missing critical error handling, data corruption risks
-- Only mention issues if they are IMPORTANT and you can point to exact problematic code:
-  - Critical bugs: "Missing null check: `user.profile.name` accessed at line 56 in `src/components/Button.js` without checking `user.profile` exists, will crash"
-  - Security: "No input validation: user input `data.email` used directly in SQL query at line 78 in `src/handlers/user.js`, SQL injection risk"
-  - Memory leaks: "Memory leak: `setTimeout` at line 67 in `src/hooks/useEffect.js` not cleared in cleanup function, timers will accumulate"
-  - Performance: "O(n²) complexity: nested loop at lines 120-125 in `src/processors/data.js`, will be slow with large datasets"
-  - Critical error handling: "Missing error handling: `fetch()` at line 45 in `src/api/user.js` has no try-catch, app could crash on network failure"
-- **DO NOT include** minor issues, style concerns, or generic statements
-- **If nothing critical found**: Write "No critical code review findings." - it's perfectly fine to have nothing
-- Prioritize by severity - only list issues that really matter and could cause real problems
-- Focus on actionable, evidence-based feedback with code examples
-
-**BUGS REQUIREMENTS:**
-- List CLEAR bugs found in code and functionality
-- Include actual code defects (missing null checks, incorrect logic)
-- Include functional bugs (incorrect behavior, broken flows)
-- Include edge case failures, integration bugs, UI bugs
-- Include specific file names and line numbers when possible
-- Include reproduction steps when relevant
-- Focus on actionable, fixable bugs
+**CODE REVIEW & BUGS REQUIREMENTS:**
+- **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real issues.
+- **STRICT RULE**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
+- **MAX 5 ITEMS**: Only the most critical issues that affect quality. Less is more.
+- **CATEGORIES**:
+  - Code Issues: null checks, incorrect logic, security risks, memory leaks, performance problems
+  - Functional Bugs: broken flows, edge case failures, UI bugs, integration issues
+- **FORMAT**: `Issue type: Brief description at \`file:line\` - impact`
+  - Example: "Null check missing: `user.profile.name` at `src/Button.js:56` crashes if profile is null"
+  - Example: "Memory leak: `setTimeout` not cleared at `src/hooks/useEffect.js:67` accumulates timers"
+- **DO NOT include**: minor style issues, "could potentially" statements, maintainability opinions
+- **If nothing found**: Write "✅ No critical issues found." — developers trust this means clean code
