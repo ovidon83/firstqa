@@ -2318,23 +2318,12 @@ async function processWebhookEvent(event) {
     console.log('Event payload:', payloadString.length > 500 
       ? payloadString.substring(0, 500) + '...(truncated)' 
       : payloadString);
-    // Handle pull_request event (for PR opening - NEW BEHAVIOR)
+    // Handle pull_request event - NO automatic analysis on PR open
+    // Analysis is triggered ONLY via /qa comment command
     if (eventType === 'pull_request' && payload.action === 'opened') {
-      console.log('🚀 New PR opened - checking if ready for review');
       const { repository, pull_request: pr } = payload;
-      if (!repository || !pr) {
-        console.error('Missing required properties in payload');
-        return { success: false, message: 'Missing required properties in payload' };
-      }
-      // Only analyze PRs that are ready for review (not draft)
-      if (pr.draft) {
-        console.log(`⏸️ PR #${pr.number} is draft - skipping analysis until ready for review`);
-        return { success: true, message: 'PR is draft, skipping analysis' };
-      }
-      // Generate comprehensive analysis for ready-for-review PRs
-      console.log(`⚡ PR #${pr.number} ready for review - generating comprehensive analysis`);
-      const installationId = payload.installation?.id;
-      return await handlePROpened(repository, pr, installationId);
+      console.log(`📋 PR #${pr?.number} opened on ${repository?.full_name} - waiting for /qa command to trigger analysis`);
+      return { success: true, message: 'PR opened - use /qa command to trigger analysis' };
     }
     // Handle issue comment event (for /qa commands)
     if (eventType === 'issue_comment' && payload.action === 'created') {
