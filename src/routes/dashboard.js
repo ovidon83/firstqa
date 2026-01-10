@@ -80,6 +80,7 @@ router.get('/integrations', async (req, res) => {
       bitbucketIntegration,
       jiraIntegration,
       connected: req.query.connected, // 'github' or 'jira' when just connected
+      info: req.query.info, // Info messages (not errors, not success)
       success: flash?.type === 'success' ? flash.message : req.query.success,
       error: flash?.type === 'error' ? flash.message : req.query.error
     });

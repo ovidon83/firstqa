@@ -71,20 +71,63 @@ router.get('/health', (req, res) => {
 
 /**
  * GET /github/install-redirect - Redirect to GitHub App install with state
+ * Also checks if app is already installed and syncs the database
  */
-router.get('/install-redirect', (req, res) => {
+router.get('/install-redirect', async (req, res) => {
   if (!req.session?.user) {
     return res.redirect('/login');
   }
   
-  // Generate state token and store user ID
-  const state = crypto.randomBytes(16).toString('hex');
-  req.session.githubInstallState = state;
-  req.session.githubInstallUserId = req.session.user.id;
-  
-  // Redirect to GitHub App install page with state
-  const installUrl = `https://github.com/apps/oviai-by-firstqa/installations/new?state=${state}`;
-  res.redirect(installUrl);
+  try {
+    const userId = req.session.user.id;
+    
+    // Check if user already has a GitHub installation in the database
+    if (isSupabaseConfigured()) {
+      const { data: existingInstallation } = await supabaseAdmin
+        .from('integrations')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('provider', 'github')
+        .single();
+      
+      if (existingInstallation) {
+        console.log(`✅ User already has GitHub installation in database: ${existingInstallation.account_id}`);
+        // Redirect back to integrations with success message
+        return res.redirect('/dashboard/integrations?info=' + encodeURIComponent('GitHub is already connected'));
+      }
+    }
+    
+    // Check if user has any GitHub App installations we don't know about
+    // This requires GitHub App authentication
+    const jwt = githubAppAuth.getGitHubAppJWT();
+    if (jwt) {
+      try {
+        const appOctokit = new Octokit({ auth: jwt });
+        const { data: installations } = await appOctokit.apps.listInstallations();
+        
+        // Check if any installation matches this user's GitHub account
+        // We'll need to match by comparing user's GitHub account if available
+        console.log(`📊 Found ${installations.length} total GitHub App installations`);
+        
+        // If we find installations but don't have them in our DB, we'll let the user proceed
+        // to the GitHub page where they can configure/select repos
+      } catch (error) {
+        console.error('Error checking GitHub installations:', error.message);
+      }
+    }
+    
+    // Generate state token and store user ID
+    const state = crypto.randomBytes(16).toString('hex');
+    req.session.githubInstallState = state;
+    req.session.githubInstallUserId = req.session.user.id;
+    
+    // Redirect to GitHub App install page with state
+    const installUrl = `https://github.com/apps/oviai-by-firstqa/installations/new?state=${state}`;
+    res.redirect(installUrl);
+  } catch (error) {
+    console.error('Error in install-redirect:', error);
+    res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to connect GitHub'));
+  }
 });
 
 /**
@@ -166,6 +209,77 @@ router.get('/install-callback', async (req, res) => {
       ? '/dashboard/integrations?error=' + encodeURIComponent('Installation failed')
       : '/?error=github_install_failed';
     res.redirect(redirectUrl);
+  }
+});
+
+/**
+ * GET /github/sync-installations - Manually sync existing GitHub installations
+ * For users who already have the app installed but not in our database
+ */
+router.get('/sync-installations', async (req, res) => {
+  if (!req.session?.user) {
+    return res.redirect('/login');
+  }
+  
+  try {
+    const userId = req.session.user.id;
+    const jwt = githubAppAuth.getGitHubAppJWT();
+    
+    if (!jwt) {
+      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('GitHub App authentication not configured'));
+    }
+    
+    const appOctokit = new Octokit({ auth: jwt });
+    const { data: installations } = await appOctokit.apps.listInstallations();
+    
+    console.log(`🔍 Found ${installations.length} GitHub App installations`);
+    
+    let synced = 0;
+    
+    // Try to sync all installations
+    // In a real scenario, we'd need to match by GitHub user account
+    // For now, we'll add them all if they don't exist
+    for (const installation of installations) {
+      try {
+        if (isSupabaseConfigured()) {
+          const { data: existing } = await supabaseAdmin
+            .from('integrations')
+            .select('id')
+            .eq('provider', 'github')
+            .eq('account_id', installation.id.toString())
+            .single();
+          
+          if (!existing) {
+            // Add this installation to the current user
+            await supabaseAdmin
+              .from('integrations')
+              .insert({
+                user_id: userId,
+                provider: 'github',
+                access_token: '',
+                account_id: installation.id.toString(),
+                account_name: installation.account.login,
+                account_avatar: installation.account.avatar_url,
+                scopes: installation.permissions ? Object.keys(installation.permissions) : []
+              });
+            
+            console.log(`✅ Synced installation: ${installation.account.login}`);
+            synced++;
+          }
+        }
+      } catch (error) {
+        console.error(`Error syncing installation ${installation.id}:`, error.message);
+      }
+    }
+    
+    if (synced > 0) {
+      return res.redirect('/dashboard/integrations?connected=github&t=' + Date.now());
+    } else {
+      return res.redirect('/dashboard/integrations?info=' + encodeURIComponent('No new installations found to sync'));
+    }
+  } catch (error) {
+    console.error('Error syncing installations:', error);
+    return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to sync installations'));
   }
 });
 

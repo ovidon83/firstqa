@@ -338,6 +338,12 @@
                 </div>
             <% } %>
 
+            <% if (locals.info) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; color: #93c5fd;">
+                    ℹ️ <%= info %>
+                </div>
+            <% } %>
+
             <% if (locals.error) { %>
                 <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #fca5a5;">
                     <%= error %>
@@ -389,6 +395,10 @@
                             <a href="/github/install-redirect" class="btn btn-primary">
                                 <i class="fab fa-github"></i>
                                 Connect GitHub
+                            </a>
+                            <a href="/github/sync-installations" class="btn btn-secondary" style="font-size: 0.85rem;">
+                                <i class="fas fa-sync"></i>
+                                Already installed? Sync
                             </a>
                         <% } %>
                     </div>
