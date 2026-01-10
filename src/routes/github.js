@@ -124,7 +124,7 @@ router.get('/install-callback', async (req, res) => {
         });
         
         // Save to database
-        await supabaseAdmin
+        const { data, error: upsertError } = await supabaseAdmin
           .from('integrations')
           .upsert({
             user_id: userId,
@@ -136,15 +136,22 @@ router.get('/install-callback', async (req, res) => {
             scopes: installation.permissions ? Object.keys(installation.permissions) : []
           }, {
             onConflict: 'user_id,provider,account_id'
-          });
+          })
+          .select();
         
-        console.log(`✅ GitHub installation saved to database for user ${userId}`);
+        if (upsertError) {
+          console.error('❌ Error saving GitHub installation to database:', upsertError);
+          throw upsertError;
+        }
+        
+        console.log(`✅ GitHub installation saved to database for user ${userId}:`, data);
         
         // Clean up session state
         delete req.session.githubInstallState;
         delete req.session.githubInstallUserId;
         
-        return res.redirect('/dashboard/integrations?success=' + encodeURIComponent('GitHub connected successfully'));
+        // Redirect with a reload flag to force page refresh
+        return res.redirect('/dashboard/integrations?connected=github&t=' + Date.now());
       } catch (error) {
         console.error('Error saving GitHub installation:', error.message);
         return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to save GitHub installation'));

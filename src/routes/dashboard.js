@@ -79,6 +79,7 @@ router.get('/integrations', async (req, res) => {
       githubIntegration,
       bitbucketIntegration,
       jiraIntegration,
+      connected: req.query.connected, // 'github' or 'jira' when just connected
       success: flash?.type === 'success' ? flash.message : req.query.success,
       error: flash?.type === 'error' ? flash.message : req.query.error
     });

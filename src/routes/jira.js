@@ -102,7 +102,7 @@ router.get('/callback', async (req, res) => {
 
     // Save to Supabase
     if (isSupabaseConfigured()) {
-      await supabaseAdmin
+      const { data, error: upsertError } = await supabaseAdmin
         .from('integrations')
         .upsert({
           user_id: userId,
@@ -116,16 +116,23 @@ router.get('/callback', async (req, res) => {
           scopes: ['read:jira-work', 'read:jira-user', 'offline_access']
         }, {
           onConflict: 'user_id,provider,account_id'
-        });
+        })
+        .select();
 
-      console.log(`✅ Jira integration saved to database for user ${userId}`);
+      if (upsertError) {
+        console.error('❌ Error saving Jira integration to database:', upsertError);
+        throw upsertError;
+      }
+
+      console.log(`✅ Jira integration saved to database for user ${userId}:`, data);
     }
 
     // Clean up session
     delete req.session.jiraOAuthState;
     delete req.session.jiraOAuthUserId;
 
-    res.redirect('/dashboard/integrations?success=' + encodeURIComponent('Jira connected successfully'));
+    // Redirect with a reload flag to force page refresh
+    res.redirect('/dashboard/integrations?connected=jira&t=' + Date.now());
   } catch (error) {
     console.error('Jira OAuth callback error:', error.response?.data || error.message);
     res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to connect Jira'));

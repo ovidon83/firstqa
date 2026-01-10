@@ -324,7 +324,15 @@
                 <p>Connect your repositories to start analyzing pull requests</p>
             </div>
 
-            <% if (locals.success) { %>
+            <% if (locals.connected === 'github') { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    ✅ GitHub connected successfully!
+                </div>
+            <% } else if (locals.connected === 'jira') { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    ✅ Jira connected successfully!
+                </div>
+            <% } else if (locals.success) { %>
                 <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
                     <%= success %>
                 </div>
