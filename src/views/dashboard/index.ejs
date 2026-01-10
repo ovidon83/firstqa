@@ -320,28 +320,86 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Analyses This Month</div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">
+                        <%= stats.analysesThisMonth %>
+                        <% if (stats.plan === 'free') { %>
+                            <span style="font-size: 0.9rem; color: #888;">/ <%= stats.analysesLimit %></span>
+                        <% } %>
+                    </div>
+                    <% if (stats.plan === 'free' && stats.analysesThisMonth >= stats.analysesLimit * 0.8) { %>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #f59e0b;">
+                            ⚠️ Nearing limit
+                        </div>
+                    <% } %>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Connected Repos</div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-label">Connected Integrations</div>
+                    <div class="stat-value"><%= stats.connectedIntegrations %></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Bugs Found</div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-label">Current Plan</div>
+                    <div class="stat-value" style="font-size: 1.5rem; text-transform: capitalize;">
+                        <%= stats.plan %>
+                        <% if (stats.plan === 'pro' || stats.plan === 'enterprise') { %>
+                            <span style="font-size: 0.7rem;">✨</span>
+                        <% } %>
+                    </div>
                 </div>
             </div>
 
-            <!-- Empty State -->
-            <div class="empty-state">
-                <div class="empty-state-icon">🔌</div>
-                <h3>Connect your first integration</h3>
-                <p>Connect GitHub or Bitbucket to start analyzing your pull requests</p>
-                <a href="/dashboard/integrations" class="btn-primary">
-                    <i class="fas fa-plug"></i>
-                    Add Integration
-                </a>
-            </div>
+            <!-- Recent Activity or Empty State -->
+            <% if (stats.recentAnalyses && stats.recentAnalyses.length > 0) { %>
+                <div style="margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="font-size: 1.25rem; font-weight: 600;">Recent Analyses</h2>
+                        <a href="/dashboard/history" style="color: #10b981; text-decoration: none; font-size: 0.9rem;">
+                            View all →
+                        </a>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <% stats.recentAnalyses.forEach(analysis => { %>
+                            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <a href="<%= analysis.pr_url %>" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 500;">
+                                        <%= analysis.pr_title || `PR #${analysis.pr_number}` %>
+                                        <i class="fas fa-external-link-alt" style="font-size: 0.7rem; opacity: 0.6;"></i>
+                                    </a>
+                                    <div style="font-size: 0.85rem; color: #888; margin-top: 0.25rem;">
+                                        <i class="fab fa-github"></i>
+                                        <%= analysis.repository %> #<%= analysis.pr_number %>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: <%= analysis.analysis_type === 'full' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(168, 85, 247, 0.15)' %>; color: <%= analysis.analysis_type === 'full' ? '#60a5fa' : '#c084fc' %>; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 0.25rem;">
+                                        <%= analysis.analysis_type %>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #888;">
+                                        <%= new Date(analysis.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } else if (stats.connectedIntegrations > 0) { %>
+                <!-- Has integrations but no analyses yet -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <h3>Ready to analyze PRs</h3>
+                    <p>Comment <code>/qa</code> on any pull request to get your first analysis</p>
+                </div>
+            <% } else { %>
+                <!-- No integrations connected -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔌</div>
+                    <h3>Connect your first integration</h3>
+                    <p>Connect GitHub or Jira to start analyzing your pull requests and tickets</p>
+                    <a href="/dashboard/integrations" class="btn-primary">
+                        <i class="fas fa-plug"></i>
+                        Add Integration
+                    </a>
+                </div>
+            <% } %>
         </main>
     </div>
 </body>

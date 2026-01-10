@@ -27,17 +27,68 @@ router.get('/', async (req, res) => {
   try {
     const user = req.session.user;
     
-    // TODO: Fetch user stats from database
-    const stats = {
+    let stats = {
       analysesThisMonth: 0,
-      connectedRepos: 0,
-      bugsFound: 0
+      analysesLimit: 10,
+      connectedIntegrations: 0,
+      recentAnalyses: [],
+      plan: 'free'
     };
     
-    res.render('dashboard/index', { user, stats });
+    if (isSupabaseConfigured()) {
+      // Fetch user stats
+      const { data: userData } = await supabaseAdmin
+        .from('users')
+        .select('plan, analyses_this_month, analyses_limit')
+        .eq('id', user.id)
+        .single();
+      
+      if (userData) {
+        stats.analysesThisMonth = userData.analyses_this_month || 0;
+        stats.analysesLimit = userData.analyses_limit || 10;
+        stats.plan = userData.plan || 'free';
+      }
+      
+      // Count connected integrations
+      const { count: integrationCount } = await supabaseAdmin
+        .from('integrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      
+      stats.connectedIntegrations = integrationCount || 0;
+      
+      // Fetch recent analyses (last 5)
+      const { data: recentAnalyses } = await supabaseAdmin
+        .from('analyses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      stats.recentAnalyses = recentAnalyses || [];
+      
+      console.log(`📊 Dashboard stats for ${user.email}:`, stats);
+    }
+    
+    res.render('dashboard/index', { 
+      user, 
+      stats,
+      success: req.query.success,
+      error: req.query.error  
+    });
   } catch (error) {
     console.error('Dashboard error:', error);
-    res.render('dashboard/index', { user: req.session.user, stats: {} });
+    res.render('dashboard/index', { 
+      user: req.session.user, 
+      stats: {
+        analysesThisMonth: 0,
+        analysesLimit: 10,
+        connectedIntegrations: 0,
+        recentAnalyses: [],
+        plan: 'free'
+      },
+      error: 'Failed to load dashboard data'
+    });
   }
 });
 
@@ -172,10 +223,42 @@ router.post('/integrations/jira/disconnect', async (req, res) => {
 /**
  * GET /dashboard/history - Analysis history
  */
-router.get('/history', (req, res) => {
-  const user = req.session.user;
-  // TODO: Fetch analysis history from database
-  res.render('dashboard/history', { user, analyses: [] });
+router.get('/history', async (req, res) => {
+  try {
+    const user = req.session.user;
+    let analyses = [];
+    
+    if (isSupabaseConfigured()) {
+      // Fetch analysis history from database
+      const { data, error } = await supabaseAdmin
+        .from('analyses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50); // Show last 50 analyses
+      
+      if (error) {
+        console.error('Error fetching analyses:', error);
+      } else {
+        analyses = data || [];
+        console.log(`📊 Fetched ${analyses.length} analyses for user ${user.email}`);
+      }
+    }
+    
+    res.render('dashboard/history', { 
+      user, 
+      analyses,
+      success: req.query.success,
+      error: req.query.error
+    });
+  } catch (error) {
+    console.error('History page error:', error);
+    res.render('dashboard/history', { 
+      user: req.session.user, 
+      analyses: [],
+      error: 'Failed to load analysis history'
+    });
+  }
 });
 
 /**

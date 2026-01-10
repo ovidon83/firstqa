@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis History - FirstQA</title>
+    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0a0a0b;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .navbar {
+            padding: 1rem 0;
+            background: rgba(10, 10, 11, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logo-icon { font-size: 1.5rem; }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .logout-btn {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .dashboard-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+        }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #888;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .sidebar-link:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+        .sidebar-link.active {
+            color: #fff;
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .sidebar-link i { width: 20px; text-align: center; }
+        .main-content { flex: 1; }
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p { color: #888; }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .history-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+        .history-item:hover {
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        .history-title {
+            flex: 1;
+        }
+        .history-title h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .history-title a {
+            color: #10b981;
+            text-decoration: none;
+        }
+        .history-title a:hover {
+            text-decoration: underline;
+        }
+        .history-meta {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .history-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-full {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+        .badge-short {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+        }
+        .history-stats {
+            display: flex;
+            gap: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .stat-item i {
+            color: #10b981;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #888;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .dashboard-layout { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .sidebar-nav {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 0.5rem;
+            }
+            .sidebar-link { white-space: nowrap; }
+            .history-stats {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">FirstQA</span>
+            </a>
+            <div class="nav-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <% if (user.avatar_url) { %>
+                            <img src="<%= user.avatar_url %>" alt="<%= user.full_name %>">
+                        <% } else { %>
+                            <%= user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase() %>
+                        <% } %>
+                    </div>
+                    <span><%= user.full_name || user.email %></span>
+                </div>
+                <a href="/logout" class="logout-btn">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="sidebar-link">
+                    <i class="fas fa-home"></i>
+                    Overview
+                </a>
+                <a href="/dashboard/integrations" class="sidebar-link">
+                    <i class="fas fa-plug"></i>
+                    Integrations
+                </a>
+                <a href="/dashboard/history" class="sidebar-link active">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="/dashboard/settings" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Analysis History</h1>
+                <p>View all your past PR analyses and test recipes</p>
+            </div>
+
+            <% if (locals.error) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #fca5a5;">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <% if (analyses && analyses.length > 0) { %>
+                <div class="history-list">
+                    <% analyses.forEach(analysis => { %>
+                        <div class="history-item">
+                            <div class="history-header">
+                                <div class="history-title">
+                                    <h3>
+                                        <a href="<%= analysis.pr_url %>" target="_blank">
+                                            <%= analysis.pr_title || `PR #${analysis.pr_number}` %>
+                                            <i class="fas fa-external-link-alt" style="font-size: 0.8rem; opacity: 0.6;"></i>
+                                        </a>
+                                    </h3>
+                                    <div class="history-meta">
+                                        <i class="fab fa-github"></i>
+                                        <%= analysis.repository %> #<%= analysis.pr_number %>
+                                    </div>
+                                </div>
+                                <span class="history-badge <%= analysis.analysis_type === 'full' ? 'badge-full' : 'badge-short' %>">
+                                    <%= analysis.analysis_type %>
+                                </span>
+                            </div>
+                            <div class="history-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span><%= new Date(analysis.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span><%= new Date(analysis.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %></span>
+                                </div>
+                                <% if (analysis.processing_time_ms) { %>
+                                    <div class="stat-item">
+                                        <i class="fas fa-stopwatch"></i>
+                                        <span><%= (analysis.processing_time_ms / 1000).toFixed(1) %>s</span>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <h3>No analyses yet</h3>
+                    <p>Your PR analyses will appear here once you connect an integration and comment <code>/qa</code> on a pull request.</p>
+                </div>
+            <% } %>
+        </main>
+    </div>
+</body>
+</html>
