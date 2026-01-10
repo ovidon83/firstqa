@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations - FirstQA</title>
+    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0a0a0b;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .navbar {
+            padding: 1rem 0;
+            background: rgba(10, 10, 11, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logo-icon { font-size: 1.5rem; }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .logout-btn {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .dashboard-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+        }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #888;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .sidebar-link:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+        .sidebar-link.active {
+            color: #fff;
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .sidebar-link i { width: 20px; text-align: center; }
+        .main-content { flex: 1; }
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p { color: #888; }
+        .integrations-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        .integration-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .integration-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        .github-icon {
+            background: linear-gradient(135deg, #6e5494 0%, #4d3d6b 100%);
+        }
+        .bitbucket-icon {
+            background: linear-gradient(135deg, #0052cc 0%, #003d99 100%);
+        }
+        .integration-info { flex: 1; }
+        .integration-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .integration-description {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+        .integration-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .status-connected {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        .status-not-connected {
+            background: rgba(107, 114, 128, 0.15);
+            color: #9ca3af;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .integration-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .btn-danger {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .connection-details {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .detail-row:last-child { margin-bottom: 0; }
+        .detail-label { color: #888; }
+        .detail-value { color: #fff; font-weight: 500; }
+        @media (max-width: 768px) {
+            .dashboard-layout { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .sidebar-nav {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 0.5rem;
+            }
+            .sidebar-link { white-space: nowrap; }
+            .integration-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .integration-actions { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">FirstQA</span>
+            </a>
+            <div class="nav-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <% if (user.avatarUrl) { %>
+                            <img src="<%= user.avatarUrl %>" alt="<%= user.name %>">
+                        <% } else { %>
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                        <% } %>
+                    </div>
+                    <span><%= user.name || user.email %></span>
+                </div>
+                <a href="/logout" class="logout-btn">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="sidebar-link">
+                    <i class="fas fa-home"></i>
+                    Overview
+                </a>
+                <a href="/dashboard/integrations" class="sidebar-link active">
+                    <i class="fas fa-plug"></i>
+                    Integrations
+                </a>
+                <a href="/dashboard/history" class="sidebar-link">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="/dashboard/settings" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Integrations</h1>
+                <p>Connect your repositories to start analyzing pull requests</p>
+            </div>
+
+            <% if (locals.success) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    <%= success %>
+                </div>
+            <% } %>
+
+            <% if (locals.error) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #fca5a5;">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <div class="integrations-grid">
+                <!-- GitHub Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon github-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">GitHub</div>
+                        <div class="integration-description">
+                            Analyze pull requests, generate test recipes, and catch bugs before they ship.
+                        </div>
+                        <% if (locals.githubIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Account:</span>
+                                    <span class="detail-value"><%= githubIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(githubIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.githubIntegration) { %>
+                            <form action="/dashboard/integrations/github/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/github/install-redirect" class="btn btn-primary">
+                                <i class="fab fa-github"></i>
+                                Connect GitHub
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Bitbucket Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon bitbucket-icon">
+                        <i class="fab fa-bitbucket"></i>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">Bitbucket</div>
+                        <div class="integration-description">
+                            Analyze pull requests, generate test recipes, and catch bugs before they ship.
+                        </div>
+                        <% if (locals.bitbucketIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Workspace:</span>
+                                    <span class="detail-value"><%= bitbucketIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(bitbucketIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.bitbucketIntegration) { %>
+                            <form action="/dashboard/integrations/bitbucket/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/api/auth/bitbucket/install" class="btn btn-primary">
+                                <i class="fab fa-bitbucket"></i>
+                                Connect Bitbucket
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
