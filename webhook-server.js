@@ -24,6 +24,7 @@ const adminRoutes = require('./src/routes/admin');
 const stripeRoutes = require('./src/routes/stripe');
 const bitbucketRoutes = require('./src/routes/bitbucket');
 const authRoutes = require('./src/routes/auth');
+const dashboardRoutes = require('./src/routes/dashboard');
 // customerRoutes will be imported AFTER directory fix
 
 // Create Express app
@@ -169,13 +170,8 @@ app.get('/signup', (req, res) => {
 // Logout shortcut
 app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
-// Dashboard (protected route)
-app.get('/dashboard', (req, res) => {
-  if (!req.session?.user) {
-    return res.redirect('/login');
-  }
-  res.render('dashboard/index', { user: req.session.user });
-});
+// Dashboard routes
+app.use('/dashboard', dashboardRoutes);
 
 // Success page route for post-payment onboarding
 app.get('/success', async (req, res) => {

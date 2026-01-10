@@ -7,6 +7,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const bitbucketService = require('../utils/bitbucketService');
 const bitbucketAppAuth = require('../utils/bitbucketAppAuth');
+const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 
 // Middleware to verify Bitbucket webhook signatures
 const verifyBitbucketWebhook = (req, res, next) => {
@@ -175,6 +176,30 @@ router.get('/callback', async (req, res) => {
       bitbucketAppAuth.saveInstallation(installation);
       console.log(`✅ Bitbucket OAuth installation saved for workspace: ${workspace.slug}`);
       
+      // If user is logged in, also save to Supabase
+      if (req.session?.user && isSupabaseConfigured()) {
+        try {
+          await supabaseAdmin
+            .from('integrations')
+            .upsert({
+              user_id: req.session.user.id,
+              provider: 'bitbucket',
+              access_token: tokenData.access_token,
+              refresh_token: tokenData.refresh_token,
+              token_expires_at: installation.expiresAt ? new Date(installation.expiresAt).toISOString() : null,
+              account_id: workspace.uuid,
+              account_name: workspace.slug,
+              scopes: tokenData.scopes || []
+            }, {
+              onConflict: 'user_id,provider,account_id'
+            });
+          console.log(`✅ Bitbucket integration saved to database for user ${req.session.user.email}`);
+        } catch (dbError) {
+          console.error('Error saving Bitbucket integration to database:', dbError.message);
+          // Don't fail the whole flow if DB save fails
+        }
+      }
+      
       // Automatically setup webhooks for all repositories in this workspace
       try {
         const webhookResults = await bitbucketAppAuth.setupWebhooksForWorkspace(
@@ -193,10 +218,19 @@ router.get('/callback', async (req, res) => {
     console.log(`📊 Summary: ${workspaces.length} workspace(s), ${totalWebhooksCreated} webhook(s) created`);
 
     // Redirect to success page or dashboard
-    res.redirect('/?success=bitbucket_installed');
+    // Redirect based on whether user is logged in
+    if (req.session?.user) {
+      res.redirect('/dashboard/integrations?success=' + encodeURIComponent('Bitbucket connected successfully'));
+    } else {
+      res.redirect('/?success=bitbucket_installed');
+    }
   } catch (error) {
     console.error('Error handling OAuth callback:', error);
-    res.redirect('/?error=bitbucket_oauth_error');
+    if (req.session?.user) {
+      res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to connect Bitbucket'));
+    } else {
+      res.redirect('/?error=bitbucket_oauth_error');
+    }
   }
 });
 
