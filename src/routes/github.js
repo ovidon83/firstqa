@@ -241,24 +241,48 @@ router.get('/sync-installations', async (req, res) => {
     
     console.log(`🔍 Found ${installations.length} GitHub App installations`);
     
-    let synced = 0;
+    if (installations.length === 0) {
+      return res.redirect('/dashboard/integrations?info=' + encodeURIComponent('No GitHub App installations found. Install the app first.'));
+    }
     
-    // Try to sync all installations
-    // In a real scenario, we'd need to match by GitHub user account
-    // For now, we'll add them all if they don't exist
+    let synced = 0;
+    let errors = [];
+    
+    // Get user's GitHub username from their session/profile if available
+    const userGitHubLogin = req.session.user.user_metadata?.user_name || 
+                           req.session.user.user_metadata?.preferred_username;
+    
+    console.log(`👤 User's GitHub login: ${userGitHubLogin || 'unknown'}`);
+    
+    // Try to sync installations that match the user's GitHub account
     for (const installation of installations) {
       try {
+        const accountLogin = installation.account.login;
+        
+        // Only sync if:
+        // 1. It's a personal account matching the user's GitHub login, OR
+        // 2. We don't know the user's GitHub login (sync all as fallback)
+        const shouldSync = !userGitHubLogin || 
+                          accountLogin.toLowerCase() === userGitHubLogin.toLowerCase();
+        
+        if (!shouldSync) {
+          console.log(`⏭️  Skipping installation for ${accountLogin} (doesn't match user ${userGitHubLogin})`);
+          continue;
+        }
+        
+        // Check if already exists
         if (isSupabaseConfigured()) {
           const { data: existing } = await supabaseAdmin
             .from('integrations')
             .select('id')
+            .eq('user_id', userId)
             .eq('provider', 'github')
             .eq('account_id', installation.id.toString())
             .single();
           
           if (!existing) {
             // Add this installation to the current user
-            await supabaseAdmin
+            const { error } = await supabaseAdmin
               .from('integrations')
               .insert({
                 user_id: userId,
@@ -270,23 +294,35 @@ router.get('/sync-installations', async (req, res) => {
                 scopes: installation.permissions ? Object.keys(installation.permissions) : []
               });
             
-            console.log(`✅ Synced installation: ${installation.account.login}`);
-            synced++;
+            if (error) {
+              console.error(`❌ Error syncing installation ${installation.id}:`, error.message);
+              errors.push(`${installation.account.login}: ${error.message}`);
+            } else {
+              console.log(`✅ Synced installation: ${installation.account.login}`);
+              synced++;
+            }
+          } else {
+            console.log(`ℹ️  Installation ${accountLogin} already synced`);
           }
         }
       } catch (error) {
         console.error(`Error syncing installation ${installation.id}:`, error.message);
+        errors.push(error.message);
       }
+    }
+    
+    if (errors.length > 0) {
+      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent(`Failed to sync: ${errors[0]}`));
     }
     
     if (synced > 0) {
       return res.redirect('/dashboard/integrations?connected=github&t=' + Date.now());
     } else {
-      return res.redirect('/dashboard/integrations?info=' + encodeURIComponent('No new installations found to sync'));
+      return res.redirect('/dashboard/integrations?info=' + encodeURIComponent('All matching installations already synced'));
     }
   } catch (error) {
     console.error('Error syncing installations:', error);
-    return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to sync installations'));
+    return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to sync installations: ' + error.message));
   }
 });
 
