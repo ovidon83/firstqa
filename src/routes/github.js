@@ -83,7 +83,7 @@ router.get('/install-redirect', (req, res) => {
   req.session.githubInstallUserId = req.session.user.id;
   
   // Redirect to GitHub App install page with state
-  const installUrl = `https://github.com/apps/firstqa/installations/new?state=${state}`;
+  const installUrl = `https://github.com/apps/oviai-by-firstqa/installations/new?state=${state}`;
   res.redirect(installUrl);
 });
 
