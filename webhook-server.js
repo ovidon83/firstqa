@@ -23,6 +23,8 @@ const contactRoutes = require('./src/routes/contact');
 const adminRoutes = require('./src/routes/admin');
 const stripeRoutes = require('./src/routes/stripe');
 const bitbucketRoutes = require('./src/routes/bitbucket');
+const githubRoutes = require('./src/routes/github');
+const jiraRoutes = require('./src/routes/jira');
 const authRoutes = require('./src/routes/auth');
 const dashboardRoutes = require('./src/routes/dashboard');
 // customerRoutes will be imported AFTER directory fix
@@ -175,6 +177,12 @@ app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
 // Dashboard routes
 app.use('/dashboard', dashboardRoutes);
+
+// GitHub routes (webhooks and OAuth callbacks)
+app.use('/github', githubRoutes);
+
+// Jira routes
+app.use('/jira', jiraRoutes);
 
 // Success page route for post-payment onboarding
 app.get('/success', async (req, res) => {

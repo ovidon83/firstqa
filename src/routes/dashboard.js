@@ -49,6 +49,7 @@ router.get('/integrations', async (req, res) => {
     const user = req.session.user;
     let githubIntegration = null;
     let bitbucketIntegration = null;
+    let jiraIntegration = null;
     
     if (isSupabaseConfigured()) {
       // Fetch user's integrations from database
@@ -60,6 +61,7 @@ router.get('/integrations', async (req, res) => {
       if (integrations) {
         githubIntegration = integrations.find(i => i.provider === 'github');
         bitbucketIntegration = integrations.find(i => i.provider === 'bitbucket');
+        jiraIntegration = integrations.find(i => i.provider === 'jira');
       }
     }
     
@@ -67,6 +69,7 @@ router.get('/integrations', async (req, res) => {
       user,
       githubIntegration,
       bitbucketIntegration,
+      jiraIntegration,
       success: req.query.success,
       error: req.query.error
     });
@@ -76,6 +79,7 @@ router.get('/integrations', async (req, res) => {
       user: req.session.user,
       githubIntegration: null,
       bitbucketIntegration: null,
+      jiraIntegration: null,
       success: req.query.success,
       error: req.query.error
     });
@@ -127,6 +131,30 @@ router.post('/integrations/bitbucket/disconnect', async (req, res) => {
   } catch (error) {
     console.error('Bitbucket disconnect error:', error);
     res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to disconnect Bitbucket'));
+  }
+});
+
+/**
+ * POST /dashboard/integrations/jira/disconnect - Disconnect Jira
+ */
+router.post('/integrations/jira/disconnect', async (req, res) => {
+  try {
+    const user = req.session.user;
+    
+    if (isSupabaseConfigured()) {
+      await supabaseAdmin
+        .from('integrations')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('provider', 'jira');
+      
+      console.log(`✅ Jira integration disconnected for user ${user.email}`);
+    }
+    
+    res.redirect('/dashboard/integrations?success=' + encodeURIComponent('Jira disconnected'));
+  } catch (error) {
+    console.error('Jira disconnect error:', error);
+    res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to disconnect Jira'));
   }
 });
 

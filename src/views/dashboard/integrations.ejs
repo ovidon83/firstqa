@@ -386,7 +386,8 @@
                     </div>
                 </div>
 
-                <!-- Bitbucket Integration -->
+                <!-- Bitbucket Integration - HIDDEN (code kept for future use) -->
+                <% if (false) { %>
                 <div class="integration-card">
                     <div class="integration-icon bitbucket-icon">
                         <i class="fab fa-bitbucket"></i>
@@ -430,6 +431,56 @@
                             <a href="/api/auth/bitbucket/install" class="btn btn-primary">
                                 <i class="fab fa-bitbucket"></i>
                                 Connect Bitbucket
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Jira Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon" style="background: linear-gradient(135deg, #0052cc 0%, #003d99 100%);">
+                        <i class="fab fa-jira"></i>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">Jira</div>
+                        <div class="integration-description">
+                            Analyze tickets for missing requirements, edge cases, and potential conflicts before development starts.
+                        </div>
+                        <% if (locals.jiraIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Site:</span>
+                                    <span class="detail-value"><%= jiraIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(jiraIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.jiraIntegration) { %>
+                            <form action="/dashboard/integrations/jira/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/jira/install" class="btn btn-primary">
+                                <i class="fab fa-jira"></i>
+                                Connect Jira
                             </a>
                         <% } %>
                     </div>
