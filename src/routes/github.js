@@ -25,21 +25,28 @@ const verifyGitHubWebhook = (req, res, next) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
+  // IMPORTANT: Express.json() parses the body, but we need the raw bytes for signature verification
+  // The signature is computed by GitHub on the raw body, so we must use req.rawBody
+  const payload = req.rawBody || JSON.stringify(req.body);
+  
   // Verify the signature
   const hmac = crypto.createHmac('sha256', webhookSecret);
-  const payload = JSON.stringify(req.body);
   const computedSignature = `sha256=${hmac.update(payload).digest('hex')}`;
 
   if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature))) {
     return next();
   } else {
     console.error('Invalid signature');
+    console.error('Expected:', signature);
+    console.error('Computed:', computedSignature);
     return res.status(401).json({ error: 'Unauthorized' });
   }
 };
 
 // GitHub webhook handler
-router.post('/webhook', express.json({ limit: '10mb' }), verifyGitHubWebhook, async (req, res) => {
+// NOTE: Don't use express.json() here - it's already parsed by webhook-server.js
+// and we need req.rawBody for signature verification
+router.post('/webhook', verifyGitHubWebhook, async (req, res) => {
   try {
     const eventType = req.headers['x-github-event'];
     console.log(`Received ${eventType} webhook`);
