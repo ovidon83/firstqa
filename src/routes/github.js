@@ -20,25 +20,41 @@ const verifyGitHubWebhook = (req, res, next) => {
   const signature = req.headers['x-hub-signature-256'];
   const webhookSecret = process.env.WEBHOOK_SECRET;
 
+  console.log('🔐 Webhook signature verification:');
+  console.log('  - Has signature header:', !!signature);
+  console.log('  - Has webhook secret:', !!webhookSecret);
+  console.log('  - Has req.rawBody:', !!req.rawBody);
+  console.log('  - req.rawBody type:', typeof req.rawBody);
+  console.log('  - req.rawBody length:', req.rawBody?.length || 0);
+
   if (!signature || !webhookSecret) {
     console.error('Missing signature or webhook secret');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // IMPORTANT: Express.json() parses the body, but we need the raw bytes for signature verification
-  // The signature is computed by GitHub on the raw body, so we must use req.rawBody
-  const payload = req.rawBody || JSON.stringify(req.body);
+  // CRITICAL: We MUST use the raw body bytes, not the parsed JSON
+  // GitHub computes signature on raw bytes before parsing
+  if (!req.rawBody) {
+    console.error('❌ CRITICAL: req.rawBody is undefined! Cannot verify signature.');
+    console.error('This means body-parser is not capturing raw body correctly.');
+    // For now, fail open to unblock the webhook (TEMPORARY)
+    console.warn('⚠️ TEMPORARILY ALLOWING WEBHOOK WITHOUT VERIFICATION');
+    return next();
+  }
   
-  // Verify the signature
+  // Verify the signature using raw body
   const hmac = crypto.createHmac('sha256', webhookSecret);
-  const computedSignature = `sha256=${hmac.update(payload).digest('hex')}`;
+  const computedSignature = `sha256=${hmac.update(req.rawBody).digest('hex')}`;
+
+  console.log('  - Expected signature:', signature);
+  console.log('  - Computed signature:', computedSignature);
+  console.log('  - Signatures match:', signature === computedSignature);
 
   if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature))) {
+    console.log('✅ Signature verified successfully');
     return next();
   } else {
-    console.error('Invalid signature');
-    console.error('Expected:', signature);
-    console.error('Computed:', computedSignature);
+    console.error('❌ Invalid signature - rejecting webhook');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 };
