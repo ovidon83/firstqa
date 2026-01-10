@@ -158,6 +158,10 @@ router.get('/github', async (req, res) => {
  */
 router.get('/callback', async (req, res) => {
   try {
+    console.log('🔄 OAuth callback received');
+    console.log('Query params:', req.query);
+    console.log('Full URL:', req.originalUrl);
+    
     const { code, error: oauthError, error_description } = req.query;
 
     if (oauthError) {
@@ -166,9 +170,11 @@ router.get('/callback', async (req, res) => {
     }
 
     if (!code) {
+      console.error('No code in callback. Query:', req.query);
       return res.redirect('/login?error=' + encodeURIComponent('No authorization code received'));
     }
 
+    console.log('📝 Exchanging code for session...');
     // Exchange code for session
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
