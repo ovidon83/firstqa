@@ -8,6 +8,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const githubAppAuth = require('./githubAppAuth');
+const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 // Initialize GitHub client with token (for backward compatibility)
 let octokit;
 let simulatedMode = false;
@@ -65,6 +66,54 @@ console.log(`Test requests will be stored at: ${TEST_REQUESTS_PATH}`);
 console.log(`Data retention period: ${DATA_RETENTION_DAYS} days`);
 // Simple label for when Ovi AI has reviewed a PR
 const OVI_REVIEWED_LABEL = 'Reviewed by Ovi AI';
+
+/**
+ * Save analysis to Supabase database
+ * @param {Object} data - Analysis data
+ * @returns {Promise<Object>} Database result
+ */
+async function saveAnalysisToDatabase(data) {
+  if (!isSupabaseConfigured()) {
+    console.warn('⚠️ Supabase not configured, skipping database save');
+    return null;
+  }
+  
+  const { userId, provider, repository, prNumber, prTitle, prUrl, analysisType, analysisOutput } = data;
+  
+  try {
+    const { data: result, error } = await supabaseAdmin
+      .from('analyses')
+      .insert({
+        user_id: userId,
+        provider: provider,
+        repository: repository,
+        pr_number: prNumber,
+        pr_title: prTitle,
+        pr_url: prUrl,
+        analysis_type: analysisType,
+        status: 'completed',
+        result: analysisOutput,
+        completed_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Also increment user's analyses count for this month
+    await supabaseAdmin.rpc('increment_user_analyses_count', {
+      user_id_param: userId
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('Error saving analysis to database:', error);
+    throw error;
+  }
+}
+
 /**
  * Get production readiness score emoji
  * @param {number} score - The production readiness score (0-10)
@@ -1018,10 +1067,12 @@ That's it! We'll handle the rest. 🚀
 /**
  * Handle test request - core functionality
  */
-async function handleTestRequest(repository, issue, comment, sender) {
+async function handleTestRequest(repository, issue, comment, sender, userId = null) {
   console.log(`Processing test request from ${sender.login} on PR #${issue.number}`);
   console.log(`Repository: ${repository.full_name}`);
   console.log(`Comment: ${comment.body}`);
+  console.log(`User ID: ${userId || 'unknown'}`);
+  
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
   
@@ -1726,6 +1777,31 @@ async function handleTestRequest(repository, issue, comment, sender) {
   }
   const commentResult = await postComment(repository.full_name, issue.number, acknowledgmentComment);
   console.log(`✅ Acknowledgment comment ${commentResult.simulated ? 'would be' : 'was'} posted`);
+  
+  // Save analysis to database if user_id is available
+  if (userId && isSupabaseConfigured() && aiInsights && aiInsights.success) {
+    try {
+      await saveAnalysisToDatabase({
+        userId,
+        provider: 'github',
+        repository: repository.full_name,
+        prNumber: issue.number,
+        prTitle: issue.title,
+        prUrl: `https://github.com/${repository.full_name}/pull/${issue.number}`,
+        analysisType: 'full',
+        analysisOutput: {
+          raw: aiInsights.data,
+          formatted: acknowledgmentComment,
+          timestamp: new Date().toISOString()
+        }
+      });
+      console.log(`✅ Analysis saved to database for user ${userId}`);
+    } catch (error) {
+      console.error('❌ Error saving analysis to database:', error.message);
+      // Don't fail the whole process if database save fails
+    }
+  }
+  
   // Add "Reviewed by Ovi" label after AI analysis is complete
   const labelResult = await addOviReviewedLabel(repository.full_name, issue.number);
   console.log(`✅ "Reviewed by Ovi" label ${labelResult.simulated ? 'would be' : 'was'} added`);
@@ -1820,10 +1896,11 @@ async function handleTestRequest(repository, issue, comment, sender) {
 /**
  * Handle short request - generate a short analysis
  */
-async function handleShortRequest(repository, issue, comment, sender) {
+async function handleShortRequest(repository, issue, comment, sender, userId = null) {
   console.log(`Processing short request from ${sender.login} on PR #${issue.number}`);
   console.log(`Repository: ${repository.full_name}`);
   console.log(`Comment: ${comment.body}`);
+  console.log(`User ID: ${userId || 'unknown'}`);
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
   // Get PR description and diff
@@ -1950,6 +2027,31 @@ async function handleShortRequest(repository, issue, comment, sender) {
   }
   const commentResult = await postComment(repository.full_name, issue.number, acknowledgmentComment);
   console.log(`✅ Acknowledgment comment ${commentResult.simulated ? 'would be' : 'was'} posted`);
+  
+  // Save analysis to database if user_id is available
+  if (userId && isSupabaseConfigured() && aiInsights && aiInsights.success) {
+    try {
+      await saveAnalysisToDatabase({
+        userId,
+        provider: 'github',
+        repository: repository.full_name,
+        prNumber: issue.number,
+        prTitle: issue.title,
+        prUrl: `https://github.com/${repository.full_name}/pull/${issue.number}`,
+        analysisType: 'short',
+        analysisOutput: {
+          raw: aiInsights.data,
+          formatted: acknowledgmentComment,
+          timestamp: new Date().toISOString()
+        }
+      });
+      console.log(`✅ Short analysis saved to database for user ${userId}`);
+    } catch (error) {
+      console.error('❌ Error saving short analysis to database:', error.message);
+      // Don't fail the whole process if database save fails
+    }
+  }
+  
   // Add "Reviewed by Ovi" label after AI analysis is complete
   const labelResult = await addOviReviewedLabel(repository.full_name, issue.number);
   console.log(`✅ "Reviewed by Ovi" label ${labelResult.simulated ? 'would be' : 'was'} added`);
@@ -2313,6 +2415,33 @@ async function processWebhookEvent(event) {
     const eventType = event.headers['x-github-event'];
     const payload = event.body;
     console.log('📣 Processing webhook event:', eventType);
+    
+    // Extract installation_id to link webhook to user account
+    const installationId = payload.installation?.id;
+    console.log(`🔑 Installation ID: ${installationId}`);
+    
+    // Look up user_id from database using installation_id
+    let userId = null;
+    if (installationId && isSupabaseConfigured()) {
+      try {
+        const { data: integration } = await supabaseAdmin
+          .from('integrations')
+          .select('user_id')
+          .eq('provider', 'github')
+          .eq('account_id', installationId.toString())
+          .single();
+        
+        if (integration) {
+          userId = integration.user_id;
+          console.log(`✅ Found user_id: ${userId} for installation: ${installationId}`);
+        } else {
+          console.warn(`⚠️ No user found for installation ${installationId}`);
+        }
+      } catch (error) {
+        console.error('Error looking up user by installation_id:', error.message);
+      }
+    }
+    
     // Only log first 500 characters to avoid flooding the console
     const payloadString = JSON.stringify(payload, null, 2);
     console.log('Event payload:', payloadString.length > 500 
@@ -2352,12 +2481,12 @@ async function processWebhookEvent(event) {
       // Check for /qa command (manual QA re-run)
       if (comment.body.trim().startsWith('/qa')) {
         console.log('🧪 /qa command detected!');
-        return await handleTestRequest(repository, issue, comment, sender);
+        return await handleTestRequest(repository, issue, comment, sender, userId);
       }
       // Check for /short command (short QA analysis)
       if (comment.body.trim().startsWith('/short')) {
         console.log('📝 /short command detected!');
-        return await handleShortRequest(repository, issue, comment, sender);
+        return await handleShortRequest(repository, issue, comment, sender, userId);
       }
     }
     // For all other event types, just log and return success
