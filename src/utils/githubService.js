@@ -115,6 +115,45 @@ async function saveAnalysisToDatabase(data) {
 }
 
 /**
+ * Check if user has exceeded their usage limits
+ * @param {string} userId - User UUID
+ * @returns {Promise<Object>} { allowed: boolean, current: number, limit: number, plan: string }
+ */
+async function checkUsageLimits(userId) {
+  if (!isSupabaseConfigured()) {
+    return { allowed: true, current: 0, limit: Infinity, plan: 'unknown' };
+  }
+  
+  try {
+    const { data: user, error } = await supabaseAdmin
+      .from('users')
+      .select('plan, analyses_this_month, analyses_limit')
+      .eq('id', userId)
+      .single();
+    
+    if (error) throw error;
+    
+    const current = user.analyses_this_month || 0;
+    const limit = user.analyses_limit || 10;
+    const plan = user.plan || 'free';
+    
+    // Pro and enterprise users have unlimited analyses
+    if (plan === 'pro' || plan === 'enterprise') {
+      return { allowed: true, current, limit: Infinity, plan };
+    }
+    
+    // Free users have a limit
+    const allowed = current < limit;
+    
+    return { allowed, current, limit, plan };
+  } catch (error) {
+    console.error('Error checking usage limits:', error);
+    // On error, allow the request (fail open)
+    return { allowed: true, current: 0, limit: Infinity, plan: 'error' };
+  }
+}
+
+/**
  * Get production readiness score emoji
  * @param {number} score - The production readiness score (0-10)
  * @returns {string} Appropriate emoji for the production readiness level
@@ -1073,6 +1112,30 @@ async function handleTestRequest(repository, issue, comment, sender, userId = nu
   console.log(`Comment: ${comment.body}`);
   console.log(`User ID: ${userId || 'unknown'}`);
   
+  // Check usage limits if user_id is available
+  if (userId && isSupabaseConfigured()) {
+    const limitCheck = await checkUsageLimits(userId);
+    if (!limitCheck.allowed) {
+      console.warn(`⚠️ Usage limit exceeded for user ${userId}`);
+      const limitMessage = `
+## 🚫 Usage Limit Reached
+
+You've reached your monthly analysis limit (${limitCheck.current}/${limitCheck.limit} analyses).
+
+**Upgrade to Pro** to get unlimited analyses: https://www.firstqa.dev/dashboard
+
+Or wait until next month when your limit resets.
+      `;
+      await postComment(repository.full_name, issue.number, limitMessage);
+      return { 
+        success: false, 
+        message: 'Usage limit exceeded',
+        limitReached: true 
+      };
+    }
+    console.log(`✅ Usage check passed: ${limitCheck.current}/${limitCheck.limit} analyses used`);
+  }
+  
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
   
@@ -1901,6 +1964,31 @@ async function handleShortRequest(repository, issue, comment, sender, userId = n
   console.log(`Repository: ${repository.full_name}`);
   console.log(`Comment: ${comment.body}`);
   console.log(`User ID: ${userId || 'unknown'}`);
+  
+  // Check usage limits if user_id is available
+  if (userId && isSupabaseConfigured()) {
+    const limitCheck = await checkUsageLimits(userId);
+    if (!limitCheck.allowed) {
+      console.warn(`⚠️ Usage limit exceeded for user ${userId}`);
+      const limitMessage = `
+## 🚫 Usage Limit Reached
+
+You've reached your monthly analysis limit (${limitCheck.current}/${limitCheck.limit} analyses).
+
+**Upgrade to Pro** to get unlimited analyses: https://www.firstqa.dev/dashboard
+
+Or wait until next month when your limit resets.
+      `;
+      await postComment(repository.full_name, issue.number, limitMessage);
+      return { 
+        success: false, 
+        message: 'Usage limit exceeded',
+        limitReached: true 
+      };
+    }
+    console.log(`✅ Usage check passed: ${limitCheck.current}/${limitCheck.limit} analyses used`);
+  }
+  
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
   // Get PR description and diff
