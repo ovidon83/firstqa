@@ -53,25 +53,34 @@ router.get('/integrations', async (req, res) => {
     
     if (isSupabaseConfigured()) {
       // Fetch user's integrations from database
-      const { data: integrations } = await supabaseAdmin
+      const { data: integrations, error: fetchError } = await supabaseAdmin
         .from('integrations')
         .select('*')
         .eq('user_id', user.id);
       
-      if (integrations) {
+      if (fetchError) {
+        console.error('Error fetching integrations:', fetchError);
+      } else if (integrations) {
+        // Find the first integration of each type
         githubIntegration = integrations.find(i => i.provider === 'github');
         bitbucketIntegration = integrations.find(i => i.provider === 'bitbucket');
         jiraIntegration = integrations.find(i => i.provider === 'jira');
+        
+        console.log(`📊 Loaded integrations for ${user.email}: GitHub=${!!githubIntegration}, Bitbucket=${!!bitbucketIntegration}, Jira=${!!jiraIntegration}`);
       }
     }
+    
+    // Check for flash messages in session
+    const flash = req.session.flash;
+    delete req.session.flash;
     
     res.render('dashboard/integrations', {
       user,
       githubIntegration,
       bitbucketIntegration,
       jiraIntegration,
-      success: req.query.success,
-      error: req.query.error
+      success: flash?.type === 'success' ? flash.message : req.query.success,
+      error: flash?.type === 'error' ? flash.message : req.query.error
     });
   } catch (error) {
     console.error('Integrations page error:', error);
