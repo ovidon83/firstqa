@@ -28,8 +28,9 @@ const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
+        persistSession: false, // Server-side: don't persist
+        detectSessionInUrl: true,
+        flowType: 'pkce' // Required for server-side OAuth
       }
     })
   : null;
