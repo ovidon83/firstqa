@@ -55,18 +55,21 @@ async function autoSyncGitHubInstallations(userId, userEmail) {
         console.log(`🔄 [AUTO-SYNC] Checking installation ${installation.id} (${installation.account.login})`);
         
         // Check if this installation is already linked to ANY user
-        const { data: existingIntegration, error: fetchError } = await supabaseAdmin
+        // Use .limit(1) instead of .single() to handle potential duplicates
+        const { data: existingIntegrations, error: fetchError } = await supabaseAdmin
           .from('integrations')
           .select('id, user_id')
           .eq('provider', 'github')
           .eq('account_id', installation.id.toString())
-          .single();
+          .limit(1);
         
-        if (fetchError && fetchError.code !== 'PGRST116') {
+        if (fetchError) {
           console.error(`❌ [AUTO-SYNC] Error fetching integration:`, fetchError);
+          continue;
         }
 
-        if (existingIntegration) {
+        if (existingIntegrations && existingIntegrations.length > 0) {
+          const existingIntegration = existingIntegrations[0];
           // If it's already linked to THIS user, skip
           if (existingIntegration.user_id === userId) {
             console.log(`✅ [AUTO-SYNC] Installation ${installation.id} already linked to ${userEmail}`);
