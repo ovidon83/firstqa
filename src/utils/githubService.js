@@ -2513,21 +2513,22 @@ async function processWebhookEvent(event) {
     if (installationId && isSupabaseConfigured()) {
       try {
         console.log(`🔍 Looking up user for installation: ${installationId} (${typeof installationId})`);
-        const { data: integration, error } = await supabaseAdmin
+        // Use .limit(1) instead of .single() to handle potential duplicates gracefully
+        const { data: integrations, error } = await supabaseAdmin
           .from('integrations')
           .select('user_id')
           .eq('provider', 'github')
           .eq('account_id', installationId.toString())
-          .single();
+          .limit(1);
         
-        console.log(`🔍 Query result - data:`, integration, `error:`, error);
+        console.log(`🔍 Query result - data:`, integrations, `error:`, error);
         
         if (error) {
           console.error(`❌ Error querying for user:`, error);
         }
         
-        if (integration) {
-          userId = integration.user_id;
+        if (integrations && integrations.length > 0) {
+          userId = integrations[0].user_id;
           console.log(`✅ Found user_id: ${userId} for installation: ${installationId}`);
         } else {
           console.warn(`⚠️ No user found for installation ${installationId}`);
