@@ -20,15 +20,22 @@ const verifyGitHubWebhook = (req, res, next) => {
   const signature = req.headers['x-hub-signature-256'];
   const webhookSecret = process.env.WEBHOOK_SECRET;
 
+  console.log('🔐 Webhook signature verification:');
+  console.log('  Has signature:', !!signature);
+  console.log('  Has secret:', !!webhookSecret);
+  console.log('  Has rawBody:', !!req.rawBody);
+  console.log('  rawBody type:', req.rawBody ? (Buffer.isBuffer(req.rawBody) ? 'Buffer' : typeof req.rawBody) : 'undefined');
+  console.log('  rawBody length:', req.rawBody?.length || 0);
+
   if (!signature || !webhookSecret) {
-    console.error('Missing signature or webhook secret');
+    console.error('❌ Missing signature or webhook secret');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   // CRITICAL: We MUST use the raw body bytes (Buffer), not the parsed JSON
   // GitHub computes signature on raw bytes before parsing
   if (!req.rawBody) {
-    console.error('❌ CRITICAL: req.rawBody is undefined! Cannot verify signature.');
+    console.error('❌ req.rawBody is undefined!');
     return res.status(401).json({ error: 'Unauthorized - no raw body' });
   }
   
@@ -36,7 +43,12 @@ const verifyGitHubWebhook = (req, res, next) => {
   const hmac = crypto.createHmac('sha256', webhookSecret);
   const computedSignature = `sha256=${hmac.update(req.rawBody).digest('hex')}`;
 
+  console.log('  Expected:', signature.substring(0, 20) + '...');
+  console.log('  Computed:', computedSignature.substring(0, 20) + '...');
+  console.log('  Match:', signature === computedSignature);
+
   if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature))) {
+    console.log('✅ Signature verified');
     return next();
   } else {
     console.error('❌ Invalid webhook signature');
