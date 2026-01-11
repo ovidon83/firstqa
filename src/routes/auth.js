@@ -6,6 +6,109 @@
 const express = require('express');
 const router = express.Router();
 const { supabase, supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
+const { Octokit } = require('@octokit/rest');
+const githubAppAuth = require('../utils/githubAppAuth');
+
+/**
+ * Auto-sync GitHub App installations for the logged-in user
+ * This runs in the background after login to link any existing installations
+ */
+async function autoSyncGitHubInstallations(userId, userEmail) {
+  try {
+    if (!isSupabaseConfigured()) {
+      console.log('⏭️  Skipping GitHub sync: Supabase not configured');
+      return;
+    }
+
+    const jwt = githubAppAuth.getGitHubAppJWT();
+    if (!jwt) {
+      console.log('⏭️  Skipping GitHub sync: GitHub App not configured');
+      return;
+    }
+
+    const appOctokit = new Octokit({ auth: jwt });
+    const { data: installations } = await appOctokit.apps.listInstallations();
+
+    if (installations.length === 0) {
+      console.log(`⏭️  No GitHub App installations found to sync for ${userEmail}`);
+      return;
+    }
+
+    console.log(`🔍 Auto-syncing ${installations.length} GitHub App installation(s) for ${userEmail}`);
+
+    let synced = 0;
+
+    for (const installation of installations) {
+      try {
+        // Check if this installation is already linked to ANY user
+        const { data: existingIntegration } = await supabaseAdmin
+          .from('integrations')
+          .select('id, user_id')
+          .eq('provider', 'github')
+          .eq('account_id', installation.id.toString())
+          .single();
+
+        if (existingIntegration) {
+          // If it's already linked to THIS user, skip
+          if (existingIntegration.user_id === userId) {
+            console.log(`✅ Installation ${installation.id} already linked to ${userEmail}`);
+            continue;
+          }
+          // If it's linked to a DIFFERENT user, skip (don't steal installations)
+          console.log(`⏭️  Installation ${installation.id} already linked to another user`);
+          continue;
+        }
+
+        // Not linked to anyone - let's check if we should link it to this user
+        // We'll use GitHub API to check if user has access to this installation
+        try {
+          const installationOctokit = new Octokit({
+            auth: await githubAppAuth.getInstallationToken(installation.id)
+          });
+          
+          // Try to get installation details to verify access
+          const { data: installDetails } = await installationOctokit.apps.getInstallation({
+            installation_id: installation.id
+          });
+          
+          // Link this installation to the user
+          const { data, error } = await supabaseAdmin
+            .from('integrations')
+            .insert({
+              user_id: userId,
+              provider: 'github',
+              access_token: '', // GitHub App uses JWT/installation tokens
+              account_id: installation.id.toString(),
+              account_name: installation.account.login,
+              account_avatar: installation.account.avatar_url,
+              scopes: installation.permissions ? Object.keys(installation.permissions) : []
+            })
+            .select();
+
+          if (error) {
+            console.error(`❌ Error linking installation ${installation.id}:`, error);
+          } else {
+            console.log(`✅ Linked GitHub installation ${installation.id} (${installation.account.login}) to ${userEmail}`);
+            synced++;
+          }
+        } catch (installError) {
+          console.log(`⏭️  Couldn't verify access to installation ${installation.id}, skipping`);
+        }
+      } catch (error) {
+        console.error(`❌ Error processing installation ${installation.id}:`, error);
+      }
+    }
+
+    if (synced > 0) {
+      console.log(`🎉 Auto-synced ${synced} GitHub installation(s) for ${userEmail}`);
+    } else {
+      console.log(`ℹ️  No new GitHub installations to sync for ${userEmail}`);
+    }
+  } catch (error) {
+    console.error('❌ Error in auto-sync GitHub installations:', error);
+    // Don't throw - this is a background operation
+  }
+}
 
 // ===========================================
 // EMAIL/PASSWORD AUTH
@@ -63,6 +166,11 @@ router.post('/signup', async (req, res) => {
       req.session.accessToken = data.session.access_token;
       req.session.refreshToken = data.session.refresh_token;
       
+      // Auto-sync GitHub App installations in the background
+      autoSyncGitHubInstallations(data.user.id, data.user.email).catch(err => {
+        console.error('Background sync error:', err);
+      });
+      
       return res.redirect('/dashboard');
     }
 
@@ -111,6 +219,12 @@ router.post('/login', async (req, res) => {
     req.session.refreshToken = data.session.refresh_token;
 
     console.log(`✅ User logged in: ${data.user.email}`);
+    
+    // Auto-sync GitHub App installations in the background
+    autoSyncGitHubInstallations(data.user.id, data.user.email).catch(err => {
+      console.error('Background sync error:', err);
+    });
+    
     res.redirect('/dashboard');
   } catch (error) {
     console.error('Login error:', error);
@@ -193,10 +307,45 @@ router.get('/callback', async (req, res) => {
     req.session.refreshToken = data.session.refresh_token;
 
     console.log(`✅ User logged in via GitHub: ${data.user.email}`);
+    
+    // Auto-sync GitHub App installations in the background
+    autoSyncGitHubInstallations(data.user.id, data.user.email).catch(err => {
+      console.error('Background sync error:', err);
+    });
+    
     res.redirect('/dashboard');
   } catch (error) {
     console.error('OAuth callback error:', error);
     res.redirect('/login?error=' + encodeURIComponent('Authentication failed'));
+  }
+});
+
+// ===========================================
+// MANUAL GITHUB SYNC (for immediate testing/fixing)
+// ===========================================
+
+/**
+ * GET /auth/sync-github - Manually trigger GitHub installations sync
+ * This is useful for users who installed the app before logging in
+ */
+router.get('/sync-github', async (req, res) => {
+  if (!req.session?.user) {
+    return res.redirect('/login?error=' + encodeURIComponent('Please log in first'));
+  }
+
+  try {
+    const userId = req.session.user.id;
+    const userEmail = req.session.user.email;
+
+    console.log(`🔄 Manual GitHub sync requested by ${userEmail}`);
+    
+    // Run the sync function
+    await autoSyncGitHubInstallations(userId, userEmail);
+    
+    return res.redirect('/dashboard?success=' + encodeURIComponent('GitHub installations synced successfully!'));
+  } catch (error) {
+    console.error('Manual GitHub sync error:', error);
+    return res.redirect('/dashboard?error=' + encodeURIComponent('Failed to sync GitHub installations'));
   }
 });
 
