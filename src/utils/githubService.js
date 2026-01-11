@@ -2512,12 +2512,19 @@ async function processWebhookEvent(event) {
     let userId = null;
     if (installationId && isSupabaseConfigured()) {
       try {
-        const { data: integration } = await supabaseAdmin
+        console.log(`🔍 Looking up user for installation: ${installationId} (${typeof installationId})`);
+        const { data: integration, error } = await supabaseAdmin
           .from('integrations')
           .select('user_id')
           .eq('provider', 'github')
           .eq('account_id', installationId.toString())
           .single();
+        
+        console.log(`🔍 Query result - data:`, integration, `error:`, error);
+        
+        if (error) {
+          console.error(`❌ Error querying for user:`, error);
+        }
         
         if (integration) {
           userId = integration.user_id;
@@ -2526,7 +2533,8 @@ async function processWebhookEvent(event) {
           console.warn(`⚠️ No user found for installation ${installationId}`);
         }
       } catch (error) {
-        console.error('Error looking up user by installation_id:', error.message);
+        console.error('❌ Exception looking up user by installation_id:', error.message);
+        console.error('❌ Stack:', error.stack);
       }
     }
     
