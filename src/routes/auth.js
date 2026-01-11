@@ -13,112 +13,160 @@ const githubAppAuth = require('../utils/githubAppAuth');
  * Auto-sync GitHub App installations for the logged-in user
  * This runs in the background after login to link any existing installations
  */
+/**
+ * Auto-sync GitHub App installations for the logged-in user
+ * This runs in the background after login to link any existing installations
+ * 
+ * ACCOUNT LINKING LOGIC:
+ * 1. Find other accounts with the same email and merge their data
+ * 2. Link all GitHub App installations to this user
+ * 3. Use upsert to handle duplicates gracefully
+ */
 async function autoSyncGitHubInstallations(userId, userEmail) {
   console.log(`🔄 [AUTO-SYNC] Starting for user ${userEmail} (ID: ${userId})`);
   
   try {
-    console.log(`🔄 [AUTO-SYNC] Step 1: Check Supabase configured`);
     if (!isSupabaseConfigured()) {
       console.log('⏭️  [AUTO-SYNC] Skipping: Supabase not configured');
       return;
     }
-    console.log(`✅ [AUTO-SYNC] Supabase is configured`);
 
-    console.log(`🔄 [AUTO-SYNC] Step 2: Get GitHub App JWT`);
     const jwt = githubAppAuth.getGitHubAppJWT();
     if (!jwt) {
       console.log('⏭️  [AUTO-SYNC] Skipping: GitHub App not configured');
       return;
     }
-    console.log(`✅ [AUTO-SYNC] GitHub App JWT obtained`);
 
-    console.log(`🔄 [AUTO-SYNC] Step 3: List GitHub App installations`);
+    // STEP 1: Account Linking - Find other accounts with same email
+    console.log(`🔗 [ACCOUNT-LINK] Checking for duplicate accounts with email ${userEmail}`);
+    const { data: sameEmailUsers, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id, email')
+      .eq('email', userEmail);
+    
+    if (userError) {
+      console.error('❌ [ACCOUNT-LINK] Error fetching users:', userError);
+    } else if (sameEmailUsers && sameEmailUsers.length > 1) {
+      const otherUserIds = sameEmailUsers
+        .filter(u => u.id !== userId)
+        .map(u => u.id);
+      
+      console.log(`🔗 [ACCOUNT-LINK] Found ${otherUserIds.length} duplicate account(s) to merge`);
+      
+      // Transfer integrations and analyses from duplicate accounts
+      for (const otherUserId of otherUserIds) {
+        console.log(`🔗 [ACCOUNT-LINK] Merging account ${otherUserId} into ${userId}`);
+        
+        // Get integrations from the other account
+        const { data: oldIntegrations } = await supabaseAdmin
+          .from('integrations')
+          .select('*')
+          .eq('user_id', otherUserId);
+        
+        if (oldIntegrations && oldIntegrations.length > 0) {
+          console.log(`🔗 [ACCOUNT-LINK] Found ${oldIntegrations.length} integration(s) to transfer`);
+          
+          // For each integration, upsert it to the current user
+          for (const integration of oldIntegrations) {
+            const { error: upsertError } = await supabaseAdmin
+              .from('integrations')
+              .upsert({
+                user_id: userId, // Change to current user
+                provider: integration.provider,
+                account_id: integration.account_id,
+                account_name: integration.account_name,
+                account_avatar: integration.account_avatar,
+                access_token: integration.access_token,
+                refresh_token: integration.refresh_token,
+                token_expires_at: integration.token_expires_at,
+                scopes: integration.scopes,
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'provider,account_id', // Use unique index
+                ignoreDuplicates: false // Update if exists
+              });
+            
+            if (upsertError && upsertError.code !== '23505') {
+              console.error(`❌ [ACCOUNT-LINK] Error upserting integration:`, upsertError);
+            } else {
+              console.log(`✅ [ACCOUNT-LINK] Transferred ${integration.provider} integration ${integration.account_id}`);
+            }
+          }
+          
+          // Delete old integrations
+          await supabaseAdmin
+            .from('integrations')
+            .delete()
+            .eq('user_id', otherUserId);
+        }
+        
+        // Transfer analyses
+        const { error: analysesError } = await supabaseAdmin
+          .from('analyses')
+          .update({ user_id: userId })
+          .eq('user_id', otherUserId);
+        
+        if (analysesError) {
+          console.error(`❌ [ACCOUNT-LINK] Error transferring analyses:`, analysesError);
+        } else {
+          console.log(`✅ [ACCOUNT-LINK] Transferred analyses from account ${otherUserId}`);
+        }
+        
+        // Note: Don't delete the duplicate user account yet - it's tied to auth.users
+        // Just log it for manual cleanup
+        console.log(`ℹ️  [ACCOUNT-LINK] Duplicate account ${otherUserId} should be manually deleted from Supabase Auth`);
+      }
+    } else {
+      console.log(`✅ [ACCOUNT-LINK] No duplicate accounts found`);
+    }
+
+    // STEP 2: Sync GitHub App installations
+    console.log(`🔄 [AUTO-SYNC] Fetching GitHub App installations`);
     const appOctokit = new Octokit({ auth: jwt });
     const { data: installations } = await appOctokit.apps.listInstallations();
     console.log(`✅ [AUTO-SYNC] Found ${installations.length} installation(s)`);
-    
-    if (installations.length > 0) {
-      console.log(`📋 [AUTO-SYNC] Installation IDs:`, installations.map(i => `${i.id} (${i.account.login})`).join(', '));
-    }
 
     if (installations.length === 0) {
-      console.log(`⏭️  [AUTO-SYNC] No GitHub App installations found for ${userEmail}`);
+      console.log(`⏭️  [AUTO-SYNC] No installations to sync`);
       return;
     }
-
-    console.log(`🔍 [AUTO-SYNC] Processing ${installations.length} installation(s) for ${userEmail}`);
 
     let synced = 0;
 
     for (const installation of installations) {
       try {
-        console.log(`🔄 [AUTO-SYNC] Checking installation ${installation.id} (${installation.account.login})`);
-        
-        // Check if this installation is already linked to ANY user
-        // Use .limit(1) instead of .single() to handle potential duplicates
-        const { data: existingIntegrations, error: fetchError } = await supabaseAdmin
+        // Upsert: Insert if new, update user_id if exists (for account linking)
+        const { error: upsertError } = await supabaseAdmin
           .from('integrations')
-          .select('id, user_id')
-          .eq('provider', 'github')
-          .eq('account_id', installation.id.toString())
-          .limit(1);
-        
-        if (fetchError) {
-          console.error(`❌ [AUTO-SYNC] Error fetching integration:`, fetchError);
-          continue;
-        }
-
-        if (existingIntegrations && existingIntegrations.length > 0) {
-          const existingIntegration = existingIntegrations[0];
-          // If it's already linked to THIS user, skip
-          if (existingIntegration.user_id === userId) {
-            console.log(`✅ [AUTO-SYNC] Installation ${installation.id} already linked to ${userEmail}`);
-            continue;
-          }
-          // If it's linked to a DIFFERENT user, skip (don't steal installations)
-          console.log(`⏭️  [AUTO-SYNC] Installation ${installation.id} already linked to another user`);
-          continue;
-        }
-
-        // Not linked to anyone - link it to this user without verification
-        // (simpler approach - just link all unlinked installations)
-        console.log(`🔗 [AUTO-SYNC] Linking installation ${installation.id} to ${userEmail}...`);
-        
-        const { data, error } = await supabaseAdmin
-          .from('integrations')
-          .insert({
+          .upsert({
             user_id: userId,
             provider: 'github',
             access_token: '', // GitHub App uses JWT/installation tokens
             account_id: installation.id.toString(),
             account_name: installation.account.login,
             account_avatar: installation.account.avatar_url,
-            scopes: installation.permissions ? Object.keys(installation.permissions) : []
-          })
-          .select();
+            scopes: installation.permissions ? Object.keys(installation.permissions) : [],
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'provider,account_id', // Use unique index from migration
+            ignoreDuplicates: false // Update if exists
+          });
 
-        if (error) {
-          console.error(`❌ [AUTO-SYNC] Error linking installation ${installation.id}:`, error);
+        if (upsertError) {
+          console.error(`❌ [AUTO-SYNC] Error upserting installation ${installation.id}:`, upsertError);
         } else {
-          console.log(`✅ [AUTO-SYNC] Linked installation ${installation.id} (${installation.account.login}) to ${userEmail}`);
           synced++;
+          console.log(`✅ [AUTO-SYNC] Synced installation ${installation.id} (${installation.account.login})`);
         }
       } catch (error) {
         console.error(`❌ [AUTO-SYNC] Error processing installation ${installation.id}:`, error);
       }
     }
 
-    console.log(`📊 [AUTO-SYNC] Summary: Synced ${synced} of ${installations.length} installation(s) for ${userEmail}`);
-    
-    if (synced > 0) {
-      console.log(`🎉 [AUTO-SYNC] Successfully synced ${synced} GitHub installation(s) for ${userEmail}`);
-    } else {
-      console.log(`ℹ️  [AUTO-SYNC] No new GitHub installations to sync for ${userEmail}`);
-    }
+    console.log(`🎉 [AUTO-SYNC] Completed: ${synced}/${installations.length} installation(s) synced for ${userEmail}`);
   } catch (error) {
     console.error('❌ [AUTO-SYNC] Fatal error:', error);
     console.error('❌ [AUTO-SYNC] Stack trace:', error.stack);
-    // Don't throw - this is a background operation
   }
 }
 
