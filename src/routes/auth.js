@@ -14,98 +14,107 @@ const githubAppAuth = require('../utils/githubAppAuth');
  * This runs in the background after login to link any existing installations
  */
 async function autoSyncGitHubInstallations(userId, userEmail) {
+  console.log(`🔄 [AUTO-SYNC] Starting for user ${userEmail} (ID: ${userId})`);
+  
   try {
+    console.log(`🔄 [AUTO-SYNC] Step 1: Check Supabase configured`);
     if (!isSupabaseConfigured()) {
-      console.log('⏭️  Skipping GitHub sync: Supabase not configured');
+      console.log('⏭️  [AUTO-SYNC] Skipping: Supabase not configured');
       return;
     }
+    console.log(`✅ [AUTO-SYNC] Supabase is configured`);
 
+    console.log(`🔄 [AUTO-SYNC] Step 2: Get GitHub App JWT`);
     const jwt = githubAppAuth.getGitHubAppJWT();
     if (!jwt) {
-      console.log('⏭️  Skipping GitHub sync: GitHub App not configured');
+      console.log('⏭️  [AUTO-SYNC] Skipping: GitHub App not configured');
       return;
     }
+    console.log(`✅ [AUTO-SYNC] GitHub App JWT obtained`);
 
+    console.log(`🔄 [AUTO-SYNC] Step 3: List GitHub App installations`);
     const appOctokit = new Octokit({ auth: jwt });
     const { data: installations } = await appOctokit.apps.listInstallations();
+    console.log(`✅ [AUTO-SYNC] Found ${installations.length} installation(s)`);
+    
+    if (installations.length > 0) {
+      console.log(`📋 [AUTO-SYNC] Installation IDs:`, installations.map(i => `${i.id} (${i.account.login})`).join(', '));
+    }
 
     if (installations.length === 0) {
-      console.log(`⏭️  No GitHub App installations found to sync for ${userEmail}`);
+      console.log(`⏭️  [AUTO-SYNC] No GitHub App installations found for ${userEmail}`);
       return;
     }
 
-    console.log(`🔍 Auto-syncing ${installations.length} GitHub App installation(s) for ${userEmail}`);
+    console.log(`🔍 [AUTO-SYNC] Processing ${installations.length} installation(s) for ${userEmail}`);
 
     let synced = 0;
 
     for (const installation of installations) {
       try {
+        console.log(`🔄 [AUTO-SYNC] Checking installation ${installation.id} (${installation.account.login})`);
+        
         // Check if this installation is already linked to ANY user
-        const { data: existingIntegration } = await supabaseAdmin
+        const { data: existingIntegration, error: fetchError } = await supabaseAdmin
           .from('integrations')
           .select('id, user_id')
           .eq('provider', 'github')
           .eq('account_id', installation.id.toString())
           .single();
+        
+        if (fetchError && fetchError.code !== 'PGRST116') {
+          console.error(`❌ [AUTO-SYNC] Error fetching integration:`, fetchError);
+        }
 
         if (existingIntegration) {
           // If it's already linked to THIS user, skip
           if (existingIntegration.user_id === userId) {
-            console.log(`✅ Installation ${installation.id} already linked to ${userEmail}`);
+            console.log(`✅ [AUTO-SYNC] Installation ${installation.id} already linked to ${userEmail}`);
             continue;
           }
           // If it's linked to a DIFFERENT user, skip (don't steal installations)
-          console.log(`⏭️  Installation ${installation.id} already linked to another user`);
+          console.log(`⏭️  [AUTO-SYNC] Installation ${installation.id} already linked to another user`);
           continue;
         }
 
-        // Not linked to anyone - let's check if we should link it to this user
-        // We'll use GitHub API to check if user has access to this installation
-        try {
-          const installationOctokit = new Octokit({
-            auth: await githubAppAuth.getInstallationToken(installation.id)
-          });
-          
-          // Try to get installation details to verify access
-          const { data: installDetails } = await installationOctokit.apps.getInstallation({
-            installation_id: installation.id
-          });
-          
-          // Link this installation to the user
-          const { data, error } = await supabaseAdmin
-            .from('integrations')
-            .insert({
-              user_id: userId,
-              provider: 'github',
-              access_token: '', // GitHub App uses JWT/installation tokens
-              account_id: installation.id.toString(),
-              account_name: installation.account.login,
-              account_avatar: installation.account.avatar_url,
-              scopes: installation.permissions ? Object.keys(installation.permissions) : []
-            })
-            .select();
+        // Not linked to anyone - link it to this user without verification
+        // (simpler approach - just link all unlinked installations)
+        console.log(`🔗 [AUTO-SYNC] Linking installation ${installation.id} to ${userEmail}...`);
+        
+        const { data, error } = await supabaseAdmin
+          .from('integrations')
+          .insert({
+            user_id: userId,
+            provider: 'github',
+            access_token: '', // GitHub App uses JWT/installation tokens
+            account_id: installation.id.toString(),
+            account_name: installation.account.login,
+            account_avatar: installation.account.avatar_url,
+            scopes: installation.permissions ? Object.keys(installation.permissions) : []
+          })
+          .select();
 
-          if (error) {
-            console.error(`❌ Error linking installation ${installation.id}:`, error);
-          } else {
-            console.log(`✅ Linked GitHub installation ${installation.id} (${installation.account.login}) to ${userEmail}`);
-            synced++;
-          }
-        } catch (installError) {
-          console.log(`⏭️  Couldn't verify access to installation ${installation.id}, skipping`);
+        if (error) {
+          console.error(`❌ [AUTO-SYNC] Error linking installation ${installation.id}:`, error);
+        } else {
+          console.log(`✅ [AUTO-SYNC] Linked installation ${installation.id} (${installation.account.login}) to ${userEmail}`);
+          synced++;
         }
       } catch (error) {
-        console.error(`❌ Error processing installation ${installation.id}:`, error);
+        console.error(`❌ [AUTO-SYNC] Error processing installation ${installation.id}:`, error);
       }
     }
 
+    console.log(`📊 [AUTO-SYNC] Summary: Synced ${synced} of ${installations.length} installation(s) for ${userEmail}`);
+    
     if (synced > 0) {
-      console.log(`🎉 Auto-synced ${synced} GitHub installation(s) for ${userEmail}`);
+      console.log(`🎉 [AUTO-SYNC] Successfully synced ${synced} GitHub installation(s) for ${userEmail}`);
     } else {
-      console.log(`ℹ️  No new GitHub installations to sync for ${userEmail}`);
+      console.log(`ℹ️  [AUTO-SYNC] No new GitHub installations to sync for ${userEmail}`);
     }
   } catch (error) {
-    console.error('❌ Error in auto-sync GitHub installations:', error);
+    console.error('❌ [AUTO-SYNC] Fatal error:', error);
+    console.error('❌ [AUTO-SYNC] Stack trace:', error.stack);
     // Don't throw - this is a background operation
   }
 }
@@ -330,6 +339,7 @@ router.get('/callback', async (req, res) => {
  */
 router.get('/sync-github', async (req, res) => {
   if (!req.session?.user) {
+    console.log('❌ [MANUAL-SYNC] No user in session');
     return res.redirect('/login?error=' + encodeURIComponent('Please log in first'));
   }
 
@@ -337,14 +347,16 @@ router.get('/sync-github', async (req, res) => {
     const userId = req.session.user.id;
     const userEmail = req.session.user.email;
 
-    console.log(`🔄 Manual GitHub sync requested by ${userEmail}`);
+    console.log(`🔄 [MANUAL-SYNC] GitHub sync requested by ${userEmail} (ID: ${userId})`);
     
     // Run the sync function
     await autoSyncGitHubInstallations(userId, userEmail);
     
+    console.log(`✅ [MANUAL-SYNC] Sync completed for ${userEmail}`);
     return res.redirect('/dashboard?success=' + encodeURIComponent('GitHub installations synced successfully!'));
   } catch (error) {
-    console.error('Manual GitHub sync error:', error);
+    console.error('❌ [MANUAL-SYNC] Fatal error:', error);
+    console.error('❌ [MANUAL-SYNC] Stack trace:', error.stack);
     return res.redirect('/dashboard?error=' + encodeURIComponent('Failed to sync GitHub installations'));
   }
 });
