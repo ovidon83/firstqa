@@ -102,17 +102,15 @@ async function createWebhook(siteId, accessToken) {
 
   try {
     const response = await axios.post(
-      `https://api.atlassian.com/ex/jira/${siteId}/rest/api/3/webhook`,
-      [
-        {
-          name: 'FirstQA Analysis Webhook',
-          url: webhookUrl,
-          events: [
-            'comment_created' // Trigger when a comment is added to an issue
-          ]
-          // Note: filters/JQL queries are not supported in webhook creation via API
-        }
-      ],
+      `https://api.atlassian.com/ex/jira/${siteId}/rest/webhooks/1.0/webhook`,
+      {
+        name: 'FirstQA Analysis Webhook',
+        url: webhookUrl,
+        events: [
+          'comment_created'
+        ],
+        enabled: true
+      },
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -123,16 +121,11 @@ async function createWebhook(siteId, accessToken) {
     );
 
     console.log(`✅ Jira webhook created:`, response.data);
-    return response.data[0]; // API returns array
+    return response.data;
   } catch (error) {
-    // Check if webhook already exists
-    if (error.response?.status === 400) {
-      console.log('ℹ️  Webhook might already exist or invalid request');
-      console.error('Error details:', error.response?.data);
-      return null; // Don't fail OAuth flow
-    }
-    console.error('❌ Failed to create Jira webhook:', error.response?.data || error.message);
-    throw error;
+    console.error('❌ Webhook failed:', error.response?.data);
+    // Don't fail OAuth
+    return null;
   }
 }
 
