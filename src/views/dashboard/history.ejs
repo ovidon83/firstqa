@@ -186,6 +186,9 @@
             background: rgba(168, 85, 247, 0.15);
             color: #c084fc;
         }
+        .fab.fa-jira {
+            color: #0052cc;
+        }
         .history-stats {
             display: flex;
             gap: 2rem;
@@ -297,18 +300,24 @@
             <% if (analyses && analyses.length > 0) { %>
                 <div class="history-list">
                     <% analyses.forEach(analysis => { %>
+                        <% const isJira = analysis.provider === 'jira' || (analysis.pr_number === 0 && analysis.repository); %>
                         <div class="history-item">
                             <div class="history-header">
                                 <div class="history-title">
                                     <h3>
                                         <a href="<%= analysis.pr_url %>" target="_blank">
-                                            <%= analysis.pr_title || `PR #${analysis.pr_number}` %>
+                                            <%= analysis.pr_title || (isJira ? analysis.repository : `PR #${analysis.pr_number}`) %>
                                             <i class="fas fa-external-link-alt" style="font-size: 0.8rem; opacity: 0.6;"></i>
                                         </a>
                                     </h3>
                                     <div class="history-meta">
-                                        <i class="fab fa-github"></i>
-                                        <%= analysis.repository %> #<%= analysis.pr_number %>
+                                        <% if (isJira) { %>
+                                            <i class="fab fa-jira"></i>
+                                            <%= analysis.repository %> • Jira Ticket
+                                        <% } else { %>
+                                            <i class="fab fa-github"></i>
+                                            <%= analysis.repository %> #<%= analysis.pr_number %>
+                                        <% } %>
                                     </div>
                                 </div>
                                 <span class="history-badge <%= analysis.analysis_type === 'full' ? 'badge-full' : 'badge-short' %>">

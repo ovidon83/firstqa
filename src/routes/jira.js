@@ -127,6 +127,16 @@ router.get('/callback', async (req, res) => {
       console.log(`✅ Jira integration saved to database for user ${userId}:`, data);
     }
 
+    // Create webhook in Jira
+    try {
+      const { createWebhook } = require('../utils/jiraService');
+      await createWebhook(site.id, access_token);
+      console.log('✅ Jira webhook created for /qa command triggers');
+    } catch (webhookError) {
+      console.error('⚠️  Failed to create Jira webhook (non-fatal):', webhookError.message);
+      // Don't fail the whole OAuth flow if webhook creation fails
+    }
+
     // Clean up session
     delete req.session.jiraOAuthState;
     delete req.session.jiraOAuthUserId;
@@ -136,6 +146,27 @@ router.get('/callback', async (req, res) => {
   } catch (error) {
     console.error('Jira OAuth callback error:', error.response?.data || error.message);
     res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to connect Jira'));
+  }
+});
+
+/**
+ * POST /jira/webhook - Handle Jira webhooks
+ */
+router.post('/webhook', async (req, res) => {
+  try {
+    console.log('🔔 Jira webhook received');
+    
+    const { processWebhookEvent } = require('../utils/jiraService');
+    const result = await processWebhookEvent(req);
+
+    if (result.success) {
+      res.status(200).json({ success: true, message: result.message });
+    } else {
+      res.status(400).json({ success: false, error: result.error || result.message });
+    }
+  } catch (error) {
+    console.error('❌ Jira webhook handler error:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 
