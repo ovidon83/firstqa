@@ -101,31 +101,55 @@ async function createWebhook(siteId, accessToken) {
   console.log(`   Webhook URL: ${webhookUrl}`);
 
   try {
+    // Use the legacy webhook endpoint (v1) which works with OAuth
     const response = await axios.post(
       `https://api.atlassian.com/ex/jira/${siteId}/rest/webhooks/1.0/webhook`,
       {
-        name: 'FirstQA Analysis Webhook',
+        name: 'FirstQA',
         url: webhookUrl,
-        events: [
-          'comment_created'
-        ],
-        enabled: true
+        events: ['jira:issue_updated'],
+        filters: {
+          'issue-related-events-section': 'comment_created'
+        }
       },
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         }
       }
     );
 
-    console.log(`✅ Jira webhook created:`, response.data);
+    console.log(`✅ Jira webhook created successfully`);
     return response.data;
   } catch (error) {
-    console.error('❌ Webhook failed:', error.response?.data);
-    // Don't fail OAuth
-    return null;
+    console.error('❌ Webhook creation failed:', error.response?.status, error.response?.data);
+    
+    // Try alternative: user-level webhook using v3 API
+    try {
+      console.log('🔄 Trying alternative webhook creation method...');
+      const altResponse = await axios.put(
+        `https://api.atlassian.com/ex/jira/${siteId}/rest/api/3/webhook`,
+        {
+          webhooks: [{
+            name: 'FirstQA',
+            url: webhookUrl,
+            events: ['comment_created']
+          }]
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      console.log(`✅ Jira webhook created via alternative method`);
+      return altResponse.data;
+    } catch (altError) {
+      console.error('❌ Alternative method also failed:', altError.response?.status, altError.response?.data);
+      return null;
+    }
   }
 }
 
