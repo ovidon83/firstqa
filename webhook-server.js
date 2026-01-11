@@ -81,8 +81,9 @@ app.use(session({
 app.use(bodyParser.json({
   limit: '10mb', // Increase limit to handle larger PR data
   verify: (req, res, buf) => {
-    // Store the raw request body for webhook verification
-    req.rawBody = buf.toString();
+    // Store the raw request body as Buffer for webhook signature verification
+    // CRITICAL: Must be Buffer, not string, because GitHub computes signature on raw bytes
+    req.rawBody = buf;
   }
 }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
