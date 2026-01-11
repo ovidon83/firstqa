@@ -32,7 +32,7 @@ router.get('/install', (req, res) => {
     const authUrl = new URL('https://auth.atlassian.com/authorize');
     authUrl.searchParams.append('audience', 'api.atlassian.com');
     authUrl.searchParams.append('client_id', process.env.JIRA_CLIENT_ID);
-    authUrl.searchParams.append('scope', 'read:jira-work read:jira-user offline_access');
+    authUrl.searchParams.append('scope', 'read:jira-work read:jira-user write:jira-work manage:jira-webhook offline_access');
     authUrl.searchParams.append('redirect_uri', `${process.env.BASE_URL || 'http://localhost:3000'}/jira/callback`);
     authUrl.searchParams.append('state', state);
     authUrl.searchParams.append('response_type', 'code');
@@ -113,7 +113,7 @@ router.get('/callback', async (req, res) => {
           account_id: site.id,
           account_name: site.name,
           account_avatar: site.avatarUrl,
-          scopes: ['read:jira-work', 'read:jira-user', 'offline_access']
+          scopes: ['read:jira-work', 'read:jira-user', 'write:jira-work', 'manage:jira-webhook', 'offline_access']
         }, {
           onConflict: 'user_id,provider,account_id'
         })
