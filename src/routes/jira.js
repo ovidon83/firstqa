@@ -127,8 +127,9 @@ router.get('/callback', async (req, res) => {
       console.log(`✅ Jira integration saved to database for user ${userId}:`, data);
     }
 
-    // Skip automatic webhook creation - will be done manually
-    console.log('ℹ️  Jira connected - webhook needs to be created manually in Jira settings');
+    // Try to create webhook automatically
+    const { createWebhook } = require('../utils/jiraService');
+    await createWebhook(site.id, access_token);
 
     // Clean up session
     delete req.session.jiraOAuthState;
