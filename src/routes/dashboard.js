@@ -49,13 +49,18 @@ router.get('/', async (req, res) => {
         stats.plan = userData.plan || 'free';
       }
       
-      // Count connected integrations
-      const { count: integrationCount } = await supabaseAdmin
+      // Count connected providers (not individual installations)
+      // GitHub may have multiple installations, but we count it as 1 provider
+      const { data: integrations } = await supabaseAdmin
         .from('integrations')
-        .select('*', { count: 'exact', head: true })
+        .select('provider')
         .eq('user_id', user.id);
       
-      stats.connectedIntegrations = integrationCount || 0;
+      if (integrations) {
+        // Get unique providers
+        const uniqueProviders = [...new Set(integrations.map(i => i.provider))];
+        stats.connectedIntegrations = uniqueProviders.length;
+      }
       
       // Fetch recent analyses (last 5)
       const { data: recentAnalyses } = await supabaseAdmin
@@ -98,7 +103,7 @@ router.get('/', async (req, res) => {
 router.get('/integrations', async (req, res) => {
   try {
     const user = req.session.user;
-    let githubIntegration = null;
+    let githubInstallations = [];
     let bitbucketIntegration = null;
     let jiraIntegration = null;
     
@@ -107,17 +112,18 @@ router.get('/integrations', async (req, res) => {
       const { data: integrations, error: fetchError } = await supabaseAdmin
         .from('integrations')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true }); // Oldest first
       
       if (fetchError) {
         console.error('Error fetching integrations:', fetchError);
       } else if (integrations) {
-        // Find the first integration of each type
-        githubIntegration = integrations.find(i => i.provider === 'github');
+        // Group GitHub installations (each GitHub App installation is a separate record)
+        githubInstallations = integrations.filter(i => i.provider === 'github');
         bitbucketIntegration = integrations.find(i => i.provider === 'bitbucket');
         jiraIntegration = integrations.find(i => i.provider === 'jira');
         
-        console.log(`📊 Loaded integrations for ${user.email}: GitHub=${!!githubIntegration}, Bitbucket=${!!bitbucketIntegration}, Jira=${!!jiraIntegration}`);
+        console.log(`📊 Loaded integrations for ${user.email}: GitHub=${githubInstallations.length} installation(s), Bitbucket=${!!bitbucketIntegration}, Jira=${!!jiraIntegration}`);
       }
     }
     
@@ -127,7 +133,7 @@ router.get('/integrations', async (req, res) => {
     
     res.render('dashboard/integrations', {
       user,
-      githubIntegration,
+      githubInstallations, // Array of all GitHub App installations
       bitbucketIntegration,
       jiraIntegration,
       connected: req.query.connected, // 'github' or 'jira' when just connected
@@ -139,7 +145,7 @@ router.get('/integrations', async (req, res) => {
     console.error('Integrations page error:', error);
     res.render('dashboard/integrations', {
       user: req.session.user,
-      githubIntegration: null,
+      githubInstallations: [],
       bitbucketIntegration: null,
       jiraIntegration: null,
       success: req.query.success,

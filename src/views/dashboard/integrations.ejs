@@ -361,20 +361,37 @@
                         <div class="integration-description">
                             Analyze pull requests, generate test recipes, and catch bugs before they ship.
                         </div>
-                        <% if (locals.githubIntegration) { %>
+                        <% if (locals.githubInstallations && githubInstallations.length > 0) { %>
                             <div class="integration-status status-connected">
                                 <span class="status-dot"></span>
                                 Connected
                             </div>
                             <div class="connection-details">
                                 <div class="detail-row">
-                                    <span class="detail-label">Account:</span>
-                                    <span class="detail-value"><%= githubIntegration.account_name %></span>
+                                    <span class="detail-label">Installations:</span>
+                                    <span class="detail-value"><%= githubInstallations.length %> <%= githubInstallations.length === 1 ? 'account' : 'accounts' %></span>
                                 </div>
                                 <div class="detail-row">
-                                    <span class="detail-label">Connected:</span>
-                                    <span class="detail-value"><%= new Date(githubIntegration.created_at).toLocaleDateString() %></span>
+                                    <span class="detail-label">Primary account:</span>
+                                    <span class="detail-value"><%= githubInstallations[0].account_name %></span>
                                 </div>
+                                <% if (githubInstallations.length > 1) { %>
+                                <details style="margin-top: 0.75rem;">
+                                    <summary style="cursor: pointer; color: #10b981; font-size: 0.85rem; user-select: none;">
+                                        <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-right: 0.25rem;"></i>
+                                        Show all <%= githubInstallations.length %> installations
+                                    </summary>
+                                    <div style="margin-top: 0.5rem; padding-left: 0.5rem; border-left: 2px solid rgba(16, 185, 129, 0.3);">
+                                        <% githubInstallations.forEach((installation, index) => { %>
+                                        <div style="margin-bottom: 0.25rem; color: #9ca3af; font-size: 0.85rem;">
+                                            <i class="fab fa-github" style="width: 16px; text-align: center;"></i>
+                                            <%= installation.account_name %>
+                                            <% if (index === 0) { %><span style="color: #10b981;">(Primary)</span><% } %>
+                                        </div>
+                                        <% }) %>
+                                    </div>
+                                </details>
+                                <% } %>
                             </div>
                         <% } else { %>
                             <div class="integration-status status-not-connected">
@@ -384,11 +401,11 @@
                         <% } %>
                     </div>
                     <div class="integration-actions">
-                        <% if (locals.githubIntegration) { %>
+                        <% if (locals.githubInstallations && githubInstallations.length > 0) { %>
                             <form action="/dashboard/integrations/github/disconnect" method="POST" style="margin: 0;">
                                 <button type="submit" class="btn btn-danger">
                                     <i class="fas fa-unlink"></i>
-                                    Disconnect
+                                    Disconnect All
                                 </button>
                             </form>
                         <% } else { %>
