@@ -138,20 +138,14 @@ function extractTextFromADF(adf) {
 async function fetchTicketDetails(issueKey, installation) {
   console.log(`🔍 Fetching Jira ticket: ${issueKey}`);
 
-  // Generate JWT token with proper QSH for this specific API call
-  const path = `/rest/api/3/issue/${issueKey}`;
-  const queryParams = 'expand=renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,comments';
-  const fullPath = `${path}?${queryParams}`;
-  
+  // Generate JWT token using context-qsh
   const token = generateInstallationToken(
     installation.client_key,
-    installation.shared_secret,
-    'GET',
-    fullPath
+    installation.shared_secret
   );
 
   const response = await axios.get(
-    `${installation.base_url}${path}`,
+    `${installation.base_url}/rest/api/3/issue/${issueKey}`,
     {
       headers: {
         'Authorization': `JWT ${token}`,
@@ -191,18 +185,15 @@ async function fetchTicketDetails(issueKey, installation) {
 async function postComment(issueKey, commentBody, installation) {
   console.log(`💬 Posting comment to Jira ticket: ${issueKey}`);
 
-  // Generate JWT token with proper QSH for this specific API call
-  const path = `/rest/api/3/issue/${issueKey}/comment`;
+  // Generate JWT token using context-qsh
   const token = generateInstallationToken(
     installation.client_key,
-    installation.shared_secret,
-    'POST',
-    path
+    installation.shared_secret
   );
 
   try {
     const response = await axios.post(
-      `${installation.base_url}${path}`,
+      `${installation.base_url}/rest/api/3/issue/${issueKey}/comment`,
       {
         body: {
           type: 'doc',

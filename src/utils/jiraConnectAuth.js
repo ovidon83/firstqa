@@ -210,31 +210,25 @@ function computeQSH(method, url) {
 
 /**
  * Generate installation token for making API calls to Jira
- * Note: For Connect apps, we can use a wildcard QSH hash for all API calls
+ * Uses context-qsh for Connect app API calls
  */
 function generateInstallationToken(clientKey, sharedSecret, method, path) {
   const now = Math.floor(Date.now() / 1000);
   
-  // Compute QSH (Query String Hash) if method and path provided
-  let qsh;
-  if (method && path) {
-    qsh = computeQSH(method, path);
-  } else {
-    // Use wildcard QSH for general API access
-    // This works for most Jira Cloud API endpoints
-    qsh = computeQSH('GET', '/');
-  }
-  
+  // For Atlassian Connect apps, we can use 'context-qsh' for API calls
+  // within the same Jira instance. This is simpler and more reliable.
   const token = jwt.sign(
     {
-      iss: 'com.firstqa.jira',
+      iss: 'com.firstqa.jira', // Must match the key in atlassian-connect.json
       iat: now,
       exp: now + 180, // 3 minutes
-      qsh: qsh
+      qsh: 'context-qsh' // Special value for Connect app API calls
     },
     sharedSecret,
     { algorithm: 'HS256' }
   );
+  
+  console.log(`🔑 Generated JWT token for ${clientKey}`);
   
   return token;
 }
