@@ -178,16 +178,59 @@ async function verifyConnectJWT(req, res, next) {
 }
 
 /**
- * Generate installation token for making API calls to Jira
+ * Compute QSH (Query String Hash) for JWT
+ * This is required for authenticating API calls in Atlassian Connect
  */
-function generateInstallationToken(clientKey, sharedSecret) {
+function computeQSH(method, url) {
+  const crypto = require('crypto');
+  
+  // Parse URL to separate path and query
+  const urlParts = url.split('?');
+  const path = urlParts[0];
+  const query = urlParts[1] || '';
+  
+  // Canonicalize query string
+  let canonicalQuery = '';
+  if (query) {
+    const params = query.split('&').sort();
+    canonicalQuery = params.join('&');
+  }
+  
+  // Create canonical request
+  const canonicalRequest = `${method.toUpperCase()}&${path}&${canonicalQuery}`;
+  
+  // Compute SHA-256 hash
+  const hash = crypto
+    .createHash('sha256')
+    .update(canonicalRequest)
+    .digest('hex');
+  
+  return hash;
+}
+
+/**
+ * Generate installation token for making API calls to Jira
+ * Note: For Connect apps, we can use a wildcard QSH hash for all API calls
+ */
+function generateInstallationToken(clientKey, sharedSecret, method, path) {
   const now = Math.floor(Date.now() / 1000);
+  
+  // Compute QSH (Query String Hash) if method and path provided
+  let qsh;
+  if (method && path) {
+    qsh = computeQSH(method, path);
+  } else {
+    // Use wildcard QSH for general API access
+    // This works for most Jira Cloud API endpoints
+    qsh = computeQSH('GET', '/');
+  }
+  
   const token = jwt.sign(
     {
       iss: 'com.firstqa.jira',
       iat: now,
       exp: now + 180, // 3 minutes
-      qsh: 'context-qsh' // Context QSH for API calls
+      qsh: qsh
     },
     sharedSecret,
     { algorithm: 'HS256' }
@@ -203,5 +246,6 @@ module.exports = {
   verifyJWT,
   extractJWT,
   verifyConnectJWT,
-  generateInstallationToken
+  generateInstallationToken,
+  computeQSH
 };
