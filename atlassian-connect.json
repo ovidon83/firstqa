@@ -1,0 +1,39 @@
+{
+  "name": "FirstQA - AI QA Engineer",
+  "description": "AI-powered QA analysis for Jira tickets. Comment /qa on any ticket to get comprehensive test scenarios, risk analysis, and quality insights.",
+  "key": "com.firstqa.jira",
+  "baseUrl": "https://www.firstqa.dev",
+  "vendor": {
+    "name": "FirstQA",
+    "url": "https://www.firstqa.dev"
+  },
+  "authentication": {
+    "type": "jwt"
+  },
+  "lifecycle": {
+    "installed": "/jira-connect/installed",
+    "uninstalled": "/jira-connect/uninstalled",
+    "enabled": "/jira-connect/enabled",
+    "disabled": "/jira-connect/disabled"
+  },
+  "scopes": [
+    "READ",
+    "WRITE"
+  ],
+  "apiVersion": 1,
+  "modules": {
+    "webhooks": [
+      {
+        "event": "comment_created",
+        "url": "/jira-connect/webhook?event=comment_created",
+        "excludeBody": false,
+        "filter": ""
+      }
+    ]
+  },
+  "apiMigrations": {
+    "gdpr": true,
+    "context-qsh": true,
+    "signed-install": true
+  }
+}

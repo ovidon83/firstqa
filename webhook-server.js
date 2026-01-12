@@ -25,6 +25,7 @@ const stripeRoutes = require('./src/routes/stripe');
 const bitbucketRoutes = require('./src/routes/bitbucket');
 const githubRoutes = require('./src/routes/github');
 const jiraRoutes = require('./src/routes/jira');
+const jiraConnectRoutes = require('./src/routes/jiraConnect');
 const authRoutes = require('./src/routes/auth');
 const dashboardRoutes = require('./src/routes/dashboard');
 // customerRoutes will be imported AFTER directory fix
@@ -182,8 +183,16 @@ app.use('/dashboard', dashboardRoutes);
 // GitHub routes (webhooks and OAuth callbacks)
 app.use('/github', githubRoutes);
 
-// Jira routes
+// Jira OAuth routes
 app.use('/jira', jiraRoutes);
+
+// Jira Connect routes (Atlassian Connect app)
+app.use('/jira-connect', jiraConnectRoutes);
+
+// Serve Atlassian Connect descriptor
+app.get('/atlassian-connect.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'atlassian-connect.json'));
+});
 
 // Success page route for post-payment onboarding
 app.get('/success', async (req, res) => {
