@@ -1710,6 +1710,25 @@ Or wait until next month when your limit resets.
     });
     if (aiInsights && aiInsights.success) {
       console.log('✅ FirstQA Ovi AI analysis completed successfully');
+      
+      // Apply smart Release Pulse analysis
+      try {
+        const { enhanceReleasePulseInMarkdown } = require('../services/releasePulseAnalyzer');
+        
+        // Fetch PR details for file stats
+        const prDetails = await fetchPR(repository.full_name, issue.number);
+        
+        aiInsights = enhanceReleasePulseInMarkdown(aiInsights, {
+          filesChanged: prDetails.changed_files || 0,
+          additions: prDetails.additions || 0,
+          deletions: prDetails.deletions || 0,
+          files: prDetails.files?.map(f => f.filename) || []
+        });
+        console.log('✅ Applied smart Release Pulse analysis for /qa command');
+      } catch (error) {
+        console.error('⚠️  Release Pulse enhancement failed:', error.message);
+        // Continue with original analysis
+      }
     } else {
       console.error('❌ FirstQA Ovi AI analysis failed:', aiInsights?.error, aiInsights?.details);
     }
@@ -2446,19 +2465,34 @@ async function handlePROpened(repository, pr, installationId) {
       body: prDescription,
       diff: prDiff
     });
-    if (aiInsights && aiInsights.success) {
-      console.log('✅ Comprehensive analysis generated successfully');
-    } else {
-      console.error('❌ Comprehensive analysis generation failed:', aiInsights?.error);
+  if (aiInsights && aiInsights.success) {
+    console.log('✅ Comprehensive analysis generated successfully');
+    
+    // Apply smart Release Pulse analysis
+    try {
+      const { enhanceReleasePulseInMarkdown } = require('../services/releasePulseAnalyzer');
+      aiInsights = enhanceReleasePulseInMarkdown(aiInsights, {
+        filesChanged: pr.changed_files || 0,
+        additions: pr.additions || 0,
+        deletions: pr.deletions || 0,
+        files: pr.files?.map(f => f.filename) || []
+      });
+      console.log('✅ Applied smart Release Pulse analysis');
+    } catch (error) {
+      console.error('⚠️  Release Pulse enhancement failed:', error.message);
+      // Continue with original analysis
     }
-  } catch (error) {
-    console.error('❌ Comprehensive analysis threw exception:', error.message);
-    aiInsights = {
-      success: false,
-      error: 'Comprehensive analysis generation failed',
-      details: error.message
-    };
+  } else {
+    console.error('❌ Comprehensive analysis generation failed:', aiInsights?.error);
   }
+} catch (error) {
+  console.error('❌ Comprehensive analysis threw exception:', error.message);
+  aiInsights = {
+    success: false,
+    error: 'Comprehensive analysis generation failed',
+    details: error.message
+  };
+}
   
   // Post the analysis first
   const analysisResult = await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights);
