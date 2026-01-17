@@ -191,28 +191,39 @@ async function verifyConnectJWT(req, res, next) {
 function computeQSH(method, url) {
   const crypto = require('crypto');
   
-  // Parse URL to separate path and query
-  const urlParts = url.split('?');
-  const path = urlParts[0];
-  const query = urlParts[1] || '';
-  
-  // Canonicalize query string
-  let canonicalQuery = '';
-  if (query) {
-    const params = query.split('&').sort();
-    canonicalQuery = params.join('&');
+  try {
+    // Parse URL properly to extract path and query
+    const urlObj = new URL(url);
+    const path = urlObj.pathname; // Just the path, e.g., /rest/api/3/issue/DEV-2
+    const query = urlObj.search.substring(1); // Remove the leading '?'
+    
+    console.log(`🔐 QSH input - Method: ${method}, Path: ${path}, Query: ${query}`);
+    
+    // Canonicalize query string (sort parameters)
+    let canonicalQuery = '';
+    if (query) {
+      const params = query.split('&').sort();
+      canonicalQuery = params.join('&');
+    }
+    
+    // Create canonical request: METHOD&path&canonicalQuery
+    const canonicalRequest = `${method.toUpperCase()}&${path}&${canonicalQuery}`;
+    
+    console.log(`🔐 QSH canonical string: ${canonicalRequest}`);
+    
+    // Compute SHA-256 hash
+    const hash = crypto
+      .createHash('sha256')
+      .update(canonicalRequest)
+      .digest('hex');
+    
+    console.log(`🔐 QSH hash: ${hash}`);
+    
+    return hash;
+  } catch (error) {
+    console.error('❌ QSH computation error:', error);
+    throw error;
   }
-  
-  // Create canonical request
-  const canonicalRequest = `${method.toUpperCase()}&${path}&${canonicalQuery}`;
-  
-  // Compute SHA-256 hash
-  const hash = crypto
-    .createHash('sha256')
-    .update(canonicalRequest)
-    .digest('hex');
-  
-  return hash;
 }
 
 /**
