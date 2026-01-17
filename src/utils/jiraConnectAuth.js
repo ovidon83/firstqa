@@ -231,22 +231,22 @@ function computeQSH(method, url) {
 
 /**
  * Generate installation token for making API calls to Jira
- * Computes proper QSH hash for outbound API calls
+ * For Connect apps: iss = app key, sub = clientKey (optional)
  */
 function generateInstallationToken(clientKey, sharedSecret, method, fullUrl) {
   const now = Math.floor(Date.now() / 1000);
   
-  // Compute QSH for the specific API call
-  const qsh = method && fullUrl ? computeQSH(method, fullUrl) : 'context-qsh';
-  
+  // For context-qsh to work, we must have it enabled in descriptor
+  // AND not compute a specific QSH
   const payload = {
-    iss: clientKey, // For outbound API calls, use clientKey as issuer
+    iss: 'com.firstqa.jira', // App key from atlassian-connect.json
     iat: now,
     exp: now + 180, // 3 minutes
-    qsh: qsh
+    qsh: 'context-qsh', // Use context-qsh for same-instance API calls
+    sub: clientKey // Optional: client key as subject
   };
   
-  console.log(`🔑 Generating JWT for ${method} ${fullUrl}`);
+  console.log(`🔑 Generating JWT for ${method || 'webhook'} ${fullUrl || 'context'}`);
   console.log(`🔑 Payload:`, payload);
   console.log(`🔑 Using shared secret (first 10 chars): ${sharedSecret.substring(0, 10)}...`);
   
