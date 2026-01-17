@@ -154,7 +154,14 @@ async function verifyConnectJWT(req, res, next) {
     console.log(`🔐 Verifying JWT for client: ${clientKey}`);
 
     // Get installation to retrieve shared secret
+    console.log(`🔍 Looking up installation in database for client_key: ${clientKey}`);
     const installation = await getConnectInstallation(clientKey);
+    console.log(`✅ Found installation:`, {
+      client_key: installation.client_key,
+      base_url: installation.base_url,
+      site_name: installation.site_name,
+      has_shared_secret: !!installation.shared_secret
+    });
     
     // Verify JWT with shared secret
     const verification = verifyJWT(token, installation.shared_secret);
@@ -215,20 +222,21 @@ function computeQSH(method, url) {
 function generateInstallationToken(clientKey, sharedSecret, method, path) {
   const now = Math.floor(Date.now() / 1000);
   
-  // For Atlassian Connect apps, we can use 'context-qsh' for API calls
-  // within the same Jira instance. This is simpler and more reliable.
-  const token = jwt.sign(
-    {
-      iss: 'com.firstqa.jira', // Must match the key in atlassian-connect.json
-      iat: now,
-      exp: now + 180, // 3 minutes
-      qsh: 'context-qsh' // Special value for Connect app API calls
-    },
-    sharedSecret,
-    { algorithm: 'HS256' }
-  );
+  const payload = {
+    iss: 'com.firstqa.jira', // Must match the key in atlassian-connect.json
+    iat: now,
+    exp: now + 180, // 3 minutes
+    qsh: 'context-qsh' // Special value for Connect app API calls
+  };
   
-  console.log(`🔑 Generated JWT token for ${clientKey}`);
+  console.log(`🔑 Generating JWT with payload:`, payload);
+  console.log(`🔑 Using shared secret (first 10 chars): ${sharedSecret.substring(0, 10)}...`);
+  
+  const token = jwt.sign(payload, sharedSecret, { algorithm: 'HS256' });
+  
+  // Decode the token to verify what we're sending
+  const decoded = jwt.decode(token);
+  console.log(`🔑 Generated JWT decoded:`, decoded);
   
   return token;
 }

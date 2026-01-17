@@ -137,12 +137,21 @@ function extractTextFromADF(adf) {
  */
 async function fetchTicketDetails(issueKey, installation) {
   console.log(`🔍 Fetching Jira ticket: ${issueKey}`);
+  console.log(`📦 Installation data:`, {
+    client_key: installation.client_key,
+    base_url: installation.base_url,
+    has_shared_secret: !!installation.shared_secret,
+    secret_length: installation.shared_secret?.length
+  });
 
   // Generate JWT token using context-qsh
   const token = generateInstallationToken(
     installation.client_key,
     installation.shared_secret
   );
+
+  console.log(`🔑 Generated JWT token (first 50 chars): ${token.substring(0, 50)}...`);
+  console.log(`📍 API URL: ${installation.base_url}/rest/api/3/issue/${issueKey}`);
 
   const response = await axios.get(
     `${installation.base_url}/rest/api/3/issue/${issueKey}`,
