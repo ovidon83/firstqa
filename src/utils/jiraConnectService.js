@@ -144,24 +144,27 @@ async function fetchTicketDetails(issueKey, installation) {
     secret_length: installation.shared_secret?.length
   });
 
-  // Generate JWT token using context-qsh
+  // Build full API URL with query params
+  const apiPath = `/rest/api/3/issue/${issueKey}`;
+  const queryParams = 'expand=renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,comments';
+  const fullUrl = `${installation.base_url}${apiPath}?${queryParams}`;
+
+  console.log(`📍 Full API URL: ${fullUrl}`);
+
+  // Generate JWT token with proper QSH for this specific request
   const token = generateInstallationToken(
     installation.client_key,
-    installation.shared_secret
+    installation.shared_secret,
+    'GET',
+    fullUrl
   );
 
-  console.log(`🔑 Generated JWT token (first 50 chars): ${token.substring(0, 50)}...`);
-  console.log(`📍 API URL: ${installation.base_url}/rest/api/3/issue/${issueKey}`);
-
   const response = await axios.get(
-    `${installation.base_url}/rest/api/3/issue/${issueKey}`,
+    fullUrl,
     {
       headers: {
         'Authorization': `JWT ${token}`,
         'Accept': 'application/json'
-      },
-      params: {
-        expand: 'renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,comments'
       }
     }
   );
@@ -194,15 +197,23 @@ async function fetchTicketDetails(issueKey, installation) {
 async function postComment(issueKey, commentBody, installation) {
   console.log(`💬 Posting comment to Jira ticket: ${issueKey}`);
 
-  // Generate JWT token using context-qsh
+  // Build full API URL
+  const apiPath = `/rest/api/3/issue/${issueKey}/comment`;
+  const fullUrl = `${installation.base_url}${apiPath}`;
+
+  console.log(`📍 POST URL: ${fullUrl}`);
+
+  // Generate JWT token with proper QSH for this specific request
   const token = generateInstallationToken(
     installation.client_key,
-    installation.shared_secret
+    installation.shared_secret,
+    'POST',
+    fullUrl
   );
 
   try {
     const response = await axios.post(
-      `${installation.base_url}/rest/api/3/issue/${issueKey}/comment`,
+      fullUrl,
       {
         body: {
           type: 'doc',
