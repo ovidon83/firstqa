@@ -185,28 +185,31 @@ async function verifyConnectJWT(req, res, next) {
 }
 
 /**
- * Compute QSH (Query String Hash) for JWT
- * This is required for authenticating API calls in Atlassian Connect
+ * Compute QSH (Query String Hash) for JWT per Atlassian Connect spec
+ * Reference: https://developer.atlassian.com/cloud/jira/platform/understanding-jwt-for-connect-apps/
  */
 function computeQSH(method, url) {
   const crypto = require('crypto');
   
   try {
-    // Parse URL properly to extract path and query
+    // Parse URL to extract path and query
     const urlObj = new URL(url);
-    const path = urlObj.pathname; // Just the path, e.g., /rest/api/3/issue/DEV-2
-    const query = urlObj.search.substring(1); // Remove the leading '?'
+    const path = urlObj.pathname;
     
-    console.log(`🔐 QSH input - Method: ${method}, Path: ${path}, Query: ${query}`);
-    
-    // Canonicalize query string (sort parameters)
-    let canonicalQuery = '';
-    if (query) {
-      const params = query.split('&').sort();
-      canonicalQuery = params.join('&');
+    // Sort query parameters alphabetically by key
+    const params = [];
+    for (const [key, value] of urlObj.searchParams.entries()) {
+      params.push(`${key}=${value}`);
     }
+    params.sort();
     
-    // Create canonical request: METHOD&path&canonicalQuery
+    const canonicalQuery = params.join('&');
+    
+    console.log(`🔐 QSH input - Method: ${method}, Path: ${path}`);
+    console.log(`🔐 QSH query params (sorted): ${canonicalQuery}`);
+    
+    // Create canonical request: METHOD&path&sortedQuery
+    // Note: No '?' prefix on the query string
     const canonicalRequest = `${method.toUpperCase()}&${path}&${canonicalQuery}`;
     
     console.log(`🔐 QSH canonical string: ${canonicalRequest}`);
@@ -237,7 +240,7 @@ function generateInstallationToken(clientKey, sharedSecret, method, fullUrl) {
   const qsh = method && fullUrl ? computeQSH(method, fullUrl) : 'context-qsh';
   
   const payload = {
-    iss: 'com.firstqa.jira', // Must match the key in atlassian-connect.json
+    iss: clientKey, // For outbound API calls, use clientKey as issuer
     iat: now,
     exp: now + 180, // 3 minutes
     qsh: qsh
