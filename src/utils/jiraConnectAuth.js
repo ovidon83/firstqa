@@ -143,20 +143,16 @@ async function verifyConnectJWT(req, res, next) {
     // Get installation to retrieve shared secret
     const installation = await getConnectInstallation(clientKey);
     
-    // 1) Verify signature/claims (HS256)
-    const verification = jwtLib.decodeSymmetric(
-      token,
-      installation.shared_secret,
-      'HS256',
-      true // noVerify = false
-    );
-    
-    if (!verification.valid) {
-      console.error('❌ JWT signature verification failed');
+    // 1) Verify signature/claims (HS256) using standard jwt library
+    let decoded;
+    try {
+      decoded = jwt.verify(token, installation.shared_secret, {
+        algorithms: ['HS256']
+      });
+    } catch (error) {
+      console.error('❌ JWT signature verification failed:', error.message);
       return res.status(401).json({ error: 'Invalid JWT signature' });
     }
-
-    const decoded = verification.decoded;
 
     // 2) Verify QSH (binds token to this HTTP request)
     // Note: ignore the "jwt" query param itself when computing canonical request
