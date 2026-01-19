@@ -40,6 +40,12 @@ async function processConnectWebhook(payload, installation) {
     // Fetch full ticket details
     const ticketDetails = await fetchTicketDetails(issue.key, installation);
 
+    // Defensive check
+    if (!ticketDetails || !ticketDetails.summary) {
+      console.error('❌ Failed to fetch valid ticket details');
+      return { success: false, message: 'Failed to fetch ticket details' };
+    }
+
     // Generate AI analysis
     const { generateTicketInsights } = require('../../ai/openaiClient');
     const aiInsights = await generateTicketInsights({
@@ -167,6 +173,17 @@ async function fetchTicketDetails(issueKey, installation) {
       }
     }
   );
+
+  // Defensive validation
+  if (!response.data || !response.data.fields) {
+    console.error('❌ Unexpected Jira issue payload:', {
+      status: response.status,
+      contentType: response.headers['content-type'],
+      url: fullUrl,
+      dataPreview: JSON.stringify(response.data).substring(0, 500)
+    });
+    throw new Error('Unexpected Jira issue payload: missing fields');
+  }
 
   const issue = response.data;
   
