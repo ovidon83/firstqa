@@ -24,7 +24,35 @@ try {
   console.error('❌ Error initializing OpenAI client:', error.message);
 }
 
+/**
+ * Safe string conversion helper
+ * Converts any value to a string safely (never throws)
+ */
+function toStr(x) {
+  if (typeof x === 'string') return x;
+  if (typeof x === 'number' || typeof x === 'boolean') return String(x);
+  if (x === null || x === undefined) return '';
+  if (typeof x === 'object') {
+    // If it has a body property (comment object), use that
+    if (x.body && typeof x.body === 'string') return x.body;
+    // Otherwise stringify
+    try {
+      return JSON.stringify(x);
+    } catch {
+      return String(x);
+    }
+  }
+  return String(x || '');
+}
 
+/**
+ * Safe truncate helper
+ * Truncates string to max length (never throws)
+ */
+function trunc(x, n) {
+  const str = toStr(x);
+  return str.slice(0, n);
+}
 
 /**
  * Generate QA insights for a pull request with DEEP CODE ANALYSIS
@@ -79,14 +107,14 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     const isUpdateAnalysis = newCommits && newCommits.length > 0;
     
     // Sanitize inputs with much higher limits for deep analysis
-    const sanitizedTitle = (title || 'No title provided').substring(0, 300);
-    let sanitizedBody = (body || 'No description provided').substring(0, 3000); // Higher limit for update context
+    const sanitizedTitle = trunc(title || 'No title provided', 300);
+    let sanitizedBody = trunc(body || 'No description provided', 3000); // Higher limit for update context
     
     // Note: The body already contains new commits context from githubService.js
     // We're analyzing the FULL PR diff, but with awareness of what's new
     
-    const sanitizedDiff = diff.substring(0, 12000); // Full PR diff
-    const sanitizedContext = JSON.stringify(codeContext).substring(0, 6000); // Code context
+    const sanitizedDiff = trunc(diff, 12000); // Full PR diff
+    const sanitizedContext = trunc(JSON.stringify(codeContext), 6000); // Code context
 
     console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars, Context=${sanitizedContext.length} chars`);
     if (isUpdateAnalysis) {
@@ -1362,9 +1390,9 @@ async function generateShortAnalysis({ repo, pr_number, title, body, diff }) {
     }
 
     // Sanitize inputs for short analysis
-    const sanitizedTitle = (title || 'No title provided').substring(0, 200);
-    const sanitizedBody = (body || 'No description provided').substring(0, 1000);
-    const sanitizedDiff = diff.substring(0, 4000); // Lower limit for short analysis
+    const sanitizedTitle = trunc(title || 'No title provided', 200);
+    const sanitizedBody = trunc(body || 'No description provided', 1000);
+    const sanitizedDiff = trunc(diff, 4000); // Lower limit for short analysis
 
     console.log(`🔍 Short analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars`);
 
@@ -1550,10 +1578,10 @@ async function generateTicketInsights({ ticketId, title, description, comments, 
 
     console.log(`🔍 Starting SINGLE FAST TICKET ANALYSIS for ${ticketId} on ${platform}`);
 
-    // Sanitize inputs
-    const sanitizedTitle = (title || 'No title provided').substring(0, 300);
-    const sanitizedDescription = (description || 'No description provided').substring(0, 2000);
-    const sanitizedComments = comments.slice(0, 3).map(c => c.substring(0, 500)); // Last 3 comments, max 500 chars each
+    // Sanitize inputs (safe for any type)
+    const sanitizedTitle = trunc(title || 'No title provided', 300);
+    const sanitizedDescription = trunc(description || 'No description provided', 2000);
+    const sanitizedComments = comments.slice(0, 3).map(c => trunc(c, 500)); // Last 3 comments, max 500 chars each
     const sanitizedLabels = labels.slice(0, 10); // Max 10 labels
 
     console.log(`🔍 Ticket analysis input: Title=${sanitizedTitle.length} chars, Description=${sanitizedDescription.length} chars, Comments=${sanitizedComments.length}, Labels=${sanitizedLabels.length}`);
