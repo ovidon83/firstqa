@@ -156,34 +156,40 @@ async function verifyConnectJWT(req, res, next) {
     }
 
     // 2) Verify QSH (binds token to this HTTP request)
-    // Note: context-qsh is for context/session tokens, webhooks have computed QSH
-    // But we're being lenient here since signature verification is primary security
+    // context-qsh is only for lifecycle endpoints (installed/uninstalled)
+    // All webhooks should have computed QSH
     
-    // Allow context-qsh for lifecycle/webhook callbacks (lenient)
-    if (decoded.qsh === 'context-qsh') {
-      console.log('✅ QSH: context-qsh (accepted for webhooks - lenient)');
+    const isLifecycleEndpoint = req.originalUrl.includes('/installed') || req.originalUrl.includes('/uninstalled');
+    
+    if (decoded.qsh === 'context-qsh' && isLifecycleEndpoint) {
+      console.log('✅ QSH: context-qsh (lifecycle endpoint)');
+    } else if (decoded.qsh === 'context-qsh') {
+      console.warn('⚠️  context-qsh on non-lifecycle endpoint - should have computed QSH');
+      // Allow for now but log warning
     } else {
-      // For other requests, validate QSH matches the request
+      // Validate QSH matches the request
       try {
         const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
         const baseUrl = `${req.protocol}://${req.get('host')}`;
         
-        // Use fromMethodAndUrl to compute expected QSH
+        // Build canonical request and compute expected QSH
         const reqJwt = jwtLib.fromMethodAndUrl(req.method, fullUrl, baseUrl);
+        const expectedQsh = jwtLib.createQueryStringHash(reqJwt);
         
-        if (reqJwt && reqJwt.qsh && decoded.qsh !== reqJwt.qsh) {
+        if (decoded.qsh !== expectedQsh) {
           console.error('❌ QSH mismatch', {
-            expected: reqJwt.qsh,
-            got: decoded.qsh,
-            fullUrl
+            method: req.method,
+            url: req.originalUrl,
+            expected: expectedQsh,
+            got: decoded.qsh
           });
           return res.status(401).json({ error: 'Invalid QSH' });
         }
         
-        console.log('✅ QSH validated:', decoded.qsh);
+        console.log('✅ QSH validated');
       } catch (error) {
-        console.warn('⚠️  QSH validation skipped:', error.message);
-        // Continue - signature was verified
+        console.error('❌ QSH validation error:', error.message);
+        return res.status(401).json({ error: 'QSH validation failed' });
       }
     }
 

@@ -21,29 +21,28 @@ async function processConnectWebhook(payload, installation) {
       return { success: false, message: 'Invalid webhook payload' };
     }
 
-    console.log(`Issue: ${issue.key}`);
-    console.log(`Comment by: ${comment.author?.displayName}`);
-    console.log(`Comment body:`, JSON.stringify(comment.body, null, 2));
-
-    // Ignore comments from our own bot (prevent infinite loop)
+    // Early check: ignore bot comments (prevent infinite loop)
     const authorName = comment.author?.displayName || '';
-    const authorId = comment.author?.accountId || '';
-    if (authorName.includes('FirstQA') || authorName.includes('firstqa')) {
-      console.log('Skipping comment from FirstQA bot (prevent loop)');
+    const isBot = authorName.includes('FirstQA') || authorName.includes('firstqa');
+    
+    console.log(`📩 Webhook: ${webhookEvent} | Issue: ${issue.key} | Author: ${authorName}${isBot ? ' [BOT]' : ''}`);
+    
+    if (isBot) {
+      console.log('✓ Ignored bot comment (prevent loop)');
       return { success: true, message: 'Ignored bot comment' };
     }
 
-    // Extract text from comment
+    // Extract and check for /qa command
     const commentText = extractTextFromComment(comment);
-    console.log(`Extracted text: "${commentText}"`);
-
-    // Check for /qa command
-    if (!commentText.trim().toLowerCase().startsWith('/qa')) {
-      console.log('Skipping comment without /qa command');
+    const hasQaCommand = commentText.trim().toLowerCase().startsWith('/qa');
+    
+    if (!hasQaCommand) {
+      console.log('✓ No /qa command, skipping');
       return { success: true, message: 'Not a /qa command' };
     }
 
-    console.log('🧪 /qa command detected!');
+    console.log('🧪 /qa command detected! Processing analysis...');
+    console.log(`📝 Comment preview: "${commentText.substring(0, 100)}..."`);
 
     // Fetch full ticket details
     const ticketDetails = await fetchTicketDetails(issue.key, installation);
@@ -311,15 +310,36 @@ function asStringArray(val) {
 
 /**
  * Helper: Convert any value to array of step strings
+ * Intelligently splits strings and removes existing numbering to avoid duplication
  */
 function asSteps(val) {
   if (Array.isArray(val)) {
-    return val.map(asString).filter(Boolean);
+    return val.map(asString).filter(Boolean).map(cleanStepNumber);
   }
   if (typeof val === 'string') {
-    // Try to split by newlines or numbered patterns
-    const lines = val.split(/\n|(?=^\d+[\).\s]+)/m).map(s => s.trim()).filter(Boolean);
-    return lines;
+    // Split by newlines, numbered lists (1. or 1) ), or sentence boundaries
+    let steps = [];
+    
+    // First try splitting by newlines (most common)
+    const lines = val.split('\n').map(s => s.trim()).filter(Boolean);
+    
+    if (lines.length > 1) {
+      // Multiple lines - use as steps
+      steps = lines;
+    } else {
+      // Single line - try splitting by numbered patterns or sentences
+      const numbered = val.split(/(?=\d+[\).\s]+)/).map(s => s.trim()).filter(Boolean);
+      if (numbered.length > 1) {
+        steps = numbered;
+      } else {
+        // Try splitting by sentence boundaries (. followed by capital letter or end)
+        const sentences = val.split(/\.\s+(?=[A-Z])/).map(s => s.trim()).filter(Boolean);
+        steps = sentences.length > 1 ? sentences : [val];
+      }
+    }
+    
+    // Clean up numbering from each step
+    return steps.map(cleanStepNumber).filter(Boolean);
   }
   if (val && typeof val === 'object') {
     if (val.steps) return asSteps(val.steps);
@@ -327,6 +347,15 @@ function asSteps(val) {
     return str ? [str] : [];
   }
   return [];
+}
+
+/**
+ * Remove leading numbers/bullets from step text (e.g., "1. " or "- ")
+ */
+function cleanStepNumber(step) {
+  if (typeof step !== 'string') return asString(step);
+  // Remove patterns like "1. ", "1) ", "- ", "• ", etc.
+  return step.replace(/^[\d]+[\).\s]+|^[-•]\s+/, '').trim();
 }
 
 /**

@@ -222,9 +222,12 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
           throw new Error('Empty response from OpenAI');
         }
 
-        // Log the raw response for debugging (truncated)
-        console.log('🔍 Raw AI response (first 500 chars):', response.substring(0, 500));
-        console.log('🔍 Response length:', response.length);
+        // Log summary
+        console.log('🔍 AI response:', {
+          length: response.length,
+          usage: completion.usage,
+          model: completion.model
+        });
 
         // Try to parse the JSON response with multiple fallback strategies
         let insights = await parseAIResponse(response, sanitizedTitle, sanitizedBody, sanitizedDiff);
@@ -1805,7 +1808,13 @@ Before completing the analysis, ensure:
   });
 
   const content = response.choices[0].message.content;
-  console.log('🤖 Raw AI response:', content);
+  
+  // Log summary instead of full response
+  console.log('🤖 AI response:', {
+    length: content.length,
+    usage: response.usage,
+    model: response.model
+  });
   
   // Extract JSON from the response
   const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
