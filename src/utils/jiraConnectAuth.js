@@ -155,12 +155,12 @@ async function verifyConnectJWT(req, res, next) {
     }
 
     // 2) Verify QSH (binds token to this HTTP request)
-    // For inbound webhooks, Jira sends with a specific QSH
-    // We verify signature above, so QSH validation is additional security
+    // Note: context-qsh is for context/session tokens, webhooks have computed QSH
+    // But we're being lenient here since signature verification is primary security
     
-    // Allow context-qsh for lifecycle/webhook callbacks
+    // Allow context-qsh for lifecycle/webhook callbacks (lenient)
     if (decoded.qsh === 'context-qsh') {
-      console.log('✅ QSH: context-qsh (valid for webhooks)');
+      console.log('✅ QSH: context-qsh (accepted for webhooks - lenient)');
     } else {
       // For other requests, validate QSH matches the request
       try {
@@ -200,32 +200,32 @@ async function verifyConnectJWT(req, res, next) {
 }
 
 /**
- * Generate JWT for making outbound API calls to Jira
- * Uses atlassian-jwt library for proper QSH computation
- * @param {string} sharedSecret - Installation shared secret
- * @param {string} method - HTTP method (GET, POST, etc.)
- * @param {string} fullUrl - Full API URL
- * @param {string} baseUrl - Jira base URL (for QSH computation)
- * @returns {string} JWT token
+ * Generate JWT for making outbound API calls to Jira (Connect app -> Jira REST)
+ * Correct QSH generation:
+ * - Build Request via fromMethodAndUrl()
+ * - Compute qsh via createQueryStringHash(req)
+ * - DO NOT set sub unless impersonating a REAL Jira user accountId
  */
-function generateInstallationToken(sharedSecret, method, fullUrl, baseUrl) {
+function generateInstallationToken(sharedSecret, method, fullUrl) {
   const now = Math.floor(Date.now() / 1000);
   
   console.log(`🔑 Generating token for: ${method} ${fullUrl}`);
-  console.log(`🔑 Base URL: ${baseUrl}`);
   
-  // Use atlassian-jwt to compute proper QSH
-  const req = jwtLib.fromMethodAndUrl(method, fullUrl, baseUrl);
+  // Build the canonical request object
+  const req = jwtLib.fromMethodAndUrl(method.toUpperCase(), fullUrl);
   
-  console.log(`🔑 fromMethodAndUrl result:`, req);
-  console.log(`🔑 QSH from library: ${req ? req.qsh : 'UNDEFINED'}`);
+  // IMPORTANT: qsh is NOT on req.qsh; you must compute it:
+  const qsh = jwtLib.createQueryStringHash(req);
+  
+  console.log(`🔑 fromMethodAndUrl:`, req);
+  console.log(`🔑 Computed QSH: ${qsh}`);
   
   const payload = {
-    iss: 'com.firstqa.jira', // App key from atlassian-connect.json
+    iss: 'com.firstqa.jira',  // your Connect app key
     iat: now,
-    exp: now + 180, // 3 minutes
-    qsh: req && req.qsh ? req.qsh : 'MISSING_QSH' // Properly computed QSH from atlassian-jwt
-    // DO NOT set sub: clientKey - it breaks auth
+    exp: now + 180,
+    qsh
+    // DO NOT set sub unless impersonating a REAL Jira user accountId
   };
   
   console.log(`🔑 Full payload:`, payload);
@@ -233,10 +233,6 @@ function generateInstallationToken(sharedSecret, method, fullUrl, baseUrl) {
   const token = jwtLib.encodeSymmetric(payload, sharedSecret);
   
   console.log(`🔑 Token (first 50): ${token.substring(0, 50)}...`);
-  
-  // Decode to verify
-  const decoded = jwt.decode(token);
-  console.log(`🔑 Decoded token:`, decoded);
   
   return token;
 }

@@ -155,8 +155,7 @@ async function fetchTicketDetails(issueKey, installation) {
   const token = generateInstallationToken(
     installation.shared_secret,
     'GET',
-    fullUrl,
-    installation.base_url
+    fullUrl
   );
 
   const response = await axios.get(
@@ -207,8 +206,7 @@ async function postComment(issueKey, commentBody, installation) {
   const token = generateInstallationToken(
     installation.shared_secret,
     'POST',
-    fullUrl,
-    installation.base_url
+    fullUrl
   );
 
   try {
