@@ -211,23 +211,32 @@ async function verifyConnectJWT(req, res, next) {
 function generateInstallationToken(sharedSecret, method, fullUrl, baseUrl) {
   const now = Math.floor(Date.now() / 1000);
   
+  console.log(`🔑 Generating token for: ${method} ${fullUrl}`);
+  console.log(`🔑 Base URL: ${baseUrl}`);
+  
   // Use atlassian-jwt to compute proper QSH
   const req = jwtLib.fromMethodAndUrl(method, fullUrl, baseUrl);
+  
+  console.log(`🔑 fromMethodAndUrl result:`, req);
+  console.log(`🔑 QSH from library: ${req ? req.qsh : 'UNDEFINED'}`);
   
   const payload = {
     iss: 'com.firstqa.jira', // App key from atlassian-connect.json
     iat: now,
     exp: now + 180, // 3 minutes
-    qsh: req.qsh // Properly computed QSH from atlassian-jwt
+    qsh: req && req.qsh ? req.qsh : 'MISSING_QSH' // Properly computed QSH from atlassian-jwt
     // DO NOT set sub: clientKey - it breaks auth
   };
   
-  console.log(`🔑 Outbound JWT: ${method} ${fullUrl}`);
-  console.log(`🔑 QSH: ${req.qsh}`);
+  console.log(`🔑 Full payload:`, payload);
   
   const token = jwtLib.encodeSymmetric(payload, sharedSecret);
   
   console.log(`🔑 Token (first 50): ${token.substring(0, 50)}...`);
+  
+  // Decode to verify
+  const decoded = jwt.decode(token);
+  console.log(`🔑 Decoded token:`, decoded);
   
   return token;
 }
