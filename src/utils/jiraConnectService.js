@@ -367,21 +367,38 @@ function truncate(str, n = 800) {
 }
 
 /**
- * Normalize AI analysis to safe structure
+ * Normalize AI analysis to safe structure (comprehensive format)
  */
 function normalizeAnalysis(analysis) {
   const normalized = {
-    smartQuestions: asStringArray(analysis.smartQuestions),
-    riskAreas: asStringArray(analysis.riskAreas),
+    // Questions & Risks (merged from qaQuestions and keyRisks)
+    qaQuestions: asStringArray(analysis.qaQuestions || analysis.smartQuestions || []),
+    keyRisks: asStringArray(analysis.keyRisks || analysis.riskAreas || []),
+    
+    // Ready for Dev
+    initialReadinessScore: analysis.initialReadinessScore || analysis.readyForDevScoreNow,
+    readyForDevelopmentScore: analysis.readyForDevelopmentScore || analysis.readyForDevScoreAfter,
+    needsQA: asString(analysis.readyForDevPulse?.needsQA || 'Recommended'),
+    needsQAReason: asString(analysis.readyForDevPulse?.needsQAReason || ''),
+    
+    // Improvements
+    improvementsNeeded: asStringArray(analysis.improvementsNeeded || []),
+    
+    // Test Recipe
     testRecipe: [],
-    readyForDevelopmentScore: undefined
+    
+    // Score Breakdown
+    scoreBreakdown: analysis.scoreBreakdown || null,
+    
+    // Tip & Missing Info
+    tip: asString(analysis.tip || ''),
+    missingInfo: asStringArray(analysis.missingInfo || [])
   };
 
   // Normalize test recipe
   let rawRecipe = analysis.testRecipe;
   if (!Array.isArray(rawRecipe)) {
     if (typeof rawRecipe === 'string') {
-      // Wrap single string as one test
       rawRecipe = [{
         name: 'Test Scenario',
         steps: rawRecipe
@@ -397,32 +414,27 @@ function normalizeAnalysis(analysis) {
     name: asString(test.name || test.title || test.scenario || `Scenario ${i + 1}`),
     priority: asString(test.priority || test.severity || 'Medium'),
     steps: asSteps(test.steps || test.step || test.instructions),
-    expectedResult: asString(test.expectedResult || test.expected || test.assertion || '')
+    expectedResult: asString(test.expectedResult || test.expected || test.assertion || ''),
+    automation: asString(test.automation || ''),
+    reason: asString(test.reason || '')
   }));
 
-  // Normalize score
-  if (typeof analysis.readyForDevelopmentScore === 'number') {
-    normalized.readyForDevelopmentScore = analysis.readyForDevelopmentScore;
-  } else if (analysis.readyForDevelopmentScore) {
-    const parsed = parseInt(asString(analysis.readyForDevelopmentScore), 10);
-    if (!isNaN(parsed)) {
-      normalized.readyForDevelopmentScore = parsed;
-    }
+  // Validate scores
+  if (typeof normalized.readyForDevelopmentScore !== 'number') {
+    const parsed = parseInt(asString(normalized.readyForDevelopmentScore), 10);
+    normalized.readyForDevelopmentScore = !isNaN(parsed) ? parsed : undefined;
   }
-
-  // Debug log if normalization changed structure
-  if (analysis.testRecipe && normalized.testRecipe.length === 0) {
-    console.log('⚠️  AI analysis normalized', {
-      hasTestRecipe: !!analysis.testRecipe,
-      testCount: normalized.testRecipe.length
-    });
+  
+  if (typeof normalized.initialReadinessScore !== 'number') {
+    const parsed = parseInt(asString(normalized.initialReadinessScore), 10);
+    normalized.initialReadinessScore = !isNaN(parsed) ? parsed : undefined;
   }
 
   return normalized;
 }
 
 /**
- * Format AI analysis as comment (robust, never throws)
+ * Format comprehensive AI analysis as Jira comment (robust, never throws)
  */
 function formatAnalysisComment(analysis) {
   try {
@@ -430,51 +442,137 @@ function formatAnalysisComment(analysis) {
     
     let comment = '🤖 FirstQA Analysis\n\n';
     
-    if (a.smartQuestions.length > 0) {
-      comment += 'Key Questions:\n';
-      a.smartQuestions.forEach((q, i) => {
+    // Ready for Development section
+    if (a.readyForDevelopmentScore !== undefined) {
+      comment += '📊 Ready for Development\n';
+      
+      // Score progression
+      if (a.initialReadinessScore !== undefined) {
+        comment += `Score: ${a.initialReadinessScore}/5 → ${a.readyForDevelopmentScore}/5\n`;
+      } else {
+        comment += `Score: ${a.readyForDevelopmentScore}/5\n`;
+      }
+      
+      // Needs QA
+      const qaEmoji = a.needsQA === 'Mandatory' ? '🔴' : a.needsQA === 'Recommended' ? '🟡' : '🟢';
+      comment += `${qaEmoji} Needs QA: ${a.needsQA}`;
+      if (a.needsQAReason) {
+        comment += ` - ${truncate(a.needsQAReason, 200)}`;
+      }
+      comment += '\n\n';
+    }
+
+    // Questions & Risks (merged)
+    const hasQuestions = a.qaQuestions.length > 0;
+    const hasRisks = a.keyRisks.length > 0;
+    
+    if (hasQuestions || hasRisks) {
+      comment += '❓ Questions & Risks\n';
+      
+      // Add questions
+      a.qaQuestions.forEach((q, i) => {
         comment += `${i + 1}. ${truncate(q, 300)}\n`;
       });
+      
+      // Add risks (continue numbering)
+      const riskStartNum = a.qaQuestions.length + 1;
+      a.keyRisks.forEach((risk, i) => {
+        comment += `${riskStartNum + i}. ⚠️ ${truncate(risk, 300)}\n`;
+      });
+      
       comment += '\n';
     }
 
-    if (a.riskAreas.length > 0) {
-      comment += 'Risk Areas:\n';
-      a.riskAreas.forEach((risk, i) => {
-        comment += `${i + 1}. ${truncate(risk, 300)}\n`;
+    // Improvements Needed
+    if (a.improvementsNeeded.length > 0) {
+      comment += '📝 Improvements Needed\n';
+      a.improvementsNeeded.forEach((improvement, i) => {
+        comment += `${i + 1}. ${truncate(improvement, 300)}\n`;
       });
       comment += '\n';
     }
 
+    // Test Scenarios (grouped by priority)
     if (a.testRecipe.length > 0) {
-      comment += 'Test Scenarios:\n';
-      a.testRecipe.forEach((test, i) => {
-        comment += `\n${i + 1}. ${truncate(test.name, 200)}\n`;
-        comment += `Priority: ${test.priority}\n`;
-        
-        if (test.steps.length > 0) {
-          comment += 'Steps:\n';
-          test.steps.forEach((step, j) => {
-            comment += `  ${j + 1}. ${truncate(step, 400)}\n`;
-          });
+      comment += '🧪 Test Scenarios\n\n';
+      
+      // Group tests by priority
+      const priorityGroups = {
+        'Happy Path': [],
+        'Critical Path': [],
+        'Edge Case': [],
+        'Regression': []
+      };
+      
+      a.testRecipe.forEach(test => {
+        const priority = test.priority;
+        if (priorityGroups[priority]) {
+          priorityGroups[priority].push(test);
         } else {
-          comment += 'Steps: (not provided)\n';
+          // Fallback to Happy Path for unknown priorities
+          priorityGroups['Happy Path'].push(test);
         }
-        
-        if (test.expectedResult) {
-          comment += `Expected: ${truncate(test.expectedResult, 300)}\n`;
+      });
+      
+      // Output tests in priority order
+      let testNum = 1;
+      ['Happy Path', 'Critical Path', 'Edge Case', 'Regression'].forEach(priority => {
+        const tests = priorityGroups[priority];
+        if (tests.length > 0) {
+          comment += `[${priority}]\n`;
+          
+          tests.forEach(test => {
+            comment += `${testNum}. ${truncate(test.name, 200)}\n`;
+            
+            if (test.steps.length > 0) {
+              comment += 'Steps:\n';
+              test.steps.forEach((step, j) => {
+                comment += `  ${j + 1}. ${truncate(step, 400)}\n`;
+              });
+            }
+            
+            if (test.expectedResult) {
+              comment += `Expected: ${truncate(test.expectedResult, 300)}\n`;
+            }
+            
+            if (test.automation) {
+              comment += `Automation: ${test.automation}\n`;
+            }
+            
+            comment += '\n';
+            testNum++;
+          });
         }
+      });
+    }
+
+    // Score Breakdown
+    if (a.scoreBreakdown) {
+      const sb = a.scoreBreakdown;
+      comment += '📈 Score Breakdown\n';
+      if (sb.clarity !== undefined) comment += `Clarity: ${formatScoreValue(sb.clarity)}\n`;
+      if (sb.dependencies !== undefined) comment += `Dependencies: ${formatScoreValue(sb.dependencies)}\n`;
+      if (sb.testability !== undefined) comment += `Testability: ${formatScoreValue(sb.testability)}\n`;
+      if (sb.riskProfile !== undefined) comment += `Risk Profile: ${formatScoreValue(sb.riskProfile)}\n`;
+      if (sb.scopeReadiness !== undefined) comment += `Scope: ${formatScoreValue(sb.scopeReadiness)}\n`;
+      comment += '\n';
+    }
+
+    // Tip
+    if (a.tip) {
+      comment += `💡 Tip: ${truncate(a.tip, 300)}\n\n`;
+    }
+
+    // Missing Info
+    if (a.missingInfo.length > 0) {
+      comment += '⚠️ Missing Info\n';
+      a.missingInfo.forEach((info, i) => {
+        comment += `${i + 1}. ${truncate(info, 200)}\n`;
       });
       comment += '\n';
     }
 
-    if (a.readyForDevelopmentScore !== undefined) {
-      const score = a.readyForDevelopmentScore;
-      const emoji = score >= 80 ? '✅' : score >= 60 ? '⚠️' : '❌';
-      comment += `\n${emoji} Ready for Development: ${score}%\n`;
-    }
-
-    comment += '\n---\nGenerated by FirstQA - AI-powered QA analysis';
+    comment += '---\nGenerated by FirstQA - AI-powered QA analysis';
 
     return comment;
   } catch (error) {
@@ -483,6 +581,16 @@ function formatAnalysisComment(analysis) {
     const keys = analysis ? Object.keys(analysis).join(', ') : 'none';
     return `🤖 FirstQA Analysis\n\n(Analysis generated, but formatting failed. Raw keys: ${keys})\n\n---\nGenerated by FirstQA`;
   }
+}
+
+/**
+ * Format score breakdown values (0.0-1.0) as readable strings
+ */
+function formatScoreValue(value) {
+  if (typeof value === 'number') {
+    return `${(value * 100).toFixed(0)}%`;
+  }
+  return asString(value);
 }
 
 /**
