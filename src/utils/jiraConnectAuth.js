@@ -224,9 +224,7 @@ module.exports = {
   saveConnectInstallation,
   getConnectInstallation,
   deleteConnectInstallation,
-  verifyJWT,
   extractJWT,
   verifyConnectJWT,
-  generateInstallationToken,
-  computeQSH
+  generateInstallationToken
 };
