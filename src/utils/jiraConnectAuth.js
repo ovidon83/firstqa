@@ -30,6 +30,7 @@ async function saveConnectInstallation(installationData) {
   // Extract site name from baseUrl
   const siteName = baseUrl.replace('https://', '').replace('.atlassian.net', '');
 
+  // Save Connect installation (no integration_id - Jira Connect is system-level)
   const { data, error } = await supabaseAdmin
     .from('jira_connect_installations')
     .upsert({

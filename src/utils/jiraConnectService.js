@@ -25,6 +25,14 @@ async function processConnectWebhook(payload, installation) {
     console.log(`Comment by: ${comment.author?.displayName}`);
     console.log(`Comment body:`, JSON.stringify(comment.body, null, 2));
 
+    // Ignore comments from our own bot (prevent infinite loop)
+    const authorName = comment.author?.displayName || '';
+    const authorId = comment.author?.accountId || '';
+    if (authorName.includes('FirstQA') || authorName.includes('firstqa')) {
+      console.log('Skipping comment from FirstQA bot (prevent loop)');
+      return { success: true, message: 'Ignored bot comment' };
+    }
+
     // Extract text from comment
     const commentText = extractTextFromComment(comment);
     console.log(`Extracted text: "${commentText}"`);
@@ -196,18 +204,18 @@ async function fetchTicketDetails(issueKey, installation) {
   return {
     key: issue.key,
     id: issue.id,
-    summary: summary,
-    description: issue.renderedFields?.description || issue.fields?.description || '',
-    type: issue.fields?.issuetype?.name || 'Task',
-    priority: issue.fields?.priority?.name || 'Medium',
-    status: issue.fields?.status?.name || 'Unknown',
-    assignee: issue.fields?.assignee?.displayName || 'Unassigned',
-    reporter: issue.fields?.reporter?.displayName || 'Unknown',
+    summary: asString(summary),
+    description: asString(issue.renderedFields?.description || issue.fields?.description || ''),
+    type: asString(issue.fields?.issuetype?.name || 'Task'),
+    priority: asString(issue.fields?.priority?.name || 'Medium'),
+    status: asString(issue.fields?.status?.name || 'Unknown'),
+    assignee: asString(issue.fields?.assignee?.displayName || 'Unassigned'),
+    reporter: asString(issue.fields?.reporter?.displayName || 'Unknown'),
     labels: issue.fields?.labels || [],
     comments: issue.fields?.comment?.comments?.map(c => ({
-      author: c.author?.displayName || 'Unknown',
-      body: extractTextFromComment(c),
-      created: c.created
+      author: asString(c.author?.displayName || 'Unknown'),
+      body: asString(extractTextFromComment(c)),
+      created: asString(c.created || '')
     })) || [],
     url: `${installation.base_url}/browse/${issue.key}`
   };
@@ -233,23 +241,25 @@ async function postComment(issueKey, commentBody, installation) {
   );
 
   try {
+    // Convert commentBody to proper ADF format (one paragraph per line)
+    const lines = commentBody.split('\n');
+    const adfContent = lines.map(line => ({
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: line || ' ' // Empty string breaks ADF, use space
+        }
+      ]
+    }));
+
     const response = await axios.post(
       fullUrl,
       {
         body: {
           type: 'doc',
           version: 1,
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: commentBody
-                }
-              ]
-            }
-          ]
+          content: adfContent
         }
       },
       {
@@ -457,7 +467,7 @@ async function saveAnalysisToDatabase(data) {
       .from('analyses')
       .insert({
         user_id: null, // Connect apps are not user-specific
-        integration_id: installationId,
+        integration_id: null, // Jira Connect installations not in integrations table
         provider: provider,
         repository: issueKey,
         pr_number: 0,
@@ -466,20 +476,31 @@ async function saveAnalysisToDatabase(data) {
         analysis_type: 'full',
         status: 'completed',
         result: analysisResult,
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
+        metadata: { 
+          jira_installation_id: installationId, // Store reference in metadata
+          issue_key: issueKey
+        }
       })
       .select();
 
     if (error) {
       console.error('❌ Error saving analysis to database:', error);
-      throw error;
+      console.error('❌ Error details:', {
+        code: error.code,
+        message: error.message,
+        hint: error.hint
+      });
+      // Don't throw - analysis was successful even if DB save failed
+      return null;
     }
 
-    console.log(`✅ Analysis saved to database`);
+    console.log(`✅ Analysis saved to database (ID: ${savedAnalysis[0]?.id})`);
     return savedAnalysis;
   } catch (error) {
     console.error('❌ Failed to save analysis:', error);
     // Don't throw - analysis was successful even if DB save failed
+    return null;
   }
 }
 
