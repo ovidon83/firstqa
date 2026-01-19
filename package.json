@@ -25,6 +25,7 @@
     "@octokit/rest": "^19.0.13",
     "@playwright/test": "^1.56.0",
     "@supabase/supabase-js": "^2.90.1",
+    "atlassian-jwt": "^2.0.3",
     "axios": "^1.10.0",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.2",

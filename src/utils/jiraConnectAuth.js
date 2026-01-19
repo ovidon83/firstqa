@@ -4,6 +4,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const jwtLib = require('atlassian-jwt');
 const crypto = require('crypto');
 const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 
@@ -98,20 +99,6 @@ async function deleteConnectInstallation(clientKey) {
   console.log(`✅ Connect installation deleted: ${clientKey}`);
 }
 
-/**
- * Verify JWT token from Atlassian Connect request
- */
-function verifyJWT(token, sharedSecret) {
-  try {
-    const decoded = jwt.verify(token, sharedSecret, {
-      algorithms: ['HS256']
-    });
-    return { valid: true, decoded };
-  } catch (error) {
-    console.error('❌ JWT verification failed:', error.message);
-    return { valid: false, error: error.message };
-  }
-}
 
 /**
  * Extract JWT from request (query param or Authorization header)
@@ -132,7 +119,7 @@ function extractJWT(req) {
 }
 
 /**
- * Middleware to verify Atlassian Connect JWT
+ * Middleware to verify Atlassian Connect JWT with QSH validation
  */
 async function verifyConnectJWT(req, res, next) {
   try {
@@ -144,38 +131,54 @@ async function verifyConnectJWT(req, res, next) {
     }
 
     // Decode without verification to get clientKey
-    const decoded = jwt.decode(token);
-    if (!decoded || !decoded.iss) {
+    const decodedUnverified = jwt.decode(token);
+    if (!decodedUnverified || !decodedUnverified.iss) {
       console.error('❌ Invalid JWT structure');
       return res.status(401).json({ error: 'Invalid JWT token' });
     }
 
-    const clientKey = decoded.iss;
+    const clientKey = decodedUnverified.iss;
     console.log(`🔐 Verifying JWT for client: ${clientKey}`);
 
     // Get installation to retrieve shared secret
-    console.log(`🔍 Looking up installation in database for client_key: ${clientKey}`);
     const installation = await getConnectInstallation(clientKey);
-    console.log(`✅ Found installation:`, {
-      client_key: installation.client_key,
-      base_url: installation.base_url,
-      site_name: installation.site_name,
-      has_shared_secret: !!installation.shared_secret
-    });
     
-    // Verify JWT with shared secret
-    const verification = verifyJWT(token, installation.shared_secret);
+    // 1) Verify signature/claims (HS256)
+    const verification = jwtLib.decodeSymmetric(
+      token,
+      installation.shared_secret,
+      'HS256',
+      true // noVerify = false
+    );
     
     if (!verification.valid) {
-      console.error('❌ JWT verification failed:', verification.error);
+      console.error('❌ JWT signature verification failed');
       return res.status(401).json({ error: 'Invalid JWT signature' });
+    }
+
+    const decoded = verification.decoded;
+
+    // 2) Verify QSH (binds token to this HTTP request)
+    // Note: ignore the "jwt" query param itself when computing canonical request
+    const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const reqJwt = jwtLib.fromMethodAndUrl(req.method, fullUrl, baseUrl);
+    const expectedQsh = reqJwt.qsh;
+    
+    if (decoded.qsh !== 'context-qsh' && decoded.qsh !== expectedQsh) {
+      console.error('❌ QSH mismatch', {
+        expected: expectedQsh,
+        got: decoded.qsh,
+        fullUrl
+      });
+      return res.status(401).json({ error: 'Invalid QSH' });
     }
 
     console.log(`✅ JWT verified for ${clientKey}`);
     
     // Attach installation and decoded token to request
     req.connectInstallation = installation;
-    req.connectJWT = verification.decoded;
+    req.connectJWT = decoded;
     
     next();
   } catch (error) {
@@ -185,74 +188,34 @@ async function verifyConnectJWT(req, res, next) {
 }
 
 /**
- * Compute QSH (Query String Hash) for JWT per Atlassian Connect spec
- * Reference: https://developer.atlassian.com/cloud/jira/platform/understanding-jwt-for-connect-apps/
+ * Generate JWT for making outbound API calls to Jira
+ * Uses atlassian-jwt library for proper QSH computation
+ * @param {string} sharedSecret - Installation shared secret
+ * @param {string} method - HTTP method (GET, POST, etc.)
+ * @param {string} fullUrl - Full API URL
+ * @param {string} baseUrl - Jira base URL (for QSH computation)
+ * @returns {string} JWT token
  */
-function computeQSH(method, url) {
-  const crypto = require('crypto');
-  
-  try {
-    // Parse URL to extract path and query
-    const urlObj = new URL(url);
-    const path = urlObj.pathname;
-    
-    // Sort query parameters alphabetically by key
-    const params = [];
-    for (const [key, value] of urlObj.searchParams.entries()) {
-      params.push(`${key}=${value}`);
-    }
-    params.sort();
-    
-    const canonicalQuery = params.join('&');
-    
-    console.log(`🔐 QSH input - Method: ${method}, Path: ${path}`);
-    console.log(`🔐 QSH query params (sorted): ${canonicalQuery}`);
-    
-    // Create canonical request: METHOD&path&sortedQuery
-    // Note: No '?' prefix on the query string
-    const canonicalRequest = `${method.toUpperCase()}&${path}&${canonicalQuery}`;
-    
-    console.log(`🔐 QSH canonical string: ${canonicalRequest}`);
-    
-    // Compute SHA-256 hash
-    const hash = crypto
-      .createHash('sha256')
-      .update(canonicalRequest)
-      .digest('hex');
-    
-    console.log(`🔐 QSH hash: ${hash}`);
-    
-    return hash;
-  } catch (error) {
-    console.error('❌ QSH computation error:', error);
-    throw error;
-  }
-}
-
-/**
- * Generate installation token for making API calls to Jira
- * For Connect apps: iss = app key, sub = clientKey (optional)
- */
-function generateInstallationToken(clientKey, sharedSecret, method, fullUrl) {
+function generateInstallationToken(sharedSecret, method, fullUrl, baseUrl) {
   const now = Math.floor(Date.now() / 1000);
   
-  // For context-qsh to work, we must have it enabled in descriptor
-  // AND not compute a specific QSH
+  // Use atlassian-jwt to compute proper QSH
+  const req = jwtLib.fromMethodAndUrl(method, fullUrl, baseUrl);
+  
   const payload = {
     iss: 'com.firstqa.jira', // App key from atlassian-connect.json
     iat: now,
     exp: now + 180, // 3 minutes
-    qsh: 'context-qsh', // Use context-qsh for same-instance API calls
-    sub: clientKey // Optional: client key as subject
+    qsh: req.qsh // Properly computed QSH from atlassian-jwt
+    // DO NOT set sub: clientKey - it breaks auth
   };
   
-  console.log(`🔑 Generating JWT for ${method || 'webhook'} ${fullUrl || 'context'}`);
-  console.log(`🔑 Payload:`, payload);
-  console.log(`🔑 Using shared secret (first 10 chars): ${sharedSecret.substring(0, 10)}...`);
+  console.log(`🔑 Outbound JWT: ${method} ${fullUrl}`);
+  console.log(`🔑 QSH: ${req.qsh}`);
   
-  const token = jwt.sign(payload, sharedSecret, { algorithm: 'HS256' });
+  const token = jwtLib.encodeSymmetric(payload, sharedSecret);
   
-  console.log(`🔑 Generated JWT token: ${token.substring(0, 50)}...`);
+  console.log(`🔑 Token (first 50): ${token.substring(0, 50)}...`);
   
   return token;
 }

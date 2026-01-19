@@ -151,12 +151,12 @@ async function fetchTicketDetails(issueKey, installation) {
 
   console.log(`📍 Full API URL: ${fullUrl}`);
 
-  // Generate JWT token with proper QSH for this specific request
+  // Generate JWT token with proper QSH using atlassian-jwt
   const token = generateInstallationToken(
-    installation.client_key,
     installation.shared_secret,
     'GET',
-    fullUrl
+    fullUrl,
+    installation.base_url
   );
 
   const response = await axios.get(
@@ -203,12 +203,12 @@ async function postComment(issueKey, commentBody, installation) {
 
   console.log(`📍 POST URL: ${fullUrl}`);
 
-  // Generate JWT token with proper QSH for this specific request
+  // Generate JWT token with proper QSH using atlassian-jwt
   const token = generateInstallationToken(
-    installation.client_key,
     installation.shared_secret,
     'POST',
-    fullUrl
+    fullUrl,
+    installation.base_url
   );
 
   try {
