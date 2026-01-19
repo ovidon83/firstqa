@@ -150,9 +150,11 @@ async function fetchTicketDetails(issueKey, installation) {
     secret_length: installation.shared_secret?.length
   });
 
-  // Build full API URL with query params
+  // Build full API URL with explicit field requests
   const apiPath = `/rest/api/3/issue/${issueKey}`;
-  const queryParams = 'expand=renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,comments';
+  const fields = encodeURIComponent('summary,description,comment,labels,priority,issuetype,status,assignee,reporter');
+  const expand = encodeURIComponent('renderedFields,comments');
+  const queryParams = `fields=${fields}&expand=${expand}`;
   const fullUrl = `${installation.base_url}${apiPath}?${queryParams}`;
 
   console.log(`📍 Full API URL: ${fullUrl}`);
@@ -174,32 +176,36 @@ async function fetchTicketDetails(issueKey, installation) {
     }
   );
 
-  // Defensive validation
-  if (!response.data || !response.data.fields) {
+  const issue = response.data;
+
+  // Defensive validation - try multiple fallbacks for summary
+  const summary = issue.fields?.summary || issue.renderedFields?.summary || issue.summary;
+  
+  if (!summary) {
     console.error('❌ Unexpected Jira issue payload:', {
       status: response.status,
       contentType: response.headers['content-type'],
       url: fullUrl,
-      dataPreview: JSON.stringify(response.data).substring(0, 500)
+      topLevelKeys: Object.keys(issue || {}),
+      fieldsKeys: Object.keys(issue?.fields || {}),
+      dataPreview: JSON.stringify(response.data).substring(0, 800)
     });
-    throw new Error('Unexpected Jira issue payload: missing fields');
+    throw new Error('Unexpected Jira issue payload: missing summary');
   }
-
-  const issue = response.data;
   
   return {
     key: issue.key,
     id: issue.id,
-    summary: issue.fields.summary,
-    description: issue.renderedFields?.description || issue.fields.description || '',
-    type: issue.fields.issuetype?.name || 'Task',
-    priority: issue.fields.priority?.name || 'Medium',
-    status: issue.fields.status?.name || 'Unknown',
-    assignee: issue.fields.assignee?.displayName || 'Unassigned',
-    reporter: issue.fields.reporter?.displayName || 'Unknown',
-    labels: issue.fields.labels || [],
-    comments: issue.fields.comment?.comments?.map(c => ({
-      author: c.author.displayName,
+    summary: summary,
+    description: issue.renderedFields?.description || issue.fields?.description || '',
+    type: issue.fields?.issuetype?.name || 'Task',
+    priority: issue.fields?.priority?.name || 'Medium',
+    status: issue.fields?.status?.name || 'Unknown',
+    assignee: issue.fields?.assignee?.displayName || 'Unassigned',
+    reporter: issue.fields?.reporter?.displayName || 'Unknown',
+    labels: issue.fields?.labels || [],
+    comments: issue.fields?.comment?.comments?.map(c => ({
+      author: c.author?.displayName || 'Unknown',
       body: extractTextFromComment(c),
       created: c.created
     })) || [],
