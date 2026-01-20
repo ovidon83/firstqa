@@ -106,6 +106,7 @@ router.get('/integrations', async (req, res) => {
     let githubInstallations = [];
     let bitbucketIntegration = null;
     let jiraIntegration = null;
+    let linearIntegration = null;
     
     if (isSupabaseConfigured()) {
       // Fetch user's integrations from database
@@ -122,8 +123,9 @@ router.get('/integrations', async (req, res) => {
         githubInstallations = integrations.filter(i => i.provider === 'github');
         bitbucketIntegration = integrations.find(i => i.provider === 'bitbucket');
         jiraIntegration = integrations.find(i => i.provider === 'jira');
+        linearIntegration = integrations.find(i => i.provider === 'linear');
         
-        console.log(`📊 Loaded integrations for ${user.email}: GitHub=${githubInstallations.length} installation(s), Bitbucket=${!!bitbucketIntegration}, Jira=${!!jiraIntegration}`);
+        console.log(`📊 Loaded integrations for ${user.email}: GitHub=${githubInstallations.length} installation(s), Bitbucket=${!!bitbucketIntegration}, Jira=${!!jiraIntegration}, Linear=${!!linearIntegration}`);
       }
     }
     
@@ -136,7 +138,8 @@ router.get('/integrations', async (req, res) => {
       githubInstallations, // Array of all GitHub App installations
       bitbucketIntegration,
       jiraIntegration,
-      connected: req.query.connected, // 'github' or 'jira' when just connected
+      linearIntegration,
+      connected: req.query.connected, // 'github', 'jira', or 'linear' when just connected
       info: req.query.info, // Info messages (not errors, not success)
       success: flash?.type === 'success' ? flash.message : req.query.success,
       error: flash?.type === 'error' ? flash.message : req.query.error
@@ -148,6 +151,7 @@ router.get('/integrations', async (req, res) => {
       githubInstallations: [],
       bitbucketIntegration: null,
       jiraIntegration: null,
+      linearIntegration: null,
       success: req.query.success,
       error: req.query.error
     });
@@ -223,6 +227,114 @@ router.post('/integrations/jira/disconnect', async (req, res) => {
   } catch (error) {
     console.error('Jira disconnect error:', error);
     res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to disconnect Jira'));
+  }
+});
+
+/**
+ * POST /dashboard/integrations/linear/install - Install Linear integration
+ */
+router.post('/integrations/linear/install', async (req, res) => {
+  try {
+    const user = req.session.user;
+    const { apiKey } = req.body;
+
+    if (!apiKey) {
+      return res.status(400).json({ success: false, error: 'API key is required' });
+    }
+
+    if (!isSupabaseConfigured()) {
+      return res.status(500).json({ success: false, error: 'Database not configured' });
+    }
+
+    // Verify API key and get organization info
+    const { verifyLinearApiKey, getLinearOrganization } = require('../utils/linearConnectService');
+    const orgInfo = await verifyLinearApiKey(apiKey);
+
+    if (!orgInfo) {
+      return res.status(401).json({ success: false, error: 'Invalid API key' });
+    }
+
+    // Save Linear installation
+    const { saveLinearInstallation } = require('../utils/linearConnectAuth');
+    const installation = await saveLinearInstallation({
+      apiKey: apiKey,
+      organizationId: orgInfo.id,
+      organizationName: orgInfo.name
+    });
+
+    // Also save to integrations table for dashboard display
+    const { data, error: integrationError } = await supabaseAdmin
+      .from('integrations')
+      .upsert({
+        user_id: user.id,
+        provider: 'linear',
+        access_token: '', // API key stored in linear_connect_installations
+        account_id: orgInfo.id,
+        account_name: orgInfo.name,
+        account_avatar: null,
+        scopes: []
+      }, {
+        onConflict: 'user_id,provider,account_id'
+      })
+      .select();
+
+    if (integrationError) {
+      console.error('Error saving Linear integration:', integrationError);
+      // Don't fail - installation is saved in linear_connect_installations
+    }
+
+    console.log(`✅ Linear integration installed for user ${user.email}: ${orgInfo.name}`);
+
+    res.json({ success: true, organization: orgInfo });
+  } catch (error) {
+    console.error('Linear install error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to install Linear integration' 
+    });
+  }
+});
+
+/**
+ * POST /dashboard/integrations/linear/disconnect - Disconnect Linear
+ */
+router.post('/integrations/linear/disconnect', async (req, res) => {
+  try {
+    const user = req.session.user;
+    
+    if (isSupabaseConfigured()) {
+      // Get Linear integration to find organization ID
+      const { data: integration } = await supabaseAdmin
+        .from('integrations')
+        .select('account_id')
+        .eq('user_id', user.id)
+        .eq('provider', 'linear')
+        .single();
+
+      if (integration) {
+        // Delete from integrations table
+        await supabaseAdmin
+          .from('integrations')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('provider', 'linear');
+
+        // Disable in linear_connect_installations
+        const { deleteLinearInstallation } = require('../utils/linearConnectAuth');
+        try {
+          await deleteLinearInstallation(integration.account_id);
+        } catch (err) {
+          console.warn('Could not delete Linear installation:', err.message);
+        }
+      }
+      
+      console.log(`✅ Linear integration disconnected for user ${user.email}`);
+    }
+    
+    res.redirect('/dashboard/integrations?success=' + encodeURIComponent('Linear disconnected'));
+  } catch (error) {
+    console.error('Linear disconnect error:', error);
+    res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to disconnect Linear'));
   }
 });
 

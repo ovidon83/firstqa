@@ -332,6 +332,10 @@
                 <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
                     ✅ Jira connected successfully!
                 </div>
+            <% } else if (locals.connected === 'linear') { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    ✅ Linear connected successfully! Comment /qa on any issue to get QA analysis.
+                </div>
             <% } else if (locals.success) { %>
                 <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
                     <%= success %>
@@ -520,8 +524,160 @@
                         <% } %>
                     </div>
                 </div>
+
+                <!-- Linear Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon" style="background: linear-gradient(135deg, #5e6ad2 0%, #3b4ed8 100%);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">Linear</div>
+                        <div class="integration-description">
+                            Comment /qa on Linear issues to get comprehensive QA analysis, test scenarios, and risk assessments.
+                        </div>
+                        <% if (locals.linearIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Organization:</span>
+                                    <span class="detail-value"><%= linearIntegration.organization_name || linearIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(linearIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.linearIntegration) { %>
+                            <form action="/dashboard/integrations/linear/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <button type="button" class="btn btn-primary" onclick="openLinearModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; display: inline-block;">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+                                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Connect Linear
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
+
+    <!-- Linear API Key Modal -->
+    <div id="linearModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Connect Linear</h2>
+            <p style="color: #888; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Enter your Linear Personal API Key to connect your workspace.
+            </p>
+            
+            <form id="linearForm" action="/dashboard/integrations/linear/install" method="POST">
+                <div style="margin-bottom: 1rem;">
+                    <label for="linearApiKey" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
+                        Personal API Key
+                    </label>
+                    <input 
+                        type="password" 
+                        id="linearApiKey" 
+                        name="apiKey" 
+                        required 
+                        placeholder="lin_api_..."
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"
+                    />
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+                        <a href="https://linear.app/settings/api" target="_blank" style="color: #10b981; text-decoration: none;">
+                            Get your API key from Linear Settings →
+                        </a>
+                    </div>
+                </div>
+                
+                <div id="linearError" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: #fca5a5; font-size: 0.9rem;"></div>
+                
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeLinearModal()" class="btn btn-secondary" style="margin: 0;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="margin: 0;">
+                        <i class="fas fa-plug"></i>
+                        Connect
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openLinearModal() {
+            document.getElementById('linearModal').style.display = 'flex';
+            document.getElementById('linearApiKey').focus();
+        }
+        
+        function closeLinearModal() {
+            document.getElementById('linearModal').style.display = 'none';
+            document.getElementById('linearForm').reset();
+            document.getElementById('linearError').style.display = 'none';
+        }
+        
+        // Close modal on background click
+        document.getElementById('linearModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLinearModal();
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('linearForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const errorDiv = document.getElementById('linearError');
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        apiKey: formData.get('apiKey')
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = '/dashboard/integrations?connected=linear';
+                } else {
+                    errorDiv.textContent = result.error || 'Failed to connect Linear';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>

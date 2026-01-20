@@ -10,6 +10,68 @@ const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 const LINEAR_API_URL = 'https://api.linear.app/graphql';
 
 /**
+ * Verify Linear API key and get organization info
+ */
+async function verifyLinearApiKey(apiKey) {
+  const query = `
+    query {
+      organization {
+        id
+        name
+        urlKey
+      }
+      viewer {
+        id
+        name
+        email
+      }
+    }
+  `;
+
+  try {
+    const response = await axios.post(
+      LINEAR_API_URL,
+      { query },
+      {
+        headers: {
+          'Authorization': apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data.errors) {
+      console.error('Linear API error:', response.data.errors);
+      return null;
+    }
+
+    const org = response.data.data?.organization;
+    const viewer = response.data.data?.viewer;
+
+    if (!org || !org.id) {
+      return null;
+    }
+
+    return {
+      id: org.id,
+      name: org.name,
+      urlKey: org.urlKey,
+      viewer: viewer ? { id: viewer.id, name: viewer.name, email: viewer.email } : null
+    };
+  } catch (error) {
+    console.error('Failed to verify Linear API key:', error.response?.data || error.message);
+    return null;
+  }
+}
+
+/**
+ * Get Linear organization info (for use with stored API key)
+ */
+async function getLinearOrganization(apiKey) {
+  return verifyLinearApiKey(apiKey);
+}
+
+/**
  * Process webhook from Linear
  */
 async function processLinearWebhook(payload, installation) {
@@ -648,5 +710,7 @@ module.exports = {
   processLinearWebhook,
   fetchIssueDetails,
   postComment,
-  formatAnalysisComment
+  formatAnalysisComment,
+  verifyLinearApiKey,
+  getLinearOrganization
 };
