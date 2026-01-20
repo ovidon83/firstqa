@@ -236,7 +236,7 @@ router.post('/integrations/jira/disconnect', async (req, res) => {
 router.post('/integrations/linear/install', async (req, res) => {
   try {
     const user = req.session.user;
-    const { apiKey } = req.body;
+    const { apiKey, webhookSecret } = req.body;
 
     if (!apiKey) {
       return res.status(400).json({ success: false, error: 'API key is required' });
@@ -259,7 +259,8 @@ router.post('/integrations/linear/install', async (req, res) => {
     const installation = await saveLinearInstallation({
       apiKey: apiKey,
       organizationId: orgInfo.id,
-      organizationName: orgInfo.name
+      organizationName: orgInfo.name,
+      webhookSecret: webhookSecret || null
     });
 
     // Also save to integrations table for dashboard display
@@ -335,6 +336,54 @@ router.post('/integrations/linear/disconnect', async (req, res) => {
   } catch (error) {
     console.error('Linear disconnect error:', error);
     res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to disconnect Linear'));
+  }
+});
+
+/**
+ * POST /dashboard/integrations/linear/update-webhook-secret - Update webhook secret
+ */
+router.post('/integrations/linear/update-webhook-secret', async (req, res) => {
+  try {
+    const user = req.session.user;
+    const { webhookSecret } = req.body;
+
+    if (!isSupabaseConfigured()) {
+      return res.status(500).json({ success: false, error: 'Database not configured' });
+    }
+
+    // Get Linear integration to find organization ID
+    const { data: integration } = await supabaseAdmin
+      .from('integrations')
+      .select('account_id')
+      .eq('user_id', user.id)
+      .eq('provider', 'linear')
+      .single();
+
+    if (!integration) {
+      return res.status(404).json({ success: false, error: 'Linear integration not found' });
+    }
+
+    // Update webhook secret in linear_connect_installations
+    const { data: updateData, error: updateError } = await supabaseAdmin
+      .from('linear_connect_installations')
+      .update({ webhook_secret: webhookSecret || null })
+      .eq('organization_id', integration.account_id)
+      .select();
+
+    if (updateError) {
+      console.error('Error updating webhook secret:', updateError);
+      return res.status(500).json({ success: false, error: 'Failed to update webhook secret' });
+    }
+
+    console.log(`✅ Webhook secret updated for Linear integration: ${integration.account_id}`);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Webhook secret update error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to update webhook secret' 
+    });
   }
 });
 

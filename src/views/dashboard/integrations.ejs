@@ -553,6 +553,21 @@
                                     <span class="detail-label">Connected:</span>
                                     <span class="detail-value"><%= new Date(linearIntegration.created_at).toLocaleDateString() %></span>
                                 </div>
+                                <% if (!linearIntegration.webhook_secret) { %>
+                                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 6px; font-size: 0.85rem; color: #fcd34d;">
+                                    ⚠️ <strong>Webhook secret not configured.</strong> Add it for secure webhook verification.
+                                    <button type="button" onclick="openWebhookSecretModal()" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 4px; color: #fcd34d; cursor: pointer; font-size: 0.85rem;">
+                                        Add Secret
+                                    </button>
+                                </div>
+                                <% } else { %>
+                                <div style="margin-top: 0.75rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; font-size: 0.85rem; color: #6ee7b7;">
+                                    ✅ Webhook secret configured
+                                    <button type="button" onclick="openWebhookSecretModal()" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: transparent; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 4px; color: #6ee7b7; cursor: pointer; font-size: 0.85rem;">
+                                        Update
+                                    </button>
+                                </div>
+                                <% } %>
                             </div>
                         <% } else { %>
                             <div class="integration-status status-not-connected">
@@ -596,7 +611,7 @@
             <form id="linearForm" action="/dashboard/integrations/linear/install" method="POST">
                 <div style="margin-bottom: 1rem;">
                     <label for="linearApiKey" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
-                        Personal API Key
+                        Personal API Key <span style="color: #ef4444;">*</span>
                     </label>
                     <input 
                         type="password" 
@@ -610,6 +625,22 @@
                         <a href="https://linear.app/settings/api" target="_blank" style="color: #10b981; text-decoration: none;">
                             Get your API key from Linear Settings →
                         </a>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label for="linearWebhookSecret" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
+                        Webhook Signing Secret <span style="color: #888; font-size: 0.85rem;">(Optional - recommended for security)</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="linearWebhookSecret" 
+                        name="webhookSecret" 
+                        placeholder="Enter if you've set up webhooks"
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"
+                    />
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+                        Get this from Linear Settings → Webhooks → Your webhook → Signing secret
                     </div>
                 </div>
                 
@@ -661,7 +692,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        apiKey: formData.get('apiKey')
+                        apiKey: formData.get('apiKey'),
+                        webhookSecret: formData.get('webhookSecret') || null
                     })
                 });
                 
@@ -671,6 +703,98 @@
                     window.location.href = '/dashboard/integrations?connected=linear';
                 } else {
                     errorDiv.textContent = result.error || 'Failed to connect Linear';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+
+    <!-- Webhook Secret Update Modal -->
+    <div id="webhookSecretModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Update Webhook Secret</h2>
+            <p style="color: #888; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Add or update your Linear webhook signing secret for secure webhook verification.
+            </p>
+            
+            <form id="webhookSecretForm" action="/dashboard/integrations/linear/update-webhook-secret" method="POST">
+                <div style="margin-bottom: 1rem;">
+                    <label for="webhookSecretInput" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
+                        Webhook Signing Secret
+                    </label>
+                    <input 
+                        type="password" 
+                        id="webhookSecretInput" 
+                        name="webhookSecret" 
+                        placeholder="Enter your webhook signing secret"
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"
+                    />
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+                        Get this from Linear Settings → Webhooks → Your webhook → Signing secret
+                    </div>
+                </div>
+                
+                <div id="webhookSecretError" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: #fca5a5; font-size: 0.9rem;"></div>
+                
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeWebhookSecretModal()" class="btn btn-secondary" style="margin: 0;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="margin: 0;">
+                        <i class="fas fa-save"></i>
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openWebhookSecretModal() {
+            document.getElementById('webhookSecretModal').style.display = 'flex';
+            document.getElementById('webhookSecretInput').focus();
+        }
+        
+        function closeWebhookSecretModal() {
+            document.getElementById('webhookSecretModal').style.display = 'none';
+            document.getElementById('webhookSecretForm').reset();
+            document.getElementById('webhookSecretError').style.display = 'none';
+        }
+        
+        // Close modal on background click
+        document.getElementById('webhookSecretModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWebhookSecretModal();
+            }
+        });
+        
+        // Handle webhook secret form submission
+        document.getElementById('webhookSecretForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const errorDiv = document.getElementById('webhookSecretError');
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        webhookSecret: formData.get('webhookSecret') || null
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    errorDiv.textContent = result.error || 'Failed to update webhook secret';
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {

@@ -146,7 +146,8 @@ function verifyWebhookSignature(payload, signature, secret) {
  */
 async function verifyLinearWebhook(req, res, next) {
   try {
-    const signature = req.headers['x-linear-signature'];
+    // Linear uses 'linear-signature' header (case-insensitive, but check both)
+    const signature = req.headers['linear-signature'] || req.headers['x-linear-signature'] || req.headers['Linear-Signature'];
     const organizationId = req.body?.data?.organization?.id || req.body?.organizationId;
 
     if (!organizationId) {
