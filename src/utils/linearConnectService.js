@@ -105,35 +105,43 @@ async function processLinearWebhook(payload, installation) {
     }
 
     // Only handle comment creation events
-    if (type !== 'IssueComment' || action !== 'create') {
-      console.log(`Skipping event: ${type}.${action}`);
+    const event = `${type}.${action}`;
+    if (event !== 'IssueComment.create') {
+      console.log(`Skipping event: ${event}`);
       return { success: true, message: 'Event ignored' };
     }
 
-    const comment = data;
-    const issueId = comment.issueId || comment.issue?.id;
+    const commentData = data;
+    const commentId = commentData.id;
+    const issueId = commentData.issueId || commentData.issue?.id;
 
-    if (!comment || !issueId) {
-      console.log('❌ Missing comment or issueId in webhook payload');
+    if (!commentId || !issueId) {
+      console.log('❌ Missing commentId or issueId in webhook payload');
       return { success: false, message: 'Invalid webhook payload' };
+    }
+
+    // Fetch full comment via GraphQL to get complete body
+    const comment = await fetchLinearComment(commentId, installation);
+    
+    if (!comment) {
+      console.error('❌ Failed to fetch comment from Linear API');
+      return { success: false, message: 'Failed to fetch comment' };
     }
 
     // Early check: ignore bot comments (prevent infinite loop)
     const authorName = comment.user?.name || '';
     const isBot = authorName.includes('FirstQA') || authorName.includes('firstqa');
     
-    console.log(`📩 Webhook: ${type}.${action} | Issue: ${issueId} | Author: ${authorName}${isBot ? ' [BOT]' : ''}`);
+    console.log(`📩 Webhook: ${event} | Issue: ${issueId} | Author: ${authorName}${isBot ? ' [BOT]' : ''}`);
     
     if (isBot) {
       console.log('✓ Ignored bot comment (prevent loop)');
       return { success: true, message: 'Ignored bot comment' };
     }
 
-    // Extract and check for /qa command
+    // Check for /qa command in fetched comment body
     const commentBody = extractTextFromComment(comment);
-    const hasQaCommand = commentBody.trim().toLowerCase().startsWith('/qa');
-    
-    if (!hasQaCommand) {
+    if (!commentBody.includes('/qa')) {
       console.log('✓ No /qa command, skipping');
       return { success: true, message: 'Not a /qa command' };
     }
@@ -200,6 +208,71 @@ async function processLinearWebhook(payload, installation) {
       success: false,
       error: error.message
     };
+  }
+}
+
+/**
+ * Fetch Linear comment by ID using GraphQL
+ */
+async function fetchLinearComment(commentId, installation) {
+  console.log(`🔍 Fetching Linear comment: ${commentId}`);
+
+  const query = `
+    query GetComment($id: String!) {
+      comment(id: $id) {
+        id
+        body
+        user {
+          id
+          name
+          email
+        }
+        createdAt
+        issue {
+          id
+        }
+      }
+    }
+  `;
+
+  // Normalize API key: remove Bearer prefix if present
+  const token = String(installation.api_key || '').replace(/^Bearer\s+/i, '').trim();
+
+  try {
+    const response = await axios.post(
+      LINEAR_API_URL,
+      {
+        query,
+        variables: { id: commentId }
+      },
+      {
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data.errors) {
+      const tokenPreview = String(token).slice(0, 6);
+      console.error(`❌ GraphQL errors (status: ${response.status || 'N/A'}, token: ${tokenPreview}...):`, response.data.errors);
+      return null;
+    }
+
+    const comment = response.data.data?.comment;
+
+    if (!comment) {
+      console.error('❌ Comment not found');
+      return null;
+    }
+
+    return comment;
+  } catch (error) {
+    const tokenPreview = String(token).slice(0, 6);
+    const status = error.response?.status || 'N/A';
+    const graphqlErrors = error.response?.data?.errors || [];
+    console.error(`❌ Failed to fetch comment (status: ${status}, token: ${tokenPreview}...):`, graphqlErrors.length > 0 ? graphqlErrors : error.message);
+    return null;
   }
 }
 
