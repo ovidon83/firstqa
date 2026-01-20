@@ -106,14 +106,29 @@ async function processLinearWebhook(payload, installation) {
 
     // Only handle comment creation events
     const event = `${type}.${action}`;
-    if (event !== 'IssueComment.create') {
+    const isCommentCreate = 
+      (type.toLowerCase().includes('comment') && action === 'create') ||
+      event === 'Comment.create' ||
+      event === 'IssueComment.create';
+    
+    if (!isCommentCreate) {
       console.log(`Skipping event: ${event}`);
       return { success: true, message: 'Event ignored' };
     }
 
+    console.log(`✓ Comment create event detected: ${event}`);
+
     const commentData = data;
+    console.log('Comment data keys:', Object.keys(commentData || {}));
+    
     const commentId = commentData.id;
-    const issueId = commentData.issueId || commentData.issue?.id;
+    const issueId =
+      commentData.issueId ||
+      commentData.issue?.id ||
+      commentData.issue ||
+      commentData.parent?.id;
+
+    console.log(`Resolved issueId: ${issueId} (from commentId: ${commentId})`);
 
     if (!commentId || !issueId) {
       console.log('❌ Missing commentId or issueId in webhook payload');
@@ -147,6 +162,7 @@ async function processLinearWebhook(payload, installation) {
     }
 
     console.log('🧪 /qa command detected! Processing analysis...');
+    console.log(`✅ Event: ${event}, IssueId: ${issueId}, /qa detected`);
     console.log(`📝 Comment preview: "${commentBody.substring(0, 100)}..."`);
 
     // Fetch full issue details
