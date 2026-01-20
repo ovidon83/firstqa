@@ -44,8 +44,8 @@ async function verifyLinearApiKey(apiKey) {
     );
 
     if (response.data.errors) {
-      const tokenPreview = token.substring(0, 6);
-      console.error(`❌ Linear API verification failed (status: ${response.status || 'N/A`}, token: ${tokenPreview}...):`, response.data.errors);
+      const tokenPreview = String(token).slice(0, 6);
+      console.error(`❌ Linear API verification failed (status: ${response.status || 'N/A'}, token: ${tokenPreview}...):`, response.data.errors);
       return null;
     }
 
@@ -63,7 +63,7 @@ async function verifyLinearApiKey(apiKey) {
       viewer: viewer ? { id: viewer.id, name: viewer.name, email: viewer.email } : null
     };
   } catch (error) {
-    const tokenPreview = token.substring(0, 6);
+    const tokenPreview = String(token).slice(0, 6);
     const status = error.response?.status || 'N/A';
     const graphqlErrors = error.response?.data?.errors || [];
     console.error(`❌ Failed to verify Linear API key (status: ${status}, token: ${tokenPreview}...):`, graphqlErrors.length > 0 ? graphqlErrors : error.message);
