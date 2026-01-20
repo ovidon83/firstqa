@@ -26,6 +26,7 @@ const bitbucketRoutes = require('./src/routes/bitbucket');
 const githubRoutes = require('./src/routes/github');
 const jiraRoutes = require('./src/routes/jira');
 const jiraConnectRoutes = require('./src/routes/jiraConnect');
+const linearConnectRoutes = require('./src/routes/linearConnect');
 const authRoutes = require('./src/routes/auth');
 const dashboardRoutes = require('./src/routes/dashboard');
 // customerRoutes will be imported AFTER directory fix
@@ -188,6 +189,9 @@ app.use('/jira', jiraRoutes);
 
 // Jira Connect routes (Atlassian Connect app)
 app.use('/jira-connect', jiraConnectRoutes);
+
+// Linear Connect routes
+app.use('/linear-connect', linearConnectRoutes);
 
 // Serve Atlassian Connect descriptor
 app.get('/atlassian-connect.json', (req, res) => {
