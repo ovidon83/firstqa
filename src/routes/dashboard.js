@@ -125,6 +125,18 @@ router.get('/integrations', async (req, res) => {
         jiraIntegration = integrations.find(i => i.provider === 'jira');
         linearIntegration = integrations.find(i => i.provider === 'linear');
         
+        // If Linear integration exists, fetch webhook secret status
+        if (linearIntegration) {
+          const { getLinearInstallation } = require('../utils/linearConnectAuth');
+          try {
+            const linearInstall = await getLinearInstallation(linearIntegration.account_id);
+            linearIntegration.webhook_secret = linearInstall?.webhook_secret || null;
+            linearIntegration.organization_name = linearInstall?.organization_name || linearIntegration.account_name;
+          } catch (err) {
+            console.warn('Could not fetch Linear installation details:', err.message);
+          }
+        }
+        
         console.log(`📊 Loaded integrations for ${user.email}: GitHub=${githubInstallations.length} installation(s), Bitbucket=${!!bitbucketIntegration}, Jira=${!!jiraIntegration}, Linear=${!!linearIntegration}`);
       }
     }
