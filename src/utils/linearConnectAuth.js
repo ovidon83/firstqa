@@ -24,11 +24,14 @@ async function saveLinearInstallation(installationData) {
     throw new Error('Supabase not configured');
   }
 
+  // Normalize API key: remove Bearer prefix if present before saving
+  const normalizedApiKey = String(apiKey || '').replace(/^Bearer\s+/i, '').trim();
+
   // Save Linear installation
   const { data, error } = await supabaseAdmin
     .from('linear_connect_installations')
     .upsert({
-      api_key: apiKey,
+      api_key: normalizedApiKey,
       organization_id: organizationId,
       organization_name: organizationName,
       team_id: teamId || null,
