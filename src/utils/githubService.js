@@ -2072,6 +2072,7 @@ Or wait until next month when your limit resets.
   // On-demand test run: /qa -testrun -env=https://...
   const qaFlags = parseQaFlags(comment.body);
   const baseUrlForTestRun = qaFlags.envUrl || process.env.TEST_AUTOMATION_BASE_URL;
+  console.log(`🔬 [testrun] Check: flags=`, qaFlags, `baseUrl=`, baseUrlForTestRun, `aiOk=`, !!aiInsights?.success);
 
   if (qaFlags.testRun) {
     console.log(`🔬 [testrun] Flags: testRun=${qaFlags.testRun}, envUrl=${qaFlags.envUrl || '(none)'}, baseUrlForTestRun=${baseUrlForTestRun || '(none)'}, aiSuccess=${!!aiInsights?.success}, installationId=${installationId ?? '(null)'}`);
@@ -2818,7 +2819,7 @@ async function processWebhookEvent(event) {
           .eq('account_id', installationId.toString())
           .limit(1);
         
-        console.log(`🔍 Query result - data:`, integrations, `error:`, error);
+        console.log(`🔍 Query result - data:`, integrations, error ? `queryErr: ${error.message}` : 'ok');
         
         if (error) {
           console.error(`❌ Error querying for user:`, error);
