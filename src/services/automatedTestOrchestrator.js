@@ -109,7 +109,8 @@ async function executeAutomatedTests(params) {
 
   } catch (error) {
     console.error(`\n❌ Automated test execution failed:`, error.message);
-    console.error(error.stack);
+    console.error(`❌ Full error:`, error);
+    console.error('❌ Stack:', error.stack);
 
     // Update Check Run with error
     if (octokit && checkRunId) {

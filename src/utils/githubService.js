@@ -2073,10 +2073,16 @@ Or wait until next month when your limit resets.
   const qaFlags = parseQaFlags(comment.body);
   const baseUrlForTestRun = qaFlags.envUrl || process.env.TEST_AUTOMATION_BASE_URL;
 
+  if (qaFlags.testRun) {
+    console.log(`🔬 [testrun] Flags: testRun=${qaFlags.testRun}, envUrl=${qaFlags.envUrl || '(none)'}, baseUrlForTestRun=${baseUrlForTestRun || '(none)'}, aiSuccess=${!!aiInsights?.success}, installationId=${installationId ?? '(null)'}`);
+  }
+
   if (qaFlags.testRun && baseUrlForTestRun && aiInsights?.success) {
     const [owner, repo] = repository.full_name.split('/');
     const testRecipe = parseTestRecipeFromAiResponse(aiInsights?.data) ||
       aiInsights?.data?.testRecipe || [];
+
+    console.log(`🔬 [testrun] Extracted testRecipe: ${testRecipe.length} scenarios`);
 
     if (testRecipe.length > 0 && installationId) {
       let prDetails = null;
@@ -2085,9 +2091,12 @@ Or wait until next month when your limit resets.
         if (repoOctokit) {
           const prResponse = await repoOctokit.pulls.get({ owner, repo, pull_number: issue.number });
           prDetails = prResponse.data;
+        } else {
+          console.warn('🔬 [testrun] getOctokitForRepo returned null');
         }
       } catch (e) {
-        console.warn('Could not fetch PR for test run:', e.message);
+        console.warn('🔬 [testrun] Could not fetch PR for test run:', e.message);
+        console.warn('🔬 [testrun] Stack:', e.stack);
       }
 
       if (prDetails?.head?.sha) {
@@ -2103,9 +2112,10 @@ Or wait until next month when your limit resets.
           installationId
         }).catch(error => {
           console.error('❌ Automated test execution failed:', error.message);
+          console.error('❌ Stack:', error.stack);
         });
       } else {
-        console.warn('⚠️ Could not get PR SHA for test run, skipping');
+        console.warn('⚠️ Could not get PR SHA for test run, skipping (prDetails?.head?.sha:', prDetails?.head?.sha ?? 'missing', ')');
       }
     } else if (testRecipe.length === 0) {
       console.log('⏭️ No test recipe extracted for -testrun, skipping');
@@ -2114,6 +2124,8 @@ Or wait until next month when your limit resets.
     } else {
       console.log('⏭️ No base URL for -testrun (use -env=URL or TEST_AUTOMATION_BASE_URL)');
     }
+  } else if (qaFlags.testRun) {
+    console.log(`⏭️ [testrun] Skipping: baseUrl=${!!baseUrlForTestRun}, aiSuccess=${!!aiInsights?.success}`);
   }
   
   // Send email notification - DISABLED to prevent spam
