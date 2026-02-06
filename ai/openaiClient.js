@@ -64,7 +64,7 @@ function trunc(x, n) {
  * @param {string} options.diff - Code diff
  * @returns {Promise<Object>} QA insights or error object
  */
-async function generateQAInsights({ repo, pr_number, title, body, diff, newCommits }) {
+async function generateQAInsights({ repo, pr_number, title, body, diff, newCommits, fileContents = {}, selectorHints = [] }) {
   try {
     // Validate OpenAI client
     if (!openai) {
@@ -76,9 +76,10 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     // Extract file paths from diff for comprehensive analysis
     const changedFiles = extractChangedFiles(diff);
     console.log(`📁 Changed files detected: ${changedFiles.length} files`);
+    console.log(`📂 Full file contents: ${Object.keys(fileContents).length} files, ${selectorHints.length} selector hints`);
 
-    // Get comprehensive code context
-    const codeContext = await buildCodeContext(repo, pr_number, changedFiles, diff);
+    // Get comprehensive code context (includes fileContents and selectorHints for accuracy)
+    const codeContext = await buildCodeContext(repo, pr_number, changedFiles, diff, { fileContents, selectorHints });
     
     // Validate that we have real PR data, not simulated/fake data
     const isSimulatedData = diff && (
@@ -115,6 +116,17 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     
     const sanitizedDiff = trunc(diff, 12000); // Full PR diff
     const sanitizedContext = trunc(JSON.stringify(codeContext), 6000); // Code context
+
+    // Format selector hints for automation-ready test cases (exclude fullFileContents from context string to save tokens)
+    const selectorHintsFormatted = (selectorHints || []).slice(0, 40).map(h =>
+      `- ${h.type || 'selector'}: "${h.value}" (${h.file || 'unknown'})`
+    ).join('\n') || 'None extracted from code.';
+
+    // Include key file contents for UI components (truncated) - helps AI see exact elements/structure
+    const fileContentsForPrompt = Object.entries(fileContents || {}).slice(0, 4).map(([path, content]) => {
+      const snipped = trunc(content, 2000);
+      return `\n--- FILE: ${path} ---\n${snipped}${content.length > 2000 ? '\n...[truncated]' : ''}`;
+    }).join('\n') || '';
 
     console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars, Context=${sanitizedContext.length} chars`);
     if (isUpdateAnalysis) {
@@ -166,7 +178,9 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         codeContext: sanitizedContext,
         changedFiles: changedFiles,
         isUpdateAnalysis: isUpdateAnalysis,
-        newCommitsCount: isUpdateAnalysis && newCommits ? newCommits.length : 0
+        newCommitsCount: isUpdateAnalysis && newCommits ? newCommits.length : 0,
+        selectorHintsFormatted: selectorHintsFormatted || 'None extracted.',
+        fileContentsForPrompt: fileContentsForPrompt || ''
       });
     } else if (fs.existsSync(deepPromptTemplatePath)) {
       console.log('✅ Using deep analysis template for comprehensive code review');
@@ -641,8 +655,10 @@ function extractChangedFiles(diff) {
 
 /**
  * Build comprehensive code context for deep analysis with enhanced algorithmic awareness
+ * @param {Object} options - Optional { fileContents: { path: content }, selectorHints: [] }
  */
-async function buildCodeContext(repo, pr_number, changedFiles, diff) {
+async function buildCodeContext(repo, pr_number, changedFiles, diff, options = {}) {
+  const { fileContents = {}, selectorHints = [] } = options;
   const context = {
     changedFiles: changedFiles,
     fileTypes: {},
@@ -656,7 +672,9 @@ async function buildCodeContext(repo, pr_number, changedFiles, diff) {
     algorithms: {},
     boundaries: {},
     performance: {},
-    concurrency: {}
+    concurrency: {},
+    automationSelectors: selectorHints.length > 0 ? selectorHints.slice(0, 30) : []
+    // fullFileContents & selectorHints passed separately to prompt (fileContentsForPrompt, selectorHintsFormatted)
   };
 
   // Analyze file types and patterns

@@ -62,6 +62,12 @@ function generateTestReportComment(results, videoUrl, screenshotUrls = {}) {
   comment += `\n`;
   comment += generateRecommendations(results);
 
+  // Note about test data / environment when tests fail
+  if (results.failed > 0 || results.scenarios.some(s => s.status === 'ERROR')) {
+    comment += `\n---\n\n`;
+    comment += `> ⚠️ **If tests failed** due to login, missing test data, or environment setup: ensure your staging environment has the required test accounts and seed data. FirstQA does not inject credentials—configure \`TEST_USER_EMAIL\` / \`TEST_USER_PASSWORD\` if login is needed.\n`;
+  }
+
   // Footer
   comment += `\n---\n\n`;
   comment += `<sub>🤖 Automated by Ovi AI • [Test Configuration](${process.env.BASE_URL || 'http://localhost:3000'}/dashboard) • Powered by Playwright</sub>\n`;

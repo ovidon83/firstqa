@@ -251,7 +251,7 @@ app.post('/generate-test-recipe', bodyParser.json({ limit: '10mb' }), async (req
     const { generateQAInsights } = require('./ai/openaiClient');
     
     // Extract required fields from request body
-    const { repo, pr_number, title, body, diff } = req.body;
+    const { repo, pr_number, title, body, diff, newCommits, fileContents, selectorHints } = req.body;
     
     // Validate required fields
     if (!repo || !pr_number || !title) {
@@ -269,6 +269,8 @@ app.post('/generate-test-recipe', bodyParser.json({ limit: '10mb' }), async (req
     console.log(`   Title: ${title}`);
     console.log(`   Body length: ${body?.length || 0}`);
     console.log(`   Diff length: ${diff?.length || 0}`);
+    console.log(`   File contents: ${Object.keys(fileContents || {}).length} files`);
+    console.log(`   Selector hints: ${(selectorHints || []).length}`);
     
     // Generate AI insights
     const aiInsights = await generateQAInsights({
@@ -276,7 +278,10 @@ app.post('/generate-test-recipe', bodyParser.json({ limit: '10mb' }), async (req
       pr_number,
       title,
       body,
-      diff
+      diff,
+      newCommits,
+      fileContents: fileContents || {},
+      selectorHints: selectorHints || []
     });
     
     if (aiInsights && aiInsights.success) {

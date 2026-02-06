@@ -613,6 +613,30 @@ async function fetchPRDescription(repository, prNumber) {
   }
 }
 /**
+ * Fetch PR details (changed_files, additions, deletions, files)
+ */
+async function fetchPR(repository, prNumber) {
+  try {
+    if (simulatedMode) return { changed_files: 0, additions: 0, deletions: 0, files: [] };
+    const [owner, repoName] = repository.split('/');
+    if (!owner || !repoName) return { changed_files: 0, additions: 0, deletions: 0, files: [] };
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    if (!repoOctokit) return { changed_files: 0, additions: 0, deletions: 0, files: [] };
+    const { data: pr } = await repoOctokit.pulls.get({ owner, repo: repoName, pull_number: prNumber });
+    const { data: filesData } = await repoOctokit.pulls.listFiles({ owner, repo: repoName, pull_number: prNumber });
+    return {
+      changed_files: pr.changed_files ?? filesData?.length ?? 0,
+      additions: pr.additions ?? 0,
+      deletions: pr.deletions ?? 0,
+      files: (filesData || []).map(f => f.filename)
+    };
+  } catch (error) {
+    console.warn('fetchPR failed:', error.message);
+    return { changed_files: 0, additions: 0, deletions: 0, files: [] };
+  }
+}
+
+/**
  * Fetch PR diff for AI analysis
  */
 async function fetchPRDiff(repository, prNumber) {
@@ -652,6 +676,93 @@ async function fetchPRDiff(repository, prNumber) {
   } catch (error) {
     console.error(`Failed to fetch PR diff for ${repository}#${prNumber}:`, error.message);
     return 'Error fetching PR diff';
+  }
+}
+
+/** Max file size (chars) to fetch - skip larger files */
+const MAX_FILE_CONTENT_CHARS = 8000;
+/** Max number of code files to fetch full contents for */
+const MAX_FILES_TO_FETCH = 12;
+/** File extensions to prioritize for full content (UI/test-relevant) */
+const PRIORITY_EXTENSIONS = ['.tsx', '.jsx', '.ts', '.js', '.vue', '.svelte', '.py', '.java', '.go', '.rb'];
+
+/**
+ * Fetch full file contents for changed files (for accurate test case generation)
+ * Prioritizes UI/frontend files where data-testid, aria-label, and selectors live
+ * @param {string} repository - owner/repo
+ * @param {number} prNumber - PR number
+ * @returns {Promise<Object>} { fileContents: { path: string }, selectorHints: [...] }
+ */
+async function fetchChangedFileContents(repository, prNumber) {
+  try {
+    if (simulatedMode) return { fileContents: {}, selectorHints: [] };
+    const [owner, repoName] = repository.split('/');
+    if (!owner || !repoName) return { fileContents: {}, selectorHints: [] };
+
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    if (!repoOctokit) return { fileContents: {}, selectorHints: [] };
+
+    const prResponse = await repoOctokit.pulls.get({ owner, repo: repoName, pull_number: prNumber });
+    const headSha = prResponse.data.head.sha;
+
+    const filesResponse = await repoOctokit.pulls.listFiles({ owner, repo: repoName, pull_number: prNumber });
+    const codeFiles = filesResponse.data
+      .filter(f => f.filename && !f.filename.includes('node_modules') && !f.filename.includes('dist'))
+      .filter(f => /\.(js|ts|jsx|tsx|vue|svelte|py|java|go|rb|c|cs|php)$/i.test(f.filename));
+
+    // Prioritize UI files (contain selectors, test IDs)
+    codeFiles.sort((a, b) => {
+      const score = (f) => {
+        const ext = (f.filename.match(/\.[^.]+$/) || [])[0] || '';
+        if (PRIORITY_EXTENSIONS.includes(ext)) return 10;
+        if (f.filename.includes('component') || f.filename.includes('Button') || f.filename.includes('Form')) return 5;
+        return 1;
+      };
+      return score(b) - score(a);
+    });
+
+    const fileContents = {};
+    const selectorHints = [];
+    let fetched = 0;
+
+    for (const file of codeFiles) {
+      if (fetched >= MAX_FILES_TO_FETCH) break;
+      if (file.status === 'removed') continue;
+      try {
+        const { data } = await repoOctokit.repos.getContent({
+          owner, repo: repoName, path: file.filename, ref: headSha
+        });
+        if (data.type !== 'file' || !data.content) continue;
+        const content = Buffer.from(data.content, 'base64').toString('utf8');
+        if (content.length > MAX_FILE_CONTENT_CHARS) continue;
+        fileContents[file.filename] = content;
+        fetched++;
+
+        // Extract selector patterns for automation hints
+        const patternConfigs = [
+          { re: /data-testid=["']([^"']+)["']/g, type: 'data-testid' },
+          { re: /aria-label=["']([^"']+)["']/g, type: 'aria-label' },
+          { re: /id=["']([^"']+)["']/g, type: 'id' },
+          { re: /name=["']([^"']+)["']/g, type: 'name' },
+          { re: /data-cy=["']([^"']+)["']/g, type: 'data-cy' },
+          { re: /testId["'\s:=]+["']?([a-zA-Z0-9_-]+)["']?/gi, type: 'testId' },
+        ];
+        patternConfigs.forEach(({ re, type }) => {
+          let m;
+          while ((m = re.exec(content)) !== null) {
+            selectorHints.push({ file: file.filename, type, value: m[1] });
+          }
+        });
+      } catch (err) {
+        console.warn(`Could not fetch ${file.filename}:`, err.message);
+      }
+    }
+
+    console.log(`📂 Fetched full contents for ${Object.keys(fileContents).length} files, ${selectorHints.length} selector hints`);
+    return { fileContents, selectorHints };
+  } catch (error) {
+    console.warn('fetchChangedFileContents failed:', error.message);
+    return { fileContents: {}, selectorHints: [] };
   }
 }
 
@@ -1103,10 +1214,67 @@ That's it! We'll handle the rest. 🚀
 `;
   return await postComment(repository, prNumber, welcomeComment);
 }
+
+/**
+ * Parse /qa command flags from comment body
+ * Supports: /qa -testrun -env=https://example.com/
+ * @returns {{ testRun: boolean, envUrl: string|null }}
+ */
+function parseQaFlags(commentBody) {
+  const body = String(commentBody || '').trim();
+  const testRun = /\b-testrun\b/i.test(body);
+  const envMatch = body.match(/-env=(\S+)/i);
+  const envUrl = envMatch ? envMatch[1].trim() : null;
+  return { testRun, envUrl };
+}
+
+/**
+ * Parse test recipe from AI markdown response (Test Recipe table)
+ * @param {string|object} aiData - AI response (markdown or object with testRecipe)
+ * @returns {Array<{scenario, steps, expected, priority}>}
+ */
+function parseTestRecipeFromAiResponse(aiData) {
+  if (!aiData) return [];
+  if (typeof aiData === 'object' && Array.isArray(aiData.testRecipe)) return aiData.testRecipe;
+  if (typeof aiData === 'object') {
+    const combined = [...(aiData.featureTestRecipe || []), ...(aiData.technicalTestRecipe || [])];
+    if (combined.length > 0) return combined.map(t => ({
+      scenario: t.scenario || t.description,
+      steps: t.steps || t.description,
+      expected: t.expected || t.description,
+      priority: t.priority || 'Medium'
+    }));
+  }
+  if (typeof aiData !== 'string') return [];
+  // Parse markdown table: | Scenario | Steps | Expected Result | Priority |
+  const tableMatch = aiData.match(/\|\s*Scenario\s*\|\s*Steps\s*\|\s*Expected Result\s*\|\s*Priority\s*\|[\s\S]*?(?=\n## |\n---|\n\*\*|$)/i);
+  if (!tableMatch) return [];
+  const tableBody = tableMatch[0];
+  const rows = tableBody.split('\n').filter(line => {
+    const t = line.trim();
+    if (!t.startsWith('|') || line.includes('Scenario')) return false;
+    const firstCell = t.split('|').map(c => c.trim())[1] || '';
+    return !/^[\s\-:]+$/.test(firstCell); // skip separator rows
+  });
+  const recipe = [];
+  for (const row of rows) {
+    const cells = row.split('|').map(c => c.trim()).filter(Boolean);
+    if (cells.length >= 4 && cells[0] && cells[0].length > 0) {
+      recipe.push({
+        scenario: cells[0] || 'Test scenario',
+        steps: cells[1] || '',
+        expected: cells[2] || '',
+        priority: cells[3] || 'Medium'
+      });
+    }
+  }
+  return recipe;
+}
+
 /**
  * Handle test request - core functionality
  */
-async function handleTestRequest(repository, issue, comment, sender, userId = null) {
+async function handleTestRequest(repository, issue, comment, sender, userId = null, installationId = null) {
   console.log(`Processing test request from ${sender.login} on PR #${issue.number}`);
   console.log(`Repository: ${repository.full_name}`);
   console.log(`Comment: ${comment.body}`);
@@ -1690,6 +1858,17 @@ Or wait until next month when your limit resets.
     console.log(`   ✅ No new commits - Standard full PR analysis`);
   }
   
+  // Fetch full file contents for changed code files (for accurate test cases & automation)
+  let fileContents = {};
+  let selectorHints = [];
+  try {
+    const fetched = await fetchChangedFileContents(repository.full_name, issue.number);
+    fileContents = fetched.fileContents || {};
+    selectorHints = fetched.selectorHints || [];
+  } catch (err) {
+    console.warn('Could not fetch file contents for analysis:', err.message);
+  }
+
   // Generate AI insights for the PR via API endpoint
   console.log('🤖 FirstQA Ovi AI analyzing PR (regenerating complete analysis)...');
   let aiInsights;
@@ -1706,7 +1885,9 @@ Or wait until next month when your limit resets.
       title: issue.title + (newCommits.length > 0 ? ` [Updated: ${newCommits.length} new commit(s)]` : ''),
       body: enrichedDescription,
       diff: diffToAnalyze, // FULL PR diff - complete analysis
-      newCommits: newCommits.length > 0 ? newCommits : undefined
+      newCommits: newCommits.length > 0 ? newCommits : undefined,
+      fileContents,
+      selectorHints
     });
     if (aiInsights && aiInsights.success) {
       console.log('✅ FirstQA Ovi AI analysis completed successfully');
@@ -1887,79 +2068,52 @@ Or wait until next month when your limit resets.
   // Add "Reviewed by Ovi" label after AI analysis is complete
   const labelResult = await addOviReviewedLabel(repository.full_name, issue.number);
   console.log(`✅ "Reviewed by Ovi" label ${labelResult.simulated ? 'would be' : 'was'} added`);
-  
-  // AUTOMATED TESTING: Check if we should run automated tests
-  console.log('\n' + '='.repeat(60));
-  console.log('🚀 AUTOMATED TESTING SECTION REACHED!');
-  console.log('='.repeat(60) + '\n');
-  
-  try {
-    const { shouldRunAutomatedTests, executeAutomatedTests } = require('../services/automatedTestOrchestrator');
-    
-    // Fetch PR details to get the SHA
+
+  // On-demand test run: /qa -testrun -env=https://...
+  const qaFlags = parseQaFlags(comment.body);
+  const baseUrlForTestRun = qaFlags.envUrl || process.env.TEST_AUTOMATION_BASE_URL;
+
+  if (qaFlags.testRun && baseUrlForTestRun && aiInsights?.success) {
     const [owner, repo] = repository.full_name.split('/');
-    console.log(`🔍 Fetching PR details for automated testing: ${owner}/${repo}#${issue.number}`);
-    
-    let prDetails = null;
-    try {
-      const prUrl = `https://api.github.com/repos/${repository.full_name}/pulls/${issue.number}`;
-      const prResponse = await axios.get(prUrl, {
-        headers: {
-          'Authorization': `token ${process.env.GITHUB_TOKEN || ''}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'FirstQA'
+    const testRecipe = parseTestRecipeFromAiResponse(aiInsights?.data) ||
+      aiInsights?.data?.testRecipe || [];
+
+    if (testRecipe.length > 0 && installationId) {
+      let prDetails = null;
+      try {
+        const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repo);
+        if (repoOctokit) {
+          const prResponse = await repoOctokit.pulls.get({ owner, repo, pull_number: issue.number });
+          prDetails = prResponse.data;
         }
-      });
-      prDetails = prResponse.data;
-      console.log(`✅ Fetched PR SHA: ${prDetails.head.sha}`);
-    } catch (fetchError) {
-      console.error(`❌ Error fetching PR details:`, fetchError.message);
-    }
-    
-    if (!prDetails) {
-      console.log('⚠️  Could not fetch PR details, skipping automated tests');
-      // Continue without automated tests
-    } else {
-      // Build a minimal PR object for shouldRunAutomatedTests
-      const prObject = {
-        number: issue.number,
-        labels: issue.labels || [],
-        head: { sha: prDetails.head.sha }
-      };
-      
-      // Debug: Log what we're checking
-      console.log('🔍 Checking if automated tests should run:');
-      console.log(`   - TEST_AUTOMATION_ENABLED: ${process.env.TEST_AUTOMATION_ENABLED}`);
-      console.log(`   - TEST_AUTOMATION_BASE_URL: ${process.env.TEST_AUTOMATION_BASE_URL}`);
-      console.log(`   - aiInsights.success: ${aiInsights?.success}`);
-      console.log(`   - aiInsights.data type: ${typeof aiInsights?.data}`);
-      console.log(`   - testRecipe exists: ${!!aiInsights?.data?.testRecipe}`);
-      console.log(`   - testRecipe length: ${aiInsights?.data?.testRecipe?.length || 0}`);
-      
-      if (shouldRunAutomatedTests(prObject, aiInsights)) {
-        console.log('🤖 Automated testing enabled - executing tests...');
-        
-        // Execute automated tests asynchronously (don't wait for completion)
+      } catch (e) {
+        console.warn('Could not fetch PR for test run:', e.message);
+      }
+
+      if (prDetails?.head?.sha) {
+        console.log(`🤖 On-demand test run: ${testRecipe.length} scenarios at ${baseUrlForTestRun}`);
+        const { executeAutomatedTests } = require('../services/automatedTestOrchestrator');
         executeAutomatedTests({
           owner,
           repo,
           prNumber: issue.number,
           sha: prDetails.head.sha,
-          testRecipe: aiInsights?.data?.testRecipe || [],
-          baseUrl: process.env.TEST_AUTOMATION_BASE_URL,
-          installationId: repository.installation?.id || null
+          testRecipe,
+          baseUrl: baseUrlForTestRun.replace(/\/$/, ''),
+          installationId
         }).catch(error => {
           console.error('❌ Automated test execution failed:', error.message);
         });
-        
-        console.log('✅ Automated tests triggered (running in background)');
       } else {
-        console.log('⏭️  Automated testing not triggered (conditions not met)');
-        console.log('   Check the logs above to see which condition failed');
+        console.warn('⚠️ Could not get PR SHA for test run, skipping');
       }
+    } else if (testRecipe.length === 0) {
+      console.log('⏭️ No test recipe extracted for -testrun, skipping');
+    } else if (!installationId) {
+      console.log('⏭️ No installationId for test run, skipping');
+    } else {
+      console.log('⏭️ No base URL for -testrun (use -env=URL or TEST_AUTOMATION_BASE_URL)');
     }
-  } catch (error) {
-    console.error('❌ Error checking automated testing:', error.message);
   }
   
   // Send email notification - DISABLED to prevent spam
@@ -2393,8 +2547,9 @@ ${aiData}`;
 }
 /**
  * Format and post detailed analysis with hybrid structure
+ * @param {string} [options.banner] - Optional banner to prepend (e.g. for post-merge staging analysis)
  */
-async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights) {
+async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights, options = {}) {
   // Handle fallback if AI insights failed
   if (!aiInsights || !aiInsights.success) {
     console.log('🔄 Creating fallback analysis due to AI failure');
@@ -2443,9 +2598,13 @@ async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights) {
     };
   }
   // Use the shared hybrid formatting function
-  const detailedComment = formatHybridAnalysisForComment(aiInsights);
-   return await postComment(repository, prNumber, detailedComment);
+  let detailedComment = formatHybridAnalysisForComment(aiInsights);
+  if (options.banner) {
+    detailedComment = `${options.banner}\n\n${detailedComment}`;
+  }
+  return await postComment(repository, prNumber, detailedComment);
 }
+
 /**
  * Handle PR opened event - generate comprehensive analysis
  */
@@ -2529,6 +2688,98 @@ async function handlePROpened(repository, pr, installationId) {
   
   return analysisResult;
 }
+
+/** Comma-separated staging branch names (e.g. staging,stage,develop) */
+const STAGING_BRANCHES = (process.env.STAGING_BRANCHES || 'staging,stage,develop')
+  .split(',')
+  .map(b => b.trim().toLowerCase())
+  .filter(Boolean);
+
+/**
+ * Handle PR merged into staging - auto-generate analysis for staging testing
+ * Triggered when a PR is closed (merged) and its base branch is a staging branch
+ */
+async function handlePRMergedToStaging(repository, pr, userId, installationId) {
+  const baseRef = (pr.base?.ref || '').toLowerCase();
+  console.log(`🚀 Post-merge staging analysis: PR #${pr.number} merged into ${baseRef}`);
+
+  // Check usage limits
+  if (userId && isSupabaseConfigured()) {
+    const limitCheck = await checkUsageLimits(userId);
+    if (!limitCheck.allowed) {
+      console.warn(`⚠️ Skipping post-merge analysis: usage limit exceeded for user ${userId}`);
+      return { success: false, message: 'Usage limit exceeded', skipped: true };
+    }
+  }
+
+  const prDescription = await fetchPRDescription(repository.full_name, pr.number);
+  const prDiff = await fetchPRDiff(repository.full_name, pr.number);
+
+  let fileContents = {};
+  let selectorHints = [];
+  try {
+    const fetched = await fetchChangedFileContents(repository.full_name, pr.number);
+    fileContents = fetched.fileContents || {};
+    selectorHints = fetched.selectorHints || [];
+  } catch (err) {
+    console.warn('Could not fetch file contents for post-merge analysis:', err.message);
+  }
+
+  let aiInsights;
+  try {
+    aiInsights = await callTestRecipeEndpoint({
+      repo: repository.full_name,
+      pr_number: pr.number,
+      title: pr.title,
+      body: prDescription,
+      diff: prDiff,
+      fileContents,
+      selectorHints
+    });
+
+    if (aiInsights?.success) {
+      try {
+        const { enhanceReleasePulseInMarkdown } = require('../services/releasePulseAnalyzer');
+        aiInsights = enhanceReleasePulseInMarkdown(aiInsights, {
+          filesChanged: pr.changed_files || 0,
+          additions: pr.additions || 0,
+          deletions: pr.deletions || 0,
+          files: pr.files?.map(f => (typeof f === 'string' ? f : f.filename)) || []
+        });
+      } catch (e) {
+        console.warn('Release Pulse enhancement failed:', e.message);
+      }
+    }
+  } catch (error) {
+    console.error('Post-merge analysis failed:', error.message);
+    aiInsights = { success: false, error: error.message };
+  }
+
+  const banner = `## 🚀 Post-Merge Staging Analysis\n\n*Automatically generated when this PR was merged into \`${baseRef}\`. Use this to prepare staging testing.*\n`;
+  await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights, { banner });
+
+  if (userId && isSupabaseConfigured() && aiInsights?.success) {
+    try {
+      await saveAnalysisToDatabase({
+        userId,
+        provider: 'github',
+        repository: repository.full_name,
+        prNumber: pr.number,
+        prTitle: pr.title,
+        prUrl: pr.html_url || `https://github.com/${repository.full_name}/pull/${pr.number}`,
+        analysisType: 'full',
+        analysisOutput: { raw: aiInsights.data, postMergeStaging: true }
+      });
+      await supabaseAdmin.rpc('increment_user_analyses_count', { user_id_param: userId });
+    } catch (e) {
+      console.error('Error saving post-merge analysis:', e.message);
+    }
+  }
+
+  console.log(`✅ Post-merge staging analysis completed for PR #${pr.number}`);
+  return { success: true, postMergeStaging: true };
+}
+
 /**
  * Process a GitHub webhook event
  */
@@ -2585,6 +2836,19 @@ async function processWebhookEvent(event) {
       console.log(`📋 PR #${pr?.number} opened on ${repository?.full_name} - waiting for /qa command to trigger analysis`);
       return { success: true, message: 'PR opened - use /qa command to trigger analysis' };
     }
+
+    // Handle pull_request closed + merged into staging - auto-generate analysis for staging testing
+    if (eventType === 'pull_request' && payload.action === 'closed' && payload.pull_request?.merged === true) {
+      const { repository, pull_request: pr } = payload;
+      const baseRef = (pr.base?.ref || '').toLowerCase();
+      const isStagingBranch = STAGING_BRANCHES.includes(baseRef);
+      if (isStagingBranch) {
+        console.log(`🚀 PR #${pr.number} merged into ${baseRef} - triggering post-merge staging analysis`);
+        return await handlePRMergedToStaging(repository, pr, userId, installationId);
+      }
+      console.log(`📋 PR #${pr?.number} closed/merged into ${baseRef} - not a staging branch, skipping`);
+    }
+
     // Handle issue comment event (for /qa commands)
     if (eventType === 'issue_comment' && payload.action === 'created') {
       console.log('💬 New comment detected');
@@ -2612,7 +2876,7 @@ async function processWebhookEvent(event) {
       // Check for /qa command (manual QA re-run)
       if (comment.body.trim().startsWith('/qa')) {
         console.log('🧪 /qa command detected!');
-        return await handleTestRequest(repository, issue, comment, sender, userId);
+        return await handleTestRequest(repository, issue, comment, sender, userId, installationId);
       }
       // Check for /short command (short QA analysis)
       if (comment.body.trim().startsWith('/short')) {

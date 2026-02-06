@@ -130,7 +130,7 @@ async function executeAutomatedTests(params) {
           body: `## ❌ Automated Test Execution Failed\n\n` +
                 `An error occurred while executing automated tests:\n\n` +
                 `\`\`\`\n${error.message}\n\`\`\`\n\n` +
-                `Please check the configuration and try again.\n\n` +
+                `**Possible causes:** Missing test data, login required, or environment setup. Ensure your staging environment has the required test accounts and seed data. Configure \`TEST_USER_EMAIL\` / \`TEST_USER_PASSWORD\` if login is needed.\n\n` +
                 `<sub>🤖 Ovi AI Test Automation</sub>`
         });
       } catch (commentError) {

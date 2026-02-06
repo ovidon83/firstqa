@@ -64,6 +64,14 @@ Description: <%= body %>
 
 **ADVANCED CODE ANALYSIS:**
 <%= codeContext %>
+<% if (typeof selectorHintsFormatted !== 'undefined' && selectorHintsFormatted && selectorHintsFormatted !== 'None extracted.') { %>
+**AUTOMATION SELECTORS (use these in test steps when applicable - enables Playwright/automation):**
+<%= selectorHintsFormatted %>
+<% } %>
+<% if (typeof fileContentsForPrompt !== 'undefined' && fileContentsForPrompt) { %>
+**FULL FILE CONTENTS (key changed files - use for exact UI elements, component structure, strings):**
+<%= fileContentsForPrompt %>
+<% } %>
 
 Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this exact format:
 
@@ -95,8 +103,11 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 **TEST CASE REQUIREMENTS:**
 - **ORDER BY PRIORITY**: High priority tests first, then Medium
 - **SCENARIO**: Clear, specific name describing what's being tested (e.g., "Verify thought stays visible after marking as shared")
-- **STEPS**: Numbered steps using exact UI names from code. Use `<br>` for line breaks:
-  - `1. Navigate to ActView<br>2. Select thought "My First Thought"<br>3. Click "Mark as Shared" button`
+- **STEPS** (automation-ready - atomic, unambiguous, executable):
+  - One action per step. Each step must be a single, concrete action a human or Playwright could perform.
+  - Use exact UI names/labels from code. When AUTOMATION SELECTORS exist above, include them in format: `[data-testid="value"]` or `aria-label="value"` in parentheses after the human-readable action.
+  - Example: `1. Navigate to ActView (or /act-view)<br>2. Click thought "My First Thought" (or element with data-testid="thought-item")<br>3. Click "Mark as Shared" button (or [data-testid="mark-shared-btn"])`
+  - Steps must be sequential, unambiguous, and verifiable. Avoid vague actions like "verify it works".
 - **EXPECTED RESULT**: Specific, verifiable outcomes with exact details from code. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
 - **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)
@@ -221,16 +232,16 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case/Negative Test, then Regression)
     - **TEST CASE STRUCTURE REQUIREMENTS:**
       - **Scenario Name**: Descriptive name focusing on what's being tested (e.g., "Mark as Shared from Draft Filter", "Verify Flicker Fix", "Rapid Toggle Mark/Unmark")
-      - **Steps**: Detailed, numbered steps with SPECIFIC actions using EXACT names from code:
+      - **Steps** (automation-ready - atomic, one action per step, executable by Playwright):
         - **Setup/Initial State**: 
           - Exact filter active (use exact filter name from code: "Draft", "Shared", "All", etc.)
           - Exact selection state (which item is selected, how it's identified)
           - Exact data state (item properties, shared status, platforms, etc.)
           - Exact UI state (what's visible, what badges/indicators are shown)
-        - **Actions**: 
+        - **Actions** (one action per step; include selector in parentheses when AUTOMATION SELECTORS exist):
           - Exact button/link names as they appear in code (e.g., "Mark as Shared", "Mark as Draft")
-          - Exact selection actions (e.g., "Select thought with ID X")
-          - Use exact terminology from the code
+          - When selectors available: "Click 'Submit' (data-testid='submit-btn')" or "Fill email field (name='email')"
+          - Each step = one navigator/click/type/select/verify action. No compound steps.
         - Use multiline format with `<br>` tags for readability
       - **Expected Result**: EXTREMELY COMPREHENSIVE expected behaviors using EXACT details from code:
         - **Exact UI states** (use exact names from code):
