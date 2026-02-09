@@ -34,7 +34,10 @@ if (currentDir.includes('/src/src')) {
 console.log('📁 Current working directory (after fix):', process.cwd());
 console.log('📄 Loading webhook-server.js...');
 
-// Import the main application
-require('./webhook-server.js');
+// Import the main application using absolute path from new working directory
+// This ensures we load from /opt/render/project/webhook-server.js, not /opt/render/project/src/webhook-server.js
+const webhookServerPath = path.join(process.cwd(), 'webhook-server.js');
+console.log('📄 Loading from absolute path:', webhookServerPath);
+require(webhookServerPath);
 
 console.log('✅ FirstQA production server started successfully!'); 
