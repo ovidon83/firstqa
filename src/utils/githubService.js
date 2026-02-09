@@ -1992,7 +1992,7 @@ Or wait until next month when your limit resets.
   // Add header mentioning new commits if any
   if (newCommits.length > 0) {
     const isUpdate = lastAnalyzedSHA !== null;
-    acknowledgmentComment += `## 🔄 ${isUpdate ? 'Analysis Update - New Commits Detected' : 'Complete PR Analysis'}\n\n`;
+    acknowledgmentComment += `## 🔄 ${isUpdate ? 'Analysis Update - New Commits Detected' : 'QA Analysis - by Ovi (the AI QA)'}\n\n`;
     
     if (isUpdate) {
       acknowledgmentComment += `✅ **${newCommits.length} new commit(s)** added since last review:\n\n`;

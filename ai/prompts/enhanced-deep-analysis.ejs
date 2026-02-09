@@ -116,7 +116,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)
 - **AUTOMATION TYPE**: Best-fit test type based on changes and testing strategy:
   - **E2E (End-to-End)**: Full user flows through UI, critical paths, user journeys spanning multiple components
-  - **Integration**: API/service integration, database operations, component interactions, backend flows
+  - **Integration**: Be SPECIFIC - use one of: API Contract (HTTP endpoints, request/response), Database (schema, migrations, CRUD, queries), Service-to-Service (API-to-API, webhooks), Component (React/module interactions), Third-party (external APIs, OAuth, payment gateways)
   - **Unit**: Specific function/logic tests, utility functions, isolated component behavior
   - **Visual**: UI appearance, styling, layout, responsive design (if UI changes detected)
   - **Manual**: Complex scenarios requiring human judgment, exploratory testing, UX validation
@@ -305,8 +305,12 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
       - Analyze what changed and recommend the BEST-FIT test automation type for each scenario
       - **E2E (End-to-End)**: Use for full user flows through UI, multi-step journeys, critical paths spanning multiple pages/components
         - Examples: Login → Create → Submit flow, Purchase checkout, Full feature workflows
-      - **Integration**: Use for API/backend tests, database operations, service integrations, component interactions
-        - Examples: API endpoint testing, database CRUD operations, service-to-service calls, backend business logic
+      - **Integration**: Be SPECIFIC about the type. Use one of:
+        - **API Contract**: HTTP endpoints, request/response validation, status codes, API schema
+        - **Database**: Schema migrations, CRUD operations, queries, transactions, ORM behavior
+        - **Service-to-Service**: API-to-API calls, webhooks, microservice communication
+        - **Component**: React components with hooks/context, module interactions, parent-child component flows
+        - **Third-party**: External APIs, OAuth flows, payment gateways, SDK integrations
       - **Unit**: Use for isolated function/logic tests, utility functions, single component behavior, pure logic
         - Examples: Validation functions, data transformers, calculations, isolated helper methods
       - **Visual**: Use for UI appearance, styling, layout, responsive design, visual regression
@@ -315,7 +319,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
         - Examples: Complex UX flows, accessibility checks, exploratory edge cases, subjective quality assessment
       - **Selection Strategy** (APPLY EXPERT TEST AUTOMATION JUDGMENT):
         - Frontend UI changes (buttons, forms, pages, navigation) → E2E
-        - Backend logic, API changes, database schema → Integration
+        - API/HTTP changes → Integration (API Contract); DB changes → Integration (Database); service calls → Integration (Service-to-Service)
         - Pure functions, utilities, calculations, helpers → Unit
         - CSS/styling only changes → Visual
         - Complex UX requiring judgment → Manual
