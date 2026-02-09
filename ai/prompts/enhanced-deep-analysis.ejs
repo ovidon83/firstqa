@@ -81,18 +81,21 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 <table style="width: 100%; border-collapse: collapse;">
 <tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Details</th></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[If Go: "Ready after reviewing analysis and all tests pass." If No-Go: specific blocker reason]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Affected Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[List 2-4 specific components/services/modules affected, e.g., "Auth API, User Dashboard, Session Store"]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🟡 Caution / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[Base this on actual findings below: 🟢 Go if low risk & safe to release after testing, 🟡 Caution if concerns need review, 🔴 No-Go only if clear blockers exist - explain why]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Affected Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[List 2-4 specific components/services/modules affected, e.g., "Database Schema, IPC API, SQLAlchemy Models"]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">⚠️ Risk Level</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[Assess overall risk based on: critical bugs found, security issues, data integrity risks, missing validation - explain the main risk factors]</td></tr>
 </table>
 
 ## 🔍 Code Review & Bugs
 
-[AI will generate a bullet list of code issues and bugs (no sub-headings):
+[AI will generate a bullet list of code issues and bugs, SORTED BY SEVERITY (blockers first, then high, then medium):
 - Every item MUST include `file:line` reference
-- Format: "Issue description at `file.js:line` — impact"
-- Example: "Null check missing: `user.profile.name` at `src/Button.js:56` — crashes if profile is null"
+- Format: "[SEVERITY] Issue description at `file.js:line` — impact"
+- Severity markers: 🚫 BLOCKER (must fix before release), 🔴 HIGH, 🟡 MEDIUM
+- Example: "🔴 Null check missing: `user.profile.name` at `src/Button.js:56` — crashes if profile is null"
+- Example: "🚫 BLOCKER: Data corruption risk in `scripts/sql/migrations/add_reaction_breakdown.sql:18` — overwrites NULL with zeros"
 - If nothing found: "✅ No critical issues found."
-- MAX 5 items — only issues that affect quality]
+- MAX 6 items — focus on real issues that affect quality, no false positives]
 
 ## 🧪 Test Recipe
 
@@ -293,14 +296,21 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
 
 - For Code Review & Bugs (MERGED SECTION):
-  - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real issues.
-  - **REQUIRED**: Every item MUST include file:line (e.g., `src/api/user.js:45`)
-  - **MAX 5 ITEMS**: Only the most critical. Less is more.
-  - **FORMAT**: `Issue: Description at \`file:line\` - impact`
-  - **If nothing found**: Write "✅ No critical issues found."
+  - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real, verifiable issues - NO FALSE POSITIVES.
+  - **REQUIRED**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
+  - **MAX 6 ITEMS**: Only critical issues that affect quality. Less is more.
+  - **SORT BY SEVERITY**: 🚫 BLOCKER items first, then 🔴 HIGH, then 🟡 MEDIUM
+  - **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that must be fixed before release (security, data corruption, critical path breaks)
+  - **FORMAT**: `[SEVERITY] Issue type: Description at \`file:line\` - impact`
+  - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text like "in other areas" or explanations
+  - **DO NOT ADD**: Do not add any additional text after listing issues. No summaries, no "other areas", no extra explanations.
 - For Release Pulse:
-  - **Release Decision**: First row. If Go: "Ready after reviewing analysis and all tests pass." If No-Go: specific blocker.
-  - **Affected Areas**: Second row. List 2-4 specific components/services touched. Use actual names from code.
+  - **Release Decision**: First row. Evaluate based on actual findings in Code Review & Bugs:
+    - 🟢 Go: No blockers, safe to release after testing passes
+    - 🟡 Caution: Some concerns that need review before release
+    - 🔴 No-Go: Clear blockers exist (specify what they are)
+  - **Affected Areas**: Second row. List 2-4 specific components/services/modules touched. Use actual names from code.
+  - **Risk Level**: Third row. Assess overall risk (🔴 High / 🟡 Medium / 🟢 Low) based on: bugs found, security concerns, data integrity risks, missing validation. Explain the main risk factors briefly.
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
@@ -311,26 +321,43 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 **RELEASE PULSE EVALUATION REQUIREMENTS:**
 
-**IMPORTANT: Be REALISTIC. Not every PR is risky! Default to "Go" unless there's a clear reason not to.**
+**IMPORTANT: Be REALISTIC and BASE ON ACTUAL FINDINGS. Evaluate Release Decision based on what you found in Code Review & Bugs section.**
 
-- **Release Decision** (FIRST ROW):
-  - **🟢 Go**: "Ready after reviewing analysis and all tests pass." — default for most PRs
-  - **🔴 No-Go**: Only for CRITICAL blockers (security vulnerabilities, data corruption, broken critical paths) — state the specific blocker
+- **Release Decision** (FIRST ROW) - Based on actual findings:
+  - **🟢 Go**: Safe to release after testing passes. Use when: no blockers found, only minor/medium issues or no issues at all
+  - **🟡 Caution**: Concerns need review before release. Use when: high-severity issues found (not blockers), risky changes without proper validation, unclear impacts
+  - **🔴 No-Go**: Clear blockers exist that MUST be fixed first. Use when: 🚫 BLOCKER issues found in Code Review, security vulnerabilities, data corruption risks, broken critical paths
+  - **Details field**: If Go, say "Low risk - safe to release after testing" or similar based on findings. If Caution/No-Go, explain the specific concerns/blockers found.
 
 - **Affected Areas** (SECOND ROW):
   - List 2-4 SPECIFIC components/services/modules touched by the changes
-  - Use actual names from the codebase (e.g., "Auth API", "UserService", "Dashboard Component", "Webhook Handler")
-  - Level: 🔴 High = critical path (auth, payment, core business logic), 🟡 Medium = important features, 🟢 Low = non-critical
+  - Use actual names from the codebase (e.g., "Database Schema", "IPC API", "SQLAlchemy Models", "Webhook Handler")
+  - Level: 🔴 High = critical path (auth, payment, database, core business logic), 🟡 Medium = important features, 🟢 Low = non-critical
+
+- **Risk Level** (THIRD ROW):
+  - Assess overall risk: 🔴 High / 🟡 Medium / 🟢 Low
+  - Base assessment on: bugs found in Code Review section, security concerns, data integrity risks, missing validation, critical area changes
+  - **Details field**: Explain the main risk factors concisely. Examples:
+    - 🟢 Low: "Documentation changes only" or "Minor bug fixes with proper validation"
+    - 🟡 Medium: "Database schema changes require careful testing" or "New fields added without full constraints"
+    - 🔴 High: "Data integrity risk - NULL values overwritten" or "Security validation missing in critical flow"
 
 **CODE REVIEW & BUGS REQUIREMENTS:**
-- **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real issues.
+- **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real, verifiable issues - NO FALSE POSITIVES.
 - **STRICT RULE**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
-- **MAX 5 ITEMS**: Only the most critical issues that affect quality. Less is more.
+- **MAX 6 ITEMS**: Only the most critical issues that affect quality. Less is more.
+- **SORT BY SEVERITY**: List items in order: 🚫 BLOCKER first, then 🔴 HIGH, then 🟡 MEDIUM
+- **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that MUST be fixed before release:
+  - Security vulnerabilities
+  - Data corruption/integrity risks
+  - Critical path breaks
+  - Unhandled errors in critical flows
 - **CATEGORIES**:
   - Code Issues: null checks, incorrect logic, security risks, memory leaks, performance problems
   - Functional Bugs: broken flows, edge case failures, UI bugs, integration issues
-- **FORMAT**: `Issue type: Brief description at \`file:line\` - impact`
-  - Example: "Null check missing: `user.profile.name` at `src/Button.js:56` crashes if profile is null"
-  - Example: "Memory leak: `setTimeout` not cleared at `src/hooks/useEffect.js:67` accumulates timers"
-- **DO NOT include**: minor style issues, "could potentially" statements, maintainability opinions
-- **If nothing found**: Write "✅ No critical issues found." — developers trust this means clean code
+- **FORMAT**: `[SEVERITY] Issue type: Brief description at \`file:line\` - impact`
+  - Example: "🔴 Null check missing: `user.profile.name` at `src/Button.js:56` — crashes if profile is null"
+  - Example: "🚫 BLOCKER: Data corruption risk in `migrations/add_column.sql:18` — overwrites NULL with zeros"
+  - Example: "🟡 Default value issue: Missing fallback at `api/posts.py:96` — returns 0 instead of NULL"
+- **DO NOT include**: minor style issues, "could potentially" statements, maintainability opinions, false positives
+- **If nothing found**: Write ONLY "✅ No critical issues found." — NO additional text, summaries, or explanations

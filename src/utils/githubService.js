@@ -1892,24 +1892,9 @@ Or wait until next month when your limit resets.
     if (aiInsights && aiInsights.success) {
       console.log('✅ FirstQA Ovi AI analysis completed successfully');
       
-      // Apply smart Release Pulse analysis
-      try {
-        const { enhanceReleasePulseInMarkdown } = require('../services/releasePulseAnalyzer');
-        
-        // Fetch PR details for file stats
-        const prDetails = await fetchPR(repository.full_name, issue.number);
-        
-        aiInsights = enhanceReleasePulseInMarkdown(aiInsights, {
-          filesChanged: prDetails.changed_files || 0,
-          additions: prDetails.additions || 0,
-          deletions: prDetails.deletions || 0,
-          files: prDetails.files?.map(f => f.filename) || []
-        });
-        console.log('✅ Applied smart Release Pulse analysis for /qa command');
-      } catch (error) {
-        console.error('⚠️  Release Pulse enhancement failed:', error.message);
-        // Continue with original analysis
-      }
+      // NOTE: Release Pulse analysis now handled directly in AI prompt (enhanced-deep-analysis.ejs)
+      // The AI generates accurate Release Decision, Affected Areas, and Risk Level based on actual findings
+      // No need for post-processing since prompt instructions are comprehensive
     } else {
       console.error('❌ FirstQA Ovi AI analysis failed:', aiInsights?.error, aiInsights?.details);
     }
@@ -2640,20 +2625,8 @@ async function handlePROpened(repository, pr, installationId) {
   if (aiInsights && aiInsights.success) {
     console.log('✅ Comprehensive analysis generated successfully');
     
-    // Apply smart Release Pulse analysis
-    try {
-      const { enhanceReleasePulseInMarkdown } = require('../services/releasePulseAnalyzer');
-      aiInsights = enhanceReleasePulseInMarkdown(aiInsights, {
-        filesChanged: pr.changed_files || 0,
-        additions: pr.additions || 0,
-        deletions: pr.deletions || 0,
-        files: pr.files?.map(f => f.filename) || []
-      });
-      console.log('✅ Applied smart Release Pulse analysis');
-    } catch (error) {
-      console.error('⚠️  Release Pulse enhancement failed:', error.message);
-      // Continue with original analysis
-    }
+    // NOTE: Release Pulse analysis now handled directly in AI prompt (enhanced-deep-analysis.ejs)
+    // The AI generates accurate Release Decision, Affected Areas, and Risk Level based on actual findings
   } else {
     console.error('❌ Comprehensive analysis generation failed:', aiInsights?.error);
   }
@@ -2750,19 +2723,7 @@ async function handlePRMergedToStaging(repository, pr, userId, installationId) {
       selectorHints
     });
 
-    if (aiInsights?.success) {
-      try {
-        const { enhanceReleasePulseInMarkdown } = require('../services/releasePulseAnalyzer');
-        aiInsights = enhanceReleasePulseInMarkdown(aiInsights, {
-          filesChanged: pr.changed_files || 0,
-          additions: pr.additions || 0,
-          deletions: pr.deletions || 0,
-          files: pr.files?.map(f => (typeof f === 'string' ? f : f.filename)) || []
-        });
-      } catch (e) {
-        console.warn('Release Pulse enhancement failed:', e.message);
-      }
-    }
+    // NOTE: Release Pulse analysis now handled directly in AI prompt (enhanced-deep-analysis.ejs)
   } catch (error) {
     console.error('Post-merge analysis failed:', error.message);
     aiInsights = { success: false, error: error.message };
