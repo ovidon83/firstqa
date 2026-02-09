@@ -23,7 +23,7 @@ Before analyzing anything, categorize the changed files:
    - Release Confidence: 🟢 High
    - Change Impact: 🟢 Low
    - Release Decision: 🟢 Go
-   - Code Review: "No code changes to review."
+   - Bugs & Risks: "✅ No critical issues found."
    - Bugs: "No bugs identified - non-code changes only."
    - Test Recipe: Simple verification test only (e.g., "Verify file exists and is readable")
    
@@ -86,9 +86,9 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">⚠️ Risk Level</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[Assess overall risk based on: critical bugs found, security issues, data integrity risks, missing validation - explain the main risk factors]</td></tr>
 </table>
 
-## 🔍 Code Review & Bugs
+## 🔍 Bugs & Risks
 
-[AI will generate a bullet list of code issues and bugs, SORTED BY SEVERITY (blockers first, then high, then medium):
+[AI will generate a bullet list of bugs and risks, SORTED BY SEVERITY (blockers first, then high, then medium):
 - Every item MUST include `file:line` reference
 - Format: "[SEVERITY] Issue description at `file.js:line` — impact"
 - Severity markers: 🚫 BLOCKER (must fix before release), 🔴 HIGH, 🟡 MEDIUM
@@ -99,8 +99,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🧪 Test Recipe
 
-| Scenario | Steps | Expected Result | Priority |
-|----------|-------|-----------------|----------|
+| Scenario | Steps | Expected Result | Priority | Automation Type |
+|----------|-------|-----------------|----------|-----------------|
 [AI will generate test cases here — ORDERED BY PRIORITY (High first, then Medium)]
 
 **TEST CASE REQUIREMENTS:**
@@ -114,6 +114,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **EXPECTED RESULT**: Specific, verifiable outcomes with exact details from code. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
 - **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)
+- **AUTOMATION TYPE**: Best-fit test type based on changes and testing strategy:
+  - **E2E (End-to-End)**: Full user flows through UI, critical paths, user journeys spanning multiple components
+  - **Integration**: API/service integration, database operations, component interactions, backend flows
+  - **Unit**: Specific function/logic tests, utility functions, isolated component behavior
+  - **Visual**: UI appearance, styling, layout, responsive design (if UI changes detected)
+  - **Manual**: Complex scenarios requiring human judgment, exploratory testing, UX validation
+  - Choose based on: what changed (UI/backend/logic), affected components, test scope, automation feasibility
 
 
 ---
@@ -294,8 +301,28 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **Test Complete Flows**: Test full user journeys, not just isolated actions
     - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors extracted from code
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
+    - **Automation Type** (NEW COLUMN - CRITICAL):
+      - Analyze what changed and recommend the BEST-FIT test automation type for each scenario
+      - **E2E (End-to-End)**: Use for full user flows through UI, multi-step journeys, critical paths spanning multiple pages/components
+        - Examples: Login → Create → Submit flow, Purchase checkout, Full feature workflows
+      - **Integration**: Use for API/backend tests, database operations, service integrations, component interactions
+        - Examples: API endpoint testing, database CRUD operations, service-to-service calls, backend business logic
+      - **Unit**: Use for isolated function/logic tests, utility functions, single component behavior, pure logic
+        - Examples: Validation functions, data transformers, calculations, isolated helper methods
+      - **Visual**: Use for UI appearance, styling, layout, responsive design, visual regression
+        - Examples: Button color changes, layout adjustments, CSS modifications, responsive breakpoints
+      - **Manual**: Use ONLY for complex scenarios requiring human judgment, exploratory testing, UX validation
+        - Examples: Complex UX flows, accessibility checks, exploratory edge cases, subjective quality assessment
+      - **Selection Strategy** (APPLY EXPERT TEST AUTOMATION JUDGMENT):
+        - Frontend UI changes (buttons, forms, pages, navigation) → E2E
+        - Backend logic, API changes, database schema → Integration
+        - Pure functions, utilities, calculations, helpers → Unit
+        - CSS/styling only changes → Visual
+        - Complex UX requiring judgment → Manual
+        - Multi-layer changes (UI + API + DB) → E2E for critical path + Integration for backend
+      - **IMPORTANT**: Choose based on: what actually changed in the PR, scope of test scenario, feasibility of automation, ROI of automation vs manual testing
 
-- For Code Review & Bugs (MERGED SECTION):
+- For Bugs & Risks (MERGED SECTION):
   - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real, verifiable issues - NO FALSE POSITIVES.
   - **REQUIRED**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
   - **MAX 6 ITEMS**: Only critical issues that affect quality. Less is more.
@@ -305,7 +332,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text like "in other areas" or explanations
   - **DO NOT ADD**: Do not add any additional text after listing issues. No summaries, no "other areas", no extra explanations.
 - For Release Pulse:
-  - **Release Decision**: First row. Evaluate based on actual findings in Code Review & Bugs:
+  - **Release Decision**: First row. Evaluate based on actual findings in Bugs & Risks:
     - 🟢 Go: No blockers, safe to release after testing passes
     - 🟡 Caution: Some concerns that need review before release
     - 🔴 No-Go: Clear blockers exist (specify what they are)
@@ -317,16 +344,41 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - NOT: "1. Open form 2. Fill fields 3. Submit"
   - This ensures the table displays steps as proper numbered lists
 
-**REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
+## 🎯 Final QA Recommendation
+
+[Generate a clear, actionable final recommendation box:
+- Use the format shown below based on the Release Decision from Release Pulse
+- If Release Decision is 🔴 No-Go or 🟡 Caution: Use ❌ **NO-GO** and explain what blockers/concerns must be addressed
+- If Release Decision is 🟢 Go with no issues: Use ✅ **GO** with brief reasoning (e.g., "Low risk changes, safe to release after testing")
+- If Release Decision is 🟢 Go but with minor issues: Use ✅ **GO** but mention "after addressing [specific items]"
+- Keep it concise (1-2 sentences max), action-oriented, and based strictly on findings above]
+
+**FORMAT EXAMPLE (choose appropriate emoji and text based on analysis):**
+
+> ### 🚦 Final QA Recommendation
+> 
+> **❌ NO-GO**
+> 
+> Do not release until blockers are fixed and tests pass on staging.
+
+OR
+
+> ### 🚦 Final QA Recommendation
+> 
+> **✅ GO**
+> 
+> Safe to release after testing passes. Low risk changes with proper validation.
+
+**REMEMBER: STOP YOUR OUTPUT AFTER THE "Final QA Recommendation" SECTION. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
 **RELEASE PULSE EVALUATION REQUIREMENTS:**
 
-**IMPORTANT: Be REALISTIC and BASE ON ACTUAL FINDINGS. Evaluate Release Decision based on what you found in Code Review & Bugs section.**
+**IMPORTANT: Be REALISTIC and BASE ON ACTUAL FINDINGS. Evaluate Release Decision based on what you found in Bugs & Risks section.**
 
 - **Release Decision** (FIRST ROW) - Based on actual findings:
   - **🟢 Go**: Safe to release after testing passes. Use when: no blockers found, only minor/medium issues or no issues at all
   - **🟡 Caution**: Concerns need review before release. Use when: high-severity issues found (not blockers), risky changes without proper validation, unclear impacts
-  - **🔴 No-Go**: Clear blockers exist that MUST be fixed first. Use when: 🚫 BLOCKER issues found in Code Review, security vulnerabilities, data corruption risks, broken critical paths
+  - **🔴 No-Go**: Clear blockers exist that MUST be fixed first. Use when: 🚫 BLOCKER issues found in Bugs & Risks, security vulnerabilities, data corruption risks, broken critical paths
   - **Details field**: If Go, say "Low risk - safe to release after testing" or similar based on findings. If Caution/No-Go, explain the specific concerns/blockers found.
 
 - **Affected Areas** (SECOND ROW):
@@ -336,13 +388,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 - **Risk Level** (THIRD ROW):
   - Assess overall risk: 🔴 High / 🟡 Medium / 🟢 Low
-  - Base assessment on: bugs found in Code Review section, security concerns, data integrity risks, missing validation, critical area changes
+  - Base assessment on: bugs found in Bugs & Risks section, security concerns, data integrity risks, missing validation, critical area changes
   - **Details field**: Explain the main risk factors concisely. Examples:
     - 🟢 Low: "Documentation changes only" or "Minor bug fixes with proper validation"
     - 🟡 Medium: "Database schema changes require careful testing" or "New fields added without full constraints"
     - 🔴 High: "Data integrity risk - NULL values overwritten" or "Security validation missing in critical flow"
 
-**CODE REVIEW & BUGS REQUIREMENTS:**
+**BUGS & RISKS REQUIREMENTS:**
 - **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real, verifiable issues - NO FALSE POSITIVES.
 - **STRICT RULE**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
 - **MAX 6 ITEMS**: Only the most critical issues that affect quality. Less is more.
