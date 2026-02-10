@@ -1710,15 +1710,14 @@ READY FOR DEV SCORE (1-10):
 
 OUTPUT STRUCTURE:
 
-- toDo: array of specific actions needed BEFORE dev starts (derived from gaps). Be concrete.
-- toAdd: array of { title, description } — things Ovi/QA can contribute directly: acceptance criteria, edge cases, error handling. Each is actionable content to add to the ticket.
-- toClarify: array of { question, context } — numbered questions ONLY where you lack sufficient context. Brief context after arrow. Omit if ticket is clear.
+- toDo: simple meta-actions only when needed (e.g., "Review the recommendations and update the ticket as needed"). Omit or use 1 item max. Do NOT list specific improvements here.
+- recommendations: array of max 5 most critical things needed to make the ticket and the change a success. Single list, no breakdown. Be direct and actionable.
 - testRecipe: array of { testType, scenario, priority, blocked? }
   - testType: "E2E" | "API" | "UI" | "Manual" (no Integration)
   - priority: "Smoke" | "Critical Path" | "Regression"
   - blocked: true when scenario awaits a toClarify item
 
-MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, toDo, toClarify.
+MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, toDo.
 
 **ENHANCED TEST RECIPE REQUIREMENTS:**
 - **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
@@ -1741,28 +1740,24 @@ Return JSON format. For FULL analysis:
   "readyForDevScore": 1-10,
   "readyForDevVerdict": "Short verdict",
   "affectedAreas": ["area1", "area2"],
-  "toDo": ["Define specific input fields for registration", "Specify validation rules for each field", "Clarify post-registration flow"],
-  "toAdd": [
-    {"title": "Acceptance criteria: email validation", "description": "Email must be valid format, max 254 chars. Show inline error on blur."},
-    {"title": "Edge case: expired session during signup", "description": "Redirect to login with message if session expires mid-flow."}
-  ],
-  "toClarify": [
-    {"question": "What specific fields are required for registration?", "context": "Ticket does not specify which user details are needed."},
-    {"question": "What is the expected behavior after successful registration?", "context": "Ticket mentions two possible outcomes but does not specify which to implement."}
+  "toDo": ["Review the recommendations and update the ticket as needed"],
+  "recommendations": [
+    "Define specific input fields required (e.g., email, password, username)",
+    "Specify validation rules for each field",
+    "Clarify post-registration flow: auto sign-in or redirect to login",
+    "Add error handling and user feedback for invalid inputs"
   ],
   "testRecipe": [
     {"testType": "E2E", "scenario": "Complete registration with valid inputs → success", "priority": "Smoke", "blocked": false},
-    {"testType": "API", "scenario": "Submit invalid email → returns 400", "priority": "Critical Path", "blocked": false},
-    {"testType": "E2E", "scenario": "Multi-subs user flow", "priority": "Critical Path", "blocked": true}
+    {"testType": "API", "scenario": "Submit invalid email → returns 400", "priority": "Critical Path", "blocked": false}
   ]
 }
 
 Test types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression. Set blocked: true when scenario awaits a toClarify answer.
 
 **FINAL VERIFICATION:**
-- Test scenarios use specific, realistic data from the ticket
-- toAdd items are actionable (Ovi can add them to the ticket)
-- toClarify only includes questions where you truly lack context
+- recommendations: max 5, most critical items only
+- toDo: only when recommendations exist — use "Review the recommendations and update the ticket as needed" or similar
 - testRecipe ordered: Smoke first, then Critical Path, then Regression`;
 
   const response = await openai.chat.completions.create({
@@ -1804,16 +1799,10 @@ function generateTicketFallbackAnalysis(title, description, platform) {
     readyForDevScore: 4,
     readyForDevVerdict: 'Manual review recommended due to AI processing error.',
     affectedAreas: ['auth', 'email', 'security'],
-    toDo: [
+    toDo: ['Review the recommendations and update the ticket as needed'],
+    recommendations: [
       'Add acceptance criteria for error states',
-      'Confirm edge case behavior with product'
-    ],
-    toAdd: [
-      { title: 'Acceptance criteria: error handling', description: 'Define error messages and retry behavior.' }
-    ],
-    toClarify: [
-      { question: 'What if the user enters an invalid email format?', context: 'No error handling specified.' },
-      { question: 'What if the email service is down?', context: 'No fallback specified.' }
+      'Define error handling and user feedback'
     ],
     testRecipe: [
       { testType: 'E2E', scenario: 'Successful flow → user can complete action', priority: 'Smoke', blocked: false },

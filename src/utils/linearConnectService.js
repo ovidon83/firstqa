@@ -584,38 +584,31 @@ function truncate(str, n = 800) {
  * Normalize AI analysis to safe structure (senior QA/CTO format)
  */
 function normalizeAnalysis(analysis) {
+  const recs = asStringArray(analysis.recommendations || analysis.improvementsNeeded || []);
   const normalized = {
     readyForDevScore: analysis.readyForDevScore ?? (analysis.readyForDevelopmentScore ? Math.round(analysis.readyForDevelopmentScore * 2) : undefined),
     readyForDevVerdict: asString(analysis.readyForDevVerdict || analysis.message || ''),
     affectedAreas: asStringArray(analysis.affectedAreas || []),
-    toDo: asStringArray(analysis.toDo || analysis.recommendations || analysis.improvementsNeeded || []),
-    toAdd: Array.isArray(analysis.toAdd)
-      ? analysis.toAdd.map(x => ({ title: asString(x.title || x.name || x), description: asString(x.description || x.detail || '') }))
-      : [],
-    toClarify: Array.isArray(analysis.toClarify)
-      ? analysis.toClarify.map(c => ({ question: asString(c.question || c), context: asString(c.context || '') }))
-      : [],
+    toDo: asStringArray(analysis.toDo || []),
+    recommendations: recs.slice(0, 5),
     testRecipe: []
   };
 
-  // Fallback: map old criticalClarifications/missingAcceptanceCriteria to toClarify
-  if (normalized.toClarify.length === 0) {
-    const critical = analysis.criticalClarifications || [];
-    const missing = analysis.missingAcceptanceCriteria || [];
-    const qa = analysis.qaQuestions || [];
-    [...critical, ...missing, ...qa].slice(0, 6).forEach(c => {
-      normalized.toClarify.push({
-        question: asString(typeof c === 'object' ? c.question : c),
-        context: asString(typeof c === 'object' ? (c.context || c.impact) : '')
-      });
-    });
-    normalized.toClarify = normalized.toClarify.filter(x => x.question);
+  // Fallback: map old formats to recommendations
+  if (normalized.recommendations.length === 0) {
+    const sources = [
+      ...(analysis.toAdd || []).map(x => asString(x.title || x.name || x.description || x)),
+      ...(analysis.toClarify || []).map(c => typeof c === 'object' ? asString(c.question) : asString(c)),
+      ...(analysis.criticalClarifications || []).map(c => typeof c === 'object' ? asString(c.question) : asString(c)),
+      ...(analysis.qaQuestions || []),
+      ...(analysis.keyRisks || [])
+    ];
+    normalized.recommendations = sources.filter(Boolean).slice(0, 5);
   }
 
-  // Fallback: map improvementsNeeded to toAdd if toAdd empty
-  if (normalized.toAdd.length === 0 && (analysis.improvementsNeeded?.length || analysis.recommendations?.length)) {
-    const items = analysis.improvementsNeeded || analysis.recommendations || [];
-    normalized.toAdd = items.slice(0, 5).map(i => ({ title: truncate(asString(i), 80), description: '' }));
+  // Fallback: simple toDo when recommendations exist
+  if (normalized.toDo.length === 0 && normalized.recommendations.length > 0) {
+    normalized.toDo = ['Review the recommendations and update the ticket as needed'];
   }
 
   // Normalize test recipe - types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression
@@ -674,28 +667,11 @@ function formatAnalysisComment(analysis) {
       comment += '\n---\n\n';
     }
 
-    // Improvements: To add + To clarify
-    if (a.toAdd.length > 0 || a.toClarify.length > 0) {
-      comment += '### 📋 Improvements\n\n';
-      if (a.toAdd.length > 0) {
-        comment += '**To add:**\n\n';
-        a.toAdd.forEach(x => {
-          const title = truncate(x.title || x.description, 100);
-          const desc = x.description && x.description !== title ? truncate(x.description, 150) : '';
-          comment += `> ✅ **${title}**\n`;
-          if (desc) comment += `> ${desc}\n`;
-          comment += '\n';
-        });
-      }
-      if (a.toClarify.length > 0) {
-        comment += '**To clarify:**\n\n';
-        a.toClarify.forEach((c, i) => {
-          comment += `${i + 1}. **${truncate(c.question, 120)}**\n`;
-          if (c.context) comment += `   → ${truncate(c.context, 200)}\n`;
-          comment += '\n';
-        });
-      }
-      comment += '---\n\n';
+    // Recommendations
+    if (a.recommendations.length > 0) {
+      comment += '### 📋 Recommendations\n\n';
+      a.recommendations.forEach(r => { comment += `- ${truncate(r, 250)}\n`; });
+      comment += '\n---\n\n';
     }
 
     // Test Recipe
@@ -714,13 +690,13 @@ function formatAnalysisComment(analysis) {
     }
 
     // Footer
-    comment += '---\n\n<sub>🤖 QA Analysis by **Ovi (the AI QA)**</sub>';
+    comment += '---\n\n🤖 QA Analysis by **Ovi (the AI QA)**';
 
     return comment;
   } catch (error) {
     console.error('❌ Error formatting analysis comment:', error);
     const keys = analysis ? Object.keys(analysis).join(', ') : 'none';
-    return `🤖 FirstQA Analysis\n\n(Formatting failed. Raw keys: ${keys})\n\n---\n<sub>🤖 QA Analysis by **Ovi (the AI QA)**</sub>`;
+    return `🤖 FirstQA Analysis\n\n(Formatting failed. Raw keys: ${keys})\n\n---\n🤖 QA Analysis by **Ovi (the AI QA)**`;
   }
 }
 
