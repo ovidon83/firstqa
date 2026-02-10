@@ -685,14 +685,14 @@ function formatAnalysisComment(analysis) {
       comment += '---\n\n';
     }
 
-    // Test Recipe: Name | Scenario | Priority | Automation Level (Linear renders Markdown, not HTML)
+    // Test Recipe: Name | Steps | Priority | Automation Level
     if (a.testRecipe.length > 0) {
       comment += '### 🧪 Test Recipe\n\n';
-      comment += '| Name | Scenario | Priority | Automation Level |\n';
-      comment += '|------|----------|----------|------------------|\n';
+      comment += '| Name | Steps | Priority | Automation Level |\n';
+      comment += '|------|-------|----------|------------------|\n';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
       a.testRecipe.forEach(t => {
-        const scenarioDisplay = truncate(t.scenario, 350).replace(/\n/g, ' · ');
+        const scenarioDisplay = truncate(t.scenario, 350).replace(/\n/g, ' → ');
         const prio = priorityEmoji[t.priority] || '🟡';
         comment += `| **${t.name}** | ${scenarioDisplay} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
       });
