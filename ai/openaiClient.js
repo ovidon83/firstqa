@@ -1710,9 +1710,11 @@ OUTPUT STRUCTURE:
 - affectedAreas: array of strings (e.g. ["auth", "registration", "validation"]).
 - highestRisk: string or null. If there's a notable risk or blocker, state it briefly. Otherwise omit or null.
 - recommendations: array of max 5 items. Each item must be a READY-TO-COPY acceptance criteria or text block that can be pasted directly into the ticket body. Full, self-contained sentences.
-- testRecipe: REQUIRED. array of 4-8 test scenarios { testType, scenario, priority }. Sort by priority (Smoke first, then Critical Path, then Regression).
-  - testType: "UI" | "API" | "Unit/Component" | "Manual". Use UI for user-facing flows (including E2E). Smoke must be UI for functional changes (user perspective). For non-functional (e.g. backend-only): use API as smoke if no UI, or UI if the API is consumed in the UI. Unit/Component for isolated logic/components.
+- testRecipe: REQUIRED. array of 4-8 test scenarios { name, scenario, priority, automationLevel }. Sort by priority (Smoke first, then Critical Path, then Regression).
+  - name: short descriptive test name (e.g. "Happy path registration")
+  - scenario: test steps as a clear, numbered list. Format like: "1. Navigate to /register. 2. Enter valid email, password, username. 3. Submit form. 4. Verify redirect to dashboard and welcome toast."
   - priority: "Smoke" | "Critical Path" | "Regression"
+  - automationLevel: "UI" | "API" | "Unit/Component" | "Manual". Use UI for user-facing flows. Smoke = UI for functional changes.
 
 MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readinessScore, affectedAreas, highestRisk (if any), recommendations, testRecipe.
 
@@ -1743,8 +1745,8 @@ Return JSON format. For FULL analysis:
     "**Error handling:** Inline validation per field. On submit failure: toast with error, keep form data, retry option."
   ],
   "testRecipe": [
-    {"testType": "UI", "scenario": "Complete registration with valid inputs → user lands on dashboard", "priority": "Smoke"},
-    {"testType": "API", "scenario": "Submit invalid email format → returns 400 with clear error message", "priority": "Critical Path"}
+    {"name": "Happy path registration", "scenario": "1. Navigate to /register. 2. Enter valid email, password, username. 3. Submit form. 4. Verify redirect to dashboard and welcome toast.", "priority": "Smoke", "automationLevel": "UI"},
+    {"name": "Invalid email validation", "scenario": "1. Navigate to /register. 2. Enter invalid email format. 3. Submit form. 4. Verify inline error and 400 response.", "priority": "Critical Path", "automationLevel": "API"}
   ]
 }
 
@@ -1794,8 +1796,8 @@ function generateTicketFallbackAnalysis(title, description, platform) {
       '**Validation:** Define validation rules and inline error display.'
     ],
     testRecipe: [
-      { testType: 'UI', scenario: 'Successful flow → user can complete action', priority: 'Smoke' },
-      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path' }
+      { name: 'Happy path', scenario: '1. Complete main flow. 2. Verify success.', priority: 'Smoke', automationLevel: 'UI' },
+      { name: 'Invalid input handling', scenario: '1. Submit invalid input. 2. Verify appropriate error returned.', priority: 'Critical Path', automationLevel: 'API' }
     ]
   };
 }

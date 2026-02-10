@@ -611,7 +611,7 @@ function normalizeAnalysis(analysis) {
   let rawRecipe = analysis.testRecipe || [];
   if (!Array.isArray(rawRecipe)) rawRecipe = [rawRecipe].filter(Boolean);
   const allowedTypes = ['UI', 'API', 'Unit/Component', 'Manual'];
-  const mapTestType = (val) => {
+  const mapAutomationLevel = (val) => {
     const v = String(val || '').trim();
     if (allowedTypes.includes(v)) return v;
     const l = v.toLowerCase();
@@ -628,20 +628,30 @@ function normalizeAnalysis(analysis) {
     if (v.includes('regression') || v === 'low') return 'Regression';
     return 'Critical Path';
   };
-  let recipe = rawRecipe.map((test) => ({
-    testType: mapTestType(test.testType || test.automation),
-    scenario: asString(test.scenario || test.name || test.title || ''),
-    priority: mapPriority(test.priority)
-  }));
+  let recipe = rawRecipe.map((test) => {
+    const scenarioRaw = test.scenario || test.name || test.title || '';
+    const steps = asSteps(scenarioRaw);
+    const scenarioFormatted = steps.length > 1
+      ? steps.map((s, i) => `${i + 1}. ${s}`).join('\n')
+      : asString(scenarioRaw);
+    const name = asString(test.name || test.title || '').trim()
+      || (steps[0] ? truncate(steps[0], 50) : 'Test');
+    return {
+      name: truncate(name, 60),
+      scenario: scenarioFormatted,
+      priority: mapPriority(test.priority),
+      automationLevel: mapAutomationLevel(test.automationLevel || test.testType || test.automation)
+    };
+  });
   recipe.sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1));
   normalized.testRecipe = recipe;
 
   // Fallback: ensure Test Recipe is never empty
   if (normalized.testRecipe.length === 0) {
     normalized.testRecipe = [
-      { testType: 'UI', scenario: 'Complete happy path flow → success', priority: 'Smoke' },
-      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path' },
-      { testType: 'UI', scenario: 'Verify UI state and feedback', priority: 'Critical Path' }
+      { name: 'Happy path', scenario: '1. Complete main flow. 2. Verify success.', priority: 'Smoke', automationLevel: 'UI' },
+      { name: 'Invalid input', scenario: '1. Submit invalid input. 2. Verify error response.', priority: 'Critical Path', automationLevel: 'API' },
+      { name: 'UI feedback', scenario: '1. Verify UI state and feedback.', priority: 'Critical Path', automationLevel: 'UI' }
     ];
   }
 
@@ -675,16 +685,16 @@ function formatAnalysisComment(analysis) {
       comment += '---\n\n';
     }
 
-    // Test Recipe
+    // Test Recipe: Name | Scenario | Priority | Automation Level
     if (a.testRecipe.length > 0) {
       comment += '### 🧪 Test Recipe\n\n';
-      comment += '| Type | Scenario | Priority |\n';
-      comment += '|------|----------|----------|\n';
+      comment += '| Name | Scenario | Priority | Automation Level |\n';
+      comment += '|------|----------|----------|------------------|\n';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
       a.testRecipe.forEach(t => {
-        const scenario = truncate(t.scenario, 200);
+        const scenarioDisplay = truncate(t.scenario, 300).replace(/\n/g, '<br>');
         const prio = priorityEmoji[t.priority] || '🟡';
-        comment += `| **${t.testType}** | ${scenario} | ${prio} ${t.priority} |\n`;
+        comment += `| **${t.name}** | ${scenarioDisplay} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
       });
       comment += '\n';
     }
