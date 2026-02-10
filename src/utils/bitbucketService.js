@@ -31,6 +31,9 @@ const DATA_RETENTION_DAYS = process.env.DATA_RETENTION_DAYS ? parseInt(process.e
 const BITBUCKET_API_BASE = 'https://api.bitbucket.org/2.0';
 
 const bitbucketAppAuth = require('./bitbucketAppAuth');
+// Reuse the same hybrid PR formatter used for GitHub so Bitbucket PR comments
+// look identical in structure and content.
+const { formatHybridAnalysisForComment } = require('./githubService');
 
 /**
  * Extract workspace from repository string
@@ -263,6 +266,8 @@ async function callTestRecipeEndpoint(data) {
 
 /**
  * Format and post analysis to PR
+ * Uses the same hybrid formatter as GitHub so Bitbucket PR comments
+ * look identical in structure and branding.
  */
 async function formatAndPostDetailedAnalysis(workspace, repoSlug, prId, aiInsights) {
   try {
@@ -272,87 +277,8 @@ async function formatAndPostDetailedAnalysis(workspace, repoSlug, prId, aiInsigh
       return { success: false, error: errorMsg };
     }
 
-    const analysis = aiInsights.data;
-    
-    // If the AI returned markdown directly (string), post it
-    if (typeof analysis === 'string') {
-      console.log('📝 Posting AI markdown response');
-      
-      // Bitbucket doesn't render HTML well - convert HTML tables to markdown
-      let cleanedAnalysis = analysis;
-      
-      // Remove HTML table tags and convert to simpler format
-      // Replace <table> structure with markdown-friendly format
-      cleanedAnalysis = cleanedAnalysis
-        .replace(/<table[^>]*>/gi, '')
-        .replace(/<\/table>/gi, '')
-        .replace(/<tr>/gi, '')
-        .replace(/<\/tr>/gi, '\n')
-        .replace(/<th[^>]*>/gi, '**')
-        .replace(/<\/th>/gi, '** | ')
-        .replace(/<td[^>]*>/gi, '')
-        .replace(/<\/td>/gi, ' | ')
-        .replace(/\| \n/g, '\n')
-        .replace(/\| $/gm, '')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<[^>]+>/g, ''); // Remove any remaining HTML tags
-      
-      return await postComment(workspace, repoSlug, prId, cleanedAnalysis);
-    }
-
-    // Otherwise, format the structured response
-    let commentBody = '# 🎯 QA Analysis - by Ovi (the AI QA)\n\n';
-
-    // Add Release Pulse if available
-    if (analysis.releasePulse) {
-      commentBody += '## 🧪 Release Pulse\n\n';
-      commentBody += `**Release Confidence:** ${analysis.releasePulse.confidence || 'N/A'}\n`;
-      commentBody += `**Change Impact:** ${analysis.releasePulse.impact || 'N/A'}\n`;
-      commentBody += `**Release Decision:** ${analysis.releasePulse.decision || 'N/A'}\n\n`;
-    }
-
-    // Add test recipe
-    if (analysis.testRecipe) {
-      commentBody += '## 🧪 Test Recipe\n\n';
-      if (analysis.testRecipe.length) {
-        analysis.testRecipe.forEach((test, idx) => {
-          commentBody += `### ${idx + 1}. ${test.scenario || 'Test Scenario'}\n`;
-          commentBody += `**Steps:** ${test.steps || 'N/A'}\n`;
-          commentBody += `**Expected Result:** ${test.expectedResult || 'N/A'}\n`;
-          commentBody += `**Priority:** ${test.priority || 'N/A'}\n\n`;
-        });
-      }
-    }
-
-    // Add code review
-    if (analysis.codeReview && analysis.codeReview.length) {
-      commentBody += '## 🔍 Code Review\n\n';
-      analysis.codeReview.forEach(item => {
-        commentBody += `- ${item}\n`;
-      });
-      commentBody += '\n';
-    }
-
-    // Add risks
-    if (analysis.risks && analysis.risks.length) {
-      commentBody += '## ⚠️ Risks\n\n';
-      analysis.risks.forEach(risk => {
-        commentBody += `- ${risk}\n`;
-      });
-      commentBody += '\n';
-    }
-
-    // Add bugs
-    if (analysis.bugs && analysis.bugs.length) {
-      commentBody += '## 🐛 Bugs\n\n';
-      analysis.bugs.forEach(bug => {
-        commentBody += `- ${bug}\n`;
-      });
-      commentBody += '\n';
-    }
-
-    commentBody += '---\n\n*With Quality By Ovi - AI-powered QA analysis by FirstQA*';
-
+    // Reuse GitHub's hybrid formatter to keep PR analysis identical.
+    const commentBody = formatHybridAnalysisForComment(aiInsights);
     return await postComment(workspace, repoSlug, prId, commentBody);
   } catch (error) {
     console.error('Error formatting and posting analysis:', error.message);
