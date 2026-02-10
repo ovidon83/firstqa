@@ -1702,47 +1702,26 @@ TICKET DATA:
 - Priority: ${priority}
 - Type: ${type}
 
-DUAL SCORING SYSTEM - REQUIRED:
-1. initialReadinessScore (1-5): Rate how ready this ticket is for development RIGHT NOW, as-is
-2. readyForDevelopmentScore (1-5): Rate how ready this ticket is AFTER adding your analysis (Risks, Questions, Test Recipe)
+READY FOR DEV SCORE (1-10):
+- readyForDevScore: 1-10 (10 = fully ready, 1 = major gaps)
+- readyForDevVerdict: One-line verdict (e.g., "Not ready. Critical gaps need resolution before starting." or "Ready. Clear AC and low risk.")
 
-CRITICAL: You MUST provide BOTH scores. readyForDevelopmentScore should always be >= initialReadinessScore because your analysis enhances the ticket.
+OUTPUT STRUCTURE - Use this EXACT format:
 
-SCORING SCALE (1-5):
-1 = Not ready (major gaps)
-2 = Needs work (some key info missing)
-3 = Decent (basic requirements clear)
-4 = Good (well-defined with clear AC)
-5 = Excellent (comprehensive, edge cases covered)
+For normal tickets, return JSON with:
+- readyForDevScore (1-10)
+- readyForDevVerdict (one line)
+- affectedAreas: array of area names as strings (e.g., ["payments", "subscriptions", "notifications"])
+- recommendations: array of actionable next steps (bullet points)
+- criticalClarifications: array of { question, context, impact } — items that BLOCK dev until resolved
+- missingAcceptanceCriteria: array of { question, context, impact } — items that would improve the ticket
+- testRecipe: array of { testType, scenario, priority, blocked? }
+  - testType: "E2E" | "Integration" | "API" | "UI" | "Regression"
+  - scenario: concise scenario description
+  - priority: "High" | "Medium" | "Low"
+  - blocked: true only if scenario cannot be tested until a critical clarification is resolved
 
-Analyze THIS specific ticket content. Generate unique insights based on what's actually written.
-
-MINIMAL ANALYSIS MODE: If the ticket has insufficient information (very vague title, no description, or extremely brief content), return a minimal analysis with:
-- minimalMode: true
-- readyForDevelopmentScore: 1
-- scoreImpactFactors: explain what's missing
-- message: explain that more details are needed before full analysis
-- Skip qaQuestions, testRecipe, and other detailed fields
-
-For normal tickets:
-- Determine changeType (frontend/backend/full-stack) from ticket content
-- For frontend tickets: look for design materials (Figma, mockups, screenshots, etc.)
-- For backend tickets: focus on APIs, data models, business logic
-- Generate userValue: simple metric (High/Medium/Low) and short summary of user benefit
-- Generate readyForDevPulse with:
-  - userValue: same as above userValue
-  - readyForDevScoreNow: initialReadinessScore (1-5)
-  - readyForDevScoreAfter: readyForDevelopmentScore (1-5)
-  - needsQA: "Mandatory|Recommended|No" based on risk/impact/complexity/money-path changes/user-sensitive changes. Set to "Mandatory" for: critical security changes, money-path features, high-risk integrations, data migrations. Set to "Recommended" for: user-sensitive functionality, complex features, moderate-risk changes. Set to "No" for: simple UI tweaks, documentation updates, low-risk refactoring, basic CRUD operations.
-  - needsQAReason: brief explanation of why QA is needed or not needed
-- Generate scoreImpactFactors that explain your specific score for THIS ticket
-- Generate improvementsNeeded: specific, actionable items that would bridge the gap between initialReadinessScore and readyForDevelopmentScore. Each item should be specific to THIS ticket (e.g., "Add AC: User sees success message after file upload" not generic advice)
-- For testRecipe priority values, use ONLY: "Happy Path" (core functionality), "Critical Path" (important scenarios), "Edge Case" (most impactful edge cases specific to this ticket), "Regression" (regression testing)
-- CRITICAL: Order testRecipe scenarios by priority in this exact order:
-  1. Happy Path scenarios first
-  2. Critical Path scenarios second  
-  3. Edge Case scenarios third
-  4. Regression scenarios last
+MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, criticalClarifications (what's missing).
 
 **ENHANCED TEST RECIPE REQUIREMENTS:**
 - **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
@@ -1759,54 +1738,28 @@ For normal tickets:
   - Include error scenarios and recovery paths
   - Make steps detailed and immediately actionable
 
-Return JSON format - MUST include BOTH initialReadinessScore AND readyForDevelopmentScore:
-
-For MINIMAL analysis (insufficient info):
+Return JSON format. For FULL analysis:
 {
-  "title": "Definition of Ready Analysis",
-  "minimalMode": true,
-  "initialReadinessScore": 1,
-  "readyForDevelopmentScore": 1,
-  "scoreImpactFactors": ["what's missing from this ticket"],
-  "message": "This ticket needs more detail before full analysis. Adding [specifics] would enable better development planning and reduce confusion."
-}
-
-For FULL analysis (sufficient info):
-{
-  "title": "Definition of Ready Analysis",
   "minimalMode": false,
-  "changeType": "frontend|backend|full-stack",
-  "hasDesignMaterials": true|false,
-  "designDetails": "description" or null,
-  "userValue": {"level": "High|Medium|Low", "summary": "short description of user benefit"},
-  "readyForDevPulse": {
-    "userValue": {"level": "High|Medium|Low", "summary": "short description of user benefit"},
-    "readyForDevScoreNow": 1-5,
-    "readyForDevScoreAfter": 1-5,
-    "needsQA": "Mandatory|Recommended|No",
-    "needsQAReason": "brief explanation of why QA is needed or not needed"
-  },
-  "qaQuestions": ["array of 5-8 questions"],
-  "keyRisks": ["array of risks"],
-  "scoreImpactFactors": ["array of score factors"],
-  "improvementsNeeded": ["specific actionable items to bridge the gap between scores"],
-  "testRecipe": [{"scenario": "...", "steps": "...", "expected": "...", "priority": "Happy Path|Critical Path|Edge Case|Regression", "automation": "...", "reason": "..."}],
-  "initialReadinessScore": 1-5,
-  "readyForDevelopmentScore": 1-5,
-  "scoreBreakdown": {"clarity": 0.0-1.0, "dependencies": 0.0-1.0, "testability": 0.0-1.0, "riskProfile": 0.0-1.0, "scopeReadiness": 0.0-1.0, "rawTotal": 0.0-5.0, "scaledScore": 1-5},
-  "tip": "actionable suggestion",
-  "missingInfo": ["specific missing details"]
+  "readyForDevScore": 1-10,
+  "readyForDevVerdict": "One-line verdict",
+  "affectedAreas": ["area1", "area2", "area3"],
+  "recommendations": ["actionable step 1", "actionable step 2"],
+  "criticalClarifications": [
+    {"question": "What happens when X?", "context": "No error handling specified. Should we...", "impact": "Without this, dev will make assumptions"}
+  ],
+  "missingAcceptanceCriteria": [
+    {"question": "Where does success confirmation appear?", "context": "User sees updated status — Toast? Dashboard?", "impact": "Unclear UX expectation"}
+  ],
+  "testRecipe": [
+    {"testType": "E2E", "scenario": "Update payment with valid card → success toast", "priority": "High", "blocked": false},
+    {"testType": "API", "scenario": "Submit valid card for user with multiple subs", "priority": "High", "blocked": true}
+  ]
 }
 
-Generate ALL important test scenarios, not just 3. Ask the 'What if' questions that matter.
+For MINIMAL analysis (insufficient info): minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, criticalClarifications.
 
-CRITICAL ORDERING REQUIREMENT: You MUST order the testRecipe array by priority in this EXACT order:
-1. ALL Happy Path scenarios first (core functionality)
-2. ALL Critical Path scenarios second (important scenarios)  
-3. ALL Edge Case scenarios third (most impactful edge cases specific to THIS ticket - focus on highest risk/impact scenarios)
-4. ALL Regression scenarios last (regression testing)
-
-DO NOT mix priorities - group all scenarios of the same priority together in the order above.
+Test types: E2E, Integration, API, UI, Regression. Priority: High, Medium, Low. Set blocked: true when scenario needs a critical clarification before it can be tested.
 
 **FINAL VERIFICATION:**
 Before completing the analysis, ensure:
@@ -1853,83 +1806,26 @@ Before completing the analysis, ensure:
  */
 function generateTicketFallbackAnalysis(title, description, platform) {
   return {
-    title: 'Definition of Ready Analysis',
-    initialReadinessScore: 2, // Add missing initial readiness score
-    qaQuestions: [
-      "What if the user enters an invalid email format? How should the system respond?",
-      "What if the email service is down when a user requests a password reset?",
-      "What if a user clicks the reset link multiple times? Should we allow it?",
-      "What if the user's email has changed since they last logged in?",
-      "What if the password reset token expires while the user is filling out the form?"
+    minimalMode: false,
+    readyForDevScore: 4,
+    readyForDevVerdict: 'Partial analysis. Manual review recommended due to AI processing error.',
+    affectedAreas: ['auth', 'email', 'security'],
+    recommendations: [
+      'Add acceptance criteria for error states',
+      'Confirm edge case behavior with product'
     ],
-    keyRisks: [
-      "Security risk: Password reset tokens could be intercepted if not using HTTPS; mitigate with secure token generation and HTTPS enforcement.",
-      "User experience risk: Users may get frustrated if reset emails are delayed; implement clear feedback and retry mechanisms.",
-      "Technical risk: Email service dependency could cause password reset failures; need fallback mechanisms and monitoring."
+    criticalClarifications: [
+      { question: 'What if the user enters an invalid email format?', context: 'No error handling specified.', impact: 'Dev will make assumptions.' },
+      { question: 'What if the email service is down?', context: 'No fallback specified.', impact: 'Could cause user frustration.' }
+    ],
+    missingAcceptanceCriteria: [
+      { question: 'Where does success confirmation appear?', context: 'Unclear.', impact: 'UX expectation undefined.' }
     ],
     testRecipe: [
-      {
-        "scenario": "Successful Password Reset Flow",
-        "steps": "1. User enters valid email. 2. User receives reset email. 3. User clicks link and sets new password.",
-        "expected": "User can successfully log in with new password.",
-        "priority": "Happy Path",
-        "automation": "E2E",
-        "reason": "Core functionality that must work perfectly for user satisfaction."
-      },
-      {
-        "scenario": "Invalid Email Handling",
-        "steps": "1. User enters invalid email format. 2. User submits form.",
-        "expected": "User receives clear error message about invalid email format.",
-        "priority": "Critical Path",
-        "automation": "Unit",
-        "reason": "Input validation is critical for security and user experience."
-      },
-      {
-        "scenario": "Expired Token Handling",
-        "steps": "1. User requests reset. 2. User waits beyond token expiration. 3. User clicks expired link.",
-        "expected": "User sees clear message about expired token and option to request new one.",
-        "priority": "Critical Path",
-        "automation": "Integration",
-        "reason": "Security requirement to prevent unauthorized password changes."
-      },
-      {
-        "scenario": "Email Service Failure",
-        "steps": "1. Email service is down. 2. User requests password reset.",
-        "expected": "System logs error, shows user-friendly message, and offers retry option.",
-        "priority": "Edge Case",
-        "automation": "Manual",
-        "reason": "Rare but critical for system reliability and user experience."
-      },
-      {
-        "scenario": "Multiple Reset Requests",
-        "steps": "1. User requests reset multiple times quickly. 2. User receives multiple emails.",
-        "expected": "System handles gracefully, invalidates old tokens, and prevents abuse.",
-        "priority": "Edge Case",
-        "automation": "Integration",
-        "reason": "Security requirement to prevent token abuse and confusion."
-      },
-      {
-        "scenario": "Password Strength Validation",
-        "steps": "1. User sets weak password. 2. User submits form.",
-        "expected": "System validates password strength and shows clear requirements.",
-        "priority": "Critical Path",
-        "automation": "Unit",
-        "reason": "Security requirement to ensure strong passwords."
-      }
-    ],
-    readyForDevelopmentScore: 4,
-    scoreBreakdown: {
-      "clarity": 0.5,
-      "dependencies": 0.5,
-      "testability": 1.0,
-      "riskProfile": 0.5,
-      "scopeReadiness": 0.5,
-      "uxStates": 0.5,
-      "rawTotal": 3.5,
-      "scaledScore": 4
-    },
-    tip: "Add detailed acceptance criteria, error handling scenarios, and security requirements to improve readiness score",
-    missingInfo: ["Detailed acceptance criteria", "Error handling specifications", "Security requirements", "Email service integration details"]
+      { testType: 'E2E', scenario: 'Successful password reset flow → user can log in with new password', priority: 'High', blocked: false },
+      { testType: 'API', scenario: 'Invalid email format → returns appropriate error', priority: 'High', blocked: false },
+      { testType: 'Integration', scenario: 'Expired token → clear message and option to request new one', priority: 'High', blocked: false }
+    ]
   };
 }
 
