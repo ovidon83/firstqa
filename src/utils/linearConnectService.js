@@ -573,6 +573,17 @@ function cleanStepNumber(step) {
 }
 
 /**
+ * Helper: Escape HTML for safe insertion into table cells
+ */
+function escapeHtml(str) {
+  return asString(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
  * Helper: Truncate string to max length
  */
 function truncate(str, n = 800) {
@@ -685,18 +696,18 @@ function formatAnalysisComment(analysis) {
       comment += '---\n\n';
     }
 
-    // Test Recipe: Name | Scenario | Priority | Automation Level
+    // Test Recipe: Name | Scenario | Priority | Automation Level (Scenario wide, Automation narrow)
     if (a.testRecipe.length > 0) {
       comment += '### 🧪 Test Recipe\n\n';
-      comment += '| Name | Scenario | Priority | Automation Level |\n';
-      comment += '|------|----------|----------|------------------|\n';
+      comment += '<table><colgroup><col style="width:18%"><col style="width:58%"><col style="width:14%"><col style="width:10%"></colgroup>';
+      comment += '<thead><tr><th>Name</th><th>Scenario</th><th>Priority</th><th>Automation Level</th></tr></thead><tbody>';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
       a.testRecipe.forEach(t => {
-        const scenarioDisplay = truncate(t.scenario, 300).replace(/\n/g, '<br>');
+        const scenarioDisplay = truncate(t.scenario, 350).replace(/\n/g, ' · ');
         const prio = priorityEmoji[t.priority] || '🟡';
-        comment += `| **${t.name}** | ${scenarioDisplay} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
+        comment += `<tr><td><strong>${escapeHtml(t.name)}</strong></td><td>${escapeHtml(scenarioDisplay)}</td><td>${prio} ${t.priority}</td><td>${escapeHtml(t.automationLevel)}</td></tr>`;
       });
-      comment += '\n';
+      comment += '</tbody></table>\n\n';
     }
 
     // Footer
