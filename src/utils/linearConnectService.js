@@ -586,10 +586,7 @@ function truncate(str, n = 800) {
 function normalizeAnalysis(analysis) {
   const recs = asStringArray(analysis.recommendations || analysis.improvementsNeeded || []);
   const normalized = {
-    readyForDevScore: analysis.readyForDevScore ?? (analysis.readyForDevelopmentScore ? Math.round(analysis.readyForDevelopmentScore * 2) : undefined),
-    readyForDevVerdict: asString(analysis.readyForDevVerdict || analysis.message || ''),
     affectedAreas: asStringArray(analysis.affectedAreas || []),
-    toDo: asStringArray(analysis.toDo || []),
     recommendations: recs.slice(0, 5),
     testRecipe: []
   };
@@ -604,11 +601,6 @@ function normalizeAnalysis(analysis) {
       ...(analysis.keyRisks || [])
     ];
     normalized.recommendations = sources.filter(Boolean).slice(0, 5);
-  }
-
-  // Fallback: simple toDo when recommendations exist
-  if (normalized.toDo.length === 0 && normalized.recommendations.length > 0) {
-    normalized.toDo = ['Review the recommendations and update the ticket as needed'];
   }
 
   // Normalize test recipe - types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression
@@ -634,22 +626,16 @@ function normalizeAnalysis(analysis) {
   normalized.testRecipe = rawRecipe.map((test) => ({
     testType: mapTestType(test.testType || test.automation),
     scenario: asString(test.scenario || test.name || test.title || ''),
-    priority: mapPriority(test.priority),
-    blocked: Boolean(test.blocked)
+    priority: mapPriority(test.priority)
   }));
 
   // Fallback: ensure Test Recipe is never empty (AI sometimes omits it)
   if (normalized.testRecipe.length === 0) {
     normalized.testRecipe = [
-      { testType: 'E2E', scenario: 'Complete happy path flow → success', priority: 'Smoke', blocked: false },
-      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path', blocked: false },
-      { testType: 'UI', scenario: 'Verify UI state and feedback', priority: 'Critical Path', blocked: false }
+      { testType: 'E2E', scenario: 'Complete happy path flow → success', priority: 'Smoke' },
+      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path' },
+      { testType: 'UI', scenario: 'Verify UI state and feedback', priority: 'Critical Path' }
     ];
-  }
-
-  if (typeof normalized.readyForDevScore !== 'number') {
-    const parsed = parseInt(String(normalized.readyForDevScore), 10);
-    normalized.readyForDevScore = !isNaN(parsed) ? Math.min(10, Math.max(1, parsed)) : 5;
   }
 
   return normalized;
@@ -664,23 +650,16 @@ function formatAnalysisComment(analysis) {
 
     // Pulse
     let comment = '### 🫀 Pulse\n\n';
-    comment += `**Ready for Dev:** ${a.readyForDevScore}/10`;
-    if (a.readyForDevVerdict) comment += ` — ${truncate(a.readyForDevVerdict, 80)}`;
-    comment += '\n\n';
     if (a.affectedAreas.length > 0) {
       comment += `**Affected Areas:** ${a.affectedAreas.map(x => `\`${x}\``).join(' · ')}\n\n`;
     }
-    if (a.toDo.length > 0) {
-      comment += '**To Do:**\n';
-      a.toDo.forEach(item => { comment += `- [ ] ${truncate(item, 200)}\n`; });
-      comment += '\n---\n\n';
-    }
+    comment += '---\n\n';
 
     // Recommendations
     if (a.recommendations.length > 0) {
       comment += '### 📋 Recommendations\n\n';
-      a.recommendations.forEach(r => { comment += `- ${truncate(r, 250)}\n`; });
-      comment += '\n---\n\n';
+      a.recommendations.forEach(r => { comment += `${truncate(r, 500)}\n\n`; });
+      comment += '---\n\n';
     }
 
     // Test Recipe
@@ -690,8 +669,7 @@ function formatAnalysisComment(analysis) {
       comment += '|------|----------|----------|\n';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
       a.testRecipe.forEach(t => {
-        let scenario = truncate(t.scenario, 150);
-        if (t.blocked) scenario += ' [BLOCKED: awaiting clarification]';
+        const scenario = truncate(t.scenario, 200);
         const prio = priorityEmoji[t.priority] || '🟡';
         comment += `| **${t.testType}** | ${scenario} | ${prio} ${t.priority} |\n`;
       });

@@ -1704,20 +1704,17 @@ TICKET DATA:
 
 You are analyzing as a senior QA Engineer and CTO with deep startup experience. Be direct, actionable, and prioritize what matters.
 
-READY FOR DEV SCORE (1-10):
-- readyForDevScore: 1-10 (10 = fully ready, 1 = major gaps)
-- readyForDevVerdict: Short verdict (e.g., "Not ready" or "Ready with minor gaps")
-
 OUTPUT STRUCTURE:
 
-- toDo: simple meta-actions only when needed (e.g., "Review the recommendations and update the ticket as needed"). Omit or use 1 item max. Do NOT list specific improvements here.
-- recommendations: array of max 5 most critical things. Each item: "Gap/need — Potential solution" (e.g., "Define input fields — Add AC: Email (required, valid format), Password (8+ chars), Username (3-20 chars)"). Always include a suggested solution.
-- testRecipe: REQUIRED. array of 4-8 test scenarios { testType, scenario, priority, blocked? }. Never omit.
+- recommendations: array of max 5 items. Each item must be a READY-TO-COPY acceptance criteria or text block that can be pasted directly into the ticket body. Full, self-contained sentences. Examples:
+  - "**Input fields:** Email (required, valid format), Password (8+ chars, at least one number), Username (3-20 chars, alphanumeric)."
+  - "**Post-registration:** User is auto-signed in and redirected to dashboard. Show welcome toast."
+  - "**Error handling:** Inline validation per field. On submit failure: toast with error message, keep form data, show retry option."
+- testRecipe: REQUIRED. array of 4-8 test scenarios { testType, scenario, priority }. Write each scenario clearly and completely—no blocked flags or caveats. Just the test scenario.
   - testType: "E2E" | "API" | "UI" | "Manual"
   - priority: "Smoke" | "Critical Path" | "Regression"
-  - blocked: true when scenario awaits clarification
 
-MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, toDo.
+MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, recommendations, testRecipe.
 
 **ENHANCED TEST RECIPE REQUIREMENTS:**
 - **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
@@ -1737,28 +1734,19 @@ MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyFo
 Return JSON format. For FULL analysis:
 {
   "minimalMode": false,
-  "readyForDevScore": 1-10,
-  "readyForDevVerdict": "Short verdict",
   "affectedAreas": ["area1", "area2"],
-  "toDo": ["Review the recommendations and update the ticket as needed"],
   "recommendations": [
-    "Define input fields — Add AC: Email (required, valid format), Password (8+ chars), Username (3-20 chars)",
-    "Validation rules — Specify: email format, password strength, duplicate username handling",
-    "Post-registration flow — Add AC: auto sign-in and redirect to dashboard, or redirect to login with success message",
-    "Error handling — Add AC: inline errors per field, toast on submit failure, retry option"
+    "**Input fields:** Email (required, valid format), Password (8+ chars), Username (3-20 chars).",
+    "**Post-registration:** User is auto-signed in and redirected to dashboard. Show welcome toast.",
+    "**Error handling:** Inline validation per field. On submit failure: toast with error, keep form data, retry option."
   ],
   "testRecipe": [
-    {"testType": "E2E", "scenario": "Complete registration with valid inputs → success", "priority": "Smoke", "blocked": false},
-    {"testType": "API", "scenario": "Submit invalid email → returns 400", "priority": "Critical Path", "blocked": false}
+    {"testType": "E2E", "scenario": "Complete registration with valid inputs → user lands on dashboard", "priority": "Smoke"},
+    {"testType": "API", "scenario": "Submit invalid email format → returns 400 with clear error message", "priority": "Critical Path"}
   ]
 }
 
-Test types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression. Set blocked: true when scenario awaits a toClarify answer.
-
-**FINAL VERIFICATION:**
-- recommendations: max 5, each with "gap — potential solution" format
-- testRecipe: ALWAYS include 4-8 scenarios. Never omit. Order: Smoke, Critical Path, Regression
-- toDo: only when recommendations exist`;
+Recommendations: ready-to-paste text for the ticket body. Test scenarios: clear, complete descriptions. No blocked/caveat suffixes.`;
 
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
@@ -1796,13 +1784,10 @@ Test types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression. Se
 function generateTicketFallbackAnalysis(title, description, platform) {
   return {
     minimalMode: false,
-    readyForDevScore: 4,
-    readyForDevVerdict: 'Manual review recommended due to AI processing error.',
     affectedAreas: ['auth', 'email', 'security'],
-    toDo: ['Review the recommendations and update the ticket as needed'],
     recommendations: [
-      'Add acceptance criteria for error states — e.g., specify expected error messages and retry behavior',
-      'Define error handling — Add AC: user feedback, fallback behavior, recovery path'
+      '**Error handling:** Specify expected error messages, retry behavior, and user feedback.',
+      '**Validation:** Define validation rules and inline error display.'
     ],
     testRecipe: [
       { testType: 'E2E', scenario: 'Successful flow → user can complete action', priority: 'Smoke', blocked: false },
