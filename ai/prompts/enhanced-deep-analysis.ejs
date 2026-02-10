@@ -84,6 +84,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🟡 Caution / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[Base this on actual findings below: 🟢 Go if low risk & safe to release after testing, 🟡 Caution if concerns need review, 🔴 No-Go only if clear blockers exist - explain why]</td></tr>
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Affected Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[List 2-4 specific components/services/modules affected, e.g., "Database Schema, IPC API, SQLAlchemy Models"]</td></tr>
 <tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">⚠️ Risk Level</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[Assess overall risk based on: critical bugs found, security issues, data integrity risks, missing validation - explain the main risk factors]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🎯 QA Recommendation</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">✅ GO / ❌ NO-GO</td><td style="padding: 8px; border: 1px solid #ddd;">[Action-oriented summary: If Go—brief reasoning. If No-Go—what must be fixed before release]</td></tr>
 </table>
 
 ## 🔍 Bugs & Risks
@@ -342,38 +343,14 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - 🔴 No-Go: Clear blockers exist (specify what they are)
   - **Affected Areas**: Second row. List 2-4 specific components/services/modules touched. Use actual names from code.
   - **Risk Level**: Third row. Assess overall risk (🔴 High / 🟡 Medium / 🟢 Low) based on: bugs found, security concerns, data integrity risks, missing validation. Explain the main risk factors briefly.
+  - **QA Recommendation**: Fourth row (last in table). Level: ✅ GO or ❌ NO-GO. Details: concise action-oriented text (1-2 sentences). If Go: "Safe to release after testing passes." or similar. If No-Go: "Do not release until blockers are fixed and tests pass on staging." or specific blockers to fix.
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
   - NOT: "1. Open form 2. Fill fields 3. Submit"
   - This ensures the table displays steps as proper numbered lists
 
-## 🎯 Final QA Recommendation
-
-[Generate a clear, actionable final recommendation box:
-- Use the format shown below based on the Release Decision from Release Pulse
-- If Release Decision is 🔴 No-Go or 🟡 Caution: Use ❌ **NO-GO** and explain what blockers/concerns must be addressed
-- If Release Decision is 🟢 Go with no issues: Use ✅ **GO** with brief reasoning (e.g., "Low risk changes, safe to release after testing")
-- If Release Decision is 🟢 Go but with minor issues: Use ✅ **GO** but mention "after addressing [specific items]"
-- Keep it concise (1-2 sentences max), action-oriented, and based strictly on findings above]
-
-**FORMAT EXAMPLE (choose appropriate emoji and text based on analysis):**
-
-> ### 🚦 Final QA Recommendation
-> 
-> **❌ NO-GO**
-> 
-> Do not release until blockers are fixed and tests pass on staging.
-
-OR
-
-> ### 🚦 Final QA Recommendation
-> 
-> **✅ GO**
-> 
-> Safe to release after testing passes. Low risk changes with proper validation.
-
-**REMEMBER: STOP YOUR OUTPUT AFTER THE "Final QA Recommendation" SECTION. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
+**REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
 **RELEASE PULSE EVALUATION REQUIREMENTS:**
 
@@ -397,6 +374,12 @@ OR
     - 🟢 Low: "Documentation changes only" or "Minor bug fixes with proper validation"
     - 🟡 Medium: "Database schema changes require careful testing" or "New fields added without full constraints"
     - 🔴 High: "Data integrity risk - NULL values overwritten" or "Security validation missing in critical flow"
+
+- **QA Recommendation** (FOURTH ROW - last in Release Pulse table):
+  - **Level**: ✅ GO or ❌ NO-GO (same as Release Decision logic)
+  - **Details**: One concise, action-oriented sentence. Examples:
+    - Go: "Safe to release after testing passes." / "Low risk - proceed with testing."
+    - No-Go: "Do not release until blockers are fixed and tests pass on staging." / "Fix data integrity issues before release."
 
 **BUGS & RISKS REQUIREMENTS:**
 - **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real, verifiable issues - NO FALSE POSITIVES.
