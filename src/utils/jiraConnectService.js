@@ -73,9 +73,15 @@ async function processConnectWebhook(payload, installation) {
 
     console.log('✅ AI analysis completed');
 
-    // Post analysis as comment
-    const analysisComment = formatAnalysisComment(aiInsights.data);
-    await postComment(issue.key, analysisComment, installation);
+    // Post analysis as comment (Jira does NOT render Markdown, so strip Markdown-only markers)
+    let analysisComment = formatAnalysisComment(aiInsights.data);
+    // Remove Markdown headings (###) and horizontal rules (---) that Jira shows as plain text
+    analysisComment = analysisComment
+      .replace(/^###\s+/gm, '')  // strip leading heading markers
+      .replace(/^---$/gm, '')    // strip lines that are just ---
+      .replace(/\n{3,}/g, '\n\n'); // collapse excessive blank lines
+
+    await postComment(issue.key, analysisComment.trim(), installation);
 
     // Save analysis to database (link to installation, not user)
     if (isSupabaseConfigured()) {
