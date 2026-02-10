@@ -1711,11 +1711,11 @@ READY FOR DEV SCORE (1-10):
 OUTPUT STRUCTURE:
 
 - toDo: simple meta-actions only when needed (e.g., "Review the recommendations and update the ticket as needed"). Omit or use 1 item max. Do NOT list specific improvements here.
-- recommendations: array of max 5 most critical things needed to make the ticket and the change a success. Single list, no breakdown. Be direct and actionable.
-- testRecipe: array of { testType, scenario, priority, blocked? }
-  - testType: "E2E" | "API" | "UI" | "Manual" (no Integration)
+- recommendations: array of max 5 most critical things. Each item: "Gap/need — Potential solution" (e.g., "Define input fields — Add AC: Email (required, valid format), Password (8+ chars), Username (3-20 chars)"). Always include a suggested solution.
+- testRecipe: REQUIRED. array of 4-8 test scenarios { testType, scenario, priority, blocked? }. Never omit.
+  - testType: "E2E" | "API" | "UI" | "Manual"
   - priority: "Smoke" | "Critical Path" | "Regression"
-  - blocked: true when scenario awaits a toClarify item
+  - blocked: true when scenario awaits clarification
 
 MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, toDo.
 
@@ -1742,10 +1742,10 @@ Return JSON format. For FULL analysis:
   "affectedAreas": ["area1", "area2"],
   "toDo": ["Review the recommendations and update the ticket as needed"],
   "recommendations": [
-    "Define specific input fields required (e.g., email, password, username)",
-    "Specify validation rules for each field",
-    "Clarify post-registration flow: auto sign-in or redirect to login",
-    "Add error handling and user feedback for invalid inputs"
+    "Define input fields — Add AC: Email (required, valid format), Password (8+ chars), Username (3-20 chars)",
+    "Validation rules — Specify: email format, password strength, duplicate username handling",
+    "Post-registration flow — Add AC: auto sign-in and redirect to dashboard, or redirect to login with success message",
+    "Error handling — Add AC: inline errors per field, toast on submit failure, retry option"
   ],
   "testRecipe": [
     {"testType": "E2E", "scenario": "Complete registration with valid inputs → success", "priority": "Smoke", "blocked": false},
@@ -1756,9 +1756,9 @@ Return JSON format. For FULL analysis:
 Test types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression. Set blocked: true when scenario awaits a toClarify answer.
 
 **FINAL VERIFICATION:**
-- recommendations: max 5, most critical items only
-- toDo: only when recommendations exist — use "Review the recommendations and update the ticket as needed" or similar
-- testRecipe ordered: Smoke first, then Critical Path, then Regression`;
+- recommendations: max 5, each with "gap — potential solution" format
+- testRecipe: ALWAYS include 4-8 scenarios. Never omit. Order: Smoke, Critical Path, Regression
+- toDo: only when recommendations exist`;
 
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
@@ -1801,8 +1801,8 @@ function generateTicketFallbackAnalysis(title, description, platform) {
     affectedAreas: ['auth', 'email', 'security'],
     toDo: ['Review the recommendations and update the ticket as needed'],
     recommendations: [
-      'Add acceptance criteria for error states',
-      'Define error handling and user feedback'
+      'Add acceptance criteria for error states — e.g., specify expected error messages and retry behavior',
+      'Define error handling — Add AC: user feedback, fallback behavior, recovery path'
     ],
     testRecipe: [
       { testType: 'E2E', scenario: 'Successful flow → user can complete action', priority: 'Smoke', blocked: false },

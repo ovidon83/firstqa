@@ -638,6 +638,15 @@ function normalizeAnalysis(analysis) {
     blocked: Boolean(test.blocked)
   }));
 
+  // Fallback: ensure Test Recipe is never empty (AI sometimes omits it)
+  if (normalized.testRecipe.length === 0) {
+    normalized.testRecipe = [
+      { testType: 'E2E', scenario: 'Complete happy path flow → success', priority: 'Smoke', blocked: false },
+      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path', blocked: false },
+      { testType: 'UI', scenario: 'Verify UI state and feedback', priority: 'Critical Path', blocked: false }
+    ];
+  }
+
   if (typeof normalized.readyForDevScore !== 'number') {
     const parsed = parseInt(String(normalized.readyForDevScore), 10);
     normalized.readyForDevScore = !isNaN(parsed) ? Math.min(10, Math.max(1, parsed)) : 5;
