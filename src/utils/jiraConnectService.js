@@ -73,15 +73,9 @@ async function processConnectWebhook(payload, installation) {
 
     console.log('✅ AI analysis completed');
 
-    // Post analysis as comment (Jira does NOT render Markdown, so strip Markdown-only markers)
-    let analysisComment = formatAnalysisComment(aiInsights.data);
-    // Remove Markdown headings (###) and horizontal rules (---) that Jira shows as plain text
-    analysisComment = analysisComment
-      .replace(/^###\s+/gm, '')  // strip leading heading markers
-      .replace(/^---$/gm, '')    // strip lines that are just ---
-      .replace(/\n{3,}/g, '\n\n'); // collapse excessive blank lines
-
-    await postComment(issue.key, analysisComment.trim(), installation);
+    // Build rich ADF comment for Jira (headings, bullets, table)
+    const adfDoc = buildJiraAdfFromAnalysis(aiInsights.data);
+    await postComment(issue.key, adfDoc, installation);
 
     // Save analysis to database (link to installation, not user)
     if (isSupabaseConfigured()) {
@@ -228,8 +222,9 @@ async function fetchTicketDetails(issueKey, installation) {
 
 /**
  * Post comment to Jira ticket
+ * Accepts either a plain text string or a full ADF doc object.
  */
-async function postComment(issueKey, commentBody, installation) {
+async function postComment(issueKey, body, installation) {
   console.log(`💬 Posting comment to Jira ticket: ${issueKey}`);
 
   // Build full API URL
@@ -246,27 +241,34 @@ async function postComment(issueKey, commentBody, installation) {
   );
 
   try {
-    // Convert commentBody to proper ADF format (one paragraph per line)
-    const lines = commentBody.split('\n');
-    const adfContent = lines.map(line => ({
-      type: 'paragraph',
-      content: [
-        {
-          type: 'text',
-          text: line || ' ' // Empty string breaks ADF, use space
-        }
-      ]
-    }));
+    let adfBody;
+
+    if (body && typeof body === 'object' && body.type === 'doc') {
+      // Already an ADF document
+      adfBody = body;
+    } else {
+      // Convert plain text (one paragraph per line) to simple ADF
+      const text = String(body || '');
+      const lines = text.split('\n');
+      const adfContent = lines.map(line => ({
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text: line || ' ' // Empty string breaks ADF, use space
+          }
+        ]
+      }));
+      adfBody = {
+        type: 'doc',
+        version: 1,
+        content: adfContent
+      };
+    }
 
     const response = await axios.post(
       fullUrl,
-      {
-        body: {
-          type: 'doc',
-          version: 1,
-          content: adfContent
-        }
-      },
+      { body: adfBody },
       {
         headers: {
           'Authorization': `JWT ${token}`,
@@ -284,7 +286,152 @@ async function postComment(issueKey, commentBody, installation) {
   }
 }
 
-const { formatAnalysisComment } = require('./ticketAnalysisFormatter');
+const { normalizeAnalysis } = require('./ticketAnalysisFormatter');
+
+/**
+ * Build a rich Jira ADF document from normalized analysis
+ * (sections + table) for a clean Jira-native layout.
+ */
+function buildJiraAdfFromAnalysis(analysis) {
+  const a = normalizeAnalysis(analysis);
+
+  const content = [];
+
+  // Pulse
+  content.push({
+    type: 'heading',
+    attrs: { level: 3 },
+    content: [{ type: 'text', text: '🫀 Pulse' }]
+  });
+
+  if (a.readinessScore != null) {
+    content.push({
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Readiness score: ', marks: [{ type: 'strong' }] },
+        { type: 'text', text: `${a.readinessScore}/5` }
+      ]
+    });
+  }
+
+  if (a.affectedAreas.length > 0) {
+    content.push({
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Affected Areas: ', marks: [{ type: 'strong' }] },
+        { type: 'text', text: a.affectedAreas.join(' · ') }
+      ]
+    });
+  }
+
+  if (a.highestRisk) {
+    content.push({
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Highest risk: ', marks: [{ type: 'strong' }] },
+        { type: 'text', text: a.highestRisk }
+      ]
+    });
+  }
+
+  // Divider
+  content.push({ type: 'rule' });
+
+  // Recommendations
+  if (a.recommendations.length > 0) {
+    content.push({
+      type: 'heading',
+      attrs: { level: 3 },
+      content: [{ type: 'text', text: '📋 Recommendations' }]
+    });
+
+    content.push({
+      type: 'bulletList',
+      content: a.recommendations.map(rec => ({
+        type: 'listItem',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: rec }]
+          }
+        ]
+      }))
+    });
+
+    content.push({ type: 'rule' });
+  }
+
+  // Test Recipe table
+  if (a.testRecipe.length > 0) {
+    content.push({
+      type: 'heading',
+      attrs: { level: 3 },
+      content: [{ type: 'text', text: '🧪 Test Recipe' }]
+    });
+
+    const headerRow = {
+      type: 'tableRow',
+      content: ['Name', 'Steps', 'Priority', 'Automation Level'].map(text => ({
+        type: 'tableHeader',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text }]
+          }
+        ]
+      }))
+    };
+
+    const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
+
+    const bodyRows = a.testRecipe.map(t => {
+      const scenarioDisplay = String(t.scenario || '').replace(/\n/g, ' → ');
+      const prioEmoji = priorityEmoji[t.priority] || '🟡';
+      const priorityText = `${prioEmoji} ${t.priority}`;
+
+      const cells = [
+        t.name,
+        scenarioDisplay,
+        priorityText,
+        t.automationLevel || ''
+      ].map(text => ({
+        type: 'tableCell',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: text || '' }]
+          }
+        ]
+      }));
+
+      return {
+        type: 'tableRow',
+        content: cells
+      };
+    });
+
+    content.push({
+      type: 'table',
+      content: [headerRow, ...bodyRows]
+    });
+  }
+
+  // Footer
+  content.push({ type: 'rule' });
+  content.push({
+    type: 'paragraph',
+    content: [
+      { type: 'text', text: '🤖 QA Analysis by ' },
+      { type: 'text', text: 'Ovi (the AI QA)', marks: [{ type: 'strong' }] }
+    ]
+  });
+
+  return {
+    type: 'doc',
+    version: 1,
+    content
+  };
+}
 
 /**
  * Helper: Safely convert any value to string
