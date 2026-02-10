@@ -1702,26 +1702,23 @@ TICKET DATA:
 - Priority: ${priority}
 - Type: ${type}
 
+You are analyzing as a senior QA Engineer and CTO with deep startup experience. Be direct, actionable, and prioritize what matters.
+
 READY FOR DEV SCORE (1-10):
 - readyForDevScore: 1-10 (10 = fully ready, 1 = major gaps)
-- readyForDevVerdict: One-line verdict (e.g., "Not ready. Critical gaps need resolution before starting." or "Ready. Clear AC and low risk.")
+- readyForDevVerdict: Short verdict (e.g., "Not ready" or "Ready with minor gaps")
 
-OUTPUT STRUCTURE - Use this EXACT format:
+OUTPUT STRUCTURE:
 
-For normal tickets, return JSON with:
-- readyForDevScore (1-10)
-- readyForDevVerdict (one line)
-- affectedAreas: array of area names as strings (e.g., ["payments", "subscriptions", "notifications"])
-- recommendations: array of actionable next steps (bullet points)
-- criticalClarifications: array of { question, context, impact } — items that BLOCK dev until resolved
-- missingAcceptanceCriteria: array of { question, context, impact } — items that would improve the ticket
+- toDo: array of specific actions needed BEFORE dev starts (derived from gaps). Be concrete.
+- toAdd: array of { title, description } — things Ovi/QA can contribute directly: acceptance criteria, edge cases, error handling. Each is actionable content to add to the ticket.
+- toClarify: array of { question, context } — numbered questions ONLY where you lack sufficient context. Brief context after arrow. Omit if ticket is clear.
 - testRecipe: array of { testType, scenario, priority, blocked? }
-  - testType: "E2E" | "Integration" | "API" | "UI" | "Regression"
-  - scenario: concise scenario description
-  - priority: "High" | "Medium" | "Low"
-  - blocked: true only if scenario cannot be tested until a critical clarification is resolved
+  - testType: "E2E" | "API" | "UI" | "Manual" (no Integration)
+  - priority: "Smoke" | "Critical Path" | "Regression"
+  - blocked: true when scenario awaits a toClarify item
 
-MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, criticalClarifications (what's missing).
+MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, toDo, toClarify.
 
 **ENHANCED TEST RECIPE REQUIREMENTS:**
 - **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
@@ -1742,34 +1739,31 @@ Return JSON format. For FULL analysis:
 {
   "minimalMode": false,
   "readyForDevScore": 1-10,
-  "readyForDevVerdict": "One-line verdict",
-  "affectedAreas": ["area1", "area2", "area3"],
-  "recommendations": ["actionable step 1", "actionable step 2"],
-  "criticalClarifications": [
-    {"question": "What happens when X?", "context": "No error handling specified. Should we...", "impact": "Without this, dev will make assumptions"}
+  "readyForDevVerdict": "Short verdict",
+  "affectedAreas": ["area1", "area2"],
+  "toDo": ["Define specific input fields for registration", "Specify validation rules for each field", "Clarify post-registration flow"],
+  "toAdd": [
+    {"title": "Acceptance criteria: email validation", "description": "Email must be valid format, max 254 chars. Show inline error on blur."},
+    {"title": "Edge case: expired session during signup", "description": "Redirect to login with message if session expires mid-flow."}
   ],
-  "missingAcceptanceCriteria": [
-    {"question": "Where does success confirmation appear?", "context": "User sees updated status — Toast? Dashboard?", "impact": "Unclear UX expectation"}
+  "toClarify": [
+    {"question": "What specific fields are required for registration?", "context": "Ticket does not specify which user details are needed."},
+    {"question": "What is the expected behavior after successful registration?", "context": "Ticket mentions two possible outcomes but does not specify which to implement."}
   ],
   "testRecipe": [
-    {"testType": "E2E", "scenario": "Update payment with valid card → success toast", "priority": "High", "blocked": false},
-    {"testType": "API", "scenario": "Submit valid card for user with multiple subs", "priority": "High", "blocked": true}
+    {"testType": "E2E", "scenario": "Complete registration with valid inputs → success", "priority": "Smoke", "blocked": false},
+    {"testType": "API", "scenario": "Submit invalid email → returns 400", "priority": "Critical Path", "blocked": false},
+    {"testType": "E2E", "scenario": "Multi-subs user flow", "priority": "Critical Path", "blocked": true}
   ]
 }
 
-For MINIMAL analysis (insufficient info): minimalMode: true, readyForDevScore: 1-3, readyForDevVerdict, recommendations, criticalClarifications.
-
-Test types: E2E, Integration, API, UI, Regression. Priority: High, Medium, Low. Set blocked: true when scenario needs a critical clarification before it can be tested.
+Test types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression. Set blocked: true when scenario awaits a toClarify answer.
 
 **FINAL VERIFICATION:**
-Before completing the analysis, ensure:
-- All test scenarios use specific, realistic data from the ticket context
-- Boundary conditions are tested with exact values mentioned in the ticket
-- Validation rules are tested with concrete examples
-- Error scenarios are based on actual ticket requirements
-- Test steps are detailed and immediately actionable
-- Expected results are specific and verifiable
-- CRITICAL: testRecipe array is ordered by priority: ALL Happy Path first, then ALL Critical Path, then ALL Edge Case, then ALL Regression`;
+- Test scenarios use specific, realistic data from the ticket
+- toAdd items are actionable (Ovi can add them to the ticket)
+- toClarify only includes questions where you truly lack context
+- testRecipe ordered: Smoke first, then Critical Path, then Regression`;
 
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
@@ -1808,23 +1802,22 @@ function generateTicketFallbackAnalysis(title, description, platform) {
   return {
     minimalMode: false,
     readyForDevScore: 4,
-    readyForDevVerdict: 'Partial analysis. Manual review recommended due to AI processing error.',
+    readyForDevVerdict: 'Manual review recommended due to AI processing error.',
     affectedAreas: ['auth', 'email', 'security'],
-    recommendations: [
+    toDo: [
       'Add acceptance criteria for error states',
       'Confirm edge case behavior with product'
     ],
-    criticalClarifications: [
-      { question: 'What if the user enters an invalid email format?', context: 'No error handling specified.', impact: 'Dev will make assumptions.' },
-      { question: 'What if the email service is down?', context: 'No fallback specified.', impact: 'Could cause user frustration.' }
+    toAdd: [
+      { title: 'Acceptance criteria: error handling', description: 'Define error messages and retry behavior.' }
     ],
-    missingAcceptanceCriteria: [
-      { question: 'Where does success confirmation appear?', context: 'Unclear.', impact: 'UX expectation undefined.' }
+    toClarify: [
+      { question: 'What if the user enters an invalid email format?', context: 'No error handling specified.' },
+      { question: 'What if the email service is down?', context: 'No fallback specified.' }
     ],
     testRecipe: [
-      { testType: 'E2E', scenario: 'Successful password reset flow → user can log in with new password', priority: 'High', blocked: false },
-      { testType: 'API', scenario: 'Invalid email format → returns appropriate error', priority: 'High', blocked: false },
-      { testType: 'Integration', scenario: 'Expired token → clear message and option to request new one', priority: 'High', blocked: false }
+      { testType: 'E2E', scenario: 'Successful flow → user can complete action', priority: 'Smoke', blocked: false },
+      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path', blocked: false }
     ]
   };
 }

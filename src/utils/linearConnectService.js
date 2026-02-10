@@ -9,6 +9,31 @@ const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 // Linear GraphQL API endpoint
 const LINEAR_API_URL = 'https://api.linear.app/graphql';
 
+// Deduplication: prevent duplicate analyses when Linear sends multiple webhooks for same comment
+const recentlyProcessed = new Map();
+const DEDUPE_TTL_MS = 120000; // 2 minutes
+
+function markProcessed(issueId, commentId) {
+  const key = `${issueId}:${commentId}`;
+  recentlyProcessed.set(key, Date.now());
+  // Clean old entries
+  const now = Date.now();
+  for (const [k, t] of recentlyProcessed.entries()) {
+    if (now - t > DEDUPE_TTL_MS) recentlyProcessed.delete(k);
+  }
+}
+
+function wasRecentlyProcessed(issueId, commentId) {
+  const key = `${issueId}:${commentId}`;
+  const t = recentlyProcessed.get(key);
+  if (!t) return false;
+  if (Date.now() - t > DEDUPE_TTL_MS) {
+    recentlyProcessed.delete(key);
+    return false;
+  }
+  return true;
+}
+
 /**
  * Verify Linear API key and get organization info
  */
@@ -164,6 +189,13 @@ async function processLinearWebhook(payload, installation) {
     console.log('🧪 /qa command detected! Processing analysis...');
     console.log(`✅ Event: ${event}, IssueId: ${issueId}, /qa detected`);
     console.log(`📝 Comment preview: "${commentBody.substring(0, 100)}..."`);
+
+    // Dedupe: Linear may send duplicate webhooks for the same comment
+    if (wasRecentlyProcessed(issueId, commentId)) {
+      console.log('✓ Duplicate webhook ignored (recently processed)');
+      return { success: true, message: 'Duplicate webhook ignored' };
+    }
+    markProcessed(issueId, commentId);
 
     // Fetch full issue details
     const issueDetails = await fetchIssueDetails(issueId, installation);
@@ -549,60 +581,67 @@ function truncate(str, n = 800) {
 }
 
 /**
- * Normalize AI analysis to safe structure (new compact format)
+ * Normalize AI analysis to safe structure (senior QA/CTO format)
  */
 function normalizeAnalysis(analysis) {
   const normalized = {
     readyForDevScore: analysis.readyForDevScore ?? (analysis.readyForDevelopmentScore ? Math.round(analysis.readyForDevelopmentScore * 2) : undefined),
     readyForDevVerdict: asString(analysis.readyForDevVerdict || analysis.message || ''),
     affectedAreas: asStringArray(analysis.affectedAreas || []),
-    recommendations: asStringArray(analysis.recommendations || analysis.improvementsNeeded || []),
-    criticalClarifications: Array.isArray(analysis.criticalClarifications)
-      ? analysis.criticalClarifications.map(c => ({
-          question: asString(c.question || c),
-          context: asString(c.context || ''),
-          impact: asString(c.impact || '')
-        }))
+    toDo: asStringArray(analysis.toDo || analysis.recommendations || analysis.improvementsNeeded || []),
+    toAdd: Array.isArray(analysis.toAdd)
+      ? analysis.toAdd.map(x => ({ title: asString(x.title || x.name || x), description: asString(x.description || x.detail || '') }))
       : [],
-    missingAcceptanceCriteria: Array.isArray(analysis.missingAcceptanceCriteria)
-      ? analysis.missingAcceptanceCriteria.map(c => ({
-          question: asString(c.question || c),
-          context: asString(c.context || ''),
-          impact: asString(c.impact || '')
-        }))
+    toClarify: Array.isArray(analysis.toClarify)
+      ? analysis.toClarify.map(c => ({ question: asString(c.question || c), context: asString(c.context || '') }))
       : [],
     testRecipe: []
   };
 
-  // Fallback: map old qaQuestions/keyRisks to criticalClarifications if new format empty
-  if (normalized.criticalClarifications.length === 0 && (analysis.qaQuestions?.length || analysis.keyRisks?.length)) {
-    const questions = asStringArray(analysis.qaQuestions || []);
-    const risks = asStringArray(analysis.keyRisks || []);
-    normalized.criticalClarifications = [...questions, ...risks].slice(0, 5).map(q => ({
-      question: truncate(q, 100),
-      context: '',
-      impact: ''
-    }));
+  // Fallback: map old criticalClarifications/missingAcceptanceCriteria to toClarify
+  if (normalized.toClarify.length === 0) {
+    const critical = analysis.criticalClarifications || [];
+    const missing = analysis.missingAcceptanceCriteria || [];
+    const qa = analysis.qaQuestions || [];
+    [...critical, ...missing, ...qa].slice(0, 6).forEach(c => {
+      normalized.toClarify.push({
+        question: asString(typeof c === 'object' ? c.question : c),
+        context: asString(typeof c === 'object' ? (c.context || c.impact) : '')
+      });
+    });
+    normalized.toClarify = normalized.toClarify.filter(x => x.question);
   }
 
-  // Normalize test recipe
+  // Fallback: map improvementsNeeded to toAdd if toAdd empty
+  if (normalized.toAdd.length === 0 && (analysis.improvementsNeeded?.length || analysis.recommendations?.length)) {
+    const items = analysis.improvementsNeeded || analysis.recommendations || [];
+    normalized.toAdd = items.slice(0, 5).map(i => ({ title: truncate(asString(i), 80), description: '' }));
+  }
+
+  // Normalize test recipe - types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression
   let rawRecipe = analysis.testRecipe || [];
   if (!Array.isArray(rawRecipe)) rawRecipe = [rawRecipe].filter(Boolean);
-  const allowedTypes = ['E2E', 'Integration', 'API', 'UI', 'Regression'];
+  const allowedTypes = ['E2E', 'API', 'UI', 'Manual'];
   const mapTestType = (val) => {
     const v = String(val || '').trim();
     if (allowedTypes.includes(v)) return v;
     const l = v.toLowerCase();
-    if (l.includes('unit') || l.includes('api')) return 'API';
-    if (l.includes('integration')) return 'Integration';
-    if (l.includes('visual') || l.includes('ui')) return 'UI';
-    if (l.includes('regression')) return 'Regression';
+    if (l.includes('api') || l.includes('integration') || l.includes('unit')) return 'API';
+    if (l.includes('ui') || l.includes('visual')) return 'UI';
+    if (l.includes('manual')) return 'Manual';
     return 'E2E';
+  };
+  const mapPriority = (val) => {
+    const v = String(val || '').trim().toLowerCase();
+    if (v.includes('smoke') || v === 'high') return 'Smoke';
+    if (v.includes('critical') || v.includes('medium')) return 'Critical Path';
+    if (v.includes('regression') || v === 'low') return 'Regression';
+    return 'Critical Path';
   };
   normalized.testRecipe = rawRecipe.map((test) => ({
     testType: mapTestType(test.testType || test.automation),
     scenario: asString(test.scenario || test.name || test.title || ''),
-    priority: asString(test.priority || 'Medium'),
+    priority: mapPriority(test.priority),
     blocked: Boolean(test.blocked)
   }));
 
@@ -615,7 +654,7 @@ function normalizeAnalysis(analysis) {
 }
 
 /**
- * Format AI analysis as Linear comment (compact format)
+ * Format AI analysis as Linear comment (senior QA/CTO format)
  */
 function formatAnalysisComment(analysis) {
   try {
@@ -629,36 +668,31 @@ function formatAnalysisComment(analysis) {
     if (a.affectedAreas.length > 0) {
       comment += `**Affected Areas:** ${a.affectedAreas.map(x => `\`${x}\``).join(' · ')}\n\n`;
     }
-    if (a.recommendations.length > 0) {
-      comment += '**Recommendations:**\n';
-      a.recommendations.forEach(r => { comment += `- ${truncate(r, 200)}\n`; });
+    if (a.toDo.length > 0) {
+      comment += '**To Do:**\n';
+      a.toDo.forEach(item => { comment += `- [ ] ${truncate(item, 200)}\n`; });
       comment += '\n---\n\n';
     }
 
-    // Clarifications
-    const critical = a.criticalClarifications;
-    const missing = a.missingAcceptanceCriteria;
-    if (critical.length > 0 || missing.length > 0) {
-      comment += '### ❓ Clarifications\n\n';
-      let num = 1;
-      if (critical.length > 0) {
-        comment += '**Critical — Block dev until resolved:**\n\n';
-        critical.forEach(c => {
-          comment += `${num}. **${truncate(c.question, 120)}**\n`;
-          if (c.context) comment += `   → ${truncate(c.context, 200)}\n`;
-          if (c.impact) comment += `   → Impact: ${truncate(c.impact, 150)}\n`;
+    // Improvements: To add + To clarify
+    if (a.toAdd.length > 0 || a.toClarify.length > 0) {
+      comment += '### 📋 Improvements\n\n';
+      if (a.toAdd.length > 0) {
+        comment += '**To add:**\n\n';
+        a.toAdd.forEach(x => {
+          const title = truncate(x.title || x.description, 100);
+          const desc = x.description && x.description !== title ? truncate(x.description, 150) : '';
+          comment += `> ✅ **${title}**\n`;
+          if (desc) comment += `> ${desc}\n`;
           comment += '\n';
-          num++;
         });
       }
-      if (missing.length > 0) {
-        comment += '**Missing Acceptance Criteria:**\n\n';
-        missing.forEach(c => {
-          comment += `${num}. **${truncate(c.question, 120)}**\n`;
+      if (a.toClarify.length > 0) {
+        comment += '**To clarify:**\n\n';
+        a.toClarify.forEach((c, i) => {
+          comment += `${i + 1}. **${truncate(c.question, 120)}**\n`;
           if (c.context) comment += `   → ${truncate(c.context, 200)}\n`;
-          if (c.impact) comment += `   → Impact: ${truncate(c.impact, 150)}\n`;
           comment += '\n';
-          num++;
         });
       }
       comment += '---\n\n';
@@ -667,12 +701,12 @@ function formatAnalysisComment(analysis) {
     // Test Recipe
     if (a.testRecipe.length > 0) {
       comment += '### 🧪 Test Recipe\n\n';
-      comment += '| Test Type | Scenario | Priority |\n';
-      comment += '|-----------|----------|----------|\n';
-      const priorityEmoji = { High: '🔴', Medium: '🟡', Low: '🟢' };
+      comment += '| Type | Scenario | Priority |\n';
+      comment += '|------|----------|----------|\n';
+      const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
       a.testRecipe.forEach(t => {
         let scenario = truncate(t.scenario, 150);
-        if (t.blocked) scenario += ' [BLOCKED: needs clarification]';
+        if (t.blocked) scenario += ' [BLOCKED: awaiting clarification]';
         const prio = priorityEmoji[t.priority] || '🟡';
         comment += `| **${t.testType}** | ${scenario} | ${prio} ${t.priority} |\n`;
       });
@@ -680,13 +714,13 @@ function formatAnalysisComment(analysis) {
     }
 
     // Footer
-    comment += '---\n\n<sub>🤖 QA Analysis by **Ovi** · [Re-analyze](#) · [Configure](#)</sub>';
+    comment += '---\n\n<sub>🤖 QA Analysis by **Ovi (the AI QA)**</sub>';
 
     return comment;
   } catch (error) {
     console.error('❌ Error formatting analysis comment:', error);
     const keys = analysis ? Object.keys(analysis).join(', ') : 'none';
-    return `🤖 FirstQA Analysis\n\n(Formatting failed. Raw keys: ${keys})\n\n---\n<sub>🤖 QA Analysis by **Ovi**</sub>`;
+    return `🤖 FirstQA Analysis\n\n(Formatting failed. Raw keys: ${keys})\n\n---\n<sub>🤖 QA Analysis by **Ovi (the AI QA)**</sub>`;
   }
 }
 
