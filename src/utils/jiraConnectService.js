@@ -501,6 +501,5 @@ async function saveAnalysisToDatabase(data) {
 module.exports = {
   processConnectWebhook,
   fetchTicketDetails,
-  postComment,
-  formatAnalysisComment
+  postComment
 };
