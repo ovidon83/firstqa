@@ -1706,15 +1706,15 @@ You are analyzing as a senior QA Engineer and CTO with deep startup experience. 
 
 OUTPUT STRUCTURE:
 
-- recommendations: array of max 5 items. Each item must be a READY-TO-COPY acceptance criteria or text block that can be pasted directly into the ticket body. Full, self-contained sentences. Examples:
-  - "**Input fields:** Email (required, valid format), Password (8+ chars, at least one number), Username (3-20 chars, alphanumeric)."
-  - "**Post-registration:** User is auto-signed in and redirected to dashboard. Show welcome toast."
-  - "**Error handling:** Inline validation per field. On submit failure: toast with error message, keep form data, show retry option."
-- testRecipe: REQUIRED. array of 4-8 test scenarios { testType, scenario, priority }. Write each scenario clearly and completely—no blocked flags or caveats. Just the test scenario.
-  - testType: "E2E" | "API" | "UI" | "Manual"
+- readinessScore: number 1-5. How ready is this ticket for development (clarity of requirements, acceptance criteria).
+- affectedAreas: array of strings (e.g. ["auth", "registration", "validation"]).
+- highestRisk: string or null. If there's a notable risk or blocker, state it briefly. Otherwise omit or null.
+- recommendations: array of max 5 items. Each item must be a READY-TO-COPY acceptance criteria or text block that can be pasted directly into the ticket body. Full, self-contained sentences.
+- testRecipe: REQUIRED. array of 4-8 test scenarios { testType, scenario, priority }. Sort by priority (Smoke first, then Critical Path, then Regression).
+  - testType: "UI" | "API" | "Unit/Component" | "Manual". Use UI for user-facing flows (including E2E). Smoke must be UI for functional changes (user perspective). For non-functional (e.g. backend-only): use API as smoke if no UI, or UI if the API is consumed in the UI. Unit/Component for isolated logic/components.
   - priority: "Smoke" | "Critical Path" | "Regression"
 
-MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, recommendations, testRecipe.
+MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readinessScore, affectedAreas, highestRisk (if any), recommendations, testRecipe.
 
 **ENHANCED TEST RECIPE REQUIREMENTS:**
 - **Boundary Testing**: Include boundary test cases for any numeric inputs, character limits, file sizes, or validation constraints mentioned in the ticket
@@ -1734,14 +1734,16 @@ MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, recomme
 Return JSON format. For FULL analysis:
 {
   "minimalMode": false,
+  "readinessScore": 4,
   "affectedAreas": ["area1", "area2"],
+  "highestRisk": "Brief risk if any, or null",
   "recommendations": [
     "**Input fields:** Email (required, valid format), Password (8+ chars), Username (3-20 chars).",
     "**Post-registration:** User is auto-signed in and redirected to dashboard. Show welcome toast.",
     "**Error handling:** Inline validation per field. On submit failure: toast with error, keep form data, retry option."
   ],
   "testRecipe": [
-    {"testType": "E2E", "scenario": "Complete registration with valid inputs → user lands on dashboard", "priority": "Smoke"},
+    {"testType": "UI", "scenario": "Complete registration with valid inputs → user lands on dashboard", "priority": "Smoke"},
     {"testType": "API", "scenario": "Submit invalid email format → returns 400 with clear error message", "priority": "Critical Path"}
   ]
 }
@@ -1784,14 +1786,16 @@ Recommendations: ready-to-paste text for the ticket body. Test scenarios: clear,
 function generateTicketFallbackAnalysis(title, description, platform) {
   return {
     minimalMode: false,
+    readinessScore: 3,
     affectedAreas: ['auth', 'email', 'security'],
+    highestRisk: null,
     recommendations: [
       '**Error handling:** Specify expected error messages, retry behavior, and user feedback.',
       '**Validation:** Define validation rules and inline error display.'
     ],
     testRecipe: [
-      { testType: 'E2E', scenario: 'Successful flow → user can complete action', priority: 'Smoke', blocked: false },
-      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path', blocked: false }
+      { testType: 'UI', scenario: 'Successful flow → user can complete action', priority: 'Smoke' },
+      { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path' }
     ]
   };
 }

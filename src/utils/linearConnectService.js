@@ -583,10 +583,14 @@ function truncate(str, n = 800) {
 /**
  * Normalize AI analysis to safe structure (senior QA/CTO format)
  */
+const PRIORITY_ORDER = { Smoke: 0, 'Critical Path': 1, Regression: 2 };
+
 function normalizeAnalysis(analysis) {
   const recs = asStringArray(analysis.recommendations || analysis.improvementsNeeded || []);
   const normalized = {
+    readinessScore: typeof analysis.readinessScore === 'number' ? Math.min(5, Math.max(1, analysis.readinessScore)) : null,
     affectedAreas: asStringArray(analysis.affectedAreas || []),
+    highestRisk: analysis.highestRisk ? asString(analysis.highestRisk).trim() : null,
     recommendations: recs.slice(0, 5),
     testRecipe: []
   };
@@ -603,18 +607,19 @@ function normalizeAnalysis(analysis) {
     normalized.recommendations = sources.filter(Boolean).slice(0, 5);
   }
 
-  // Normalize test recipe - types: E2E, API, UI, Manual. Priority: Smoke, Critical Path, Regression
+  // Normalize test recipe - types: UI, API, Unit/Component, Manual. E2E → UI.
   let rawRecipe = analysis.testRecipe || [];
   if (!Array.isArray(rawRecipe)) rawRecipe = [rawRecipe].filter(Boolean);
-  const allowedTypes = ['E2E', 'API', 'UI', 'Manual'];
+  const allowedTypes = ['UI', 'API', 'Unit/Component', 'Manual'];
   const mapTestType = (val) => {
     const v = String(val || '').trim();
     if (allowedTypes.includes(v)) return v;
     const l = v.toLowerCase();
-    if (l.includes('api') || l.includes('integration') || l.includes('unit')) return 'API';
-    if (l.includes('ui') || l.includes('visual')) return 'UI';
+    if (l.includes('e2e') || l.includes('ui') || l.includes('visual')) return 'UI';
+    if (l.includes('api') || l.includes('integration')) return 'API';
+    if (l.includes('unit') || l.includes('component')) return 'Unit/Component';
     if (l.includes('manual')) return 'Manual';
-    return 'E2E';
+    return 'UI';
   };
   const mapPriority = (val) => {
     const v = String(val || '').trim().toLowerCase();
@@ -623,16 +628,18 @@ function normalizeAnalysis(analysis) {
     if (v.includes('regression') || v === 'low') return 'Regression';
     return 'Critical Path';
   };
-  normalized.testRecipe = rawRecipe.map((test) => ({
+  let recipe = rawRecipe.map((test) => ({
     testType: mapTestType(test.testType || test.automation),
     scenario: asString(test.scenario || test.name || test.title || ''),
     priority: mapPriority(test.priority)
   }));
+  recipe.sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1));
+  normalized.testRecipe = recipe;
 
-  // Fallback: ensure Test Recipe is never empty (AI sometimes omits it)
+  // Fallback: ensure Test Recipe is never empty
   if (normalized.testRecipe.length === 0) {
     normalized.testRecipe = [
-      { testType: 'E2E', scenario: 'Complete happy path flow → success', priority: 'Smoke' },
+      { testType: 'UI', scenario: 'Complete happy path flow → success', priority: 'Smoke' },
       { testType: 'API', scenario: 'Invalid input → returns appropriate error', priority: 'Critical Path' },
       { testType: 'UI', scenario: 'Verify UI state and feedback', priority: 'Critical Path' }
     ];
@@ -648,10 +655,16 @@ function formatAnalysisComment(analysis) {
   try {
     const a = normalizeAnalysis(analysis);
 
-    // Pulse
+    // Pulse: Readiness score, Affected Areas, Highest risk (if any)
     let comment = '### 🫀 Pulse\n\n';
+    if (a.readinessScore != null) {
+      comment += `**Readiness score:** ${a.readinessScore}/5\n\n`;
+    }
     if (a.affectedAreas.length > 0) {
       comment += `**Affected Areas:** ${a.affectedAreas.map(x => `\`${x}\``).join(' · ')}\n\n`;
+    }
+    if (a.highestRisk) {
+      comment += `**Highest risk:** ${truncate(a.highestRisk, 200)}\n\n`;
     }
     comment += '---\n\n';
 
