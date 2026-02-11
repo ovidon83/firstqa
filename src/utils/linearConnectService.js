@@ -197,6 +197,10 @@ async function processLinearWebhook(payload, installation) {
     }
     markProcessed(issueId, commentId);
 
+    const { getUserIdFromLinearOrg, userHasAnyProductKnowledge, indexAllUserRepos, extractReposFromTicketContent } = require('../services/knowledgeBase/firstTimeIndexTrigger');
+    const orgId = installation.organization_id;
+    const userId = await getUserIdFromLinearOrg(orgId);
+
     // Fetch full issue details
     const issueDetails = await fetchIssueDetails(issueId, installation);
 
@@ -206,43 +210,57 @@ async function processLinearWebhook(payload, installation) {
       return { success: false, message: 'Failed to fetch issue details' };
     }
 
-    // Generate AI analysis
-    const { generateTicketInsights } = require('../../ai/openaiClient');
-    const aiInsights = await generateTicketInsights({
-      ticketId: issueDetails.identifier,
-      title: issueDetails.title,
-      description: issueDetails.description,
-      comments: issueDetails.comments,
-      labels: issueDetails.labels,
-      platform: 'linear',
-      priority: issueDetails.priority,
-      type: issueDetails.type
-    });
-
-    if (!aiInsights || !aiInsights.success) {
-      console.error('❌ AI analysis failed');
-      return { success: false, message: 'AI analysis failed' };
-    }
-
-    console.log('✅ AI analysis completed');
-
-    // Post analysis as comment
-    const analysisComment = formatAnalysisComment(aiInsights.data);
-    await postComment(issueId, analysisComment, installation);
-
-    // Save analysis to database
-    if (isSupabaseConfigured()) {
-      await saveAnalysisToDatabase({
-        installationId: installation.id,
-        provider: 'linear',
-        issueKey: issueDetails.identifier,
-        issueTitle: issueDetails.title,
-        issueUrl: issueDetails.url,
-        analysisResult: aiInsights.data
+    const runAnalysisAndPost = async () => {
+      const { generateTicketInsights } = require('../../ai/openaiClient');
+      const aiInsights = await generateTicketInsights({
+        ticketId: issueDetails.identifier,
+        title: issueDetails.title,
+        description: issueDetails.description,
+        comments: issueDetails.comments,
+        labels: issueDetails.labels,
+        platform: 'linear',
+        priority: issueDetails.priority,
+        type: issueDetails.type
       });
+      if (!aiInsights || !aiInsights.success) {
+        console.error('❌ AI analysis failed');
+        return;
+      }
+      const analysisComment = formatAnalysisComment(aiInsights.data);
+      await postComment(issueId, analysisComment, installation);
+      if (isSupabaseConfigured()) {
+        await saveAnalysisToDatabase({
+          installationId: installation.id,
+          provider: 'linear',
+          issueKey: issueDetails.identifier,
+          issueTitle: issueDetails.title,
+          issueUrl: issueDetails.url,
+          analysisResult: aiInsights.data
+        });
+      }
+      console.log('🎉 Linear issue analysis complete!');
+    };
+
+    // If user has no product knowledge: post "building knowledge" message, index repos, then run analysis
+    if (userId && process.env.ENABLE_KNOWLEDGE_SYNC === 'true') {
+      const hasKnowledge = await userHasAnyProductKnowledge(userId);
+      if (!hasKnowledge) {
+        const prioritizedRepos = extractReposFromTicketContent(
+          issueDetails.description,
+          (issueDetails.comments || []).map(c => c.body || c.text || ''),
+          issueDetails.attachmentUrls || []
+        );
+        await postComment(issueId, '🔨 **Building product knowledge** from your repositories. Analysis will be posted once indexing completes.', installation);
+        indexAllUserRepos(userId, {
+          prioritizedRepos,
+          onAllComplete: () => runAnalysisAndPost().catch(e => console.warn('Deferred Linear analysis failed:', e.message))
+        });
+        return { success: true, message: 'Indexing started, analysis will follow', issueId };
+      }
     }
 
-    console.log('🎉 Linear issue analysis complete!');
+    // User has knowledge or no userId: run analysis immediately
+    await runAnalysisAndPost();
 
     return {
       success: true,
@@ -378,6 +396,11 @@ async function fetchIssueDetails(issueId, installation) {
             createdAt
           }
         }
+        attachments {
+          nodes {
+            url
+          }
+        }
         team {
           key
         }
@@ -416,6 +439,7 @@ async function fetchIssueDetails(issueId, installation) {
       throw new Error('Issue not found');
     }
 
+    const attachmentUrls = (issue.attachments?.nodes || []).map(a => asString(a?.url || '')).filter(Boolean);
     return {
       id: issue.id,
       identifier: issue.identifier,
@@ -432,6 +456,7 @@ async function fetchIssueDetails(issueId, installation) {
         body: asString(c.body),
         created: asString(c.createdAt || '')
       })) || [],
+      attachmentUrls,
       url: issue.url
     };
   } catch (error) {

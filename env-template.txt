@@ -37,6 +37,12 @@ SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_KEY=your-service-role-key
 
+# Product knowledge system (continuous codebase understanding)
+ENABLE_KNOWLEDGE_SYNC=true
+AUTO_INDEX_ON_INSTALL=true
+INITIAL_ANALYSIS_BATCH_SIZE=50
+FIRST_TIME_INDEX_REPO_CAP=5
+
 # Jira OAuth Configuration
 JIRA_CLIENT_ID=your-jira-client-id
 JIRA_CLIENT_SECRET=your-jira-client-secret

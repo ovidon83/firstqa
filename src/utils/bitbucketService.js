@@ -293,6 +293,10 @@ async function handleTestRequest(workspace, repoSlug, prId, comment, sender) {
   try {
     console.log(`🧪 Processing /qa request for ${workspace}/${repoSlug}#${prId}`);
 
+    // First-time auto-index (Bitbucket analyzer not yet implemented - logs only for now)
+    const { triggerBitbucketFirstTimeIndex } = require('../services/knowledgeBase/firstTimeIndexTrigger');
+    triggerBitbucketFirstTimeIndex(workspace, repoSlug);
+
     // Get PR details
     const prDescription = await fetchPRDescription(workspace, repoSlug, prId);
     const prDiff = await fetchPRDiff(workspace, repoSlug, prId);

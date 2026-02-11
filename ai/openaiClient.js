@@ -80,6 +80,18 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
 
     // Get comprehensive code context (includes fileContents and selectorHints for accuracy)
     const codeContext = await buildCodeContext(repo, pr_number, changedFiles, diff, { fileContents, selectorHints });
+
+    // Get product knowledge context (if knowledge sync is enabled)
+    let productKnowledgeContext = '';
+    if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true') {
+      try {
+        const { getProductContext, formatProductContextForPrompt } = require('../src/services/knowledgeBase/contextRetriever');
+        const productContext = await getProductContext(repo, changedFiles, `${title || ''} ${body || ''}`);
+        productKnowledgeContext = formatProductContextForPrompt(productContext);
+      } catch (pkErr) {
+        console.warn('Product context retrieval failed (degrading gracefully):', pkErr.message);
+      }
+    }
     
     // Validate that we have real PR data, not simulated/fake data
     const isSimulatedData = diff && (
@@ -176,6 +188,7 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         body: sanitizedBody + analysisInstruction,
         diff: sanitizedDiff,
         codeContext: sanitizedContext,
+        productKnowledgeContext: productKnowledgeContext || 'No product knowledge context available.',
         changedFiles: changedFiles,
         isUpdateAnalysis: isUpdateAnalysis,
         newCommitsCount: isUpdateAnalysis && newCommits ? newCommits.length : 0,
@@ -192,6 +205,7 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         body: sanitizedBody,
         diff: sanitizedDiff,
         codeContext: sanitizedContext,
+        productKnowledgeContext: productKnowledgeContext || 'No product knowledge context available.',
         changedFiles: changedFiles
       });
     } else {

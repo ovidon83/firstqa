@@ -12,6 +12,10 @@ Description: <%= body %>
 
 **ADVANCED CODE ANALYSIS:**
 <%= codeContext %>
+<% if (typeof productKnowledgeContext !== 'undefined' && productKnowledgeContext && productKnowledgeContext !== 'No product knowledge context available.') { %>
+**PRODUCT KNOWLEDGE CONTEXT:**
+<%= productKnowledgeContext %>
+<% } %>
 
 Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this exact format:
 

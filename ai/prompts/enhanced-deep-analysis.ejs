@@ -64,6 +64,10 @@ Description: <%= body %>
 
 **ADVANCED CODE ANALYSIS:**
 <%= codeContext %>
+<% if (typeof productKnowledgeContext !== 'undefined' && productKnowledgeContext && productKnowledgeContext !== 'No product knowledge context available.') { %>
+**PRODUCT KNOWLEDGE CONTEXT (components, APIs, data models - use for deeper understanding):**
+<%= productKnowledgeContext %>
+<% } %>
 <% if (typeof selectorHintsFormatted !== 'undefined' && selectorHintsFormatted && selectorHintsFormatted !== 'None extracted.') { %>
 **AUTOMATION SELECTORS (use these in test steps when applicable - enables Playwright/automation):**
 <%= selectorHintsFormatted %>

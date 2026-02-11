@@ -193,6 +193,10 @@ app.use('/jira-connect', jiraConnectRoutes);
 // Linear Connect routes
 app.use('/linear-connect', linearConnectRoutes);
 
+// Knowledge API routes (product knowledge status)
+const knowledgeRoutes = require('./src/routes/knowledge');
+app.use('/api/knowledge', knowledgeRoutes);
+
 // Serve Atlassian Connect descriptor
 app.get('/atlassian-connect.json', (req, res) => {
   res.sendFile(path.join(__dirname, 'atlassian-connect.json'));

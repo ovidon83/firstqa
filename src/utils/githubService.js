@@ -1217,15 +1217,16 @@ That's it! We'll handle the rest. 🚀
 
 /**
  * Parse /qa command flags from comment body
- * Supports: /qa -testrun -env=https://example.com/
- * @returns {{ testRun: boolean, envUrl: string|null }}
+ * Supports: /qa -testrun -env=https://example.com/ -index -reindex -analyze_codebase
+ * @returns {{ testRun: boolean, envUrl: string|null, indexCodebase: boolean }}
  */
 function parseQaFlags(commentBody) {
   const body = String(commentBody || '').trim();
   const testRun = /\b-testrun\b/i.test(body);
   const envMatch = body.match(/-env=(\S+)/i);
   const envUrl = envMatch ? envMatch[1].trim() : null;
-  return { testRun, envUrl };
+  const indexCodebase = /\b-index\b/i.test(body) || /\b-reindex\b/i.test(body) || /\b-analyze_codebase\b/i.test(body) || /\b-setup\b/i.test(body);
+  return { testRun, envUrl, indexCodebase };
 }
 
 /**
@@ -1303,9 +1304,39 @@ Or wait until next month when your limit resets.
     }
     console.log(`✅ Usage check passed: ${limitCheck.current}/${limitCheck.limit} analyses used`);
   }
+
+  // Check for -index / -reindex / -analyze_codebase / -setup flag - trigger codebase indexing
+  const qaFlags = parseQaFlags(comment.body);
+  if (qaFlags.indexCodebase) {
+    if (process.env.ENABLE_KNOWLEDGE_SYNC !== 'true') {
+      await postComment(repository.full_name, issue.number, '❌ **Knowledge sync is disabled.** Set `ENABLE_KNOWLEDGE_SYNC=true` to use codebase indexing.');
+      return { success: true, message: 'Knowledge sync disabled' };
+    }
+    const hasKnowledge = await (async () => {
+      if (!isSupabaseConfigured()) return false;
+      const { count } = await supabaseAdmin.from('product_knowledge').select('*', { count: 'exact', head: true }).eq('repo_id', repository.full_name).limit(1);
+      return (count || 0) > 0;
+    })();
+    if (hasKnowledge) {
+      await postComment(repository.full_name, issue.number, '🔄 **Re-indexing codebase...** This will take 5-10 minutes. I\'ll update you when complete.');
+    } else {
+      await postComment(repository.full_name, issue.number, '🚀 **FirstQA is learning your codebase...** This will take 5-10 minutes. You\'ll be notified when complete.');
+    }
+    const { analyzeRepository } = require('../services/knowledgeBase/codebaseAnalyzer');
+    const postCommentFn = (body) => postComment(repository.full_name, issue.number, body);
+    analyzeRepository(repository.full_name, installationId, 'main', { postComment: postCommentFn }).catch(err => {
+      console.error('Codebase analysis error:', err);
+    });
+    return { success: true, message: 'Codebase indexing started' };
+  }
   
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
+
+  // First-time auto-index: if repo has no product knowledge, trigger codebase analysis in background (once)
+  const { triggerGitHubFirstTimeIndex } = require('../services/knowledgeBase/firstTimeIndexTrigger');
+  const postCommentFn = (body) => postComment(repository.full_name, issue.number, body);
+  triggerGitHubFirstTimeIndex(repository.full_name, installationId, postCommentFn);
   
   // Get the last analyzed commit SHA for this PR
   const lastAnalyzedSHA = getLastAnalyzedCommitSHA(repository.full_name, issue.number);
@@ -2698,6 +2729,10 @@ async function handlePRMergedToStaging(repository, pr, userId, installationId) {
     }
   }
 
+  // First-time auto-index (same as /qa flow)
+  const { triggerGitHubFirstTimeIndex } = require('../services/knowledgeBase/firstTimeIndexTrigger');
+  triggerGitHubFirstTimeIndex(repository.full_name, installationId);
+
   const prDescription = await fetchPRDescription(repository.full_name, pr.number);
   const prDiff = await fetchPRDiff(repository.full_name, pr.number);
 
@@ -2803,12 +2838,77 @@ async function processWebhookEvent(event) {
     console.log('Event payload:', payloadString.length > 500 
       ? payloadString.substring(0, 500) + '...(truncated)' 
       : payloadString);
+
+    // Handle installation_repositories - auto-index on repo connection
+    if (eventType === 'installation_repositories' && payload.action === 'added' && process.env.AUTO_INDEX_ON_INSTALL === 'true') {
+      const repos = payload.repositories_added || [];
+      for (const repo of repos) {
+        const repoFullName = repo.full_name || `${repo.owner?.login}/${repo.name}`;
+        const hasKnowledge = await (async () => {
+          if (!isSupabaseConfigured()) return true;
+          const { count } = await supabaseAdmin.from('product_knowledge').select('*', { count: 'exact', head: true }).eq('repo_id', repoFullName).limit(1);
+          return (count || 0) > 0;
+        })();
+        if (!hasKnowledge) {
+          const { analyzeRepository } = require('../services/knowledgeBase/codebaseAnalyzer');
+          const { getOctokit } = require('../services/githubChecksService');
+          const octokit = await getOctokit(installationId);
+          let prNumber = null;
+          if (octokit) {
+            try {
+              const [owner, repoName] = repoFullName.split('/');
+              const prs = await octokit.pulls.list({ owner, repo: repoName, state: 'open', sort: 'created', direction: 'desc', per_page: 1 });
+              if (prs.data?.[0]) prNumber = prs.data[0].number;
+            } catch (e) {
+              console.warn('Could not fetch latest PR for installation comment:', e.message);
+            }
+          }
+          const postCommentFn = prNumber ? (body) => postComment(repoFullName, prNumber, body) : null;
+          if (postCommentFn) {
+            await postCommentFn('🚀 **FirstQA is learning your codebase...** This will take 5-10 minutes. You\'ll be notified when complete.');
+          }
+          analyzeRepository(repoFullName, installationId, 'main', postCommentFn ? { postComment: postCommentFn } : null).catch(err => {
+            console.error('Auto-index on install failed:', err.message);
+          });
+        }
+      }
+    }
+
     // Handle pull_request event - NO automatic analysis on PR open
     // Analysis is triggered ONLY via /qa comment command
     if (eventType === 'pull_request' && payload.action === 'opened') {
       const { repository, pull_request: pr } = payload;
       console.log(`📋 PR #${pr?.number} opened on ${repository?.full_name} - waiting for /qa command to trigger analysis`);
+      // Background PR knowledge sync (non-blocking)
+      if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true' && installationId && pr?.head?.sha) {
+        const { syncPRKnowledge } = require('../services/knowledgeBase/prKnowledgeSync');
+        syncPRKnowledge(pr.number, repository.full_name, installationId, pr.head.sha).catch(err =>
+          console.error('PR knowledge sync error:', err.message)
+        );
+      }
       return { success: true, message: 'PR opened - use /qa command to trigger analysis' };
+    }
+
+    // PR synchronize (new commits) - background knowledge sync
+    if (eventType === 'pull_request' && payload.action === 'synchronize') {
+      const { repository, pull_request: pr } = payload;
+      if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true' && installationId && pr?.head?.sha) {
+        const { syncPRKnowledge } = require('../services/knowledgeBase/prKnowledgeSync');
+        syncPRKnowledge(pr.number, repository.full_name, installationId, pr.head.sha).catch(err =>
+          console.error('PR knowledge sync error:', err.message)
+        );
+      }
+    }
+
+    // Handle pull_request closed + merged - knowledge sync and staging analysis
+    if (eventType === 'pull_request' && payload.action === 'closed' && payload.pull_request?.merged === true) {
+      const { repository, pull_request: pr } = payload;
+      if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true' && installationId && pr?.head?.sha) {
+        const { syncPRKnowledge } = require('../services/knowledgeBase/prKnowledgeSync');
+        syncPRKnowledge(pr.number, repository.full_name, installationId, pr.head.sha).catch(err =>
+          console.error('PR knowledge sync error:', err.message)
+        );
+      }
     }
 
     // Handle pull_request closed + merged into staging - auto-generate analysis for staging testing

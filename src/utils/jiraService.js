@@ -154,6 +154,28 @@ async function createWebhook(siteId, accessToken) {
 }
 
 /**
+ * Fetch remote links for a Jira issue (e.g. GitHub PR URLs)
+ */
+async function fetchRemoteLinks(siteId, issueKey, accessToken) {
+  try {
+    const response = await axios.get(
+      `https://api.atlassian.com/ex/jira/${siteId}/rest/api/3/issue/${issueKey}/remotelink`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      }
+    );
+    const links = response.data || [];
+    return links.map(l => l.object?.url).filter(Boolean);
+  } catch (e) {
+    console.warn('Could not fetch Jira remote links:', e.message);
+    return [];
+  }
+}
+
+/**
  * Fetch ticket details from Jira
  */
 async function fetchTicketDetails(siteId, issueKey, accessToken) {
@@ -173,7 +195,10 @@ async function fetchTicketDetails(siteId, issueKey, accessToken) {
   );
 
   const issue = response.data;
-  
+
+  // Fetch remote links (GitHub PRs, etc.) for repo extraction
+  const remoteLinkUrls = await fetchRemoteLinks(siteId, issueKey, accessToken);
+
   // Extract relevant data
   return {
     key: issue.key,
@@ -191,6 +216,7 @@ async function fetchTicketDetails(siteId, issueKey, accessToken) {
       body: c.body,
       created: c.created
     })) || [],
+    remoteLinkUrls,
     url: `${issue.self.replace('/rest/api/3/issue/' + issue.key, '')}/browse/${issue.key}`
   };
 }
@@ -309,47 +335,64 @@ async function processWebhookEvent(event) {
     // Fetch full ticket details
     const ticketDetails = await fetchTicketDetails(siteId, issue.key, accessToken);
 
-    console.log('🔍 Analyzing Jira ticket...');
-
-    // Generate AI analysis
-    const { generateTicketInsights } = require('../../ai/openaiClient');
-    const aiInsights = await generateTicketInsights({
-      ticketId: ticketDetails.key,
-      title: ticketDetails.summary,
-      description: ticketDetails.description,
-      comments: ticketDetails.comments,
-      labels: ticketDetails.labels,
-      platform: 'jira',
-      priority: ticketDetails.priority,
-      type: ticketDetails.type
-    });
-
-    if (!aiInsights || !aiInsights.success) {
-      console.error('❌ AI analysis failed:', aiInsights?.error);
-      return { success: false, message: 'AI analysis failed' };
-    }
-
-    console.log('✅ AI analysis completed');
-
-    // Format and post analysis as comment
-    const analysisComment = formatAnalysisComment(aiInsights.data);
-    await postComment(siteId, issue.key, analysisComment, accessToken);
-
-    // Save analysis to database
-    if (isSupabaseConfigured()) {
-      await saveAnalysisToDatabase({
-        userId: integration.user_id,
-        integrationId: integration.id,
-        provider: 'jira',
-        issueKey: ticketDetails.key,
-        issueTitle: ticketDetails.summary,
-        issueUrl: ticketDetails.url,
-        analysisResult: aiInsights.data
+    const runAnalysisAndPost = async () => {
+      const { generateTicketInsights } = require('../../ai/openaiClient');
+      const aiInsights = await generateTicketInsights({
+        ticketId: ticketDetails.key,
+        title: ticketDetails.summary,
+        description: ticketDetails.description,
+        comments: ticketDetails.comments,
+        labels: ticketDetails.labels,
+        platform: 'jira',
+        priority: ticketDetails.priority,
+        type: ticketDetails.type
       });
+      if (!aiInsights || !aiInsights.success) {
+        console.error('❌ AI analysis failed:', aiInsights?.error);
+        return;
+      }
+      const analysisComment = formatAnalysisComment(aiInsights.data);
+      await postComment(siteId, issue.key, analysisComment, accessToken);
+      if (isSupabaseConfigured()) {
+        await saveAnalysisToDatabase({
+          userId: integration.user_id,
+          integrationId: integration.id,
+          provider: 'jira',
+          issueKey: ticketDetails.key,
+          issueTitle: ticketDetails.summary,
+          issueUrl: ticketDetails.url,
+          analysisResult: aiInsights.data
+        });
+      }
+      console.log('🎉 Jira ticket analysis complete!');
+    };
+
+    // If user has no product knowledge: post "building knowledge" message, index repos, then run analysis
+    if (integration?.user_id && process.env.ENABLE_KNOWLEDGE_SYNC === 'true') {
+      const { userHasAnyProductKnowledge, indexAllUserRepos, extractReposFromTicketContent } = require('../services/knowledgeBase/firstTimeIndexTrigger');
+      const hasKnowledge = await userHasAnyProductKnowledge(integration.user_id);
+      if (!hasKnowledge) {
+        const commentTexts = (ticketDetails.comments || []).map(c =>
+          typeof c.body === 'string' ? c.body : (c.body?.content ? extractTextFromADF(c.body) : '')
+        );
+        const prioritizedRepos = extractReposFromTicketContent(
+          ticketDetails.description,
+          commentTexts,
+          ticketDetails.remoteLinkUrls || []
+        );
+        const buildingMsg = '🔨 **Building product knowledge** from your repositories. Analysis will be posted once indexing completes.';
+        await postComment(siteId, issue.key, buildingMsg, accessToken);
+        indexAllUserRepos(integration.user_id, {
+          prioritizedRepos,
+          onAllComplete: () => runAnalysisAndPost().catch(e => console.warn('Deferred Jira analysis failed:', e.message))
+        });
+        return { success: true, message: 'Indexing started, analysis will follow', issueKey: issue.key };
+      }
     }
 
-    console.log('🎉 Jira ticket analysis complete!');
-    
+    // User has knowledge or no userId: run analysis immediately
+    await runAnalysisAndPost();
+
     return {
       success: true,
       message: 'Analysis posted',
