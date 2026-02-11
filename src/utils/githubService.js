@@ -2086,7 +2086,6 @@ Or wait until next month when your limit resets.
   console.log(`✅ "Reviewed by Ovi" label ${labelResult.simulated ? 'would be' : 'was'} added`);
 
   // On-demand test run: /qa -testrun -env=https://...
-  const qaFlags = parseQaFlags(comment.body);
   const baseUrlForTestRun = qaFlags.envUrl || process.env.TEST_AUTOMATION_BASE_URL;
   console.log(`🔬 [testrun] Check: flags=`, qaFlags, `baseUrl=`, baseUrlForTestRun, `aiOk=`, !!aiInsights?.success);
 
