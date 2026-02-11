@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovi's first review - FirstQA</title>
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+<body class="onboarding">
+  <%- include('_nav') %>
+  <main class="main">
+    <div class="card">
+      <h1>Ovi's first review</h1>
+      <p class="subtitle">Pick a PR for Ovi to test, or skip and Ovi will review the next PR automatically.</p>
+
+      <% if (typeof prs !== 'undefined' && prs.length) { %>
+        <div style="margin-bottom:1.5rem;">
+          <% prs.forEach(pr => { %>
+            <a href="<%= pr.url %>" target="_blank" rel="noopener" class="pr-card">
+              <div class="title"><%= pr.title %></div>
+              <div class="meta">
+                <i class="fab fa-git-alt" style="margin-right:0.25rem;"></i><%= pr.branch %>
+                <span style="margin-left:1rem;color:#22c55e;">+<%= pr.additions %></span>
+                <span style="color:#ef4444;">-<%= pr.deletions %></span>
+              </div>
+            </a>
+          <% }); %>
+        </div>
+        <p style="font-size:0.9rem;color:#a1a1aa;margin-bottom:1rem;">
+          Comment <code style="background:#1c1c1f;padding:0.2rem 0.5rem;border-radius:4px;">/qa</code> on any PR to get Ovi's analysis.
+        </p>
+      <% } else { %>
+        <p style="color:#a1a1aa;margin-bottom:1rem;">No open PRs found. Ovi will review your next PR when you comment <code style="background:#1c1c1f;padding:0.2rem 0.5rem;border-radius:4px;">/qa</code> on it.</p>
+      <% } %>
+
+      <form action="/onboarding/first-review/complete" method="POST">
+        <button type="submit" class="btn-primary">Go to Dashboard <i class="fas fa-arrow-right" style="font-size:0.85rem;"></i></button>
+      </form>
+
+      <p style="font-size:0.875rem;color:#71717a;text-align:center;margin-top:1rem;">
+        Or skip — Ovi will review the next PR automatically when you comment /qa
+      </p>
+
+      <div class="nav-footer">
+        <a href="/onboarding/indexing" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

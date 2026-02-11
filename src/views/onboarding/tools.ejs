@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Give Ovi access - FirstQA</title>
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+<body class="onboarding">
+  <%- include('_nav') %>
+  <main class="main">
+    <div class="card">
+      <h1>Give Ovi access</h1>
+      <p class="subtitle">Connect the tools Ovi needs to test your PRs.</p>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+      <% if (typeof connected !== 'undefined' && connected) { %>
+        <div class="alert" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#86efac;">
+          <i class="fas fa-check-circle"></i> <%= connected === 'github' ? 'GitHub' : connected %> connected successfully!
+        </div>
+      <% } %>
+      <% if (typeof hasCodeRepo !== 'undefined' && !hasCodeRepo) { %>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-circle"></i> Connect at least one code repository to continue
+        </div>
+      <% } %>
+
+      <span class="section-label">Code Repository <span style="color:#ef4444;">Required</span></span>
+      <div class="integration-grid">
+        <div class="integration-card <%= integrations.github && integrations.github.length ? 'connected' : '' %>">
+          <div class="integration-icon github"><i class="fab fa-github" style="color:white;"></i></div>
+          <span class="name">GitHub</span>
+          <% if (integrations.github && integrations.github.length) { %>
+            <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Connected</span>
+          <% } else { %>
+            <a href="/github/install-redirect?returnTo=%2Fonboarding%2Ftools" class="btn-primary" style="margin:0;padding:0.5rem 1rem;width:auto;font-size:0.875rem;">Connect</a>
+          <% } %>
+        </div>
+        <div class="integration-card <%= integrations.bitbucket ? 'connected' : '' %>">
+          <div class="integration-icon bitbucket"><i class="fab fa-bitbucket" style="color:white;"></i></div>
+          <span class="name">Bitbucket</span>
+          <% if (integrations.bitbucket) { %>
+            <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Connected</span>
+          <% } else { %>
+            <a href="/dashboard/integrations?returnTo=%2Fonboarding%2Ftools" class="btn-primary" style="margin:0;padding:0.5rem 1rem;width:auto;font-size:0.875rem;">Connect</a>
+          <% } %>
+        </div>
+      </div>
+
+      <span class="section-label">Ticket System <span style="color:#a1a1aa;">Optional</span></span>
+      <div class="integration-grid">
+        <div class="integration-card <%= integrations.linear ? 'connected' : '' %>">
+          <div class="integration-icon linear"><i class="fas fa-bolt" style="color:white;"></i></div>
+          <span class="name">Linear</span>
+          <% if (integrations.linear) { %>
+            <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Connected</span>
+          <% } else { %>
+            <a href="/dashboard/integrations?returnTo=%2Fonboarding%2Ftools" class="btn-primary" style="margin:0;padding:0.5rem 1rem;width:auto;font-size:0.875rem;">Connect</a>
+          <% } %>
+        </div>
+        <div class="integration-card <%= integrations.jira ? 'connected' : '' %>">
+          <div class="integration-icon jira"><i class="fab fa-jira" style="color:white;"></i></div>
+          <span class="name">Jira</span>
+          <% if (integrations.jira) { %>
+            <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Connected</span>
+          <% } else { %>
+            <a href="/dashboard/integrations?returnTo=%2Fonboarding%2Ftools" class="btn-primary" style="margin:0;padding:0.5rem 1rem;width:auto;font-size:0.875rem;">Connect</a>
+          <% } %>
+        </div>
+      </div>
+
+      <form action="/onboarding/tools/continue" method="POST" style="margin-top:1.5rem;">
+        <button type="submit" class="btn-primary" <%= !hasCodeRepo ? 'disabled' : '' %>>Continue <i class="fas fa-arrow-right" style="font-size:0.85rem;"></i></button>
+      </form>
+
+      <div class="nav-footer">
+        <a href="/onboarding/trial" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

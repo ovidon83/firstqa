@@ -103,17 +103,19 @@ router.get('/install-redirect', async (req, res) => {
     
     // Check if user already has a GitHub installation in the database
     if (isSupabaseConfigured()) {
-      const { data: existingInstallation } = await supabaseAdmin
+      const { data: existingInstallations } = await supabaseAdmin
         .from('integrations')
-        .select('*')
+        .select('id')
         .eq('user_id', userId)
         .eq('provider', 'github')
-        .single();
+        .limit(1);
+      const existingInstallation = existingInstallations?.[0];
       
       if (existingInstallation) {
         console.log(`✅ User already has GitHub installation in database: ${existingInstallation.account_id}`);
-        // Redirect back to integrations with success message
-        return res.redirect('/dashboard/integrations?info=' + encodeURIComponent('GitHub is already connected'));
+        const returnTo = req.query.returnTo;
+        const dest = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'info=' + encodeURIComponent('GitHub is already connected') : '/dashboard/integrations?info=' + encodeURIComponent('GitHub is already connected');
+        return res.redirect(dest);
       }
     }
     
@@ -140,6 +142,7 @@ router.get('/install-redirect', async (req, res) => {
     const state = crypto.randomBytes(16).toString('hex');
     req.session.githubInstallState = state;
     req.session.githubInstallUserId = req.session.user.id;
+    if (req.query.returnTo) req.session.githubInstallReturnTo = req.query.returnTo;
     
     // Redirect to GitHub App install page with state
     const installUrl = `https://github.com/apps/oviai-by-firstqa/installations/new?state=${state}`;
@@ -210,11 +213,14 @@ router.get('/install-callback', async (req, res) => {
         console.log(`✅ GitHub installation saved to database for user ${userId}:`, data);
         
         // Clean up session state
+        const returnTo = req.session.githubInstallReturnTo;
         delete req.session.githubInstallState;
         delete req.session.githubInstallUserId;
+        delete req.session.githubInstallReturnTo;
         
-        // Redirect with a reload flag to force page refresh
-        return res.redirect('/dashboard/integrations?connected=github&t=' + Date.now());
+        // Redirect to returnTo (e.g. onboarding) or integrations
+        const redirectUrl = returnTo ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'connected=github&t=' + Date.now() : '/dashboard/integrations?connected=github&t=' + Date.now();
+        return res.redirect(redirectUrl);
       } catch (error) {
         console.error('Error saving GitHub installation:', error.message);
         return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Failed to save GitHub installation'));

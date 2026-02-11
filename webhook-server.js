@@ -178,6 +178,10 @@ app.get('/signup', (req, res) => {
 // Logout shortcut
 app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
+// Onboarding routes (before dashboard - middleware may redirect)
+const onboardingRoutes = require('./src/routes/onboarding');
+app.use('/onboarding', onboardingRoutes);
+
 // Dashboard routes
 app.use('/dashboard', dashboardRoutes);
 

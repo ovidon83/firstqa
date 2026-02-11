@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovi is learning - FirstQA</title>
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+<body class="onboarding">
+  <%- include('_nav') %>
+  <main class="main">
+    <div class="card">
+      <h1>Ovi is learning your codebase</h1>
+      <p class="subtitle">Building product knowledge so Ovi can give better QA insights.</p>
+
+      <% if (typeof repoStatus !== 'undefined' && repoStatus.length) { %>
+        <div class="indexing-status" id="indexing-status">
+          <% repoStatus.forEach(r => { %>
+            <div style="margin-bottom:1rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                <span><%= r.repoId %></span>
+                <% if (r.hasKnowledge) { %>
+                  <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Indexed</span>
+                <% } else if (r.status === 'running') { %>
+                  <span style="color:#8b5cf6;">Indexing... <%= r.progress %>%</span>
+                <% } else { %>
+                  <span style="color:#a1a1aa;">Pending</span>
+                <% } %>
+              </div>
+              <div class="indexing-progress">
+                <div class="indexing-progress-bar" style="width:<%= r.hasKnowledge ? 100 : (r.progress || 0) %>%;"></div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else if (!anyRunning && !allIndexed) { %>
+        <div class="indexing-status">
+          <p style="color:#a1a1aa;margin-bottom:1rem;">Ovi will index your repositories when you trigger the first analysis. You can start now or skip.</p>
+          <form action="/onboarding/indexing/start" method="POST" style="margin-bottom:1rem;">
+            <button type="submit" class="btn-primary" style="margin:0;">Start indexing now</button>
+          </form>
+        </div>
+      <% } else if (allIndexed) { %>
+        <div class="indexing-status">
+          <p style="color:#22c55e;"><i class="fas fa-check-circle"></i> All repositories indexed.</p>
+        </div>
+      <% } else { %>
+        <div class="indexing-status">
+          <p style="color:#a1a1aa;">Connecting to your repositories...</p>
+        </div>
+      <% } %>
+
+      <form action="/onboarding/indexing/continue" method="POST">
+        <button type="submit" class="btn-primary">Continue <i class="fas fa-arrow-right" style="font-size:0.85rem;"></i></button>
+      </form>
+
+      <div class="nav-footer">
+        <a href="/onboarding/tools" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+    </div>
+  </main>
+  <% if (anyRunning) { %>
+  <script>
+    (function poll() {
+      fetch('/onboarding/api/indexing-status')
+        .then(r => r.json())
+        .then(data => {
+          if (data.anyRunning) {
+            setTimeout(poll, 3000);
+            // Update UI
+            const el = document.getElementById('indexing-status');
+            if (el) {
+              el.innerHTML = data.repoStatus.map(r => `
+                <div style="margin-bottom:1rem;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                    <span>${r.repoId}</span>
+                    <span style="color:${r.hasKnowledge?'#22c55e':r.status==='running'?'#8b5cf6':'#a1a1aa'}">
+                      ${r.hasKnowledge?'✓ Indexed':r.status==='running'?`Indexing... ${r.progress}%`:'Pending'}
+                    </span>
+                  </div>
+                  <div class="indexing-progress">
+                    <div class="indexing-progress-bar" style="width:${r.hasKnowledge?100:r.progress||0}%;"></div>
+                  </div>
+                </div>
+              `).join('');
+            }
+          }
+        })
+        .catch(() => setTimeout(poll, 5000));
+    })();
+  </script>
+  <% } %>
+</body>
+</html>

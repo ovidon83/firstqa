@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start your trial - FirstQA</title>
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+<body class="onboarding">
+  <%- include('_nav') %>
+  <main class="main">
+    <div class="card">
+      <h1>Start your trial</h1>
+      <p class="subtitle">5 days or 10 PR reviews, whichever comes first.</p>
+
+      <div style="background:#1c1c1f;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <strong>Free Trial</strong>
+          <span style="font-size:1.5rem;font-weight:700;">$0</span>
+        </div>
+        <p style="color:#a1a1aa;font-size:0.9rem;margin-bottom:1rem;">No credit card required</p>
+        <ul style="list-style:none;">
+          <li style="padding:0.4rem 0;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-check" style="color:#22c55e;"></i> 5 days or 10 PR reviews</li>
+          <li style="padding:0.4rem 0;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-check" style="color:#22c55e;"></i> Full access to all features</li>
+          <li style="padding:0.4rem 0;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-check" style="color:#22c55e;"></i> Unlimited team members</li>
+          <li style="padding:0.4rem 0;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-check" style="color:#22c55e;"></i> Cancel anytime</li>
+        </ul>
+        <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:1rem;margin-top:1rem;">
+          <p style="color:#a1a1aa;font-size:0.875rem;">After trial: $99/month</p>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;font-size:0.8rem;color:#a1a1aa;">
+        <span><i class="fas fa-shield-alt"></i> Read-only access</span>
+        <span><i class="fas fa-lock"></i> SOC 2 Compliant</span>
+      </div>
+
+      <form action="/onboarding/trial" method="POST">
+        <button type="submit" class="btn-primary">Start Trial <i class="fas fa-arrow-right" style="font-size:0.85rem;"></i></button>
+        <p style="text-align:center;margin-top:0.75rem;">
+          <a href="/onboarding/trial/skip" style="color:#a1a1aa;font-size:0.9rem;">Skip for now</a>
+        </p>
+      </form>
+
+      <p style="font-size:0.75rem;color:#71717a;text-align:center;margin-top:1rem;">
+        By continuing, you agree to our <a href="/terms" style="color:#a1a1aa;">Terms</a> and <a href="/privacy" style="color:#a1a1aa;">Privacy Policy</a>.
+      </p>
+
+      <div class="nav-footer">
+        <a href="/onboarding/workspace" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

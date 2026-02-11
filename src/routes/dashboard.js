@@ -17,8 +17,31 @@ function requireAuth(req, res, next) {
   next();
 }
 
+/**
+ * Middleware: Redirect to onboarding if not completed (dashboard home only)
+ */
+async function checkOnboarding(req, res, next) {
+  const isDashboardHome = req.path === '/' || req.path === '';
+  if (!isDashboardHome || req.query.onboarding === 'complete') return next();
+  if (!isSupabaseConfigured()) return next();
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('onboarding_completed_at, onboarding_step')
+      .eq('id', req.session.user.id)
+      .single();
+    if (error) return next(); // Column might not exist yet
+    const completed = data?.onboarding_completed_at || (data?.onboarding_step >= 6);
+    if (!completed) return res.redirect('/onboarding');
+  } catch (e) {
+    // If users table doesn't have onboarding columns yet, continue
+  }
+  next();
+}
+
 // Apply auth middleware to all dashboard routes
 router.use(requireAuth);
+router.use(checkOnboarding);
 
 /**
  * GET /dashboard - Dashboard home
@@ -153,6 +176,7 @@ router.get('/integrations', async (req, res) => {
       linearIntegration,
       connected: req.query.connected, // 'github', 'jira', or 'linear' when just connected
       info: req.query.info, // Info messages (not errors, not success)
+      returnTo: req.query.returnTo, // e.g. /onboarding/tools
       success: flash?.type === 'success' ? flash.message : req.query.success,
       error: flash?.type === 'error' ? flash.message : req.query.error
     });
