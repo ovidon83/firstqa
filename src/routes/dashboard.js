@@ -102,7 +102,8 @@ router.get('/', async (req, res) => {
       user, 
       stats,
       success: req.query.success,
-      error: req.query.error  
+      error: req.query.error,
+      onboarding: req.query.onboarding
     });
   } catch (error) {
     console.error('Dashboard error:', error);
@@ -115,7 +116,8 @@ router.get('/', async (req, res) => {
         recentAnalyses: [],
         plan: 'free'
       },
-      error: 'Failed to load dashboard data'
+      error: 'Failed to load dashboard data',
+      onboarding: req.query?.onboarding
     });
   }
 });

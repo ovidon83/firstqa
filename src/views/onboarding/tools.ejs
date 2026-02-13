@@ -41,15 +41,6 @@
             <a href="/github/install-redirect?returnTo=%2Fonboarding%2Ftools" class="btn-primary" style="margin:0;padding:0.5rem 1rem;width:auto;font-size:0.875rem;">Connect</a>
           <% } %>
         </div>
-        <div class="integration-card <%= integrations.bitbucket ? 'connected' : '' %>">
-          <div class="integration-icon bitbucket"><i class="fab fa-bitbucket" style="color:white;"></i></div>
-          <span class="name">Bitbucket</span>
-          <% if (integrations.bitbucket) { %>
-            <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Connected</span>
-          <% } else { %>
-            <a href="/dashboard/integrations?returnTo=%2Fonboarding%2Ftools" class="btn-primary" style="margin:0;padding:0.5rem 1rem;width:auto;font-size:0.875rem;">Connect</a>
-          <% } %>
-        </div>
       </div>
 
       <span class="section-label">Ticket System <span style="color:#a1a1aa;">Optional</span></span>

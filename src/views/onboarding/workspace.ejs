@@ -28,6 +28,12 @@
             required autocomplete="organization">
         </div>
         <div class="form-group">
+          <label for="quality_goals">Quality goals or challenges (optional)</label>
+          <textarea id="quality_goals" name="quality_goals" rows="3" 
+            placeholder="e.g. Regression bugs in checkout, slow test runs, flaky E2E tests"
+            maxlength="2000"><%= typeof qualityGoals !== 'undefined' ? qualityGoals : '' %></textarea>
+        </div>
+        <div class="form-group">
           <label for="team_size">Engineering team size</label>
           <div class="btn-group" role="group">
             <button type="button" class="btn-option <%= teamSize === '1-5' ? 'selected' : '' %>" data-value="1-5">1-5 engineers</button>

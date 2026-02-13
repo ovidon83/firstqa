@@ -205,6 +205,48 @@ async function triggerFirstTimeIndexForUserRepos(userId) {
 }
 
 /**
+ * Index only the repos the user selected (e.g. from onboarding).
+ * @param {string} userId - User ID
+ * @param {string[]} selectedRepos - Array of repo full names (owner/repo)
+ */
+async function indexSelectedReposForUser(userId, selectedRepos) {
+  if (process.env.ENABLE_KNOWLEDGE_SYNC !== 'true' || !isSupabaseConfigured() || !selectedRepos?.length) return;
+  const MAX_REPOS = parseInt(process.env.FIRST_TIME_INDEX_REPO_CAP || '5', 10);
+  const toIndex = selectedRepos.slice(0, MAX_REPOS);
+  try {
+    const { data: githubIntegrations } = await supabaseAdmin
+      .from('integrations')
+      .select('account_id')
+      .eq('user_id', userId)
+      .eq('provider', 'github');
+    if (!githubIntegrations?.length) return;
+    const { getOctokit } = require('../githubChecksService');
+    const { analyzeRepository } = require('./codebaseAnalyzer');
+    for (const int of githubIntegrations) {
+      const installationId = parseInt(int.account_id, 10);
+      try {
+        const octokit = await getOctokit(installationId);
+        if (!octokit) continue;
+        const { data } = await octokit.apps.listReposAccessibleToInstallation({ per_page: 100 });
+        const repoList = data?.repositories || [];
+        for (const repo of repoList) {
+          const repoFullName = repo.full_name;
+          if (!toIndex.includes(repoFullName)) continue;
+          console.log(`📚 Indexing ${repoFullName} (user-selected)`);
+          await analyzeRepository(repoFullName, installationId, repo.default_branch || 'main').catch(e =>
+            console.warn(`Index failed for ${repoFullName}:`, e.message)
+          );
+        }
+      } catch (e) {
+        console.warn('Could not list repos for installation:', e.message);
+      }
+    }
+  } catch (e) {
+    console.warn('indexSelectedReposForUser failed:', e.message);
+  }
+}
+
+/**
  * Get user_id from Linear organization ID (via integrations table)
  */
 async function getUserIdFromLinearOrg(organizationId) {
@@ -241,6 +283,7 @@ module.exports = {
   triggerBitbucketFirstTimeIndex,
   triggerFirstTimeIndexForUserRepos,
   indexAllUserRepos,
+  indexSelectedReposForUser,
   userHasAnyProductKnowledge,
   extractReposFromTicketContent,
   extractRepoFromGitHubUrl,

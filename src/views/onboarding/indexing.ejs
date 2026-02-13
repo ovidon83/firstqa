@@ -14,38 +14,53 @@
   <main class="main">
     <div class="card">
       <h1>Ovi is learning your codebase</h1>
-      <p class="subtitle">Building product knowledge so Ovi can give better QA insights.</p>
+      <p class="subtitle">Select repositories to index. Indexed data is stored in your workspace and improves PR and ticket analysis.</p>
 
-      <% if (typeof repoStatus !== 'undefined' && repoStatus.length) { %>
+      <% if (typeof availableRepos !== 'undefined' && availableRepos.length > 0) { %>
         <div class="indexing-status" id="indexing-status">
-          <% repoStatus.forEach(r => { %>
-            <div style="margin-bottom:1rem;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-                <span><%= r.repoId %></span>
-                <% if (r.hasKnowledge) { %>
-                  <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Indexed</span>
-                <% } else if (r.status === 'running') { %>
-                  <span style="color:#8b5cf6;">Indexing... <%= r.progress %>%</span>
-                <% } else { %>
-                  <span style="color:#a1a1aa;">Pending</span>
-                <% } %>
+          <% if (anyRunning || allIndexed) { %>
+            <% repoStatus.forEach(r => { %>
+              <div style="margin-bottom:1rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                  <span><%= r.repoId %></span>
+                  <% if (r.hasKnowledge) { %>
+                    <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Indexed</span>
+                  <% } else if (r.status === 'running') { %>
+                    <span style="color:#8b5cf6;">Indexing... <%= r.progress %>%</span>
+                  <% } else { %>
+                    <span style="color:#a1a1aa;">Pending</span>
+                  <% } %>
+                </div>
+                <div class="indexing-progress">
+                  <div class="indexing-progress-bar" style="width:<%= r.hasKnowledge ? 100 : (r.progress || 0) %>%;"></div>
+                </div>
               </div>
-              <div class="indexing-progress">
-                <div class="indexing-progress-bar" style="width:<%= r.hasKnowledge ? 100 : (r.progress || 0) %>%;"></div>
+            <% }); %>
+          <% } else { %>
+            <p style="color:#a1a1aa;margin-bottom:1rem;font-size:0.9rem;">Choose up to <%= typeof indexCap !== 'undefined' ? indexCap : 5 %> repos to index (max <%= typeof indexCap !== 'undefined' ? indexCap : 5 %>).</p>
+            <form action="/onboarding/indexing/start" method="POST" id="index-form" style="margin-bottom:1rem;">
+              <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+                <% availableRepos.forEach(r => { %>
+                  <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem;border-radius:8px;background:rgba(255,255,255,0.02);">
+                    <input type="checkbox" name="repos" value="<%= r.repoId %>" class="repo-checkbox" <%= r.hasKnowledge ? 'disabled' : '' %>>
+                    <span><%= r.repoId %></span>
+                    <% if (r.hasKnowledge) { %>
+                      <span style="color:#22c55e;font-size:0.85rem;"><i class="fas fa-check-circle"></i> Already indexed</span>
+                    <% } %>
+                  </label>
+                <% }); %>
               </div>
-            </div>
-          <% }); %>
+              <button type="submit" class="btn-primary" style="margin:0;" id="start-btn">Start indexing</button>
+            </form>
+          <% } %>
         </div>
       <% } else if (!anyRunning && !allIndexed) { %>
         <div class="indexing-status">
-          <p style="color:#a1a1aa;margin-bottom:1rem;">Ovi will index your repositories when you trigger the first analysis. You can start now or skip.</p>
-          <form action="/onboarding/indexing/start" method="POST" style="margin-bottom:1rem;">
-            <button type="submit" class="btn-primary" style="margin:0;">Start indexing now</button>
-          </form>
+          <p style="color:#a1a1aa;margin-bottom:1rem;">No repositories found. Connect GitHub and grant access to repos, or skip and index later from Settings.</p>
         </div>
       <% } else if (allIndexed) { %>
         <div class="indexing-status">
-          <p style="color:#22c55e;"><i class="fas fa-check-circle"></i> All repositories indexed.</p>
+          <p style="color:#22c55e;"><i class="fas fa-check-circle"></i> All selected repositories indexed.</p>
         </div>
       <% } else { %>
         <div class="indexing-status">
@@ -70,7 +85,6 @@
         .then(data => {
           if (data.anyRunning) {
             setTimeout(poll, 3000);
-            // Update UI
             const el = document.getElementById('indexing-status');
             if (el) {
               el.innerHTML = data.repoStatus.map(r => `
@@ -90,6 +104,33 @@
           }
         })
         .catch(() => setTimeout(poll, 5000));
+    })();
+  </script>
+  <% } else if (typeof availableRepos !== 'undefined' && availableRepos.length > 0 && !anyRunning && !allIndexed) { %>
+  <script>
+    (function() {
+      var form = document.getElementById('index-form');
+      var checkboxes = document.querySelectorAll('.repo-checkbox:not([disabled])');
+      var startBtn = document.getElementById('start-btn');
+      var cap = <%= typeof indexCap !== 'undefined' ? indexCap : 5 %>;
+      checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var checked = document.querySelectorAll('.repo-checkbox:checked').length;
+          if (checked > cap) cb.checked = false;
+          checkboxes.forEach(function(c) { if (!c.checked) c.disabled = false; });
+          var nowChecked = document.querySelectorAll('.repo-checkbox:checked').length;
+          if (nowChecked >= cap) {
+            checkboxes.forEach(function(c) { if (!c.checked) c.disabled = true; });
+          }
+        });
+      });
+      form.addEventListener('submit', function(e) {
+        var checked = document.querySelectorAll('.repo-checkbox:checked').length;
+        if (checked === 0) {
+          e.preventDefault();
+          alert('Select at least one repository to index.');
+        }
+      });
     })();
   </script>
   <% } %>

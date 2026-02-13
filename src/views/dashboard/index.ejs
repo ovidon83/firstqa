@@ -347,6 +347,18 @@
                 </div>
             </div>
 
+            <% if (typeof onboarding !== 'undefined' && onboarding === 'complete') { %>
+            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem;">You're all set!</h3>
+              <p style="color: #a1a1aa; font-size: 0.95rem; margin-bottom: 1rem;">Here's how to use Ovi:</p>
+              <ul style="list-style: none; color: #d4d4d8;">
+                <li style="padding: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-code-branch" style="color: #10b981;"></i> <strong>PRs:</strong> Comment <code style="background: rgba(0,0,0,0.3); padding: 0.15rem 0.4rem; border-radius: 4px;">/qa</code> on any pull request</li>
+                <li style="padding: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-bolt" style="color: #10b981;"></i> <strong>Linear:</strong> Comment <code style="background: rgba(0,0,0,0.3); padding: 0.15rem 0.4rem; border-radius: 4px;">/qa</code> on any issue</li>
+                <li style="padding: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem;"><i class="fab fa-jira" style="color: #10b981;"></i> <strong>Jira:</strong> Comment <code style="background: rgba(0,0,0,0.3); padding: 0.15rem 0.4rem; border-radius: 4px;">/qa</code> on any ticket</li>
+              </ul>
+            </div>
+            <% } %>
+
             <!-- Recent Activity or Empty State -->
             <% if (stats.recentAnalyses && stats.recentAnalyses.length > 0) { %>
                 <div style="margin-bottom: 2rem;">
@@ -385,8 +397,8 @@
                 <!-- Has integrations but no analyses yet -->
                 <div class="empty-state">
                     <div class="empty-state-icon">💬</div>
-                    <h3>Ready to analyze PRs</h3>
-                    <p>Comment <code>/qa</code> on any pull request to get your first analysis</p>
+                    <h3>Ready to analyze</h3>
+                    <p>Comment <code>/qa</code> on a pull request (GitHub) or Linear issue to get your first analysis</p>
                 </div>
             <% } else { %>
                 <!-- No integrations connected -->

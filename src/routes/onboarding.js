@@ -10,6 +10,7 @@ const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 const { getOctokit } = require('../services/githubChecksService');
 const {
   indexAllUserRepos,
+  indexSelectedReposForUser,
   userHasAnyProductKnowledge,
   triggerFirstTimeIndexForUserRepos
 } = require('../services/knowledgeBase/firstTimeIndexTrigger');
@@ -39,20 +40,21 @@ async function getOnboardingState(userId) {
   try {
     const { data, error } = await supabaseAdmin
       .from('users')
-      .select('company_name, team_size, onboarding_step, onboarding_completed_at, trial_started_at, trial_ends_at')
+      .select('company_name, team_size, quality_goals, onboarding_step, onboarding_completed_at, trial_started_at, trial_ends_at')
       .eq('id', userId)
       .single();
-    if (error) return { step: 1, companyName: '', teamSize: null, trialStartedAt: null };
-    return {
-      step: data?.onboarding_step ?? 1,
-      companyName: data?.company_name ?? '',
-      teamSize: data?.team_size ?? null,
-      trialStartedAt: data?.trial_started_at ?? null,
-      trialEndsAt: data?.trial_ends_at ?? null,
-      completedAt: data?.onboarding_completed_at ?? null
-    };
+    if (error) return { step: 1, companyName: '', teamSize: null, qualityGoals: '', trialStartedAt: null, trialEndsAt: null, completedAt: null };
+  return {
+    step: data?.onboarding_step ?? 1,
+    companyName: data?.company_name ?? '',
+    teamSize: data?.team_size ?? null,
+    qualityGoals: data?.quality_goals ?? '',
+    trialStartedAt: data?.trial_started_at ?? null,
+    trialEndsAt: data?.trial_ends_at ?? null,
+    completedAt: data?.onboarding_completed_at ?? null
+  };
   } catch (e) {
-    return { step: 1, companyName: '', teamSize: null, trialStartedAt: null };
+    return { step: 1, companyName: '', teamSize: null, qualityGoals: '', trialStartedAt: null, trialEndsAt: null, completedAt: null };
   }
 }
 
@@ -97,12 +99,13 @@ router.get('/workspace', async (req, res) => {
     step: 1,
     companyName: state.companyName,
     teamSize: state.teamSize,
+    qualityGoals: state.qualityGoals,
     progress: 1
   });
 });
 
 router.post('/workspace', async (req, res) => {
-  const { company_name, team_size } = req.body;
+  const { company_name, team_size, quality_goals } = req.body;
   if (!company_name?.trim()) {
     return res.redirect('/onboarding/workspace?error=' + encodeURIComponent('Company name is required'));
   }
@@ -113,6 +116,7 @@ router.post('/workspace', async (req, res) => {
   await updateOnboardingState(req.session.user.id, {
     company_name: (company_name || '').trim(),
     team_size,
+    quality_goals: (quality_goals || '').trim().slice(0, 2000),
     onboarding_step: 2
   });
   res.redirect('/onboarding/trial');
@@ -130,18 +134,6 @@ router.get('/trial', async (req, res) => {
 });
 
 router.post('/trial', async (req, res) => {
-  const now = new Date();
-  const trialEnds = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
-  await updateOnboardingState(req.session.user.id, {
-    trial_started_at: now.toISOString(),
-    trial_ends_at: trialEnds.toISOString(),
-    analyses_limit: 10,
-    onboarding_step: 3
-  });
-  res.redirect('/onboarding/tools');
-});
-
-router.get('/trial/skip', async (req, res) => {
   await updateOnboardingState(req.session.user.id, { onboarding_step: 3 });
   res.redirect('/onboarding/tools');
 });
@@ -166,7 +158,7 @@ router.get('/tools', async (req, res) => {
     }
   }
 
-  const hasCodeRepo = integrations.github.length > 0 || !!integrations.bitbucket;
+  const hasCodeRepo = integrations.github.length > 0;
 
   renderStep(req, res, 'onboarding/tools', {
     step: 3,
@@ -184,7 +176,7 @@ router.post('/tools/continue', async (req, res) => {
       .from('integrations')
       .select('provider')
       .eq('user_id', req.session.user.id);
-    hasCodeRepo = data?.some(i => i.provider === 'github' || i.provider === 'bitbucket') ?? false;
+    hasCodeRepo = data?.some(i => i.provider === 'github') ?? false;
   }
   if (!hasCodeRepo) {
     return res.redirect('/onboarding/tools?error=' + encodeURIComponent('Connect at least one code repository to continue'));
@@ -192,6 +184,8 @@ router.post('/tools/continue', async (req, res) => {
   await updateOnboardingState(req.session.user.id, { onboarding_step: 4 });
   res.redirect('/onboarding/indexing');
 });
+
+const INDEX_CAP = parseInt(process.env.FIRST_TIME_INDEX_REPO_CAP || '5', 10);
 
 // Step 4: Indexing
 router.get('/indexing', async (req, res) => {
@@ -202,6 +196,7 @@ router.get('/indexing', async (req, res) => {
   let jobId = null;
   let hasKnowledge = false;
   let repoStatus = [];
+  let availableRepos = [];
 
   if (isSupabaseConfigured()) {
     hasKnowledge = await userHasAnyProductKnowledge(req.session.user.id);
@@ -213,12 +208,11 @@ router.get('/indexing', async (req, res) => {
       .eq('provider', 'github');
 
     if (githubInts?.length) {
-      const { getOctokit } = require('../services/githubChecksService');
       for (const int of githubInts) {
         try {
           const octokit = await getOctokit(parseInt(int.account_id, 10));
           if (!octokit) continue;
-          const { data } = await octokit.apps.listReposAccessibleToInstallation({ per_page: 5 });
+          const { data } = await octokit.apps.listReposAccessibleToInstallation({ per_page: 100 });
           for (const repo of data?.repositories || []) {
             const repoId = repo.full_name;
             const { count } = await supabaseAdmin
@@ -234,13 +228,15 @@ router.get('/indexing', async (req, res) => {
               .order('created_at', { ascending: false })
               .limit(1)
               .maybeSingle();
-            repoStatus.push({
+            const item = {
               repoId,
               hasKnowledge: (count || 0) > 0,
               jobId: job?.id,
               status: job?.status,
               progress: job?.progress ?? 0
-            });
+            };
+            repoStatus.push(item);
+            availableRepos.push(item);
             if (job?.id && job?.status === 'running') jobId = job.id;
           }
           break;
@@ -259,17 +255,25 @@ router.get('/indexing', async (req, res) => {
     progress: 4,
     hasKnowledge,
     repoStatus,
+    availableRepos,
     jobId,
     allIndexed,
-    anyRunning
+    anyRunning,
+    indexCap: INDEX_CAP
   });
 });
 
 router.post('/indexing/start', async (req, res) => {
   const userId = req.session.user.id;
-  const hasKnowledge = await userHasAnyProductKnowledge(userId);
-  if (!hasKnowledge && process.env.ENABLE_KNOWLEDGE_SYNC === 'true') {
-    triggerFirstTimeIndexForUserRepos(userId).catch(e => console.warn('Index trigger failed:', e.message));
+  const repos = Array.isArray(req.body.repos) ? req.body.repos : (req.body.repos ? [req.body.repos] : []);
+  const selectedRepos = repos.filter(r => typeof r === 'string' && r.includes('/')).slice(0, INDEX_CAP);
+  if (selectedRepos.length > 0 && process.env.ENABLE_KNOWLEDGE_SYNC === 'true') {
+    indexSelectedReposForUser(userId, selectedRepos).catch(e => console.warn('Index trigger failed:', e.message));
+  } else if (selectedRepos.length === 0) {
+    const hasKnowledge = await userHasAnyProductKnowledge(userId);
+    if (!hasKnowledge) {
+      triggerFirstTimeIndexForUserRepos(userId).catch(e => console.warn('Index trigger failed:', e.message));
+    }
   }
   res.redirect('/onboarding/indexing');
 });
@@ -290,7 +294,7 @@ router.get('/api/indexing-status', async (req, res) => {
         try {
           const octokit = await getOctokit(parseInt(int.account_id, 10));
           if (!octokit) continue;
-          const { data } = await octokit.apps.listReposAccessibleToInstallation({ per_page: 10 });
+          const { data } = await octokit.apps.listReposAccessibleToInstallation({ per_page: 100 });
           for (const repo of data?.repositories || []) {
             const repoId = repo.full_name;
             const { count } = await supabaseAdmin
