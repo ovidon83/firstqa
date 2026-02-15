@@ -168,12 +168,17 @@ async function processLinearWebhook(payload, installation) {
       return { success: false, message: 'Failed to fetch comment' };
     }
 
-    // Early check: ignore bot comments (prevent infinite loop)
-    const authorName = comment.user?.name || '';
-    const isBot = authorName.includes('FirstQA') || authorName.includes('firstqa');
-    
+    // Early check: ignore bot/AI comments (prevent infinite loop)
+    // Use botActor from webhook payload - Linear sets this for AI/agent comments
+    // Avoid matching human emails like user+firstqa_client1@gmail.com
+    const authorName = comment.user?.name || comment.user?.email || 'unknown';
+    const isBotActor = commentData.botActor != null;
+    const isBotName = authorName && !authorName.includes('@') &&
+      (authorName === 'FirstQA' || authorName === 'Ovi' || /^oviai-by-firstqa$/i.test(authorName));
+    const isBot = isBotActor || !!isBotName;
+
     console.log(`📩 Webhook: ${event} | Issue: ${issueId} | Author: ${authorName}${isBot ? ' [BOT]' : ''}`);
-    
+
     if (isBot) {
       console.log('✓ Ignored bot comment (prevent loop)');
       return { success: true, message: 'Ignored bot comment' };
