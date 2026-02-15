@@ -40,7 +40,7 @@
               </div>
             <% }); %>
           <% } else if (!(typeof started !== 'undefined' && started)) { %>
-            <p style="color:#a1a1aa;margin-bottom:1rem;font-size:0.9rem;">Choose up to <%= typeof indexCap !== 'undefined' ? indexCap : 5 %> repos to index (max <%= typeof indexCap !== 'undefined' ? indexCap : 5 %>).</p>
+            <p style="color:#a1a1aa;margin-bottom:1rem;font-size:0.9rem;">Choose up to <%= typeof indexCap !== 'undefined' ? indexCap : 5 %> repos to index. Indexed data improves Ovi's PR analysis.</p>
             <form action="/onboarding/indexing/start" method="POST" id="index-form" style="margin-bottom:1rem;">
               <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
                 <% availableRepos.forEach(r => { %>
@@ -61,7 +61,7 @@
         </div>
       <% } else if (!anyRunning && !allIndexed) { %>
         <div class="indexing-status">
-          <p style="color:#a1a1aa;margin-bottom:1rem;">No repositories found. Connect GitHub and grant access to repos, or skip and index later from Settings.</p>
+          <p style="color:#a1a1aa;margin-bottom:1rem;">No repositories found. Connect GitHub first and grant access to repos, or skip and index later from Dashboard → Settings.</p>
         </div>
       <% } else if (allIndexed) { %>
         <div class="indexing-status">
@@ -73,8 +73,11 @@
         </div>
       <% } %>
 
-      <form action="/onboarding/indexing/continue" method="POST">
+      <form action="/onboarding/indexing/continue" method="POST" style="display:flex;flex-direction:column;gap:0.5rem;">
         <button type="submit" class="btn-primary">Continue <i class="fas fa-arrow-right" style="font-size:0.85rem;"></i></button>
+        <% if (typeof availableRepos !== 'undefined' && availableRepos.length > 0) { %>
+        <button type="submit" formaction="/onboarding/indexing/continue" class="btn-secondary">Skip indexing for now</button>
+        <% } %>
       </form>
 
       <div class="nav-footer">

@@ -336,7 +336,7 @@
 
             <!-- GitHub OAuth -->
             <div class="oauth-section">
-                <a href="/auth/github" class="oauth-btn">
+                <a href="/auth/github<%= typeof redirect !== 'undefined' && redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>" class="oauth-btn">
                     <i class="fab fa-github"></i>
                     Continue with GitHub
                 </a>
@@ -346,6 +346,9 @@
 
             <!-- Email/Password Form -->
             <form class="auth-form" action="/auth/login" method="POST">
+                <% if (typeof redirect !== 'undefined' && redirect) { %>
+                <input type="hidden" name="redirect" value="<%= redirect %>">
+                <% } %>
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input 
@@ -381,7 +384,7 @@
             </form>
 
             <div class="auth-footer">
-                Don't have an account? <a href="/signup">Sign up</a>
+                Don't have an account? <a href="/signup<%= typeof redirect !== 'undefined' && redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>">Sign up</a>
             </div>
         </div>
     </div>

@@ -157,22 +157,26 @@ app.use('/auth', authRoutes);
 // Login page
 app.get('/login', (req, res) => {
   if (req.session?.user) {
-    return res.redirect('/dashboard');
+    const redirect = req.query.redirect && String(req.query.redirect).startsWith('/') && !String(req.query.redirect).startsWith('//');
+    return res.redirect(redirect ? req.query.redirect : '/dashboard');
   }
   res.render('auth/login', {
     error: req.query.error,
-    success: req.query.success
+    success: req.query.success,
+    redirect: req.query.redirect
   });
 });
 
 // Signup page
 app.get('/signup', (req, res) => {
   if (req.session?.user) {
-    return res.redirect('/dashboard');
+    const redirect = req.query.redirect && String(req.query.redirect).startsWith('/') && !String(req.query.redirect).startsWith('//');
+    return res.redirect(redirect ? req.query.redirect : '/dashboard');
   }
   res.render('auth/signup', {
     error: req.query.error,
-    success: req.query.success
+    success: req.query.success,
+    redirect: req.query.redirect
   });
 });
 

@@ -173,6 +173,20 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
 }
+.onboarding .btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #a1a1aa;
+}
+.onboarding .btn-secondary:hover {
+  color: #f4f4f5;
+  border-color: rgba(255,255,255,0.3);
+}
 .onboarding .nav-footer {
   display: flex;
   align-items: center;

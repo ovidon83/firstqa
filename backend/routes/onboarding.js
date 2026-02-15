@@ -165,7 +165,8 @@ router.get('/tools', async (req, res) => {
     progress: 3,
     integrations,
     hasCodeRepo,
-    connected: req.query.connected
+    connected: req.query.connected,
+    linearOAuthEnabled: !!process.env.LINEAR_CLIENT_ID
   });
 });
 

@@ -55,6 +55,13 @@ router.get('/authorize', (req, res) => {
   }
 });
 
+function linearErrorRedirect(req, errMsg) {
+  const returnTo = req.session?.linearOAuthReturnTo;
+  const base = returnTo && String(returnTo).startsWith('/') ? returnTo : '/dashboard/integrations';
+  const sep = base.includes('?') ? '&' : '?';
+  return `${base}${sep}error=` + encodeURIComponent(errMsg);
+}
+
 /**
  * GET /linear/callback - Handle Linear OAuth callback
  */
@@ -64,16 +71,16 @@ router.get('/callback', async (req, res) => {
 
     if (oauthError) {
       console.error('Linear OAuth error:', oauthError, error_description);
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent(error_description || oauthError));
+      return res.redirect(linearErrorRedirect(req, error_description || oauthError));
     }
 
     if (!code) {
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('No authorization code received'));
+      return res.redirect(linearErrorRedirect(req, 'No authorization code received'));
     }
 
     if (state !== req.session?.linearOAuthState) {
       console.error('Linear OAuth: Invalid state token');
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Invalid state token - try again'));
+      return res.redirect(linearErrorRedirect(req, 'Invalid state token - try again'));
     }
 
     const userId = req.session.linearOAuthUserId || req.session.user?.id;
@@ -117,7 +124,7 @@ router.get('/callback', async (req, res) => {
     const org = orgResponse.data?.data?.organization;
     if (!org || !org.id) {
       console.error('Linear: Could not fetch organization');
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Could not fetch Linear organization'));
+      return res.redirect(linearErrorRedirect(req, 'Could not fetch Linear organization'));
     }
 
     // Save to linear_connect_installations (OAuth token as api_key)
@@ -155,7 +162,7 @@ router.get('/callback', async (req, res) => {
   } catch (error) {
     console.error('Linear OAuth callback error:', error.response?.data || error.message);
     const errMsg = error.response?.data?.error_description || error.response?.data?.error || error.message || 'Failed to connect Linear';
-    res.redirect('/dashboard/integrations?error=' + encodeURIComponent(errMsg));
+    res.redirect(linearErrorRedirect(req, errMsg));
   }
 });
 

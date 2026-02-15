@@ -227,11 +227,12 @@ router.post('/signup', async (req, res) => {
       };
       req.session.accessToken = data.session.access_token;
       req.session.refreshToken = data.session.refresh_token;
-      // Email signup: do NOT auto-sync GitHub (only sync when signup is via GitHub OAuth)
-      return res.redirect('/dashboard');
+      const redirect = req.body.redirect && String(req.body.redirect).startsWith('/') && !String(req.body.redirect).startsWith('//');
+      return res.redirect(redirect ? req.body.redirect : '/dashboard');
     }
 
-    res.redirect('/login?success=' + encodeURIComponent('Account created! Please log in.'));
+    const redirectParam = req.body.redirect ? '&redirect=' + encodeURIComponent(req.body.redirect) : '';
+    res.redirect('/login?success=' + encodeURIComponent('Account created! Please log in.') + redirectParam);
   } catch (error) {
     console.error('Signup error:', error);
     res.redirect('/signup?error=' + encodeURIComponent('An error occurred during signup'));
@@ -276,8 +277,8 @@ router.post('/login', async (req, res) => {
     req.session.refreshToken = data.session.refresh_token;
 
     console.log(`✅ User logged in: ${data.user.email}`);
-    // Email/password login: do NOT auto-sync GitHub (only sync when signup is via GitHub OAuth)
-    res.redirect('/dashboard');
+    const redirect = req.body.redirect && String(req.body.redirect).startsWith('/') && !String(req.body.redirect).startsWith('//');
+    res.redirect(redirect ? req.body.redirect : '/dashboard');
   } catch (error) {
     console.error('Login error:', error);
     res.redirect('/login?error=' + encodeURIComponent('An error occurred during login'));
@@ -297,6 +298,10 @@ router.get('/github', async (req, res) => {
       console.error('Supabase not configured');
       return res.redirect('/login?error=' + encodeURIComponent('Authentication service unavailable'));
     }
+
+    // Store redirect for use after OAuth callback
+    const redirect = req.query.redirect && String(req.query.redirect).startsWith('/') && !String(req.query.redirect).startsWith('//');
+    if (redirect) req.session.authRedirect = req.query.redirect;
 
     // Get the OAuth URL from Supabase
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -363,7 +368,10 @@ router.get('/callback', async (req, res) => {
     autoSyncGitHubInstallations(data.user.id, data.user.email).catch(err => {
       console.error('Background sync error:', err);
     });
-    res.redirect('/dashboard');
+    const savedRedirect = req.session.authRedirect;
+    delete req.session.authRedirect;
+    const isValidRedirect = savedRedirect && String(savedRedirect).startsWith('/') && !String(savedRedirect).startsWith('//');
+    res.redirect(isValidRedirect ? savedRedirect : '/dashboard');
   } catch (error) {
     console.error('OAuth callback error:', error);
     res.redirect('/login?error=' + encodeURIComponent('Authentication failed'));

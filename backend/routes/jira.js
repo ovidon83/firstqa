@@ -55,23 +55,30 @@ router.get('/install', (req, res) => {
 /**
  * GET /jira/callback - Handle Jira OAuth callback
  */
+function jiraErrorRedirect(req, errMsg) {
+  const returnTo = req.session?.jiraOAuthReturnTo;
+  const base = returnTo && String(returnTo).startsWith('/') ? returnTo : '/dashboard/integrations';
+  const sep = base.includes('?') ? '&' : '?';
+  return `${base}${sep}error=` + encodeURIComponent(errMsg);
+}
+
 router.get('/callback', async (req, res) => {
   try {
     const { code, state, error, error_description } = req.query;
 
     if (error) {
       console.error('Jira OAuth error:', error, error_description);
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent(error_description || error));
+      return res.redirect(jiraErrorRedirect(req, error_description || error));
     }
 
     if (!code) {
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('No authorization code received'));
+      return res.redirect(jiraErrorRedirect(req, 'No authorization code received'));
     }
 
     // Verify state
     if (state !== req.session?.jiraOAuthState) {
       console.error('Jira OAuth: Invalid state token (session may have been lost - check cookies/incognito)');
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Invalid state token - try again'));
+      return res.redirect(jiraErrorRedirect(req, 'Invalid state token - try again'));
     }
 
     const userId = req.session.jiraOAuthUserId || req.session.user?.id;
@@ -99,7 +106,7 @@ router.get('/callback', async (req, res) => {
 
     const resources = resourcesResponse.data;
     if (!resources || resources.length === 0) {
-      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('No Jira sites found'));
+      return res.redirect(jiraErrorRedirect(req, 'No Jira sites found'));
     }
 
     // Use the first accessible site
@@ -149,7 +156,7 @@ router.get('/callback', async (req, res) => {
   } catch (error) {
     console.error('Jira OAuth callback error:', error.response?.data || error.message);
     const errMsg = error.response?.data?.error_description || error.response?.data?.error || error.message || 'Failed to connect Jira';
-    res.redirect('/dashboard/integrations?error=' + encodeURIComponent(errMsg));
+    res.redirect(jiraErrorRedirect(req, errMsg));
   }
 });
 
