@@ -132,6 +132,7 @@ FirstQA features **Ovi**, an AI-powered QA Agent that provides comprehensive ana
 - Configure production database/storage
 - Set up proper SSL certificates
 - Configure production webhook endpoints
+- **Render / Production**: Set `ENABLE_KNOWLEDGE_SYNC=true` to enable codebase indexing during onboarding. If unset, the indexing step will show "Indexing is not enabled" and users can continue without it.
 
 ### **Deployment Options**
 - **Heroku**: Easy deployment with Git integration

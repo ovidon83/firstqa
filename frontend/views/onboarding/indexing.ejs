@@ -19,8 +19,8 @@
       <% if (typeof availableRepos !== 'undefined' && availableRepos.length > 0) { %>
         <div class="indexing-status" id="indexing-status">
           <% if (typeof started !== 'undefined' && started && !anyRunning && !allIndexed) { %>
-            <p style="color:#8b5cf6;margin-bottom:1rem;"><i class="fas fa-spinner fa-spin"></i> Starting indexing...</p>
-            <p style="color:#a1a1aa;font-size:0.9rem;">This may take a moment. Progress will appear shortly.</p>
+            <p style="color:#8b5cf6;margin-bottom:1rem;" id="indexing-status-line"><i class="fas fa-spinner fa-spin"></i> Starting indexing...</p>
+            <p style="color:#a1a1aa;font-size:0.9rem;" id="indexing-hint">This may take a moment. Progress will appear shortly.</p>
           <% } else if (anyRunning || allIndexed) { %>
             <% repoStatus.forEach(r => { %>
               <div style="margin-bottom:1rem;">
@@ -118,13 +118,25 @@
   <script>
     (function() {
       var startTime = Date.now();
+      var hintEl = document.getElementById('indexing-hint');
+      var statusLineEl = document.getElementById('indexing-status-line');
+      function updateFallback(msg, hideSpinner) {
+        if (hintEl) hintEl.textContent = msg;
+        if (hideSpinner && statusLineEl) statusLineEl.innerHTML = 'Indexing not started';
+      }
       function poll() {
-        if (Date.now() - startTime > 60000) return;
+        if (Date.now() - startTime > 60000) {
+          updateFallback('No progress yet. You can continue to the next step.', true);
+          return;
+        }
         fetch('/onboarding/api/indexing-status')
           .then(r => r.json())
           .then(function(data) {
             var el = document.getElementById('indexing-status');
             if (!el) return;
+            if (data.indexingEnabled === false) {
+              updateFallback('Indexing is not enabled. You can continue to the next step.', true);
+            }
             if (data.anyRunning || data.allIndexed) {
               el.innerHTML = data.repoStatus.map(function(r) {
                 return '<div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;"><span>' + r.repoId + '</span><span style="color:' + (r.hasKnowledge ? '#22c55e' : r.status === 'running' ? '#8b5cf6' : '#a1a1aa') + '">' + (r.hasKnowledge ? '✓ Indexed' : r.status === 'running' ? 'Indexing... ' + (r.progress || 0) + '%' : 'Pending') + '</span></div><div class="indexing-progress"><div class="indexing-progress-bar" style="width:' + (r.hasKnowledge ? 100 : r.progress || 0) + '%;"></div></div></div>';

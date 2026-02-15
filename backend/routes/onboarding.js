@@ -329,8 +329,9 @@ router.get('/api/indexing-status', async (req, res) => {
 
   const allIndexed = repoStatus.length > 0 && repoStatus.every(r => r.hasKnowledge);
   const anyRunning = repoStatus.some(r => r.status === 'running');
+  const indexingEnabled = process.env.ENABLE_KNOWLEDGE_SYNC === 'true';
 
-  res.json({ repoStatus, allIndexed, anyRunning });
+  res.json({ repoStatus, allIndexed, anyRunning, indexingEnabled });
 });
 
 router.post('/indexing/continue', async (req, res) => {
@@ -368,13 +369,30 @@ router.get('/first-review', async (req, res) => {
                 sort: 'updated'
               });
               for (const pr of prData || []) {
+                let additions = 0;
+                let deletions = 0;
+                let changedFiles = 0;
+                // pulls.list does not include additions/deletions - fetch full PR details
+                try {
+                  const { data: fullPr } = await octokit.pulls.get({
+                    owner,
+                    repo: repoName,
+                    pull_number: pr.number
+                  });
+                  additions = fullPr.additions ?? 0;
+                  deletions = fullPr.deletions ?? 0;
+                  changedFiles = fullPr.changed_files ?? 0;
+                } catch (e) {
+                  console.warn(`Could not fetch PR #${pr.number} details:`, e.message);
+                }
                 prs.push({
                   repo: repo.full_name,
                   number: pr.number,
                   title: pr.title,
                   branch: pr.head?.ref || '',
-                  additions: pr.additions ?? 0,
-                  deletions: pr.deletions ?? 0,
+                  additions,
+                  deletions,
+                  changed_files: changedFiles,
                   url: pr.html_url
                 });
               }

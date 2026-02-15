@@ -119,22 +119,30 @@ async function deleteLinearInstallation(organizationId) {
 
 /**
  * Verify Linear webhook signature
- * Linear sends webhooks with a signature in the X-Linear-Signature header
+ * Linear signs the exact raw request body - must use rawBody, not JSON.stringify(payload)
+ * @param {Buffer|string} rawBody - Raw request body (Buffer or string)
+ * @param {string} signature - Linear-Signature header value (hex)
+ * @param {string} secret - Webhook signing secret
  */
-function verifyWebhookSignature(payload, signature, secret) {
+function verifyWebhookSignature(rawBody, signature, secret) {
   if (!secret) {
     console.warn('⚠️ No webhook secret configured, skipping signature verification');
     return true; // Allow if no secret configured (for development)
   }
 
+  if (!rawBody || !signature) {
+    console.error('❌ Missing rawBody or signature for verification');
+    return false;
+  }
+
   const hmac = crypto.createHmac('sha256', secret);
-  hmac.update(JSON.stringify(payload));
+  hmac.update(Buffer.isBuffer(rawBody) ? rawBody : String(rawBody));
   const expectedSignature = hmac.digest('hex');
 
   // Linear uses hex-encoded HMAC-SHA256
   const isValid = crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
+    Buffer.from(signature, 'hex'),
+    Buffer.from(expectedSignature, 'hex')
   );
 
   if (!isValid) {
@@ -149,9 +157,13 @@ function verifyWebhookSignature(payload, signature, secret) {
  */
 async function verifyLinearWebhook(req, res, next) {
   try {
+    // Log early so we see incoming requests even when verification fails
+    console.log('🔔 Linear webhook POST received');
+
     // Linear uses 'linear-signature' header (case-insensitive, but check both)
     const signature = req.headers['linear-signature'] || req.headers['x-linear-signature'] || req.headers['Linear-Signature'];
-    const organizationId = req.body?.data?.organization?.id || req.body?.organizationId;
+    // Linear puts organizationId at top level of payload
+    const organizationId = req.body?.organizationId || req.body?.data?.organization?.id;
 
     if (!organizationId) {
       console.error('❌ Missing organization ID in webhook');
@@ -161,9 +173,14 @@ async function verifyLinearWebhook(req, res, next) {
     // Get installation
     const installation = await getLinearInstallation(organizationId);
 
-    // Verify signature if secret is configured
+    // Verify signature if secret is configured - MUST use raw body (Linear signs exact bytes)
     if (signature && installation.webhook_secret) {
-      const isValid = verifyWebhookSignature(req.body, signature, installation.webhook_secret);
+      const rawBody = req.rawBody;
+      if (!rawBody) {
+        console.error('❌ Raw body not available for signature verification');
+        return res.status(401).json({ error: 'Webhook verification failed' });
+      }
+      const isValid = verifyWebhookSignature(rawBody, signature, installation.webhook_secret);
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid webhook signature' });
       }
