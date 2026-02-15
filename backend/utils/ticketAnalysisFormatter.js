@@ -1,6 +1,6 @@
 /**
  * Shared ticket analysis formatter for Linear and Jira
- * Pulse, Recommendations, Test Recipe (Name | Steps | Priority | Automation Level)
+ * Pulse, Recommendations, Test Recipe (collapsible sections per scenario)
  */
 
 function asString(val) {
@@ -135,15 +135,19 @@ function formatAnalysisComment(analysis) {
 
     if (a.testRecipe.length > 0) {
       comment += '### 🧪 Test Recipe\n\n';
-      comment += '| Name | Steps | Priority | Automation Level |\n';
-      comment += '|------|-------|----------|------------------|\n';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
-      a.testRecipe.forEach(t => {
-        const scenarioDisplay = asString(t.scenario).replace(/\n/g, '<br>');
+      a.testRecipe.forEach((t, idx) => {
         const prio = priorityEmoji[t.priority] || '🟡';
-        comment += `| **${t.name}** | ${truncate(scenarioDisplay, 500)} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
+        const steps = asSteps(t.scenario);
+        // Collapsible section per scenario (Linear >>> syntax)
+        comment += `>>> **${t.name}** · ${prio} ${t.priority} · ${t.automationLevel}\n`;
+        if (steps.length > 1) {
+          steps.forEach((s, i) => { comment += `${i + 1}. ${s}\n`; });
+        } else {
+          comment += `${truncate(asString(t.scenario), 400)}\n`;
+        }
+        comment += `>>>\n\n`;
       });
-      comment += '\n';
     }
 
     comment += '---\n\n🤖 QA Analysis by **Ovi (the AI QA)**';
