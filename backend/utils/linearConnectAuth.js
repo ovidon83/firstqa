@@ -27,6 +27,21 @@ async function saveLinearInstallation(installationData) {
   // Normalize API key: remove Bearer prefix if present before saving
   const normalizedApiKey = String(apiKey || '').replace(/^Bearer\s+/i, '').trim();
 
+  // If no webhook secret provided, preserve the existing one (don't wipe on reconnect)
+  let finalWebhookSecret = webhookSecret || null;
+  if (!finalWebhookSecret) {
+    const { data: existing } = await supabaseAdmin
+      .from('linear_connect_installations')
+      .select('webhook_secret')
+      .eq('organization_id', organizationId)
+      .single();
+    
+    if (existing?.webhook_secret) {
+      console.log(`🔑 Preserving existing webhook secret for ${organizationId}`);
+      finalWebhookSecret = existing.webhook_secret;
+    }
+  }
+
   // Save Linear installation
   const { data, error } = await supabaseAdmin
     .from('linear_connect_installations')
@@ -35,7 +50,7 @@ async function saveLinearInstallation(installationData) {
       organization_id: organizationId,
       organization_name: organizationName,
       team_id: teamId || null,
-      webhook_secret: webhookSecret || null,
+      webhook_secret: finalWebhookSecret,
       installed_at: new Date().toISOString(),
       enabled: true
     }, {

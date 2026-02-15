@@ -58,30 +58,35 @@ async function autoSyncGitHubInstallations(userId, userEmail) {
         if (oldIntegrations && oldIntegrations.length > 0) {
           console.log(`🔗 [ACCOUNT-LINK] Found ${oldIntegrations.length} integration(s) to transfer`);
           
-          // For each integration, upsert it to the current user
+          // For each integration, transfer it to the current user
           for (const integration of oldIntegrations) {
-            const { error: upsertError } = await supabaseAdmin
+            // Check if current user already has this exact integration
+            const { data: existing } = await supabaseAdmin
               .from('integrations')
-              .upsert({
-                user_id: userId, // Change to current user
-                provider: integration.provider,
-                account_id: integration.account_id,
-                account_name: integration.account_name,
-                account_avatar: integration.account_avatar,
-                access_token: integration.access_token,
-                refresh_token: integration.refresh_token,
-                token_expires_at: integration.token_expires_at,
-                scopes: integration.scopes,
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'provider,account_id', // Use unique index
-                ignoreDuplicates: false // Update if exists
-              });
+              .select('id')
+              .eq('user_id', userId)
+              .eq('provider', integration.provider)
+              .eq('account_id', integration.account_id)
+              .single();
             
-            if (upsertError && upsertError.code !== '23505') {
-              console.error(`❌ [ACCOUNT-LINK] Error upserting integration:`, upsertError);
+            if (existing) {
+              // Current user already has it — just delete the old one
+              console.log(`ℹ️  [ACCOUNT-LINK] User already has ${integration.provider}/${integration.account_id}, skipping`);
             } else {
-              console.log(`✅ [ACCOUNT-LINK] Transferred ${integration.provider} integration ${integration.account_id}`);
+              // Transfer by updating the user_id in place
+              const { error: updateError } = await supabaseAdmin
+                .from('integrations')
+                .update({
+                  user_id: userId,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', integration.id);
+              
+              if (updateError) {
+                console.error(`❌ [ACCOUNT-LINK] Error transferring integration:`, updateError);
+              } else {
+                console.log(`✅ [ACCOUNT-LINK] Transferred ${integration.provider} integration ${integration.account_id}`);
+              }
             }
           }
           

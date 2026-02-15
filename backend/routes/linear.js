@@ -128,12 +128,13 @@ router.get('/callback', async (req, res) => {
     }
 
     // Save to linear_connect_installations (OAuth token as api_key)
+    // Use the app-level webhook secret from env so users don't need to enter it manually
     await saveLinearInstallation({
       apiKey: access_token,
       organizationId: org.id,
       organizationName: org.name || org.urlKey,
       teamId: null,
-      webhookSecret: null
+      webhookSecret: process.env.LINEAR_WEBHOOK_SECRET || null
     });
 
     // Save to integrations for dashboard display
