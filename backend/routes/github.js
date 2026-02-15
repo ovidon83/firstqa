@@ -119,22 +119,54 @@ router.get('/install-redirect', async (req, res) => {
       }
     }
     
-    // Check if user has any GitHub App installations we don't know about
-    // This requires GitHub App authentication
-    const jwt = githubAppAuth.getGitHubAppJWT();
-    if (jwt) {
-      try {
-        const appOctokit = new Octokit({ auth: jwt });
-        const { data: installations } = await appOctokit.apps.listInstallations();
-        
-        // Check if any installation matches this user's GitHub account
-        // We'll need to match by comparing user's GitHub account if available
-        console.log(`📊 Found ${installations.length} total GitHub App installations`);
-        
-        // If we find installations but don't have them in our DB, we'll let the user proceed
-        // to the GitHub page where they can configure/select repos
-      } catch (error) {
-        console.error('Error checking GitHub installations:', error.message);
+    // Check if the user already has the GitHub App installed but we don't have it in our DB
+    // (e.g., Setup URL wasn't configured when they first installed, so callback never fired)
+    const userGitHubLogin = req.session.user.user_metadata?.user_name || 
+                            req.session.user.user_metadata?.preferred_username;
+    
+    if (userGitHubLogin) {
+      const jwt = githubAppAuth.getGitHubAppJWT();
+      if (jwt) {
+        try {
+          const appOctokit = new Octokit({ auth: jwt });
+          const { data: installations } = await appOctokit.apps.listInstallations();
+          
+          // Find installation matching this user's GitHub account ONLY
+          const matchingInstallation = installations.find(
+            inst => inst.account.login.toLowerCase() === userGitHubLogin.toLowerCase()
+          );
+          
+          if (matchingInstallation) {
+            console.log(`🔍 Found existing GitHub App installation for ${userGitHubLogin} (ID: ${matchingInstallation.id}), saving to database`);
+            
+            const { error: saveError } = await supabaseAdmin
+              .from('integrations')
+              .upsert({
+                user_id: userId,
+                provider: 'github',
+                access_token: '',
+                account_id: matchingInstallation.id.toString(),
+                account_name: matchingInstallation.account.login,
+                account_avatar: matchingInstallation.account.avatar_url,
+                scopes: matchingInstallation.permissions ? Object.keys(matchingInstallation.permissions) : []
+              }, {
+                onConflict: 'user_id,provider,account_id'
+              });
+            
+            if (!saveError) {
+              console.log(`✅ Auto-saved GitHub installation for ${userGitHubLogin}`);
+              const returnTo = req.query.returnTo;
+              const dest = returnTo 
+                ? returnTo + (returnTo.includes('?') ? '&' : '?') + 'connected=github&t=' + Date.now()
+                : '/dashboard/integrations?connected=github&t=' + Date.now();
+              return res.redirect(dest);
+            } else {
+              console.error('❌ Error auto-saving installation:', saveError);
+            }
+          }
+        } catch (error) {
+          console.error('Error checking GitHub installations:', error.message);
+        }
       }
     }
     
