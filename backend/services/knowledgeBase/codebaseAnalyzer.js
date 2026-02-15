@@ -143,6 +143,21 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
     const totalFiles = filePaths.length;
     console.log(`📂 Found ${totalFiles} analyzable files in ${repoFullName}`);
 
+    // Handle empty repos or repos with no analyzable files
+    if (totalFiles === 0) {
+      console.log(`ℹ️  No analyzable files in ${repoFullName}, marking job as completed`);
+      await supabaseAdmin
+        .from('knowledge_sync_jobs')
+        .update({
+          status: 'completed',
+          progress: 100,
+          completed_at: new Date().toISOString(),
+          metadata: { files_analyzed: 0, entries_created: 0, note: 'No analyzable files found' }
+        })
+        .eq('id', jobId);
+      return { filesAnalyzed: 0, entriesCreated: 0 };
+    }
+
     const batches = [];
     for (let i = 0; i < filePaths.length; i += BATCH_SIZE) {
       batches.push(filePaths.slice(i, i + BATCH_SIZE));
