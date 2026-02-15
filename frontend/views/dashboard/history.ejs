@@ -327,11 +327,11 @@
                             <div class="history-stats">
                                 <div class="stat-item">
                                     <i class="fas fa-calendar"></i>
-                                    <span><%= new Date(analysis.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                                    <span class="js-local-date" data-iso="<%= analysis.created_at %>"><!-- formatted client-side --></span>
                                 </div>
                                 <div class="stat-item">
                                     <i class="fas fa-clock"></i>
-                                    <span><%= new Date(analysis.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %></span>
+                                    <span class="js-local-time" data-iso="<%= analysis.created_at %>"><!-- formatted client-side --></span>
                                 </div>
                                 <% if (analysis.processing_time_ms) { %>
                                     <div class="stat-item">
@@ -352,5 +352,21 @@
             <% } %>
         </main>
     </div>
+    <script>
+        document.querySelectorAll('.js-local-date').forEach(el => {
+            const iso = el.dataset.iso;
+            if (iso) {
+                const d = new Date(iso);
+                el.textContent = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+        });
+        document.querySelectorAll('.js-local-time').forEach(el => {
+            const iso = el.dataset.iso;
+            if (iso) {
+                const d = new Date(iso);
+                el.textContent = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+            }
+        });
+    </script>
 </body>
 </html>
