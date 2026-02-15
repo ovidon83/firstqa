@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FirstQA - Your AI QA Engineer</title>
-    <meta name="description" content="Meet Ovi, your AI QA Engineer. Ticket analysis, PR reviews, test automation, and more. Replace your first QA hire with AI.">
+    <meta name="description" content="Meet Ovi, your AI QA Engineer. Reviews requirements, analyzes PRs, tests on staging, files bugs, automates regressions, and gives go/no-go on releases. The full QA role, powered by AI.">
     
     <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,14 +16,23 @@
 <nav class="navbar">
     <div class="container">
         <a href="/" class="logo">
-            <span class="logo-icon">⚡</span>
+            <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGradNav" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <circle cx="16" cy="16" r="14" fill="url(#logoGradNav)"/>
+                <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
             <span class="logo-text">FirstQA</span>
         </a>
         <div class="nav-menu">
+            <a href="#features" class="nav-link">What Ovi Does</a>
             <a href="#how-it-works" class="nav-link">How It Works</a>
-            <a href="#features" class="nav-link">Features</a>
             <a href="/docs" class="nav-link">Docs</a>
-            <a href="#early-access" class="btn-signup">Get Started</a>
+            <a href="#early-access" class="btn-signup">Get Early Access</a>
         </div>
         <button class="mobile-menu-btn" aria-label="Menu">
             <span></span>
@@ -44,20 +53,21 @@
         <div class="hero-content">
             <div class="hero-badge">
                 <span class="pulse"></span>
-                Now in Early Access
+                Meet Ovi &mdash; Your AI QA Engineer
             </div>
             <h1>
                 Your First<br>
                 <span class="highlight">QA Engineer</span><br>
-                is an AI
+                Is Already Here
             </h1>
             <p class="hero-sub">
-                Meet <strong>Ovi</strong> — the AI that reviews PRs, writes tests, 
-                <em>runs them</em>, and catches bugs before they ship. Not just test cases — actual testing.
+                Ovi is an AI-powered QA Engineer that joins your team &mdash; not a testing tool.
+                From reviewing requirements to giving the go/no-go on releases, Ovi covers the 
+                full QA role across your entire development lifecycle.
             </p>
             <div class="hero-cta">
                 <a href="#early-access" class="btn-primary">
-                    <span>Join Early Access</span>
+                    <span>Get Early Access</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
                 <a href="#how-it-works" class="btn-ghost">
@@ -66,18 +76,18 @@
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-value">5</span>
-                    <span class="stat-label">QA Pillars Covered</span>
+                    <span class="stat-value">Full QA</span>
+                    <span class="stat-label">Role Covered</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
-                    <span class="stat-value">&lt;2min</span>
-                    <span class="stat-label">Setup Time</span>
+                    <span class="stat-value">Minutes</span>
+                    <span class="stat-label">To Onboard</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
                     <span class="stat-value">24/7</span>
-                    <span class="stat-label">Always On</span>
+                    <span class="stat-label">On Duty</span>
                 </div>
             </div>
         </div>
@@ -87,31 +97,34 @@
                     <div class="terminal-dots">
                         <span></span><span></span><span></span>
                     </div>
-                    <span class="terminal-title">ovi-qa-analysis</span>
+                    <span class="terminal-title">ovi-qa-engineer</span>
                 </div>
                 <div class="terminal-body">
                     <div class="terminal-line">
                         <span class="prompt">$</span>
-                        <span class="command">ovi test PR #142</span>
+                        <span class="command">@ovi joined the team</span>
                     </div>
                     <div class="terminal-output">
                         <div class="output-line fade-in-1">
-                            <span class="icon">🔍</span> Analyzing code changes...
+                            <span class="term-label">Day 1</span> &mdash; Ovi is up to speed
                         </div>
                         <div class="output-line fade-in-2">
-                            <span class="icon">📋</span> Generated 7 test scenarios
+                            <span class="icon-check">&#10003;</span> Learned the codebase &mdash; 142 files indexed, full context
                         </div>
                         <div class="output-line fade-in-3">
-                            <span class="icon">🎭</span> Running tests in browser...
+                            <span class="icon-check">&#10003;</span> Reviewed 3 tickets &mdash; flagged missing acceptance criteria
                         </div>
                         <div class="output-line fade-in-4">
-                            <span class="icon">✅</span> 6 passed <span class="warning">• 1 flaky</span>
+                            <span class="icon-check">&#10003;</span> PR #142 reviewed &mdash; 2 risks, 5 test cases for the team
                         </div>
                         <div class="output-line fade-in-5">
-                            <span class="icon">🎬</span> Video report: <span class="link">view recording</span>
+                            <span class="icon-check">&#10003;</span> Tested checkout on staging &mdash; 1 bug filed
                         </div>
                         <div class="output-line fade-in-6">
-                            <span class="icon">📝</span> Results posted to PR
+                            <span class="icon-check">&#10003;</span> Automated 3 critical regression scenarios
+                        </div>
+                        <div class="output-line fade-in-7">
+                            <span class="icon-check">&#10003;</span> Release v2.4 &rarr; <span class="go-badge">Go</span> <span class="checks-passed">12/12 checks passed</span>
                         </div>
                     </div>
                 </div>
@@ -120,63 +133,73 @@
     </div>
 </section>
 
-<!-- What QA Engineers Do -->
+<!-- What Ovi Does -->
 <section id="features" class="features">
     <div class="container">
         <div class="section-header">
-            <span class="section-tag">The 5 Pillars of QA</span>
-            <h2>Everything a QA Engineer Does.<br><span class="highlight">Automated.</span></h2>
-            <p>Ovi handles the complete QA workflow — from ticket to production.</p>
+            <span class="section-tag">The Complete QA Engineer</span>
+            <h2>Everything a QA Engineer Does.<br><span class="highlight">From Day One.</span></h2>
+            <p>Ovi learns your codebase, understands your product, and has full context on every change.<br>Not a tool you configure &mdash; a QA engineer that knows your repo inside out.</p>
         </div>
         
         <div class="pillars-grid">
             <div class="pillar-card active">
                 <div class="pillar-number">01</div>
                 <div class="pillar-icon">
-                    <i class="fas fa-file-lines"></i>
+                    <i class="fas fa-clipboard-check"></i>
                 </div>
-                <h3>Ticket Review</h3>
-                <p>Analyzes Jira/Linear tickets for missing requirements, edge cases, and potential conflicts before development starts.</p>
+                <h3>Requirements &amp; Design Review</h3>
+                <p>Reviews tickets for gaps in requirements, acceptance criteria, and design. Flags risks and asks the questions a senior QA would &mdash; before a single line of code is written.</p>
                 <div class="pillar-status live">Live Now</div>
             </div>
             
             <div class="pillar-card active">
                 <div class="pillar-number">02</div>
                 <div class="pillar-icon">
-                    <i class="fas fa-code-pull-request"></i>
+                    <i class="fas fa-list-check"></i>
                 </div>
-                <h3>PR Review</h3>
-                <p>Deep analysis of code changes. Identifies risks, bugs, and generates specific test cases for every pull request.</p>
+                <h3>Test Recipe Creation</h3>
+                <p>Creates comprehensive test cases from tickets and designs &mdash; before development starts. Gives your team a shared definition of &ldquo;done&rdquo; and a clear testing playbook.</p>
                 <div class="pillar-status live">Live Now</div>
             </div>
             
-            <div class="pillar-card">
+            <div class="pillar-card active">
                 <div class="pillar-number">03</div>
                 <div class="pillar-icon">
-                    <i class="fas fa-hand-pointer"></i>
+                    <i class="fas fa-code-pull-request"></i>
                 </div>
-                <h3>Manual Testing</h3>
-                <p>AI-powered browser automation that executes test scenarios like a human tester would, with video recordings.</p>
-                <div class="pillar-status coming-soon">Coming Soon</div>
+                <h3>PR Review (QA Perspective)</h3>
+                <p>Reviews pull requests for risks, logic gaps, edge cases, and testability. Provides test cases developers and reviewers can use to verify their own work.</p>
+                <div class="pillar-status live">Live Now</div>
             </div>
             
             <div class="pillar-card">
                 <div class="pillar-number">04</div>
                 <div class="pillar-icon">
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-hand-pointer"></i>
                 </div>
-                <h3>Test Automation</h3>
-                <p>Generates Playwright/Cypress test code from your PR changes. Automatically maintains and updates tests.</p>
+                <h3>Manual Testing on Staging</h3>
+                <p>Tests features in the browser on staging like a real QA engineer would. Follows the test recipe, explores edge cases, files bugs with steps to reproduce.</p>
                 <div class="pillar-status coming-soon">Coming Soon</div>
             </div>
             
             <div class="pillar-card">
                 <div class="pillar-number">05</div>
                 <div class="pillar-icon">
-                    <i class="fas fa-book"></i>
+                    <i class="fas fa-robot"></i>
                 </div>
-                <h3>Documentation</h3>
-                <p>Keeps your test documentation up-to-date. Generates test plans and updates them with every release.</p>
+                <h3>Test Automation</h3>
+                <p>Automates critical regression scenarios with Playwright. Maintains living test suites that evolve with your product &mdash; not brittle scripts that break every deploy.</p>
+                <div class="pillar-status coming-soon">Coming Soon</div>
+            </div>
+            
+            <div class="pillar-card">
+                <div class="pillar-number">06</div>
+                <div class="pillar-icon">
+                    <i class="fas fa-flag-checkered"></i>
+                </div>
+                <h3>Release Decisions</h3>
+                <p>Gives the go/no-go for every release based on test coverage, open bugs, and risk assessment. Living documentation that&rsquo;s always current.</p>
                 <div class="pillar-status coming-soon">Coming Soon</div>
             </div>
         </div>
@@ -187,22 +210,21 @@
 <section id="how-it-works" class="how-it-works">
     <div class="container">
         <div class="section-header">
-            <span class="section-tag">Setup in Minutes</span>
-            <h2>How It Works</h2>
-            <p>Connect once. Ovi handles the rest.</p>
+            <span class="section-tag">Onboard Ovi Like a New Hire</span>
+            <h2>First Day. Already Contributing.</h2>
         </div>
         
         <div class="steps-container">
             <div class="step">
                 <div class="step-number">1</div>
                 <div class="step-content">
-                    <h3>Connect Your Tools</h3>
-                    <p>Link your GitHub, Bitbucket, Jira, or Linear account with one click.</p>
+                    <h3>Give Ovi Access</h3>
+                    <p>Connect GitHub, Linear, Jira, and Slack. Ovi learns your codebase, indexes your repo, and builds full context on your product. Set up in minutes, not days.</p>
                     <div class="step-tools">
                         <span class="tool-badge"><i class="fab fa-github"></i> GitHub</span>
-                        <span class="tool-badge"><i class="fab fa-bitbucket"></i> Bitbucket</span>
-                        <span class="tool-badge"><i class="fab fa-jira"></i> Jira</span>
+                        <span class="tool-badge"><i class="fab fa-slack"></i> Slack</span>
                         <span class="tool-badge">Linear</span>
+                        <span class="tool-badge"><i class="fab fa-jira"></i> Jira</span>
                     </div>
                 </div>
             </div>
@@ -216,8 +238,8 @@
             <div class="step">
                 <div class="step-number">2</div>
                 <div class="step-content">
-                    <h3>Ovi Watches & Analyzes</h3>
-                    <p>Every PR triggers automatic analysis. Every ticket gets reviewed. No manual work needed.</p>
+                    <h3>Tag Ovi Where You Need Quality</h3>
+                    <p>Mention @ovi in Slack, tag on Linear issues, or let Ovi watch your GitHub repos. Ovi joins your workflow &mdash; you don&rsquo;t change yours.</p>
                 </div>
             </div>
             
@@ -230,10 +252,17 @@
             <div class="step">
                 <div class="step-number">3</div>
                 <div class="step-content">
-                    <h3>Ship with Confidence</h3>
-                    <p>Get detailed insights, test cases, and release recommendations directly in your workflow.</p>
+                    <h3>Ovi Does the QA Work</h3>
+                    <p>Requirements reviewed. PRs analyzed. Staging tested. Bugs filed. Regressions automated. Release decision made. Every sprint, every day.</p>
                 </div>
             </div>
+        </div>
+
+        <div class="section-cta">
+            <a href="#early-access" class="btn-primary">
+                <span>Get Early Access</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -243,19 +272,25 @@
     <div class="container">
         <div class="why-content">
             <div class="why-text">
-                <span class="section-tag">The Problem</span>
-                <h2>QA is the First Hire<br>Startups Can't Afford</h2>
+                <span class="section-tag">The Real Problem</span>
+                <h2>Your Team Deserves<br>a QA Engineer</h2>
                 <p>
-                    A senior QA engineer costs $80-120k/year. Most startups skip QA entirely, 
-                    ship bugs, and spend weeks fixing them.
+                    Most startups don&rsquo;t skip QA because they don&rsquo;t care about quality &mdash; they skip it 
+                    because it&rsquo;s hard to justify a dedicated hire early on. So developers test their own code, 
+                    reviews focus on logic instead of quality, and bugs make it to production.
                 </p>
                 <p>
-                    <strong>The result?</strong> Slower velocity, frustrated users, and founders 
-                    debugging production at 2 AM.
+                    The first QA hire should change that. They should review requirements before development. 
+                    Challenge designs. Create test plans. Review PRs through a quality lens. Test on staging. 
+                    File bugs. Automate regressions. Empower engineers to test on their own. 
+                    Give the team confidence to ship.
+                </p>
+                <p>
+                    <strong>That&rsquo;s what Ovi does. From day one.</strong>
                 </p>
                 <div class="why-cta">
                     <a href="#early-access" class="btn-primary">
-                        <span>Get AI QA Instead</span>
+                        <span>Get Early Access</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -264,26 +299,37 @@
                 <div class="comparison">
                     <div class="comparison-item bad">
                         <div class="comparison-header">
-                            <span class="comparison-icon">👤</span>
-                            <span>Human QA Hire</span>
+                            <span class="comparison-icon">&#10007;</span>
+                            <span>Without a QA Engineer</span>
                         </div>
                         <ul>
-                            <li><i class="fas fa-times"></i> $80-120k/year salary</li>
-                            <li><i class="fas fa-times"></i> 2-4 weeks to onboard</li>
-                            <li><i class="fas fa-times"></i> Works 8 hours/day</li>
-                            <li><i class="fas fa-times"></i> PTO, sick days, turnover</li>
+                            <li><i class="fas fa-times"></i> Developers test their own code (blind spots)</li>
+                            <li><i class="fas fa-times"></i> Bugs found in production, not staging</li>
+                            <li><i class="fas fa-times"></i> No one reviews requirements for testability</li>
+                            <li><i class="fas fa-times"></i> Testing is an afterthought, not a process</li>
+                            <li><i class="fas fa-times"></i> Releases feel like a gamble</li>
                         </ul>
                     </div>
                     <div class="comparison-item good">
                         <div class="comparison-header">
-                            <span class="comparison-icon">⚡</span>
-                            <span>Ovi AI</span>
+                            <svg class="comparison-logo" width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="logoGradComp" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="16" cy="16" r="14" fill="url(#logoGradComp)"/>
+                                <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </svg>
+                            <span>With Ovi</span>
                         </div>
                         <ul>
-                            <li><i class="fas fa-check"></i> Fraction of the cost</li>
-                            <li><i class="fas fa-check"></i> 2 minutes to setup</li>
-                            <li><i class="fas fa-check"></i> Works 24/7</li>
-                            <li><i class="fas fa-check"></i> Always available</li>
+                            <li><i class="fas fa-check"></i> Every ticket reviewed before development starts</li>
+                            <li><i class="fas fa-check"></i> Every PR analyzed through a QA lens</li>
+                            <li><i class="fas fa-check"></i> Features tested on staging before release</li>
+                            <li><i class="fas fa-check"></i> Engineers empowered with test cases to verify their work</li>
+                            <li><i class="fas fa-check"></i> Release decisions based on evidence, not hope</li>
                         </ul>
                     </div>
                 </div>
@@ -300,17 +346,18 @@
                 <i class="fas fa-user-check"></i>
             </div>
             <div class="human-qa-content">
-                <span class="human-qa-tag">When You Need Human Eyes</span>
+                <span class="human-qa-tag">When You Need Human Expertise</span>
                 <h3>On-Demand Human QA</h3>
                 <p>
-                    Ovi handles the day-to-day. But for exploratory testing, complex UX flows, 
-                    or pre-launch deep dives — we've got senior QA engineers on standby.
+                    Ovi covers day-to-day QA. But for complex exploratory testing, UX deep dives, 
+                    or pre-launch audits &mdash; FirstQA provides senior human QA engineers on demand. 
+                    No contracts, no commitments. They work alongside Ovi.
                 </p>
                 <ul class="human-qa-list">
                     <li><i class="fas fa-check"></i> Exploratory testing before major releases</li>
-                    <li><i class="fas fa-check"></i> Complex user flows that need intuition</li>
-                    <li><i class="fas fa-check"></i> Security & edge case deep dives</li>
-                    <li><i class="fas fa-check"></i> No commitment, pay as you go</li>
+                    <li><i class="fas fa-check"></i> Complex user flows that need human intuition</li>
+                    <li><i class="fas fa-check"></i> Security &amp; edge case deep dives</li>
+                    <li><i class="fas fa-check"></i> Seamlessly complements Ovi&rsquo;s coverage</li>
                 </ul>
                 <a href="https://calendly.com/firstqa/demo" class="btn-human-qa" target="_blank">
                     <span>Talk to Us About Human QA</span>
@@ -326,48 +373,21 @@
     <div class="container">
         <div class="early-access-card">
             <div class="ea-content">
-                <div class="ea-badge">
-                    <i class="fas fa-rocket"></i>
-                    Early Access
-                </div>
-                <h2>Be the First to Try Ovi</h2>
-                <p>Join the waitlist and help shape the future of AI-powered QA. Early users get special pricing and direct access to the team.</p>
+                <h2>Get Early Access</h2>
+                <p>Give your team a QA engineer today. Early access teams get founder-direct support and help shape Ovi&rsquo;s roadmap.</p>
                 
                 <form class="ea-form" id="subscribe-form" action="/subscribe" method="POST">
                     <div class="ea-input-group">
                         <input type="email" name="email" placeholder="you@company.com" required>
                         <button type="submit" class="btn-submit">
-                            <span>Join Waitlist</span>
+                            <span>Get Early Access</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                     <p class="ea-message" id="subscribe-message"></p>
                 </form>
                 
-                <div class="ea-divider">
-                    <span>or</span>
-                </div>
-                
-                <a href="https://calendly.com/firstqa/demo" class="btn-demo" target="_blank">
-                    <i class="fas fa-calendar"></i>
-                    Schedule a Demo Call
-                </a>
-            </div>
-            <div class="ea-visual">
-                <div class="ea-features">
-                    <div class="ea-feature">
-                        <i class="fas fa-gift"></i>
-                        <span>Early Access Pricing</span>
-                    </div>
-                    <div class="ea-feature">
-                        <i class="fas fa-comments"></i>
-                        <span>Direct Founder Access</span>
-                    </div>
-                    <div class="ea-feature">
-                        <i class="fas fa-lightbulb"></i>
-                        <span>Shape the Product</span>
-                    </div>
-                </div>
+                <p class="ea-demo-link">Prefer a walkthrough? <a href="https://calendly.com/firstqa/demo" target="_blank">Book a call</a></p>
             </div>
         </div>
     </div>
@@ -379,15 +399,24 @@
         <div class="footer-main">
             <div class="footer-brand">
                 <a href="/" class="logo">
-                    <span class="logo-icon">⚡</span>
+                    <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradFoot" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="16" cy="16" r="14" fill="url(#logoGradFoot)"/>
+                        <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
                     <span class="logo-text">FirstQA</span>
                 </a>
-                <p>Your AI QA Engineer. Ship quality at startup speed.</p>
+                <p>Your AI QA Engineer. Quality across the entire SDLC.</p>
             </div>
             <div class="footer-links">
                 <div class="footer-col">
                     <h4>Product</h4>
-                    <a href="#features">Features</a>
+                    <a href="#features">What Ovi Does</a>
                     <a href="#how-it-works">How It Works</a>
                     <a href="/docs">Documentation</a>
                 </div>
@@ -405,7 +434,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 FirstQA. All rights reserved.</p>
+            <p>&copy; 2026 FirstQA. All rights reserved.</p>
         </div>
     </div>
 </footer>
@@ -481,13 +510,13 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     text-decoration: none;
     color: var(--text-primary);
 }
 
-.logo-icon {
-    font-size: 24px;
+.logo-icon-svg {
+    flex-shrink: 0;
 }
 
 .logo-text {
@@ -511,26 +540,6 @@ body {
 }
 
 .nav-link:hover {
-    color: var(--text-primary);
-}
-
-.nav-auth {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-left: 16px;
-}
-
-.btn-login {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 16px;
-    transition: color 0.2s;
-}
-
-.btn-login:hover {
     color: var(--text-primary);
 }
 
@@ -677,17 +686,11 @@ body {
     color: var(--text-secondary);
     line-height: 1.7;
     margin-bottom: 32px;
-    max-width: 480px;
+    max-width: 500px;
 }
 
 .hero-sub strong {
     color: var(--text-primary);
-}
-
-.hero-sub em {
-    font-style: normal;
-    color: var(--accent);
-    font-weight: 600;
 }
 
 .hero-cta {
@@ -784,7 +787,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
-    max-width: 500px;
+    max-width: 520px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -841,7 +844,7 @@ body {
 .terminal-output {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .output-line {
@@ -851,36 +854,47 @@ body {
     color: var(--text-secondary);
     opacity: 0;
     animation: fadeIn 0.5s forwards;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.term-label {
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.icon-check {
+    color: var(--success);
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.go-badge {
+    display: inline-block;
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--success);
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.checks-passed {
+    color: var(--text-muted);
+    font-size: 11px;
 }
 
 .fade-in-1 { animation-delay: 0.5s; }
-.fade-in-2 { animation-delay: 1s; }
+.fade-in-2 { animation-delay: 1.0s; }
 .fade-in-3 { animation-delay: 1.5s; }
-.fade-in-4 { animation-delay: 2s; }
+.fade-in-4 { animation-delay: 2.0s; }
 .fade-in-5 { animation-delay: 2.5s; }
-.fade-in-6 { animation-delay: 3s; }
+.fade-in-6 { animation-delay: 3.0s; }
+.fade-in-7 { animation-delay: 3.5s; }
 
 @keyframes fadeIn {
     to { opacity: 1; }
-}
-
-.output-line .icon {
-    font-size: 14px;
-}
-
-.output-line .success {
-    color: var(--success);
-    font-weight: 600;
-}
-
-.output-line .warning {
-    color: var(--warning);
-}
-
-.output-line .link {
-    color: var(--accent);
-    text-decoration: underline;
-    cursor: pointer;
 }
 
 /* ============================================
@@ -918,19 +932,22 @@ body {
 .section-header p {
     font-size: 18px;
     color: var(--text-secondary);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.7;
 }
 
 .pillars-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
 }
 
 .pillar-card {
     background: var(--bg-dark);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 28px 20px;
+    padding: 32px 24px;
     position: relative;
     transition: all 0.3s;
 }
@@ -977,15 +994,15 @@ body {
 }
 
 .pillar-card h3 {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     margin-bottom: 12px;
 }
 
 .pillar-card p {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-muted);
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 20px;
 }
 
@@ -1085,6 +1102,11 @@ body {
     height: 60px;
 }
 
+.section-cta {
+    text-align: center;
+    margin-top: 64px;
+}
+
 /* ============================================
    Why Section
    ============================================ */
@@ -1159,7 +1181,12 @@ body {
 }
 
 .comparison-icon {
-    font-size: 24px;
+    font-size: 20px;
+    color: var(--danger);
+}
+
+.comparison-logo {
+    flex-shrink: 0;
 }
 
 .comparison-item ul {
@@ -1168,15 +1195,21 @@ body {
 
 .comparison-item li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     font-size: 14px;
     color: var(--text-secondary);
     margin-bottom: 10px;
+    line-height: 1.5;
 }
 
 .comparison-item li:last-child {
     margin-bottom: 0;
+}
+
+.comparison-item li i {
+    margin-top: 3px;
+    flex-shrink: 0;
 }
 
 .comparison-item.bad li i {
@@ -1301,49 +1334,56 @@ body {
    ============================================ */
 .early-access {
     padding: 120px 0;
+    position: relative;
+}
+
+.early-access::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: var(--accent);
+    filter: blur(200px);
+    opacity: 0.08;
+    pointer-events: none;
+    border-radius: 50%;
 }
 
 .early-access-card {
     background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 64px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 64px;
-    align-items: center;
-}
-
-.ea-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent-glow);
     border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 8px 16px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 24px;
+    border-radius: 24px;
+    padding: 80px 64px;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 0 80px rgba(34, 211, 238, 0.06);
 }
 
 .ea-content h2 {
-    font-size: 36px;
+    font-size: 40px;
     font-weight: 700;
     margin-bottom: 16px;
+    letter-spacing: -1px;
 }
 
 .ea-content > p {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--text-secondary);
     line-height: 1.7;
-    margin-bottom: 32px;
+    margin-bottom: 40px;
     max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ea-form {
-    margin-bottom: 24px;
+    max-width: 480px;
+    margin: 0 auto 24px;
 }
 
 .ea-input-group {
@@ -1356,7 +1396,7 @@ body {
     background: var(--bg-dark);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 14px 18px;
+    padding: 16px 18px;
     font-size: 15px;
     color: var(--text-primary);
     font-family: var(--font-main);
@@ -1380,7 +1420,7 @@ body {
     color: var(--bg-dark);
     font-size: 15px;
     font-weight: 600;
-    padding: 14px 28px;
+    padding: 16px 32px;
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -1407,69 +1447,20 @@ body {
     color: var(--danger);
 }
 
-.ea-divider {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin: 24px 0;
-}
-
-.ea-divider::before,
-.ea-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-}
-
-.ea-divider span {
-    font-size: 12px;
+.ea-demo-link {
+    font-size: 14px;
     color: var(--text-muted);
-    text-transform: uppercase;
 }
 
-.btn-demo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    padding: 12px 24px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.btn-demo:hover {
-    border-color: var(--text-muted);
-    color: var(--text-primary);
-}
-
-.ea-features {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.ea-feature {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    background: var(--bg-dark);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    color: var(--text-secondary);
-}
-
-.ea-feature i {
+.ea-demo-link a {
     color: var(--accent);
-    width: 20px;
-    text-align: center;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.ea-demo-link a:hover {
+    color: var(--text-primary);
 }
 
 /* ============================================
@@ -1489,7 +1480,7 @@ body {
 }
 
 .footer-brand {
-    max-width: 280px;
+    max-width: 300px;
 }
 
 .footer-brand .logo {
@@ -1573,19 +1564,14 @@ body {
     }
     
     .terminal {
-        max-width: 450px;
+        max-width: 480px;
     }
     
     .pillars-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .why-content {
-        grid-template-columns: 1fr;
-        gap: 48px;
-    }
-    
-    .early-access-card {
         grid-template-columns: 1fr;
         gap: 48px;
     }
@@ -1613,12 +1599,12 @@ body {
         font-size: 32px;
     }
     
-    .pillars-grid {
-        grid-template-columns: 1fr 1fr;
+    .section-header h2 br {
+        display: none;
     }
     
-    .pillar-card:last-child {
-        grid-column: span 2;
+    .pillars-grid {
+        grid-template-columns: 1fr 1fr;
     }
     
     .hero-stats {
@@ -1645,7 +1631,7 @@ body {
     }
     
     .early-access-card {
-        padding: 40px 24px;
+        padding: 48px 24px;
     }
     
     .human-qa-card {
@@ -1695,16 +1681,8 @@ body {
         grid-template-columns: 1fr;
     }
     
-    .pillar-card:last-child {
-        grid-column: span 1;
-    }
-    
     .section-header h2 {
         font-size: 28px;
-    }
-    
-    .section-header h2 br {
-        display: none;
     }
     
     .why-text h2 {
@@ -1717,6 +1695,10 @@ body {
     
     .ea-content h2 {
         font-size: 28px;
+    }
+    
+    .early-access-card {
+        padding: 40px 20px;
     }
 }
 </style>
@@ -1755,7 +1737,7 @@ document.getElementById('subscribe-form').addEventListener('submit', async funct
         const data = await response.json();
         
         if (data.success) {
-            message.textContent = '✓ You\'re on the waitlist! We\'ll be in touch soon.';
+            message.textContent = '\u2713 You\'re on the list! We\'ll be in touch soon.';
             message.className = 'ea-message success';
             form.email.value = '';
         } else {
