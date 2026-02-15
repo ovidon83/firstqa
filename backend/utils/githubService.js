@@ -2019,36 +2019,35 @@ Or wait until next month when your limit resets.
   console.log(`✅ Test request saved to database: ${saveResult ? 'success' : 'failed'}`);
   // Post acknowledgment comment with AI insights if available
   let acknowledgmentComment = ``;
-  
-  // Add header mentioning new commits if any
-  if (newCommits.length > 0) {
+
+  // Single title at top: when we have commits we add one title and strip duplicate from AI output
+  const hasCommitsBlock = newCommits.length > 0;
+  if (hasCommitsBlock) {
+    acknowledgmentComment += `# 🎯 QA Analysis - by Ovi (the AI QA)\n\n`;
     const isUpdate = lastAnalyzedSHA !== null;
-    acknowledgmentComment += `## 🔄 ${isUpdate ? 'Analysis Update - New Commits Detected' : 'QA Analysis - by Ovi (the AI QA)'}\n\n`;
-    
     if (isUpdate) {
       acknowledgmentComment += `✅ **${newCommits.length} new commit(s)** added since last review:\n\n`;
     } else {
       acknowledgmentComment += `✅ Analyzing **${newCommits.length} commit(s)** in this PR:\n\n`;
     }
-    
-    // Show commits in reverse chronological order (newest first)
     newCommits.forEach((commit, index) => {
       const commitMessage = commit.message.split('\n')[0];
       acknowledgmentComment += `${index + 1}. \`${commit.sha.substring(0, 7)}\` - ${commitMessage}\n`;
     });
     acknowledgmentComment += `\n---\n\n`;
   }
-  
-  // Add AI insights to the comment if they were generated successfully
+
   if (aiInsights && aiInsights.success) {
-    // Debug logging to see what we're getting
     console.log('🔍 AI Insights Debug:');
     console.log('AI Insights success:', aiInsights.success);
     console.log('AI Insights data type:', typeof aiInsights.data);
     console.log('AI Insights data length:', aiInsights.data ? aiInsights.data.length : 'undefined');
     console.log('AI Insights data preview:', aiInsights.data ? JSON.stringify(aiInsights.data).substring(0, 200) + '...' : 'undefined');
-    // Use the same hybrid formatting as the automatic PR analysis
-    acknowledgmentComment += formatHybridAnalysisForComment(aiInsights);
+    let aiPart = formatHybridAnalysisForComment(aiInsights);
+    if (hasCommitsBlock) {
+      aiPart = aiPart.replace(/^#\s*🎯\s*QA Analysis[^\n]*\n+\s*/i, '');
+    }
+    acknowledgmentComment += aiPart;
   } else if (aiInsights && !aiInsights.success) {
     acknowledgmentComment += `
 *Note: Ovi QA Agent insights could not be generated for this PR (${aiInsights.error}), but manual testing will proceed as normal.*

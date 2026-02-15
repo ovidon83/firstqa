@@ -1723,10 +1723,10 @@ OUTPUT STRUCTURE:
 - readinessScore: number 1-5. How ready is this ticket for development (clarity of requirements, acceptance criteria).
 - affectedAreas: array of strings (e.g. ["auth", "registration", "validation"]).
 - highestRisk: string or null. If there's a notable risk or blocker, state it briefly. Otherwise omit or null.
-- recommendations: array of max 5 items. Each item must be a READY-TO-COPY acceptance criteria or text block that can be pasted directly into the ticket body. Full, self-contained sentences.
+- recommendations: array of max 5 items. Each item must be a REAL change needed for the ticket to be clear and dev-ready: e.g. change of copy/wording, change or addition of acceptance criteria, new mandatory AC, or a concrete gap to fix. Only things REALLY missing or wrong in this ticket—no generic best practices. Ready-to-paste, full sentences. Will be shown as a checklist.
 - testRecipe: REQUIRED. array of 4-8 test scenarios { name, scenario, priority, automationLevel }. Sort by priority (Smoke first, then Critical Path, then Regression).
   - name: short descriptive test name (e.g. "Happy path registration")
-  - scenario: test steps as a clear, numbered list. Format like: "1. Navigate to /register. 2. Enter valid email, password, username. 3. Submit form. 4. Verify redirect to dashboard and welcome toast."
+  - scenario: test steps as a clear, numbered list. Use complete sentences (no cut-off). Format like: "1. Navigate to /register. 2. Enter valid email, password, username. 3. Submit form. 4. Verify redirect to dashboard and welcome toast."
   - priority: "Smoke" | "Critical Path" | "Regression"
   - automationLevel: "UI" | "API" | "Unit/Component" | "Manual". Use UI for user-facing flows. Smoke = UI for functional changes.
 

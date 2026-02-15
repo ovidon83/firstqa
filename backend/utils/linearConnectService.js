@@ -231,7 +231,10 @@ async function processLinearWebhook(payload, installation) {
         console.error('❌ AI analysis failed');
         return;
       }
-      const analysisComment = formatAnalysisComment(aiInsights.data);
+      let analysisComment = formatAnalysisComment(aiInsights.data);
+      if (issueDetails.assignee && issueDetails.assignee !== 'Unassigned') {
+        analysisComment = `**@${issueDetails.assignee}** — QA analysis ready.\n\n${analysisComment}`;
+      }
       await postComment(issueId, analysisComment, installation);
       if (isSupabaseConfigured()) {
         await saveAnalysisToDatabase({

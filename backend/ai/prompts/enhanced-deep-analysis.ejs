@@ -83,12 +83,14 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🧪 Release Pulse
 
+**TABLE RULES: Keep Metric and Level columns SHORT so they fit in one line. Level = only the value (e.g. "Go", "No-Go", "Medium"). Details = max 10–15 words, keyword-style.**
+
 <table style="width: 100%; border-collapse: collapse;">
-<tr><th style="width: 40%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 25%; text-align: center; padding: 8px; border: 1px solid #ddd;">Level</th><th style="width: 35%; text-align: left; padding: 8px; border: 1px solid #ddd;">Details</th></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Release Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🟢 Go / 🟡 Caution / 🔴 No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[Base this on actual findings below: 🟢 Go if low risk & safe to release after testing, 🟡 Caution if concerns need review, 🔴 No-Go only if clear blockers exist - explain why]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Affected Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[List 2-4 specific components/services/modules affected, e.g., "Database Schema, IPC API, SQLAlchemy Models"]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">⚠️ Risk Level</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">🔴 High / 🟡 Medium / 🟢 Low</td><td style="padding: 8px; border: 1px solid #ddd;">[Assess overall risk based on: critical bugs found, security issues, data integrity risks, missing validation - explain the main risk factors]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🎯 QA Recommendation</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center;">✅ GO / ❌ NO-GO</td><td style="padding: 8px; border: 1px solid #ddd;">[Action-oriented summary: If Go—brief reasoning. If No-Go—what must be fixed before release]</td></tr>
+<tr><th style="width: 22%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 18%; text-align: center; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Level</th><th style="width: 60%; text-align: left; padding: 8px; border: 1px solid #ddd;">Details</th></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">Go / Caution / No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[One short line, max 15 words]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">High / Medium / Low</td><td style="padding: 8px; border: 1px solid #ddd;">[2–4 components, comma-separated, max 15 words]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">⚠️ Risk</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">High / Medium / Low</td><td style="padding: 8px; border: 1px solid #ddd;">[Keywords only, max 15 words]</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🎯 Rec.</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">GO / NO-GO</td><td style="padding: 8px; border: 1px solid #ddd;">[One short sentence, max 15 words]</td></tr>
 </table>
 
 ## 🔍 Bugs & Risks
@@ -106,10 +108,16 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 | Scenario | Steps | Expected Result | Priority | Automation Type |
 |----------|-------|-----------------|----------|-----------------|
-[AI will generate test cases here — ORDERED BY PRIORITY (High first, then Medium)]
+[AI will generate test cases here — ORDERED BY PRIORITY top-down: Smoke, then Critical Path, then Regression]
+
+**If Decision is Caution or No-Go, add:**
+## ✅ To Do (for Go)
+- [ ] Item 1 (concrete action)
+- [ ] Item 2
+- [ ] … (3–5 items total)
 
 **TEST CASE REQUIREMENTS:**
-- **ORDER BY PRIORITY**: High priority tests first, then Medium
+- **ORDER BY PRIORITY (top-down)**: Always output the Test Recipe table with rows sorted by priority: **Smoke** first, then **Critical Path**, then **Regression**. Use these exact priority labels. High priority tests first, then Medium.
 - **SCENARIO**: Clear, specific name describing what's being tested (e.g., "Verify thought stays visible after marking as shared")
 - **STEPS** (automation-ready - atomic, unambiguous, executable):
   - One action per step. Each step must be a single, concrete action a human or Playwright could perform.
@@ -333,62 +341,51 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 - For Bugs & Risks (MERGED SECTION):
   - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real, verifiable issues - NO FALSE POSITIVES.
+  - **ONLY HIGH LIKELIHOOD**: List only issues with high likelihood based on the code (e.g. missing null check on a used path, wrong condition in diff). Do NOT list theoretical risks or low-probability concerns.
   - **REQUIRED**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
-  - **MAX 6 ITEMS**: Only critical issues that affect quality. Less is more.
+  - **MAX 6 ITEMS**: Only critical issues that affect quality. Prefer fewer, high-confidence items.
   - **SORT BY SEVERITY**: 🚫 BLOCKER items first, then 🔴 HIGH, then 🟡 MEDIUM
   - **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that must be fixed before release (security, data corruption, critical path breaks)
   - **FORMAT**: `[SEVERITY] Issue type: Description at \`file:line\` - impact`
-  - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text like "in other areas" or explanations
-  - **DO NOT ADD**: Do not add any additional text after listing issues. No summaries, no "other areas", no extra explanations.
-- For Release Pulse:
-  - **Release Decision**: First row. Evaluate based on actual findings in Bugs & Risks:
-    - 🟢 Go: No blockers, safe to release after testing passes
-    - 🟡 Caution: Some concerns that need review before release
-    - 🔴 No-Go: Clear blockers exist (specify what they are)
-  - **Affected Areas**: Second row. List 2-4 specific components/services/modules touched. Use actual names from code.
-  - **Risk Level**: Third row. Assess overall risk (🔴 High / 🟡 Medium / 🟢 Low) based on: bugs found, security concerns, data integrity risks, missing validation. Explain the main risk factors briefly.
-  - **QA Recommendation**: Fourth row (last in table). Level: ✅ GO or ❌ NO-GO. Details: concise action-oriented text (1-2 sentences). If Go: "Safe to release after testing passes." or similar. If No-Go: "Do not release until blockers are fixed and tests pass on staging." or specific blockers to fix.
+  - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text.
+  - **DO NOT ADD**: No summaries or extra explanations after the list.
+- For Release Pulse (Metric and Level columns SHORT; Level = only the value):
+  - **Decision**: First row. If clear or important issues exist → No-Go. Caution only for minor concerns. Level = Go / Caution / No-Go. Details = max 15 words.
+  - **Areas**: Second row. Level = High/Medium/Low. Details = 2-4 components, max 15 words.
+  - **Risk**: Third row. Level = High/Medium/Low. Details = keywords, max 15 words.
+  - **Rec.**: Fourth row. Level = GO or NO-GO. Details = one short sentence, max 15 words.
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
   - NOT: "1. Open form 2. Fill fields 3. Submit"
   - This ensures the table displays steps as proper numbered lists
 
-**REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE. DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
+**TO DO CHECKLIST (when Decision is Caution or No-Go):**
+- If Release Decision is **Caution** or **No-Go**, add a section **## ✅ To Do (for Go)** immediately after the Test Recipe table.
+- Include 3–5 concrete, actionable checklist items for the PR author (e.g. "Fix null check at `file:line`", "Add test for X", "Clarify Y with team"). Base items on Bugs & Risks and missing validations. Use clear, copy-pasteable actions.
+- If Decision is **Go**, do NOT add the To Do section.
+
+**REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE (or after "✅ To Do (for Go)" if present). DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
 **RELEASE PULSE EVALUATION REQUIREMENTS:**
 
-**IMPORTANT: Be REALISTIC and BASE ON ACTUAL FINDINGS. Evaluate Release Decision based on what you found in Bugs & Risks section.**
+**IMPORTANT: Be REALISTIC and BASE ON ACTUAL FINDINGS. If there are clear or important issues, say No-Go (not Caution).**
 
-- **Release Decision** (FIRST ROW) - Based on actual findings:
-  - **🟢 Go**: Safe to release after testing passes. Use when: no blockers found, only minor/medium issues or no issues at all
-  - **🟡 Caution**: Concerns need review before release. Use when: high-severity issues found (not blockers), risky changes without proper validation, unclear impacts
-  - **🔴 No-Go**: Clear blockers exist that MUST be fixed first. Use when: 🚫 BLOCKER issues found in Bugs & Risks, security vulnerabilities, data corruption risks, broken critical paths
-  - **Details field**: If Go, say "Low risk - safe to release after testing" or similar based on findings. If Caution/No-Go, explain the specific concerns/blockers found.
+- **Decision** (FIRST ROW): Level = only "Go", "Caution", or "No-Go". Details = max 15 words.
+  - **Go**: No blockers, no important issues; safe after testing.
+  - **Caution**: Only for minor concerns (e.g. docs/style); no blockers or high-severity bugs.
+  - **No-Go**: Clear blockers, important bugs, or significant risks. Use No-Go whenever issues are clear or important—do not use Caution for those.
 
-- **Affected Areas** (SECOND ROW):
-  - List 2-4 SPECIFIC components/services/modules touched by the changes
-  - Use actual names from the codebase (e.g., "Database Schema", "IPC API", "SQLAlchemy Models", "Webhook Handler")
-  - Level: 🔴 High = critical path (auth, payment, database, core business logic), 🟡 Medium = important features, 🟢 Low = non-critical
+- **Areas** (SECOND ROW): Level = High/Medium/Low only. Details = 2-4 components, max 15 words.
 
-- **Risk Level** (THIRD ROW):
-  - Assess overall risk: 🔴 High / 🟡 Medium / 🟢 Low
-  - Base assessment on: bugs found in Bugs & Risks section, security concerns, data integrity risks, missing validation, critical area changes
-  - **Details field**: Explain the main risk factors concisely. Examples:
-    - 🟢 Low: "Documentation changes only" or "Minor bug fixes with proper validation"
-    - 🟡 Medium: "Database schema changes require careful testing" or "New fields added without full constraints"
-    - 🔴 High: "Data integrity risk - NULL values overwritten" or "Security validation missing in critical flow"
+- **Risk** (THIRD ROW): Level = High/Medium/Low only. Details = keywords, max 15 words.
 
-- **QA Recommendation** (FOURTH ROW - last in Release Pulse table):
-  - **Level**: ✅ GO or ❌ NO-GO (same as Release Decision logic)
-  - **Details**: One concise, action-oriented sentence. Examples:
-    - Go: "Safe to release after testing passes." / "Low risk - proceed with testing."
-    - No-Go: "Do not release until blockers are fixed and tests pass on staging." / "Fix data integrity issues before release."
+- **Rec.** (FOURTH ROW): Level = GO or NO-GO only. Details = one short sentence, max 15 words.
 
 **BUGS & RISKS REQUIREMENTS:**
-- **ONLY SIGNAL, NO NOISE**: This section must be trustworthy for developers. Only include real, verifiable issues - NO FALSE POSITIVES.
+- **ONLY SIGNAL, NO NOISE**: Only real, verifiable issues with HIGH LIKELIHOOD based on the code. No theoretical or low-probability concerns. NO FALSE POSITIVES.
 - **STRICT RULE**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
-- **MAX 6 ITEMS**: Only the most critical issues that affect quality. Less is more.
+- **MAX 6 ITEMS**: Only the most critical issues. Prefer fewer, high-confidence items.
 - **SORT BY SEVERITY**: List items in order: 🚫 BLOCKER first, then 🔴 HIGH, then 🟡 MEDIUM
 - **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that MUST be fixed before release:
   - Security vulnerabilities

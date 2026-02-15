@@ -209,6 +209,7 @@ async function fetchTicketDetails(siteId, issueKey, accessToken) {
     priority: issue.fields.priority?.name || 'Medium',
     status: issue.fields.status?.name || 'Unknown',
     assignee: issue.fields.assignee?.displayName || 'Unassigned',
+    assigneeAccountId: issue.fields.assignee?.accountId || null,
     reporter: issue.fields.reporter?.displayName || 'Unknown',
     labels: issue.fields.labels || [],
     comments: issue.fields.comment?.comments?.map(c => ({
@@ -351,7 +352,11 @@ async function processWebhookEvent(event) {
         console.error('❌ AI analysis failed:', aiInsights?.error);
         return;
       }
-      const analysisComment = formatAnalysisComment(aiInsights.data);
+      let analysisComment = formatAnalysisComment(aiInsights.data);
+      if (ticketDetails.assignee && ticketDetails.assignee !== 'Unassigned') {
+        const mention = ticketDetails.assigneeAccountId ? `[~${ticketDetails.assigneeAccountId}]` : ticketDetails.assignee;
+        analysisComment = `**${mention}** — QA analysis ready.\n\n${analysisComment}`;
+      }
       await postComment(siteId, issue.key, analysisComment, accessToken);
       if (isSupabaseConfigured()) {
         await saveAnalysisToDatabase({

@@ -74,7 +74,16 @@ async function processConnectWebhook(payload, installation) {
     console.log('✅ AI analysis completed');
 
     // Build rich ADF comment for Jira (headings, bullets, table)
-    const adfDoc = buildJiraAdfFromAnalysis(aiInsights.data);
+    let adfDoc = buildJiraAdfFromAnalysis(aiInsights.data);
+    if (ticketDetails.assigneeAccountId) {
+      adfDoc.content.unshift({
+        type: 'paragraph',
+        content: [
+          { type: 'mention', attrs: { id: ticketDetails.assigneeAccountId } },
+          { type: 'text', text: ' — QA analysis ready.' }
+        ]
+      });
+    }
     await postComment(issue.key, adfDoc, installation);
 
     // Save analysis to database (link to installation, not user)
@@ -209,6 +218,7 @@ async function fetchTicketDetails(issueKey, installation) {
     priority: asString(issue.fields?.priority?.name || 'Medium'),
     status: asString(issue.fields?.status?.name || 'Unknown'),
     assignee: asString(issue.fields?.assignee?.displayName || 'Unassigned'),
+    assigneeAccountId: issue.fields?.assignee?.accountId || null,
     reporter: asString(issue.fields?.reporter?.displayName || 'Unknown'),
     labels: issue.fields?.labels || [],
     comments: issue.fields?.comment?.comments?.map(c => ({

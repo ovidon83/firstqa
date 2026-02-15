@@ -129,8 +129,8 @@ function formatAnalysisComment(analysis) {
 
     if (a.recommendations.length > 0) {
       comment += '### 📋 Recommendations\n\n';
-      a.recommendations.forEach(r => { comment += `${truncate(r, 500)}\n\n`; });
-      comment += '---\n\n';
+      a.recommendations.forEach(r => { comment += `- [ ] ${truncate(r, 500)}\n`; });
+      comment += '\n---\n\n';
     }
 
     if (a.testRecipe.length > 0) {
@@ -139,9 +139,9 @@ function formatAnalysisComment(analysis) {
       comment += '|------|-------|----------|------------------|\n';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
       a.testRecipe.forEach(t => {
-        const scenarioDisplay = truncate(t.scenario, 350).replace(/\n/g, ' → ');
+        const scenarioDisplay = asString(t.scenario).replace(/\n/g, '<br>');
         const prio = priorityEmoji[t.priority] || '🟡';
-        comment += `| **${t.name}** | ${scenarioDisplay} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
+        comment += `| **${t.name}** | ${truncate(scenarioDisplay, 500)} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
       });
       comment += '\n';
     }
