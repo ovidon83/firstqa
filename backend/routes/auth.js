@@ -312,12 +312,13 @@ router.get('/callback', async (req, res) => {
       return res.redirect('/login?error=' + encodeURIComponent(error.message));
     }
 
-    // Store user in session
+    // Store user in session (include GitHub login for installation matching)
     req.session.user = {
       id: data.user.id,
       email: data.user.email,
       name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email?.split('@')[0],
-      avatarUrl: data.user.user_metadata?.avatar_url
+      avatarUrl: data.user.user_metadata?.avatar_url,
+      githubLogin: data.user.user_metadata?.user_name || data.user.user_metadata?.preferred_username || null
     };
     req.session.accessToken = data.session.access_token;
     req.session.refreshToken = data.session.refresh_token;

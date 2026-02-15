@@ -121,8 +121,8 @@ router.get('/install-redirect', async (req, res) => {
     
     // Check if the user already has the GitHub App installed but we don't have it in our DB
     // (e.g., Setup URL wasn't configured when they first installed, so callback never fired)
-    const userGitHubLogin = req.session.user.user_metadata?.user_name || 
-                            req.session.user.user_metadata?.preferred_username;
+    const userGitHubLogin = req.session.user.githubLogin;
+    console.log(`🔍 [INSTALL-REDIRECT] GitHub login from session: ${userGitHubLogin || 'not available'}`);
     
     if (userGitHubLogin) {
       const jwt = githubAppAuth.getGitHubAppJWT();
