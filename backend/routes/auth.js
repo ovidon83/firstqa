@@ -6,8 +6,6 @@
 const express = require('express');
 const router = express.Router();
 const { supabase, supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
-const { Octokit } = require('@octokit/rest');
-const githubAppAuth = require('../utils/githubAppAuth');
 
 /**
  * Auto-sync GitHub App installations for the logged-in user
@@ -28,12 +26,6 @@ async function autoSyncGitHubInstallations(userId, userEmail) {
   try {
     if (!isSupabaseConfigured()) {
       console.log('⏭️  [AUTO-SYNC] Skipping: Supabase not configured');
-      return;
-    }
-
-    const jwt = githubAppAuth.getGitHubAppJWT();
-    if (!jwt) {
-      console.log('⏭️  [AUTO-SYNC] Skipping: GitHub App not configured');
       return;
     }
 
@@ -120,50 +112,12 @@ async function autoSyncGitHubInstallations(userId, userEmail) {
       console.log(`✅ [ACCOUNT-LINK] No duplicate accounts found`);
     }
 
-    // STEP 2: Sync GitHub App installations
-    console.log(`🔄 [AUTO-SYNC] Fetching GitHub App installations`);
-    const appOctokit = new Octokit({ auth: jwt });
-    const { data: installations } = await appOctokit.apps.listInstallations();
-    console.log(`✅ [AUTO-SYNC] Found ${installations.length} installation(s)`);
-
-    if (installations.length === 0) {
-      console.log(`⏭️  [AUTO-SYNC] No installations to sync`);
-      return;
-    }
-
-    let synced = 0;
-
-    for (const installation of installations) {
-      try {
-        // Upsert: Insert if new, update user_id if exists (for account linking)
-        const { error: upsertError } = await supabaseAdmin
-          .from('integrations')
-          .upsert({
-            user_id: userId,
-            provider: 'github',
-            access_token: '', // GitHub App uses JWT/installation tokens
-            account_id: installation.id.toString(),
-            account_name: installation.account.login,
-            account_avatar: installation.account.avatar_url,
-            scopes: installation.permissions ? Object.keys(installation.permissions) : [],
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'provider,account_id', // Use unique index from migration
-            ignoreDuplicates: false // Update if exists
-          });
-
-        if (upsertError) {
-          console.error(`❌ [AUTO-SYNC] Error upserting installation ${installation.id}:`, upsertError);
-        } else {
-          synced++;
-          console.log(`✅ [AUTO-SYNC] Synced installation ${installation.id} (${installation.account.login})`);
-        }
-      } catch (error) {
-        console.error(`❌ [AUTO-SYNC] Error processing installation ${installation.id}:`, error);
-      }
-    }
-
-    console.log(`🎉 [AUTO-SYNC] Completed: ${synced}/${installations.length} installation(s) synced for ${userEmail}`);
+    // STEP 2: Do NOT sync all GitHub App installations on login.
+    // apps.listInstallations() returns ALL installations of the app across the platform,
+    // which would incorrectly assign every org's installation to any user who logs in.
+    // Users get installations only when they explicitly go through the GitHub App
+    // install flow (/github/install-redirect -> install on org -> /github/install-callback).
+    console.log(`⏭️  [AUTO-SYNC] Skipping GitHub installations sync on login (user must install app via Connect GitHub)`);
   } catch (error) {
     console.error('❌ [AUTO-SYNC] Fatal error:', error);
     console.error('❌ [AUTO-SYNC] Stack trace:', error.stack);
