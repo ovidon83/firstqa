@@ -11,24 +11,25 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
-const githubService = require('./src/utils/githubService');
-const indexRoutes = require('./src/routes/index');
-const docsRoutes = require('./src/routes/docs');
-const statusRoutes = require('./src/routes/status');
-const privacyRoutes = require('./src/routes/privacy');
-const termsRoutes = require('./src/routes/terms');
-const supportRoutes = require('./src/routes/support');
-const emailRoutes = require('./src/routes/email');
-const contactRoutes = require('./src/routes/contact');
-const adminRoutes = require('./src/routes/admin');
-const stripeRoutes = require('./src/routes/stripe');
-const bitbucketRoutes = require('./src/routes/bitbucket');
-const githubRoutes = require('./src/routes/github');
-const jiraRoutes = require('./src/routes/jira');
-const jiraConnectRoutes = require('./src/routes/jiraConnect');
-const linearConnectRoutes = require('./src/routes/linearConnect');
-const authRoutes = require('./src/routes/auth');
-const dashboardRoutes = require('./src/routes/dashboard');
+const githubService = require('./backend/utils/githubService');
+const indexRoutes = require('./backend/routes/index');
+const docsRoutes = require('./backend/routes/docs');
+const statusRoutes = require('./backend/routes/status');
+const privacyRoutes = require('./backend/routes/privacy');
+const termsRoutes = require('./backend/routes/terms');
+const supportRoutes = require('./backend/routes/support');
+const emailRoutes = require('./backend/routes/email');
+const contactRoutes = require('./backend/routes/contact');
+const adminRoutes = require('./backend/routes/admin');
+const stripeRoutes = require('./backend/routes/stripe');
+const bitbucketRoutes = require('./backend/routes/bitbucket');
+const githubRoutes = require('./backend/routes/github');
+const jiraRoutes = require('./backend/routes/jira');
+const jiraConnectRoutes = require('./backend/routes/jiraConnect');
+const linearRoutes = require('./backend/routes/linear');
+const linearConnectRoutes = require('./backend/routes/linearConnect');
+const authRoutes = require('./backend/routes/auth');
+const dashboardRoutes = require('./backend/routes/dashboard');
 // customerRoutes will be imported AFTER directory fix
 
 // Create Express app
@@ -49,15 +50,15 @@ app.use((req, res, next) => {
 });
 
 // Fix working directory issue in production BEFORE initializing customer functions
-if (process.cwd().includes('/src')) {
-  console.log(`⚠️  WARNING: Server running from src/ directory, fixing working directory...`);
+if (process.cwd().includes('/src') || process.cwd().includes('/backend')) {
+  console.log(`⚠️  WARNING: Server running from unexpected directory, fixing working directory...`);
   process.chdir(path.join(process.cwd(), '..'));
   console.log(`✅ Fixed working directory to: ${process.cwd()}`);
 }
 
 // Set up EJS view engine
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'src', 'views'));
+app.set('views', path.join(__dirname, 'frontend', 'views'));
 
 // Ensure data directory exists
 const dataDir = path.join(__dirname, 'data');
@@ -89,12 +90,12 @@ app.use(bodyParser.json({
   }
 }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'frontend', 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/bootstrap-icons', express.static(path.join(__dirname, 'node_modules/bootstrap-icons/font')));
 
 // Serve test results (screenshots and videos)
-app.use('/test-screenshots', express.static(path.join(__dirname, 'public', 'test-screenshots')));
+app.use('/test-screenshots', express.static(path.join(__dirname, 'frontend', 'public', 'test-screenshots')));
 app.use('/test-results', express.static(path.join(__dirname, 'test-results')));
 
 // Add error handling middleware
@@ -117,7 +118,7 @@ app.use('/email', emailRoutes);
 app.use('/contact', contactRoutes);
 
 // Simple customer functions (no complex service)
-const { addCustomer, getAllCustomers, getCustomerStats } = require('./src/utils/customers');
+const { addCustomer, getAllCustomers, getCustomerStats } = require('./backend/utils/customers');
 
 // Simple customer API routes
 app.get('/api/customers', (req, res) => {
@@ -179,7 +180,7 @@ app.get('/signup', (req, res) => {
 app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
 // Onboarding routes (before dashboard - middleware may redirect)
-const onboardingRoutes = require('./src/routes/onboarding');
+const onboardingRoutes = require('./backend/routes/onboarding');
 app.use('/onboarding', onboardingRoutes);
 
 // Dashboard routes
@@ -194,11 +195,14 @@ app.use('/jira', jiraRoutes);
 // Jira Connect routes (Atlassian Connect app)
 app.use('/jira-connect', jiraConnectRoutes);
 
+// Linear OAuth routes
+app.use('/linear', linearRoutes);
+
 // Linear Connect routes
 app.use('/linear-connect', linearConnectRoutes);
 
 // Knowledge API routes (product knowledge status)
-const knowledgeRoutes = require('./src/routes/knowledge');
+const knowledgeRoutes = require('./backend/routes/knowledge');
 app.use('/api/knowledge', knowledgeRoutes);
 
 // Serve Atlassian Connect descriptor
@@ -222,7 +226,7 @@ app.get('/success', async (req, res) => {
     console.log(`🔍 Customer email found: ${customerEmail}`);
     try {
       console.log('📦 Loading customer functions...');
-      const { addCustomer } = require('./src/utils/customers');
+      const { addCustomer } = require('./backend/utils/customers');
       console.log('✅ Customer functions loaded successfully');
       
       // Add new customer automatically
@@ -256,7 +260,7 @@ app.get('/success', async (req, res) => {
 // Special route for generate-test-recipe with larger payload support
 app.post('/generate-test-recipe', bodyParser.json({ limit: '10mb' }), async (req, res) => {
   try {
-    const { generateQAInsights } = require('./ai/openaiClient');
+    const { generateQAInsights } = require('./backend/ai/openaiClient');
     
     // Extract required fields from request body
     const { repo, pr_number, title, body, diff, newCommits, fileContents, selectorHints } = req.body;
@@ -323,7 +327,7 @@ app.post('/generate-test-recipe', bodyParser.json({ limit: '10mb' }), async (req
 // Special route for generate-short-analysis with larger payload support
 app.post('/generate-short-analysis', bodyParser.json({ limit: '10mb' }), async (req, res) => {
   try {
-    const { generateShortAnalysis } = require('./ai/openaiClient');
+    const { generateShortAnalysis } = require('./backend/ai/openaiClient');
     
     // Extract required fields from request body
     const { repo, pr_number, title, body, diff } = req.body;
@@ -517,7 +521,7 @@ app.get('/github/health', (req, res) => {
 app.use('/api/auth/bitbucket', bitbucketRoutes);
 
 // Bitbucket install shortcut route (redirects to OAuth flow)
-const bitbucketAppAuth = require('./src/utils/bitbucketAppAuth');
+const bitbucketAppAuth = require('./backend/utils/bitbucketAppAuth');
 app.get('/bitbucket/install', (req, res) => {
   const crypto = require('crypto');
   const state = crypto.randomBytes(16).toString('hex');

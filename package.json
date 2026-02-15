@@ -7,8 +7,9 @@
     "start": "node webhook-server.js",
     "dev": "nodemon webhook-server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webhook": "node fixed-webhook.js",
-    "test:automation": "node scripts/test-automated-testing.js"
+    "webhook": "node backend/utils/fixed-webhook.js",
+    "test:automation": "node scripts/test-automated-testing.js",
+    "build:extension": "bash scripts/create-chrome-extension-release.sh"
   },
   "keywords": [
     "github-app",

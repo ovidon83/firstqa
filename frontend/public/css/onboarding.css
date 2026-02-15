@@ -1,0 +1,285 @@
+/* Onboarding flow - dark theme */
+.onboarding * { margin: 0; padding: 0; box-sizing: border-box; }
+.onboarding {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: #0d0d0f;
+  color: #f4f4f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.onboarding .navbar {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.onboarding .navbar .container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.onboarding .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #f4f4f5;
+}
+.onboarding .logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+}
+.onboarding .progress-bar {
+  display: flex;
+  gap: 6px;
+}
+.onboarding .progress-step {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: #1c1c1f;
+  transition: background 0.3s;
+}
+.onboarding .progress-step.active {
+  background: #8b5cf6;
+}
+.onboarding .main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+.onboarding .card {
+  width: 100%;
+  max-width: 480px;
+  background: #161618;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 2rem;
+}
+.onboarding .card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+.onboarding .card .subtitle {
+  color: #a1a1aa;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+.onboarding .form-group {
+  margin-bottom: 1.5rem;
+}
+.onboarding .form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #a1a1aa;
+  margin-bottom: 0.5rem;
+}
+.onboarding .form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  background: #0d0d0f;
+  color: #f4f4f5;
+  font-family: inherit;
+  font-size: 1rem;
+}
+.onboarding .form-group input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}
+.onboarding .form-group textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  background: #0d0d0f;
+  color: #f4f4f5;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.onboarding .form-group textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}
+.onboarding .btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.onboarding .btn-option {
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  background: #161618;
+  color: #f4f4f5;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+.onboarding .btn-option:hover {
+  background: #1c1c1f;
+  border-color: rgba(139, 92, 246, 0.4);
+}
+.onboarding .btn-option.selected {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: #8b5cf6;
+  color: #a78bfa;
+}
+.onboarding .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  margin-top: 1.5rem;
+}
+.onboarding .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+}
+.onboarding .nav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.onboarding .btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.onboarding .btn-back:hover { color: #f4f4f5; }
+.onboarding .alert {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.onboarding .alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+.onboarding .alert-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+.onboarding .integration-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #0d0d0f;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s;
+}
+.onboarding .integration-card.connected {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.05);
+}
+.onboarding .integration-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+.onboarding .integration-icon.github { background: #24292e; }
+.onboarding .integration-icon.bitbucket { background: #0052cc; }
+.onboarding .integration-icon.linear { background: #5e6ad2; }
+.onboarding .integration-icon.jira { background: #0052cc; }
+.onboarding .integration-card .name { font-weight: 500; flex: 1; }
+.onboarding .section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a1a1aa;
+  margin-bottom: 0.75rem;
+  margin-top: 1.25rem;
+}
+.onboarding .section-label:first-child { margin-top: 0; }
+.onboarding .pr-card {
+  display: block;
+  padding: 1.25rem;
+  background: #0d0d0f;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+.onboarding .pr-card:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+}
+.onboarding .pr-card .title { font-weight: 600; margin-bottom: 0.5rem; }
+.onboarding .pr-card .meta { font-size: 0.875rem; color: #a1a1aa; }
+.onboarding .indexing-status {
+  padding: 1.5rem;
+  background: #0d0d0f;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+.onboarding .indexing-progress {
+  height: 6px;
+  background: #1c1c1f;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.onboarding .indexing-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+  transition: width 0.3s;
+}

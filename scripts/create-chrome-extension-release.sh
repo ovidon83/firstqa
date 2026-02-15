@@ -11,28 +11,28 @@ mkdir -p $RELEASE_DIR
 
 # Copy essential extension files
 echo "📦 Copying extension files..."
-cp chrome_extension/manifest.json $RELEASE_DIR/
-cp chrome_extension/popup.html $RELEASE_DIR/
-cp chrome_extension/popup.js $RELEASE_DIR/
-cp chrome_extension/content.js $RELEASE_DIR/
-cp chrome_extension/background.js $RELEASE_DIR/
-cp chrome_extension/utils.js $RELEASE_DIR/
-cp chrome_extension/formatters.js $RELEASE_DIR/
-cp chrome_extension/settings.html $RELEASE_DIR/
-cp chrome_extension/settings.js $RELEASE_DIR/
-cp chrome_extension/submission.js $RELEASE_DIR/
-cp chrome_extension/ui.css $RELEASE_DIR/
+cp frontend/chrome_extension/manifest.json $RELEASE_DIR/
+cp frontend/chrome_extension/popup.html $RELEASE_DIR/
+cp frontend/chrome_extension/popup.js $RELEASE_DIR/
+cp frontend/chrome_extension/content.js $RELEASE_DIR/
+cp frontend/chrome_extension/background.js $RELEASE_DIR/
+cp frontend/chrome_extension/utils.js $RELEASE_DIR/
+cp frontend/chrome_extension/formatters.js $RELEASE_DIR/
+cp frontend/chrome_extension/settings.html $RELEASE_DIR/
+cp frontend/chrome_extension/settings.js $RELEASE_DIR/
+cp frontend/chrome_extension/submission.js $RELEASE_DIR/
+cp frontend/chrome_extension/ui.css $RELEASE_DIR/
 
 # Copy icons
 echo "🎨 Copying icons..."
 mkdir -p $RELEASE_DIR/icons
-cp chrome_extension/icons/icon16.png $RELEASE_DIR/icons/
-cp chrome_extension/icons/icon48.png $RELEASE_DIR/icons/
-cp chrome_extension/icons/icon128.png $RELEASE_DIR/icons/
+cp frontend/chrome_extension/icons/icon16.png $RELEASE_DIR/icons/
+cp frontend/chrome_extension/icons/icon48.png $RELEASE_DIR/icons/
+cp frontend/chrome_extension/icons/icon128.png $RELEASE_DIR/icons/
 
 # Copy installation guide
 echo "📖 Copying installation guide..."
-cp chrome_extension/INSTALLATION.md $RELEASE_DIR/
+cp frontend/chrome_extension/INSTALLATION.md $RELEASE_DIR/
 
 # Create README for release
 echo "📝 Creating release README..."

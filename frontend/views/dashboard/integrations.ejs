@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations - FirstQA</title>
+    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0a0a0b;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .navbar {
+            padding: 1rem 0;
+            background: rgba(10, 10, 11, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logo-icon { font-size: 1.5rem; }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .logout-btn {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .dashboard-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+        }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #888;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .sidebar-link:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+        .sidebar-link.active {
+            color: #fff;
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .sidebar-link i { width: 20px; text-align: center; }
+        .main-content { flex: 1; }
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p { color: #888; }
+        .integrations-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        .integration-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .integration-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        .github-icon {
+            background: linear-gradient(135deg, #6e5494 0%, #4d3d6b 100%);
+        }
+        .bitbucket-icon {
+            background: linear-gradient(135deg, #0052cc 0%, #003d99 100%);
+        }
+        .integration-info { flex: 1; }
+        .integration-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .integration-description {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+        .integration-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .status-connected {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        .status-not-connected {
+            background: rgba(107, 114, 128, 0.15);
+            color: #9ca3af;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .integration-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .btn-danger {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .connection-details {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .detail-row:last-child { margin-bottom: 0; }
+        .detail-label { color: #888; }
+        .detail-value { color: #fff; font-weight: 500; }
+        @media (max-width: 768px) {
+            .dashboard-layout { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .sidebar-nav {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 0.5rem;
+            }
+            .sidebar-link { white-space: nowrap; }
+            .integration-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .integration-actions { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">FirstQA</span>
+            </a>
+            <div class="nav-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <% if (user.avatarUrl) { %>
+                            <img src="<%= user.avatarUrl %>" alt="<%= user.name %>">
+                        <% } else { %>
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                        <% } %>
+                    </div>
+                    <span><%= user.name || user.email %></span>
+                </div>
+                <a href="/logout" class="logout-btn">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="sidebar-link">
+                    <i class="fas fa-home"></i>
+                    Overview
+                </a>
+                <a href="/dashboard/integrations" class="sidebar-link active">
+                    <i class="fas fa-plug"></i>
+                    Integrations
+                </a>
+                <a href="/dashboard/history" class="sidebar-link">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="/dashboard/settings" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <% if (typeof returnTo !== 'undefined' && returnTo) { %>
+                <a href="<%= returnTo %>" style="display:inline-flex;align-items:center;gap:0.5rem;color:#888;text-decoration:none;font-size:0.9rem;margin-bottom:0.5rem;">
+                    <i class="fas fa-arrow-left"></i> Back to setup
+                </a>
+                <% } %>
+                <h1>Integrations</h1>
+                <p>Connect your repositories to start analyzing pull requests</p>
+            </div>
+
+            <% if (locals.connected === 'github') { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    ✅ GitHub connected successfully!
+                </div>
+            <% } else if (locals.connected === 'jira') { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    ✅ Jira connected successfully!
+                </div>
+            <% } else if (locals.connected === 'linear') { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    ✅ Linear connected successfully! Comment /qa on any issue to get QA analysis.
+                </div>
+            <% } else if (locals.success) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #6ee7b7;">
+                    <%= success %>
+                </div>
+            <% } %>
+
+            <% if (locals.info) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; color: #93c5fd;">
+                    ℹ️ <%= info %>
+                </div>
+            <% } %>
+
+            <% if (locals.error) { %>
+                <div style="padding: 1rem; margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: #fca5a5;">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <div class="integrations-grid">
+                <!-- GitHub Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon github-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">GitHub</div>
+                        <div class="integration-description">
+                            Analyze pull requests, generate test recipes, and catch bugs before they ship.
+                        </div>
+                        <% if (locals.githubInstallations && githubInstallations.length > 0) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Installations:</span>
+                                    <span class="detail-value"><%= githubInstallations.length %> <%= githubInstallations.length === 1 ? 'account' : 'accounts' %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Primary account:</span>
+                                    <span class="detail-value"><%= githubInstallations[0].account_name %></span>
+                                </div>
+                                <% if (githubInstallations.length > 1) { %>
+                                <details style="margin-top: 0.75rem;">
+                                    <summary style="cursor: pointer; color: #10b981; font-size: 0.85rem; user-select: none;">
+                                        <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-right: 0.25rem;"></i>
+                                        Show all <%= githubInstallations.length %> installations
+                                    </summary>
+                                    <div style="margin-top: 0.5rem; padding-left: 0.5rem; border-left: 2px solid rgba(16, 185, 129, 0.3);">
+                                        <% githubInstallations.forEach((installation, index) => { %>
+                                        <div style="margin-bottom: 0.25rem; color: #9ca3af; font-size: 0.85rem;">
+                                            <i class="fab fa-github" style="width: 16px; text-align: center;"></i>
+                                            <%= installation.account_name %>
+                                            <% if (index === 0) { %><span style="color: #10b981;">(Primary)</span><% } %>
+                                        </div>
+                                        <% }) %>
+                                    </div>
+                                </details>
+                                <% } %>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.githubInstallations && githubInstallations.length > 0) { %>
+                            <form action="/dashboard/integrations/github/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect All
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/github/install-redirect" class="btn btn-primary">
+                                <i class="fab fa-github"></i>
+                                Connect GitHub
+                            </a>
+                            <a href="/github/sync-installations" class="btn btn-secondary" style="font-size: 0.85rem;">
+                                <i class="fas fa-sync"></i>
+                                Already installed? Sync
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Bitbucket Integration - HIDDEN (code kept for future use) -->
+                <% if (false) { %>
+                <div class="integration-card">
+                    <div class="integration-icon bitbucket-icon">
+                        <i class="fab fa-bitbucket"></i>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">Bitbucket</div>
+                        <div class="integration-description">
+                            Analyze pull requests, generate test recipes, and catch bugs before they ship.
+                        </div>
+                        <% if (locals.bitbucketIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Workspace:</span>
+                                    <span class="detail-value"><%= bitbucketIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(bitbucketIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.bitbucketIntegration) { %>
+                            <form action="/dashboard/integrations/bitbucket/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/api/auth/bitbucket/install" class="btn btn-primary">
+                                <i class="fab fa-bitbucket"></i>
+                                Connect Bitbucket
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+
+                <!-- Jira Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon" style="background: linear-gradient(135deg, #0052cc 0%, #003d99 100%);">
+                        <i class="fab fa-jira"></i>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">Jira</div>
+                        <div class="integration-description">
+                            Analyze tickets for missing requirements, edge cases, and potential conflicts before development starts.
+                        </div>
+                        <% if (locals.jiraIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Site:</span>
+                                    <span class="detail-value"><%= jiraIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(jiraIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.jiraIntegration) { %>
+                            <form action="/dashboard/integrations/jira/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/jira/install<%= typeof returnTo !== 'undefined' && returnTo ? '?returnTo=' + encodeURIComponent(returnTo) : '' %>" class="btn btn-primary">
+                                <i class="fab fa-jira"></i>
+                                Connect Jira
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Linear Integration -->
+                <div class="integration-card">
+                    <div class="integration-icon" style="background: linear-gradient(135deg, #5e6ad2 0%, #3b4ed8 100%);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="integration-info">
+                        <div class="integration-name">Linear</div>
+                        <div class="integration-description">
+                            Comment /qa on Linear issues to get comprehensive QA analysis, test scenarios, and risk assessments.
+                        </div>
+                        <% if (locals.linearIntegration) { %>
+                            <div class="integration-status status-connected">
+                                <span class="status-dot"></span>
+                                Connected
+                            </div>
+                            <div class="connection-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Organization:</span>
+                                    <span class="detail-value"><%= linearIntegration.organization_name || linearIntegration.account_name %></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Connected:</span>
+                                    <span class="detail-value"><%= new Date(linearIntegration.created_at).toLocaleDateString() %></span>
+                                </div>
+                                <% if (!linearIntegration.webhook_secret) { %>
+                                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 6px; font-size: 0.85rem; color: #fcd34d;">
+                                    ⚠️ <strong>Webhook secret not configured.</strong> Add it for secure webhook verification.
+                                    <button type="button" onclick="openWebhookSecretModal()" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: rgba(251, 191, 36, 0.2); border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 4px; color: #fcd34d; cursor: pointer; font-size: 0.85rem;">
+                                        Add Secret
+                                    </button>
+                                </div>
+                                <% } else { %>
+                                <div style="margin-top: 0.75rem; padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; font-size: 0.85rem; color: #6ee7b7;">
+                                    ✅ Webhook secret configured
+                                    <button type="button" onclick="openWebhookSecretModal()" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: transparent; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 4px; color: #6ee7b7; cursor: pointer; font-size: 0.85rem;">
+                                        Update
+                                    </button>
+                                </div>
+                                <% } %>
+                            </div>
+                        <% } else { %>
+                            <div class="integration-status status-not-connected">
+                                <span class="status-dot"></span>
+                                Not connected
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="integration-actions">
+                        <% if (locals.linearIntegration) { %>
+                            <form action="/dashboard/integrations/linear/disconnect" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-unlink"></i>
+                                    Disconnect
+                                </button>
+                            </form>
+                        <% } else if (locals.linearOAuthEnabled) { %>
+                            <a href="/linear/authorize<%= typeof returnTo !== 'undefined' && returnTo ? '?returnTo=' + encodeURIComponent(returnTo) : '' %>" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; display: inline-block;">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+                                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Connect Linear
+                            </a>
+                        <% } else { %>
+                            <button type="button" class="btn btn-primary" onclick="openLinearModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; display: inline-block;">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+                                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Connect Linear
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Linear API Key Modal -->
+    <div id="linearModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Connect Linear</h2>
+            <p style="color: #888; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Enter your Linear Personal API Key to connect your workspace.
+            </p>
+            
+            <form id="linearForm" action="/dashboard/integrations/linear/install" method="POST">
+                <div style="margin-bottom: 1rem;">
+                    <label for="linearApiKey" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
+                        Personal API Key <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="linearApiKey" 
+                        name="apiKey" 
+                        required 
+                        placeholder="lin_api_..."
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"
+                    />
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+                        <a href="https://linear.app/settings/api" target="_blank" style="color: #10b981; text-decoration: none;">
+                            Get your API key from Linear Settings →
+                        </a>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label for="linearWebhookSecret" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
+                        Webhook Signing Secret <span style="color: #888; font-size: 0.85rem;">(Optional - recommended for security)</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="linearWebhookSecret" 
+                        name="webhookSecret" 
+                        placeholder="Enter if you've set up webhooks"
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"
+                    />
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+                        Get this from Linear Settings → Webhooks → Your webhook → Signing secret
+                    </div>
+                </div>
+                
+                <div id="linearError" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: #fca5a5; font-size: 0.9rem;"></div>
+                
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeLinearModal()" class="btn btn-secondary" style="margin: 0;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="margin: 0;">
+                        <i class="fas fa-plug"></i>
+                        Connect
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openLinearModal() {
+            document.getElementById('linearModal').style.display = 'flex';
+            document.getElementById('linearApiKey').focus();
+        }
+        
+        function closeLinearModal() {
+            document.getElementById('linearModal').style.display = 'none';
+            document.getElementById('linearForm').reset();
+            document.getElementById('linearError').style.display = 'none';
+        }
+        
+        // Close modal on background click
+        document.getElementById('linearModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLinearModal();
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('linearForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const errorDiv = document.getElementById('linearError');
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        apiKey: formData.get('apiKey'),
+                        webhookSecret: formData.get('webhookSecret') || null
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = '/dashboard/integrations?connected=linear';
+                } else {
+                    errorDiv.textContent = result.error || 'Failed to connect Linear';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+
+    <!-- Webhook Secret Update Modal -->
+    <div id="webhookSecretModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%;">
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Update Webhook Secret</h2>
+            <p style="color: #888; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Add or update your Linear webhook signing secret for secure webhook verification.
+            </p>
+            
+            <form id="webhookSecretForm" action="/dashboard/integrations/linear/update-webhook-secret" method="POST">
+                <div style="margin-bottom: 1rem;">
+                    <label for="webhookSecretInput" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #fff;">
+                        Webhook Signing Secret
+                    </label>
+                    <input 
+                        type="password" 
+                        id="webhookSecretInput" 
+                        name="webhookSecret" 
+                        placeholder="Enter your webhook signing secret"
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;"
+                    />
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #888;">
+                        Get this from Linear Settings → Webhooks → Your webhook → Signing secret
+                    </div>
+                </div>
+                
+                <div id="webhookSecretError" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: #fca5a5; font-size: 0.9rem;"></div>
+                
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeWebhookSecretModal()" class="btn btn-secondary" style="margin: 0;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="margin: 0;">
+                        <i class="fas fa-save"></i>
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openWebhookSecretModal() {
+            document.getElementById('webhookSecretModal').style.display = 'flex';
+            document.getElementById('webhookSecretInput').focus();
+        }
+        
+        function closeWebhookSecretModal() {
+            document.getElementById('webhookSecretModal').style.display = 'none';
+            document.getElementById('webhookSecretForm').reset();
+            document.getElementById('webhookSecretError').style.display = 'none';
+        }
+        
+        // Close modal on background click
+        document.getElementById('webhookSecretModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeWebhookSecretModal();
+            }
+        });
+        
+        // Handle webhook secret form submission
+        document.getElementById('webhookSecretForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const errorDiv = document.getElementById('webhookSecretError');
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        webhookSecret: formData.get('webhookSecret') || null
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    errorDiv.textContent = result.error || 'Failed to update webhook secret';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

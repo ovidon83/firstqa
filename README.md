@@ -33,28 +33,25 @@ FirstQA is a comprehensive QA platform that combines AI-powered analysis with on
 
 ```
 FirstQA/
-├── 📁 docs/                          # Documentation per product area
-│   ├── 📁 landing-page/             # Landing page documentation
-│   ├── 📁 github-app/               # GitHub App implementation docs
-│   ├── 📁 chrome-extension/         # Chrome extension docs (future)
-│   ├── 📁 api/                      # API documentation
-│   └── 📁 deployment/               # Deployment guides
-├── 📁 src/                          # Main application source
-│   ├── 📁 modules/                  # Feature modules
-│   ├── 📁 components/               # Reusable UI components
-│   ├── 📁 services/                 # Business logic services
-│   ├── 📁 config/                   # Configuration files
-│   ├── 📁 routes/                   # Express.js routes
-│   ├── 📁 views/                    # EJS templates
-│   ├── 📁 utils/                    # Utility functions
-│   └── 📁 public/                   # Static assets
-├── 📁 FirstQA-Extension/            # Chrome extension (future)
-├── 📁 ai/                           # AI integration and prompts
-├── 📁 data/                         # Data storage (JSON files)
-├── 📁 public/                       # Public static assets
-├── webhook-server.js                # Main production server
-├── fixed-webhook.js                 # Webhook proxy for development
-└── package.json                     # Dependencies and scripts
+├── docs/                    # Documentation
+│   ├── plan.md             # Daily/weekly plans, work log
+│   ├── features.md         # Feature backlog
+│   ├── marketing/          # LinkedIn, X, IG content
+│   └── customer-support/   # Support docs, FAQs
+├── backend/                 # Server-side code
+│   ├── routes/             # Express routes
+│   ├── services/           # Business logic
+│   ├── utils/              # Utilities
+│   ├── lib/                # Shared libs
+│   └── ai/                 # AI prompts & OpenAI client
+├── frontend/                # Client-side code
+│   ├── views/              # EJS templates
+│   ├── public/             # Static assets (CSS, images)
+│   └── chrome_extension/   # Chrome extension
+├── scripts/                # Dev/ops scripts
+├── supabase/               # DB migrations
+├── webhook-server.js       # Entry point
+└── .env.example            # Env template (copy to .env)
 ```
 
 ## 🛠️ **Tech Stack**
@@ -88,33 +85,10 @@ cd firstqa
 npm install
 ```
 
-3. **Create a `.env` file** with your configuration:
+3. **Create a `.env` file** (`.env.example` documents all required variables):
 ```bash
-# Server configuration
-PORT=3000
-NODE_ENV=development
-
-# Session management
-SESSION_SECRET=your-session-secret-key
-
-# GitHub App configuration (recommended)
-GITHUB_APP_ID=your-app-id
-GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
-GITHUB_WEBHOOK_SECRET=your-webhook-secret
-
-# GitHub PAT (legacy, optional fallback)
-GITHUB_TOKEN=your-github-token
-
-# OpenAI Configuration
-OPENAI_API_KEY=your-openai-api-key
-OPENAI_MODEL=gpt-4o
-
-# Webhook configuration
-WEBHOOK_PROXY_URL=https://smee.io/your-smee-url
-ENABLE_GITHUB=true
-
-# Notification settings
-NOTIFICATION_EMAIL=your-email@example.com
+cp .env.example .env
+# Edit .env with your GitHub App, OpenAI, Supabase, etc.
 ```
 
 4. **Start the webhook server**:
@@ -182,7 +156,6 @@ FirstQA takes security seriously. We understand that granting access to your cod
 - **HTTPS/TLS encryption** for all data transmission
 
 ### **📋 Security Documentation**
-- **🔒 Security Policy**: [View Security Details →](SECURITY.md)
 - **🔐 Privacy Policy**: [Privacy Policy](https://firstqa.dev/privacy)
 - **📄 Terms of Service**: [Terms](https://firstqa.dev/terms)
 - **📧 Security Contact**: security@firstqa.dev

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovi is learning - FirstQA</title>
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+<body class="onboarding">
+  <%- include('_nav') %>
+  <main class="main">
+    <div class="card">
+      <h1>Ovi is learning your codebase</h1>
+      <p class="subtitle">Select repositories to index. Indexed data is stored in your workspace and improves PR and ticket analysis.</p>
+
+      <% if (typeof availableRepos !== 'undefined' && availableRepos.length > 0) { %>
+        <div class="indexing-status" id="indexing-status">
+          <% if (typeof started !== 'undefined' && started && !anyRunning && !allIndexed) { %>
+            <p style="color:#8b5cf6;margin-bottom:1rem;"><i class="fas fa-spinner fa-spin"></i> Starting indexing...</p>
+            <p style="color:#a1a1aa;font-size:0.9rem;">This may take a moment. Progress will appear shortly.</p>
+          <% } else if (anyRunning || allIndexed) { %>
+            <% repoStatus.forEach(r => { %>
+              <div style="margin-bottom:1rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                  <span><%= r.repoId %></span>
+                  <% if (r.hasKnowledge) { %>
+                    <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Indexed</span>
+                  <% } else if (r.status === 'running') { %>
+                    <span style="color:#8b5cf6;">Indexing... <%= r.progress %>%</span>
+                  <% } else { %>
+                    <span style="color:#a1a1aa;">Pending</span>
+                  <% } %>
+                </div>
+                <div class="indexing-progress">
+                  <div class="indexing-progress-bar" style="width:<%= r.hasKnowledge ? 100 : (r.progress || 0) %>%;"></div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else if (!(typeof started !== 'undefined' && started)) { %>
+            <p style="color:#a1a1aa;margin-bottom:1rem;font-size:0.9rem;">Choose up to <%= typeof indexCap !== 'undefined' ? indexCap : 5 %> repos to index (max <%= typeof indexCap !== 'undefined' ? indexCap : 5 %>).</p>
+            <form action="/onboarding/indexing/start" method="POST" id="index-form" style="margin-bottom:1rem;">
+              <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+                <% availableRepos.forEach(r => { %>
+                  <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;padding:0.5rem;border-radius:8px;background:rgba(255,255,255,0.02);">
+                    <input type="checkbox" name="repos" value="<%= r.repoId %>" class="repo-checkbox" <%= r.hasKnowledge ? 'disabled' : '' %>>
+                    <span><%= r.repoId %></span>
+                    <% if (r.hasKnowledge) { %>
+                      <span style="color:#22c55e;font-size:0.85rem;"><i class="fas fa-check-circle"></i> Already indexed</span>
+                    <% } %>
+                  </label>
+                <% }); %>
+              </div>
+              <button type="submit" class="btn-primary" style="margin:0;" id="start-btn">Start indexing</button>
+            </form>
+          <% } else { %>
+            <!-- started=1 but form hidden - placeholder for poll to fill -->
+          <% } %>
+        </div>
+      <% } else if (!anyRunning && !allIndexed) { %>
+        <div class="indexing-status">
+          <p style="color:#a1a1aa;margin-bottom:1rem;">No repositories found. Connect GitHub and grant access to repos, or skip and index later from Settings.</p>
+        </div>
+      <% } else if (allIndexed) { %>
+        <div class="indexing-status">
+          <p style="color:#22c55e;"><i class="fas fa-check-circle"></i> All selected repositories indexed.</p>
+        </div>
+      <% } else { %>
+        <div class="indexing-status">
+          <p style="color:#a1a1aa;">Connecting to your repositories...</p>
+        </div>
+      <% } %>
+
+      <form action="/onboarding/indexing/continue" method="POST">
+        <button type="submit" class="btn-primary">Continue <i class="fas fa-arrow-right" style="font-size:0.85rem;"></i></button>
+      </form>
+
+      <div class="nav-footer">
+        <a href="/onboarding/tools" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+      </div>
+    </div>
+  </main>
+  <% if (anyRunning) { %>
+  <script>
+    (function poll() {
+      fetch('/onboarding/api/indexing-status')
+        .then(r => r.json())
+        .then(data => {
+          if (data.anyRunning) {
+            setTimeout(poll, 3000);
+            const el = document.getElementById('indexing-status');
+            if (el) {
+              el.innerHTML = data.repoStatus.map(r => `
+                <div style="margin-bottom:1rem;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+                    <span>${r.repoId}</span>
+                    <span style="color:${r.hasKnowledge?'#22c55e':r.status==='running'?'#8b5cf6':'#a1a1aa'}">
+                      ${r.hasKnowledge?'✓ Indexed':r.status==='running'?`Indexing... ${r.progress}%`:'Pending'}
+                    </span>
+                  </div>
+                  <div class="indexing-progress">
+                    <div class="indexing-progress-bar" style="width:${r.hasKnowledge?100:r.progress||0}%;"></div>
+                  </div>
+                </div>
+              `).join('');
+            }
+          }
+        })
+        .catch(() => setTimeout(poll, 5000));
+    })();
+  </script>
+  <% } else if (typeof started !== 'undefined' && started && !anyRunning && !allIndexed) { %>
+  <script>
+    (function() {
+      var startTime = Date.now();
+      function poll() {
+        if (Date.now() - startTime > 60000) return;
+        fetch('/onboarding/api/indexing-status')
+          .then(r => r.json())
+          .then(function(data) {
+            var el = document.getElementById('indexing-status');
+            if (!el) return;
+            if (data.anyRunning || data.allIndexed) {
+              el.innerHTML = data.repoStatus.map(function(r) {
+                return '<div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;"><span>' + r.repoId + '</span><span style="color:' + (r.hasKnowledge ? '#22c55e' : r.status === 'running' ? '#8b5cf6' : '#a1a1aa') + '">' + (r.hasKnowledge ? '✓ Indexed' : r.status === 'running' ? 'Indexing... ' + (r.progress || 0) + '%' : 'Pending') + '</span></div><div class="indexing-progress"><div class="indexing-progress-bar" style="width:' + (r.hasKnowledge ? 100 : r.progress || 0) + '%;"></div></div></div>';
+              }).join('');
+              if (data.anyRunning) setTimeout(poll, 3000);
+              return;
+            }
+            setTimeout(poll, 2000);
+          })
+          .catch(function() { setTimeout(poll, 3000); });
+      }
+      poll();
+    })();
+  </script>
+  <% } else if (typeof availableRepos !== 'undefined' && availableRepos.length > 0 && !anyRunning && !allIndexed) { %>
+  <script>
+    (function() {
+      var form = document.getElementById('index-form');
+      var checkboxes = document.querySelectorAll('.repo-checkbox:not([disabled])');
+      var startBtn = document.getElementById('start-btn');
+      var cap = <%= typeof indexCap !== 'undefined' ? indexCap : 5 %>;
+      checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var checked = document.querySelectorAll('.repo-checkbox:checked').length;
+          if (checked > cap) cb.checked = false;
+          checkboxes.forEach(function(c) { if (!c.checked) c.disabled = false; });
+          var nowChecked = document.querySelectorAll('.repo-checkbox:checked').length;
+          if (nowChecked >= cap) {
+            checkboxes.forEach(function(c) { if (!c.checked) c.disabled = true; });
+          }
+        });
+      });
+      form.addEventListener('submit', function(e) {
+        var checked = document.querySelectorAll('.repo-checkbox:checked').length;
+        if (checked === 0) {
+          e.preventDefault();
+          alert('Select at least one repository to index.');
+        }
+      });
+    })();
+  </script>
+  <% } %>
+</body>
+</html>

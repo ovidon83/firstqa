@@ -1,55 +1,17 @@
 # FirstQA Documentation
 
-Welcome to the FirstQA documentation. This section contains comprehensive guides and information for each product area.
+## Structure
 
-## 📚 **Documentation Sections**
+| File / Folder | Purpose |
+|---------------|---------|
+| [plan.md](./plan.md) | Daily/weekly plans, work log |
+| [features.md](./features.md) | Feature backlog |
+| [product/](./product/) | Product strategy, pricing, competitive analysis, growth |
+| [marketing/](./marketing/) | LinkedIn, X, IG content |
+| [support/](./support/) | Support docs, FAQs |
 
-### **🌐 [Landing Page](./landing-page/)**
-- Landing page implementation and features
-- User onboarding flows
-- Pricing and subscription management
-- Contact and support forms
+## Quick Links
 
-### **🔗 [GitHub App](./github-app/)**
-- GitHub App implementation details
-- Webhook handling and processing
-- PR analysis and AI integration
-- Authentication and security
-
-### **🔌 [Chrome Extension](./chrome-extension/)**
-- Browser extension development (future)
-- Integration with web platforms
-- User experience and workflows
-
-### **🔌 [API Reference](./api/)**
-- REST API endpoints
-- Authentication and authorization
-- Request/response formats
-- Rate limiting and quotas
-
-### **🚀 [Deployment](./deployment/)**
-- Production deployment guides
-- Environment configuration
-- Monitoring and logging
-- Scaling and performance
-
-## 🚀 **Quick Start**
-
-1. **For Users**: Start with the [Landing Page](./landing-page/) documentation
-2. **For Developers**: Check the [GitHub App](./github-app/) implementation
-3. **For DevOps**: Review the [Deployment](./deployment/) guides
-
-## 📝 **Contributing**
-
-To contribute to this documentation:
-1. Fork the repository
-2. Make your changes
-3. Submit a pull request
-4. Ensure all links and references are updated
-
-## 🔗 **External Resources**
-
-- [Main Website](https://firstqa.dev)
-- [GitHub Repository](https://github.com/ovidon83/firstqa)
-- [Support Portal](https://firstqa.dev/support)
-- [Contact Us](mailto:hello@firstqa.dev)
+- [Main README](../README.md)
+- [Chrome Extension Install](https://github.com/ovidon83/firstqa/blob/main/frontend/chrome_extension/INSTALLATION.md)
+- [FirstQA](https://firstqa.dev)

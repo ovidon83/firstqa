@@ -6,6 +6,7 @@ yarn-error.log
 
 # Environment variables
 .env
+.env.new
 .env.local
 .env.development.local
 .env.test.local
@@ -60,14 +61,15 @@ Thumbs.db
 # Data files
 data/*.json
 data/backups/
+backend/data/*.json
 
 # Test results (videos, screenshots)
 test-results/
-public/test-screenshots/ add-secrets.sh
-generate-secrets.js
-show-secrets.sh
-update-env-secrets.sh
-add-secrets.sh
-generate-secrets.js
-show-secrets.sh
-update-env-secrets.sh
+public/test-screenshots/
+frontend/public/test-screenshots/
+
+# Build artifacts (extension release zips)
+*.zip
+
+# Private keys (use GITHUB_PRIVATE_KEY in .env instead)
+*.pem

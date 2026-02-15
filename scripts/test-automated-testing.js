@@ -5,8 +5,8 @@
  */
 
 require('dotenv').config();
-const { executeTestRecipe } = require('../ai/testExecutor');
-const { getTestConfig } = require('../src/services/automatedTestOrchestrator');
+const { executeTestRecipe } = require('../backend/ai/testExecutor');
+const { getTestConfig } = require('../backend/services/automatedTestOrchestrator');
 
 async function testAutomatedTesting() {
   console.log('🧪 Testing Automated Testing Setup\n');
