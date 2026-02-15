@@ -12,6 +12,26 @@
 </head>
 <body>
 
+<!-- Early Access Modal -->
+<div class="modal-overlay" id="ea-modal">
+    <div class="modal-card">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <h2>Get Early Access</h2>
+        <p>Give your team a QA engineer today. Early access teams get founder-direct support and help shape Ovi&rsquo;s roadmap.</p>
+        <form class="ea-form" id="subscribe-form" action="/subscribe" method="POST">
+            <div class="ea-input-group">
+                <input type="email" name="email" placeholder="you@company.com" required>
+                <button type="submit" class="btn-submit">
+                    <span>Get Early Access</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <p class="ea-message" id="subscribe-message"></p>
+        </form>
+        <p class="ea-demo-link">Prefer a walkthrough? <a href="https://calendly.com/firstqa/demo" target="_blank">Book a call</a></p>
+    </div>
+</div>
+
 <!-- Navigation -->
 <nav class="navbar">
     <div class="container">
@@ -32,7 +52,7 @@
             <a href="#features" class="nav-link">What Ovi Does</a>
             <a href="#how-it-works" class="nav-link">How It Works</a>
             <a href="/docs" class="nav-link">Docs</a>
-            <a href="#early-access" class="btn-signup">Get Early Access</a>
+            <a href="#" class="btn-signup" data-ea-trigger>Get Early Access</a>
         </div>
         <button class="mobile-menu-btn" aria-label="Menu">
             <span></span>
@@ -56,17 +76,17 @@
                 Meet Ovi &mdash; Your AI QA Engineer
             </div>
             <h1>
-                Your First<br>
-                <span class="highlight">QA Engineer</span><br>
-                Is Already Here
+                Your All-in-All<br>
+                <span class="highlight">AI-Powered</span><br>
+                QA Engineer
             </h1>
             <p class="hero-sub">
-                Ovi is an AI-powered QA Engineer that joins your team &mdash; not a testing tool.
+                Ovi joins your team and workflow and contributes instantly &mdash; not a testing tool.
                 From reviewing requirements to giving the go/no-go on releases, Ovi covers the 
                 full QA role across your entire development lifecycle.
             </p>
             <div class="hero-cta">
-                <a href="#early-access" class="btn-primary">
+                <a href="#" class="btn-primary" data-ea-trigger>
                     <span>Get Early Access</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
@@ -76,18 +96,18 @@
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-value">Full QA</span>
-                    <span class="stat-label">Role Covered</span>
+                    <span class="stat-value">5</span>
+                    <span class="stat-label">QA Pillars Covered</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
-                    <span class="stat-value">Minutes</span>
-                    <span class="stat-label">To Onboard</span>
+                    <span class="stat-value">&lt;2min</span>
+                    <span class="stat-label">Setup Time</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
                     <span class="stat-value">24/7</span>
-                    <span class="stat-label">On Duty</span>
+                    <span class="stat-label">Always On</span>
                 </div>
             </div>
         </div>
@@ -97,34 +117,31 @@
                     <div class="terminal-dots">
                         <span></span><span></span><span></span>
                     </div>
-                    <span class="terminal-title">ovi-qa-engineer</span>
+                    <span class="terminal-title">ovi-qa-analysis</span>
                 </div>
                 <div class="terminal-body">
                     <div class="terminal-line">
                         <span class="prompt">$</span>
-                        <span class="command">@ovi joined the team</span>
+                        <span class="command">ovi test PR #142</span>
                     </div>
                     <div class="terminal-output">
                         <div class="output-line fade-in-1">
-                            <span class="term-label">Day 1</span> &mdash; Ovi is up to speed
+                            <span class="icon">&#128270;</span> Analyzing code changes...
                         </div>
                         <div class="output-line fade-in-2">
-                            <span class="icon-check">&#10003;</span> Learned the codebase &mdash; 142 files indexed, full context
+                            <span class="icon">&#128203;</span> Generated 7 test scenarios
                         </div>
                         <div class="output-line fade-in-3">
-                            <span class="icon-check">&#10003;</span> Reviewed 3 tickets &mdash; flagged missing acceptance criteria
+                            <span class="icon">&#127917;</span> Running tests in browser...
                         </div>
                         <div class="output-line fade-in-4">
-                            <span class="icon-check">&#10003;</span> PR #142 reviewed &mdash; 2 risks, 5 test cases for the team
+                            <span class="icon">&#9989;</span> 6 passed <span class="warning">&bull; 1 flaky</span>
                         </div>
                         <div class="output-line fade-in-5">
-                            <span class="icon-check">&#10003;</span> Tested checkout on staging &mdash; 1 bug filed
+                            <span class="icon">&#127916;</span> Video report: <span class="link">view recording</span>
                         </div>
                         <div class="output-line fade-in-6">
-                            <span class="icon-check">&#10003;</span> Automated 3 critical regression scenarios
-                        </div>
-                        <div class="output-line fade-in-7">
-                            <span class="icon-check">&#10003;</span> Release v2.4 &rarr; <span class="go-badge">Go</span> <span class="checks-passed">12/12 checks passed</span>
+                            <span class="icon">&#128221;</span> Results posted to PR
                         </div>
                     </div>
                 </div>
@@ -138,69 +155,49 @@
     <div class="container">
         <div class="section-header">
             <span class="section-tag">The Complete QA Engineer</span>
-            <h2>Everything a QA Engineer Does.<br><span class="highlight">From Day One.</span></h2>
-            <p>Ovi learns your codebase, understands your product, and has full context on every change.<br>Not a tool you configure &mdash; a QA engineer that knows your repo inside out.</p>
+            <h2>Everything a QA Engineer Does A-Z.</h2>
+            <p>Ovi handles the complete QA workflow &mdash; from ticket to production.</p>
         </div>
         
         <div class="pillars-grid">
-            <div class="pillar-card active">
-                <div class="pillar-number">01</div>
+            <div class="pillar-card">
                 <div class="pillar-icon">
                     <i class="fas fa-clipboard-check"></i>
                 </div>
                 <h3>Requirements &amp; Design Review</h3>
                 <p>Reviews tickets for gaps in requirements, acceptance criteria, and design. Flags risks and asks the questions a senior QA would &mdash; before a single line of code is written.</p>
-                <div class="pillar-status live">Live Now</div>
             </div>
             
-            <div class="pillar-card active">
-                <div class="pillar-number">02</div>
+            <div class="pillar-card">
                 <div class="pillar-icon">
                     <i class="fas fa-list-check"></i>
                 </div>
                 <h3>Test Recipe Creation</h3>
                 <p>Creates comprehensive test cases from tickets and designs &mdash; before development starts. Gives your team a shared definition of &ldquo;done&rdquo; and a clear testing playbook.</p>
-                <div class="pillar-status live">Live Now</div>
             </div>
             
-            <div class="pillar-card active">
-                <div class="pillar-number">03</div>
+            <div class="pillar-card">
                 <div class="pillar-icon">
                     <i class="fas fa-code-pull-request"></i>
                 </div>
                 <h3>PR Review (QA Perspective)</h3>
                 <p>Reviews pull requests for risks, logic gaps, edge cases, and testability. Provides test cases developers and reviewers can use to verify their own work.</p>
-                <div class="pillar-status live">Live Now</div>
             </div>
             
             <div class="pillar-card">
-                <div class="pillar-number">04</div>
                 <div class="pillar-icon">
                     <i class="fas fa-hand-pointer"></i>
                 </div>
                 <h3>Manual Testing on Staging</h3>
                 <p>Tests features in the browser on staging like a real QA engineer would. Follows the test recipe, explores edge cases, files bugs with steps to reproduce.</p>
-                <div class="pillar-status coming-soon">Coming Soon</div>
             </div>
             
             <div class="pillar-card">
-                <div class="pillar-number">05</div>
                 <div class="pillar-icon">
                     <i class="fas fa-robot"></i>
                 </div>
                 <h3>Test Automation</h3>
                 <p>Automates critical regression scenarios with Playwright. Maintains living test suites that evolve with your product &mdash; not brittle scripts that break every deploy.</p>
-                <div class="pillar-status coming-soon">Coming Soon</div>
-            </div>
-            
-            <div class="pillar-card">
-                <div class="pillar-number">06</div>
-                <div class="pillar-icon">
-                    <i class="fas fa-flag-checkered"></i>
-                </div>
-                <h3>Release Decisions</h3>
-                <p>Gives the go/no-go for every release based on test coverage, open bugs, and risk assessment. Living documentation that&rsquo;s always current.</p>
-                <div class="pillar-status coming-soon">Coming Soon</div>
             </div>
         </div>
     </div>
@@ -219,12 +216,11 @@
                 <div class="step-number">1</div>
                 <div class="step-content">
                     <h3>Give Ovi Access</h3>
-                    <p>Connect GitHub, Linear, Jira, and Slack. Ovi learns your codebase, indexes your repo, and builds full context on your product. Set up in minutes, not days.</p>
+                    <p>Connect your tools. Ovi learns your codebase, indexes your repo, and builds full context on your product. Set up in minutes, not days.</p>
                     <div class="step-tools">
                         <span class="tool-badge"><i class="fab fa-github"></i> GitHub</span>
-                        <span class="tool-badge"><i class="fab fa-slack"></i> Slack</span>
                         <span class="tool-badge">Linear</span>
-                        <span class="tool-badge"><i class="fab fa-jira"></i> Jira</span>
+                        <span class="tool-badge"><i class="fab fa-slack"></i> Slack</span>
                     </div>
                 </div>
             </div>
@@ -259,7 +255,7 @@
         </div>
 
         <div class="section-cta">
-            <a href="#early-access" class="btn-primary">
+            <a href="#" class="btn-primary" data-ea-trigger>
                 <span>Get Early Access</span>
                 <i class="fas fa-arrow-right"></i>
             </a>
@@ -273,67 +269,84 @@
         <div class="why-content">
             <div class="why-text">
                 <span class="section-tag">The Real Problem</span>
-                <h2>Your Team Deserves<br>a QA Engineer</h2>
+                <h2>Your Team Is Moving Fast &mdash;<br>But Paying a Hidden Tax</h2>
                 <p>
                     Most startups don&rsquo;t skip QA because they don&rsquo;t care about quality &mdash; they skip it 
-                    because it&rsquo;s hard to justify a dedicated hire early on. So developers test their own code, 
-                    reviews focus on logic instead of quality, and bugs make it to production.
+                    because hiring a dedicated QA engineer is hard to justify early on. So developers test their own code, 
+                    code reviews focus on logic instead of quality, and bugs make it to production.
                 </p>
                 <p>
-                    The first QA hire should change that. They should review requirements before development. 
-                    Challenge designs. Create test plans. Review PRs through a quality lens. Test on staging. 
-                    File bugs. Automate regressions. Empower engineers to test on their own. 
-                    Give the team confidence to ship.
+                    The problem? <strong>Developers test like builders, not users.</strong> They know the system too well. 
+                    They miss edge cases. They skip the &ldquo;stupid user&rdquo; scenarios.
                 </p>
                 <p>
+                    The result isn&rsquo;t just bugs &mdash; it&rsquo;s a <strong>velocity tax</strong> that silently kills momentum:
+                </p>
+                <ul class="why-list">
+                    <li>30-40% of your sprint capacity goes to rework and bug fixes</li>
+                    <li>Your team context-switches between building new features and fixing old ones</li>
+                    <li>You shift from product mode to maintenance mode before you even find PMF</li>
+                    <li>Releases feel like a gamble because no one really knows what will break</li>
+                </ul>
+                <p>
+                    <strong>The first QA hire should change that.</strong> They should catch requirements gaps before 
+                    development starts. Challenge designs for testability. Create comprehensive test plans. Review PRs 
+                    through a quality lens. Test features before they hit production. Automate regression testing. 
+                    Give engineers confidence to ship fast.
+                </p>
+                <p class="why-closer">
                     <strong>That&rsquo;s what Ovi does. From day one.</strong>
                 </p>
-                <div class="why-cta">
-                    <a href="#early-access" class="btn-primary">
-                        <span>Get Early Access</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
+            </div>
+        </div>
+
+        <div class="why-comparison">
+            <div class="comparison">
+                <div class="comparison-item bad">
+                    <div class="comparison-header">
+                        <span class="comparison-icon">&#10007;</span>
+                        <span>Without a QA Engineer</span>
+                    </div>
+                    <ul>
+                        <li><i class="fas fa-times"></i> Developers test their own code (blind spots everywhere)</li>
+                        <li><i class="fas fa-times"></i> Bugs found in production, not staging</li>
+                        <li><i class="fas fa-times"></i> No one reviews requirements for testability</li>
+                        <li><i class="fas fa-times"></i> Testing is an afterthought, not a process</li>
+                        <li><i class="fas fa-times"></i> 30-40% of capacity spent on rework and fixes</li>
+                        <li><i class="fas fa-times"></i> Releases feel like a gamble</li>
+                    </ul>
+                </div>
+                <div class="comparison-item good">
+                    <div class="comparison-header">
+                        <svg class="comparison-logo" width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradComp" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="16" cy="16" r="14" fill="url(#logoGradComp)"/>
+                            <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                        <span>With Ovi</span>
+                    </div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Every ticket reviewed before development starts</li>
+                        <li><i class="fas fa-check"></i> Every PR analyzed through a QA lens</li>
+                        <li><i class="fas fa-check"></i> Features tested on staging before release</li>
+                        <li><i class="fas fa-check"></i> Engineers empowered with test cases to verify their work</li>
+                        <li><i class="fas fa-check"></i> 30-40% more capacity for building new features</li>
+                        <li><i class="fas fa-check"></i> Release decisions based on evidence, not hope</li>
+                    </ul>
                 </div>
             </div>
-            <div class="why-visual">
-                <div class="comparison">
-                    <div class="comparison-item bad">
-                        <div class="comparison-header">
-                            <span class="comparison-icon">&#10007;</span>
-                            <span>Without a QA Engineer</span>
-                        </div>
-                        <ul>
-                            <li><i class="fas fa-times"></i> Developers test their own code (blind spots)</li>
-                            <li><i class="fas fa-times"></i> Bugs found in production, not staging</li>
-                            <li><i class="fas fa-times"></i> No one reviews requirements for testability</li>
-                            <li><i class="fas fa-times"></i> Testing is an afterthought, not a process</li>
-                            <li><i class="fas fa-times"></i> Releases feel like a gamble</li>
-                        </ul>
-                    </div>
-                    <div class="comparison-item good">
-                        <div class="comparison-header">
-                            <svg class="comparison-logo" width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="logoGradComp" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-                                    </linearGradient>
-                                </defs>
-                                <circle cx="16" cy="16" r="14" fill="url(#logoGradComp)"/>
-                                <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                            </svg>
-                            <span>With Ovi</span>
-                        </div>
-                        <ul>
-                            <li><i class="fas fa-check"></i> Every ticket reviewed before development starts</li>
-                            <li><i class="fas fa-check"></i> Every PR analyzed through a QA lens</li>
-                            <li><i class="fas fa-check"></i> Features tested on staging before release</li>
-                            <li><i class="fas fa-check"></i> Engineers empowered with test cases to verify their work</li>
-                            <li><i class="fas fa-check"></i> Release decisions based on evidence, not hope</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        </div>
+
+        <div class="section-cta" style="margin-top: 64px;">
+            <a href="#" class="btn-primary" data-ea-trigger>
+                <span>Get Early Access</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -368,27 +381,16 @@
     </div>
 </section>
 
-<!-- Early Access -->
-<section id="early-access" class="early-access">
+<!-- Bottom CTA -->
+<section class="bottom-cta">
     <div class="container">
-        <div class="early-access-card">
-            <div class="ea-content">
-                <h2>Get Early Access</h2>
-                <p>Give your team a QA engineer today. Early access teams get founder-direct support and help shape Ovi&rsquo;s roadmap.</p>
-                
-                <form class="ea-form" id="subscribe-form" action="/subscribe" method="POST">
-                    <div class="ea-input-group">
-                        <input type="email" name="email" placeholder="you@company.com" required>
-                        <button type="submit" class="btn-submit">
-                            <span>Get Early Access</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                    <p class="ea-message" id="subscribe-message"></p>
-                </form>
-                
-                <p class="ea-demo-link">Prefer a walkthrough? <a href="https://calendly.com/firstqa/demo" target="_blank">Book a call</a></p>
-            </div>
+        <div class="bottom-cta-content">
+            <h2>Ready to Give Your Team a QA Engineer?</h2>
+            <p>Join early access and bring Ovi onto your team today.</p>
+            <a href="#" class="btn-primary btn-large" data-ea-trigger>
+                <span>Get Early Access</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
     </div>
 </section>
@@ -487,6 +489,82 @@ body {
 }
 
 /* ============================================
+   Modal
+   ============================================ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    max-width: 520px;
+    width: 90%;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalIn 0.25s ease-out;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-card h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.modal-card > p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ============================================
    Navigation
    ============================================ */
 .navbar {
@@ -552,6 +630,7 @@ body {
     padding: 10px 20px;
     border-radius: 8px;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .btn-signup:hover {
@@ -729,6 +808,11 @@ body {
     transform: translateX(4px);
 }
 
+.btn-primary.btn-large {
+    font-size: 17px;
+    padding: 18px 36px;
+}
+
 .btn-ghost {
     display: inline-flex;
     align-items: center;
@@ -787,7 +871,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
-    max-width: 520px;
+    max-width: 500px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -844,7 +928,7 @@ body {
 .terminal-output {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .output-line {
@@ -854,47 +938,36 @@ body {
     color: var(--text-secondary);
     opacity: 0;
     animation: fadeIn 0.5s forwards;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.term-label {
-    font-weight: 600;
-    color: var(--accent);
-}
-
-.icon-check {
-    color: var(--success);
-    font-weight: 700;
-    font-size: 13px;
-    flex-shrink: 0;
-}
-
-.go-badge {
-    display: inline-block;
-    background: rgba(74, 222, 128, 0.15);
-    color: var(--success);
-    font-weight: 600;
-    padding: 1px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-}
-
-.checks-passed {
-    color: var(--text-muted);
-    font-size: 11px;
 }
 
 .fade-in-1 { animation-delay: 0.5s; }
-.fade-in-2 { animation-delay: 1.0s; }
+.fade-in-2 { animation-delay: 1s; }
 .fade-in-3 { animation-delay: 1.5s; }
-.fade-in-4 { animation-delay: 2.0s; }
+.fade-in-4 { animation-delay: 2s; }
 .fade-in-5 { animation-delay: 2.5s; }
-.fade-in-6 { animation-delay: 3.0s; }
-.fade-in-7 { animation-delay: 3.5s; }
+.fade-in-6 { animation-delay: 3s; }
 
 @keyframes fadeIn {
     to { opacity: 1; }
+}
+
+.output-line .icon {
+    font-size: 14px;
+}
+
+.output-line .success {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.output-line .warning {
+    color: var(--warning);
+}
+
+.output-line .link {
+    color: var(--accent);
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 /* ============================================
@@ -938,9 +1011,10 @@ body {
 }
 
 .pillars-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 20px;
+    justify-content: center;
 }
 
 .pillar-card {
@@ -950,23 +1024,13 @@ body {
     padding: 32px 24px;
     position: relative;
     transition: all 0.3s;
+    width: calc(33.333% - 14px);
 }
 
 .pillar-card:hover {
-    border-color: var(--text-muted);
-    transform: translateY(-4px);
-}
-
-.pillar-card.active {
     border-color: var(--accent);
+    transform: translateY(-4px);
     background: linear-gradient(180deg, rgba(34, 211, 238, 0.05) 0%, transparent 50%);
-}
-
-.pillar-number {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
 }
 
 .pillar-icon {
@@ -985,11 +1049,11 @@ body {
     color: var(--text-secondary);
 }
 
-.pillar-card.active .pillar-icon {
+.pillar-card:hover .pillar-icon {
     background: var(--accent-glow);
 }
 
-.pillar-card.active .pillar-icon i {
+.pillar-card:hover .pillar-icon i {
     color: var(--accent);
 }
 
@@ -1003,27 +1067,6 @@ body {
     font-size: 14px;
     color: var(--text-muted);
     line-height: 1.7;
-    margin-bottom: 20px;
-}
-
-.pillar-status {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 6px 12px;
-    border-radius: 100px;
-    display: inline-block;
-}
-
-.pillar-status.live {
-    background: rgba(74, 222, 128, 0.1);
-    color: var(--success);
-}
-
-.pillar-status.coming-soon {
-    background: var(--bg-elevated);
-    color: var(--text-muted);
 }
 
 /* ============================================
@@ -1117,10 +1160,8 @@ body {
 }
 
 .why-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
+    max-width: 720px;
+    margin: 0 auto;
 }
 
 .why-text .section-tag {
@@ -1131,35 +1172,65 @@ body {
     font-size: 38px;
     font-weight: 700;
     letter-spacing: -1px;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .why-text p {
     font-size: 16px;
     color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: 16px;
+    line-height: 1.8;
+    margin-bottom: 20px;
 }
 
 .why-text p strong {
     color: var(--text-primary);
 }
 
-.why-cta {
+.why-list {
+    list-style: none;
+    margin: 0 0 24px 0;
+    padding: 0;
+}
+
+.why-list li {
+    position: relative;
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding-left: 24px;
+    margin-bottom: 10px;
+}
+
+.why-list li::before {
+    content: '\2022';
+    position: absolute;
+    left: 8px;
+    color: var(--text-muted);
+}
+
+.why-closer {
     margin-top: 32px;
+    font-size: 17px !important;
+}
+
+.why-comparison {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 800px;
+    margin: 64px auto 0;
 }
 
 .comparison {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 .comparison-item {
     background: var(--bg-dark);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 24px;
+    padding: 28px;
 }
 
 .comparison-item.bad {
@@ -1177,7 +1248,7 @@ body {
     gap: 12px;
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .comparison-icon {
@@ -1199,7 +1270,7 @@ body {
     gap: 10px;
     font-size: 14px;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     line-height: 1.5;
 }
 
@@ -1330,59 +1401,52 @@ body {
 }
 
 /* ============================================
-   Early Access Section
+   Bottom CTA Section
    ============================================ */
-.early-access {
+.bottom-cta {
     padding: 120px 0;
     position: relative;
+    text-align: center;
 }
 
-.early-access::before {
+.bottom-cta::before {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 600px;
-    height: 600px;
+    height: 400px;
     background: var(--accent);
     filter: blur(200px);
-    opacity: 0.08;
+    opacity: 0.06;
     pointer-events: none;
     border-radius: 50%;
 }
 
-.early-access-card {
-    background: var(--bg-card);
-    border: 1px solid var(--accent);
-    border-radius: 24px;
-    padding: 80px 64px;
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto;
+.bottom-cta-content {
     position: relative;
-    box-shadow: 0 0 80px rgba(34, 211, 238, 0.06);
+    z-index: 1;
 }
 
-.ea-content h2 {
-    font-size: 40px;
+.bottom-cta h2 {
+    font-size: 36px;
     font-weight: 700;
-    margin-bottom: 16px;
     letter-spacing: -1px;
+    margin-bottom: 16px;
 }
 
-.ea-content > p {
+.bottom-cta p {
     font-size: 17px;
     color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: 40px;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-bottom: 32px;
 }
 
+/* ============================================
+   Shared Form Styles (used in modal)
+   ============================================ */
 .ea-form {
-    max-width: 480px;
+    max-width: 420px;
     margin: 0 auto 24px;
 }
 
@@ -1396,7 +1460,7 @@ body {
     background: var(--bg-dark);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 16px 18px;
+    padding: 14px 18px;
     font-size: 15px;
     color: var(--text-primary);
     font-family: var(--font-main);
@@ -1420,7 +1484,7 @@ body {
     color: var(--bg-dark);
     font-size: 15px;
     font-weight: 600;
-    padding: 16px 32px;
+    padding: 14px 28px;
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -1564,16 +1628,19 @@ body {
     }
     
     .terminal {
-        max-width: 480px;
+        max-width: 450px;
     }
     
-    .pillars-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .pillar-card {
+        width: calc(50% - 10px);
     }
     
     .why-content {
+        max-width: 100%;
+    }
+
+    .comparison {
         grid-template-columns: 1fr;
-        gap: 48px;
     }
 }
 
@@ -1599,12 +1666,8 @@ body {
         font-size: 32px;
     }
     
-    .section-header h2 br {
-        display: none;
-    }
-    
-    .pillars-grid {
-        grid-template-columns: 1fr 1fr;
+    .pillar-card {
+        width: calc(50% - 10px);
     }
     
     .hero-stats {
@@ -1630,10 +1693,6 @@ body {
         flex-direction: column;
     }
     
-    .early-access-card {
-        padding: 48px 24px;
-    }
-    
     .human-qa-card {
         flex-direction: column;
         padding: 32px 24px;
@@ -1650,6 +1709,18 @@ body {
     
     .human-qa-content h3 {
         font-size: 22px;
+    }
+
+    .why-text h2 {
+        font-size: 30px;
+    }
+
+    .why-text h2 br {
+        display: none;
+    }
+
+    .comparison {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1677,8 +1748,8 @@ body {
         justify-content: center;
     }
     
-    .pillars-grid {
-        grid-template-columns: 1fr;
+    .pillar-card {
+        width: 100%;
     }
     
     .section-header h2 {
@@ -1686,26 +1757,56 @@ body {
     }
     
     .why-text h2 {
+        font-size: 26px;
+    }
+    
+    .bottom-cta h2 {
         font-size: 28px;
     }
-    
-    .why-text h2 br {
-        display: none;
-    }
-    
-    .ea-content h2 {
-        font-size: 28px;
-    }
-    
-    .early-access-card {
-        padding: 40px 20px;
+
+    .modal-card {
+        padding: 32px 20px;
     }
 }
 </style>
 
 <script>
-// Smooth scroll
+// Modal functionality
+const modal = document.getElementById('ea-modal');
+const modalClose = document.getElementById('modal-close');
+
+document.querySelectorAll('[data-ea-trigger]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.add('active');
+        // Focus the email input after modal opens
+        setTimeout(() => {
+            const emailInput = modal.querySelector('input[type="email"]');
+            if (emailInput) emailInput.focus();
+        }, 100);
+    });
+});
+
+modalClose.addEventListener('click', () => {
+    modal.classList.remove('active');
+});
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        modal.classList.remove('active');
+    }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+    }
+});
+
+// Smooth scroll for non-modal links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    if (anchor.hasAttribute('data-ea-trigger')) return;
     anchor.addEventListener('click', function(e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
