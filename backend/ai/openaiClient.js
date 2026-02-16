@@ -181,6 +181,7 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         analysisInstruction += `9. Consider how all changes work **TOGETHER** (integration testing)\n\n`;
       }
       
+      const testRecipeRules = require('./prompts/test-recipe-rules');
       prompt = ejs.render(promptTemplate, {
         repo,
         pr_number,
@@ -193,11 +194,13 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         isUpdateAnalysis: isUpdateAnalysis,
         newCommitsCount: isUpdateAnalysis && newCommits ? newCommits.length : 0,
         selectorHintsFormatted: selectorHintsFormatted || 'None extracted.',
-        fileContentsForPrompt: fileContentsForPrompt || ''
+        fileContentsForPrompt: fileContentsForPrompt || '',
+        testRecipeRules
       });
     } else if (fs.existsSync(deepPromptTemplatePath)) {
       console.log('✅ Using deep analysis template for comprehensive code review');
       const promptTemplate = fs.readFileSync(deepPromptTemplatePath, 'utf8');
+      const testRecipeRules = require('./prompts/test-recipe-rules');
       prompt = ejs.render(promptTemplate, {
         repo,
         pr_number,
@@ -206,7 +209,8 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         diff: sanitizedDiff,
         codeContext: sanitizedContext,
         productKnowledgeContext: productKnowledgeContext || 'No product knowledge context available.',
-        changedFiles: changedFiles
+        changedFiles: changedFiles,
+        testRecipeRules
       });
     } else {
       // Fallback to default template if deep analysis template doesn't exist
@@ -1440,10 +1444,12 @@ async function generateShortAnalysis({ repo, pr_number, title, body, diff }) {
     }
     
     const promptTemplate = fs.readFileSync(promptTemplatePath, 'utf8');
+    const testRecipeRules = require('./prompts/test-recipe-rules');
     prompt = ejs.render(promptTemplate, {
       title: sanitizedTitle,
       body: sanitizedBody,
-      diff: sanitizedDiff
+      diff: sanitizedDiff,
+      testRecipeRules
     });
 
     console.log(`📝 Generated prompt length: ${prompt.length} characters`);
@@ -1659,6 +1665,7 @@ async function generateTicketInsights({ ticketId, title, description, comments, 
 // Removed calculateInitialReadinessScore - now handled by AI
 
 async function generateSingleAnalysis(title, description, comments, labels, platform, priority, type) {
+  const testRecipeRules = require('./prompts/test-recipe-rules');
   const prompt = `You are a senior QA engineer analyzing tickets for development readiness. 
 
 CRITICAL: Every ticket is UNIQUE. Analyze THIS SPECIFIC TICKET only. Do NOT use generic feedback or copy-paste from previous analyses.
@@ -1726,9 +1733,12 @@ OUTPUT STRUCTURE:
 - recommendations: array of max 5 items. Each item must be a REAL change needed for the ticket to be clear and dev-ready: e.g. change of copy/wording, change or addition of acceptance criteria, new mandatory AC, or a concrete gap to fix. Only things REALLY missing or wrong in this ticket—no generic best practices. Ready-to-paste, full sentences. Will be shown as a checklist.
 - testRecipe: REQUIRED. array of 4-8 test scenarios { name, scenario, priority, automationLevel }. Sort by priority (Smoke first, then Critical Path, then Regression).
   - name: short descriptive test name (e.g. "Happy path registration")
-  - scenario: test steps as a clear, numbered list. Use complete sentences (no cut-off). Format like: "1. Navigate to /register. 2. Enter valid email, password, username. 3. Submit form. 4. Verify redirect to dashboard and welcome toast."
+  - scenario: test steps as a clear, numbered list. Each step must be ATOMIC, UNAMBIGUOUS, and EXECUTABLE (see rules below).
   - priority: "Smoke" | "Critical Path" | "Regression"
   - automationLevel: "UI" | "API" | "Unit/Component" | "Manual". Use UI for user-facing flows. Smoke = UI for functional changes.
+
+**TEST RECIPE STEP RULES (STRICT — apply to every scenario):**
+${testRecipeRules}
 
 MINIMAL MODE: If ticket has insufficient info, return minimalMode: true, readinessScore, affectedAreas, highestRisk (if any), recommendations, testRecipe.
 
@@ -1759,8 +1769,8 @@ Return JSON format. For FULL analysis:
     "**Error handling:** Inline validation per field. On submit failure: toast with error, keep form data, retry option."
   ],
   "testRecipe": [
-    {"name": "Happy path registration", "scenario": "1. Navigate to /register. 2. Enter valid email, password, username. 3. Submit form. 4. Verify redirect to dashboard and welcome toast.", "priority": "Smoke", "automationLevel": "UI"},
-    {"name": "Invalid email validation", "scenario": "1. Navigate to /register. 2. Enter invalid email format. 3. Submit form. 4. Verify inline error and 400 response.", "priority": "Critical Path", "automationLevel": "API"}
+    {"name": "Happy path registration", "scenario": "1. Navigate to /register. 2. Enter 'test@example.com' in the 'Email' field. 3. Enter 'password123' in the 'Password' field. 4. Click the 'Submit' button. 5. Verify that the text 'Welcome' appears and URL redirects to /dashboard.", "priority": "Smoke", "automationLevel": "UI"},
+    {"name": "Invalid email validation", "scenario": "1. Navigate to /register. 2. Enter 'invalid-email' in the 'Email' field. 3. Click the 'Submit' button. 4. Verify that the error message 'Invalid email format' appears.", "priority": "Critical Path", "automationLevel": "API"}
   ]
 }
 

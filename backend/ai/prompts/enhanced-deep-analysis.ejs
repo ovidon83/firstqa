@@ -119,12 +119,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 **TEST CASE REQUIREMENTS:**
 - **ORDER BY PRIORITY (top-down)**: Always output the Test Recipe table with rows sorted by priority: **Smoke** first, then **Critical Path**, then **Regression**. Use these exact priority labels. High priority tests first, then Medium.
 - **SCENARIO**: Clear, specific name describing what's being tested (e.g., "Verify thought stays visible after marking as shared")
-- **STEPS** (automation-ready - atomic, unambiguous, executable):
-  - One action per step. Each step must be a single, concrete action a human or Playwright could perform.
-  - Use exact UI names/labels from code. When AUTOMATION SELECTORS exist above, include them in format: `[data-testid="value"]` or `aria-label="value"` in parentheses after the human-readable action.
-  - Example: `1. Navigate to ActView (or /act-view)<br>2. Click thought "My First Thought" (or element with data-testid="thought-item")<br>3. Click "Mark as Shared" button (or [data-testid="mark-shared-btn"])`
-  - Steps must be sequential, unambiguous, and verifiable. Avoid vague actions like "verify it works".
-- **EXPECTED RESULT**: Specific, verifiable outcomes with exact details from code. Use `<br>` for multiple expectations:
+- **STEPS** (follow the strict rules below — atomic, unambiguous, executable by someone who doesn't know the app):
+<% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
+<%= testRecipeRules %>
+<% } %>
+  - Use exact UI names/labels from code. When AUTOMATION SELECTORS exist above, include them: `(data-testid="value")` in parentheses after the human-readable action.
+  - Format steps with `<br>` between each: `1. Navigate to ActView (or /act-view)<br>2. Click "Mark as Shared" button (data-testid="mark-shared-btn")<br>3. Verify that the text "Marked as shared! ✔" appears`
+- **EXPECTED RESULT**: Specific, observable outcomes. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
 - **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)
 - **AUTOMATION TYPE**: Best-fit test type based on changes and testing strategy:

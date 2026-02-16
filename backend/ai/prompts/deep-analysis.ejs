@@ -68,13 +68,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Include ALL priority levels: Happy Path, Critical Path, Edge Case, and Regression
   - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case, then Regression)
   - Within each priority level, order by relevance to the actual PR changes
-  - **For each priority level, include BOTH positive and negative scenarios:**
-    - Start with **positive test cases** (happy path, successful workflows)
-    - Then include **negative test cases** (error conditions, edge cases, failure scenarios)
+  - **STEPS must be ATOMIC, UNAMBIGUOUS, and EXECUTABLE** (see rules below)
+<% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
+<%= testRecipeRules %>
+<% } %>
   - **IMPORTANT**: Scenario names should be descriptive and concise WITHOUT prefixes like "Positive Scenario:" or "Negative Scenario:"
   - Examples: "User Login Success", "Invalid Credentials", "Password Reset Flow", "Session Timeout"
   - Focus on scenarios that directly test the changed functionality and affected product areas
-  - Make steps detailed, actionable, and multiline-friendly
   - Evaluate which scenarios make most sense given the specific changes in the PR
   - **Priority Examples**: User login = Happy Path, form validation = Critical Path, network timeout = Edge Case, existing user flows = Regression
 - For Questions, Risks & Bugs: 
@@ -243,13 +243,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Include ALL priority levels: Happy Path, Critical Path, Edge Case, and Regression
   - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case, then Regression)
   - Within each priority level, order by relevance to the actual PR changes
-  - **For each priority level, include BOTH positive and negative scenarios:**
-    - Start with **positive test cases** (happy path, successful workflows)
-    - Then include **negative test cases** (error conditions, edge cases, failure scenarios)
+  - **STEPS must be ATOMIC, UNAMBIGUOUS, and EXECUTABLE** (see rules below)
+<% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
+<%= testRecipeRules %>
+<% } %>
   - **IMPORTANT**: Scenario names should be descriptive and concise WITHOUT prefixes like "Positive Scenario:" or "Negative Scenario:"
   - Examples: "User Login Success", "Invalid Credentials", "Password Reset Flow", "Session Timeout"
   - Focus on scenarios that directly test the changed functionality and affected product areas
-  - Make steps detailed, actionable, and multiline-friendly
   - Evaluate which scenarios make most sense given the specific changes in the PR
   - **Priority Examples**: User login = Happy Path, form validation = Critical Path, network timeout = Edge Case, existing user flows = Regression
 - For Questions, Risks & Bugs: 
