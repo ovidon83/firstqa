@@ -73,17 +73,15 @@
         <div class="hero-content">
             <div class="hero-badge">
                 <span class="pulse"></span>
-                Meet Ovi &mdash; Your AI QA Engineer
+                Now in Early Access
             </div>
             <h1>
-                Your All-in-All<br>
-                <span class="highlight">AI-Powered</span><br>
-                QA Engineer
+                Meet <span class="highlight">Ovi</span>, Your<br>
+                AI QA Engineer
             </h1>
             <p class="hero-sub">
-                Ovi joins your team and workflow and contributes instantly &mdash; not a testing tool.
-                From reviewing requirements to giving the go/no-go on releases, Ovi covers the 
-                full QA role across your entire development lifecycle.
+                Ovi joins your team and workflow instantly. From reviewing requirements 
+                to giving the go/no-go on releases &mdash; the full QA role, powered by AI.
             </p>
             <div class="hero-cta">
                 <a href="#" class="btn-primary" data-ea-trigger>
@@ -117,31 +115,34 @@
                     <div class="terminal-dots">
                         <span></span><span></span><span></span>
                     </div>
-                    <span class="terminal-title">ovi-qa-analysis</span>
+                    <span class="terminal-title">ovi-qa-engineer</span>
                 </div>
                 <div class="terminal-body">
                     <div class="terminal-line">
                         <span class="prompt">$</span>
-                        <span class="command">ovi test PR #142</span>
+                        <span class="command">@ovi review PR #142</span>
                     </div>
                     <div class="terminal-output">
                         <div class="output-line fade-in-1">
-                            <span class="icon">&#128270;</span> Analyzing code changes...
+                            <span class="icon">&#128270;</span> Analyzing changes &amp; requirements...
                         </div>
                         <div class="output-line fade-in-2">
-                            <span class="icon">&#128203;</span> Generated 7 test scenarios
+                            <span class="icon">&#9888;&#65039;</span> 2 gaps flagged in acceptance criteria
                         </div>
                         <div class="output-line fade-in-3">
-                            <span class="icon">&#127917;</span> Running tests in browser...
+                            <span class="icon">&#128203;</span> Generated 8 test cases
                         </div>
                         <div class="output-line fade-in-4">
-                            <span class="icon">&#9989;</span> 6 passed <span class="warning">&bull; 1 flaky</span>
+                            <span class="icon">&#127917;</span> Testing on staging...
                         </div>
                         <div class="output-line fade-in-5">
-                            <span class="icon">&#127916;</span> Video report: <span class="link">view recording</span>
+                            <span class="icon">&#9989;</span> 7 passed <span class="warning">&bull; 1 bug filed</span>
                         </div>
                         <div class="output-line fade-in-6">
-                            <span class="icon">&#128221;</span> Results posted to PR
+                            <span class="icon">&#128221;</span> QA review posted to PR
+                        </div>
+                        <div class="output-line fade-in-7">
+                            <span class="icon">&#128640;</span> Release v2.4 &rarr; <span class="go-badge">Go</span>
                         </div>
                     </div>
                 </div>
@@ -165,7 +166,7 @@
                     <i class="fas fa-clipboard-check"></i>
                 </div>
                 <h3>Requirements &amp; Design Review</h3>
-                <p>Reviews tickets for gaps in requirements, acceptance criteria, and design. Flags risks and asks the questions a senior QA would &mdash; before a single line of code is written.</p>
+                <p>Flags gaps in requirements and design before development starts. Asks the questions a senior QA would.</p>
             </div>
             
             <div class="pillar-card">
@@ -173,15 +174,15 @@
                     <i class="fas fa-list-check"></i>
                 </div>
                 <h3>Test Recipe Creation</h3>
-                <p>Creates comprehensive test cases from tickets and designs &mdash; before development starts. Gives your team a shared definition of &ldquo;done&rdquo; and a clear testing playbook.</p>
+                <p>Generates test cases from tickets and designs. Your team&rsquo;s shared definition of &ldquo;done&rdquo; and testing playbook.</p>
             </div>
             
             <div class="pillar-card">
                 <div class="pillar-icon">
                     <i class="fas fa-code-pull-request"></i>
                 </div>
-                <h3>PR Review (QA Perspective)</h3>
-                <p>Reviews pull requests for risks, logic gaps, edge cases, and testability. Provides test cases developers and reviewers can use to verify their own work.</p>
+                <h3>PR Review (QA Lens)</h3>
+                <p>Reviews PRs for risks, logic gaps, and testability. Gives devs test cases to verify their own work.</p>
             </div>
             
             <div class="pillar-card">
@@ -189,7 +190,7 @@
                     <i class="fas fa-hand-pointer"></i>
                 </div>
                 <h3>Manual Testing on Staging</h3>
-                <p>Tests features in the browser on staging like a real QA engineer would. Follows the test recipe, explores edge cases, files bugs with steps to reproduce.</p>
+                <p>Tests features in the browser like a real QA would. Explores edge cases, files bugs with repro steps.</p>
             </div>
             
             <div class="pillar-card">
@@ -197,7 +198,7 @@
                     <i class="fas fa-robot"></i>
                 </div>
                 <h3>Test Automation</h3>
-                <p>Automates critical regression scenarios with Playwright. Maintains living test suites that evolve with your product &mdash; not brittle scripts that break every deploy.</p>
+                <p>Automates critical regressions with Playwright. Living test suites that evolve with your product.</p>
             </div>
         </div>
     </div>
@@ -266,38 +267,46 @@
 <!-- Why Section -->
 <section class="why-section">
     <div class="container">
-        <div class="why-content">
-            <div class="why-text">
-                <span class="section-tag">The Real Problem</span>
-                <h2>Your Team Is Moving Fast &mdash;<br>But Paying a Hidden Tax</h2>
-                <p>
-                    Most startups don&rsquo;t skip QA because they don&rsquo;t care about quality &mdash; they skip it 
-                    because hiring a dedicated QA engineer is hard to justify early on. So developers test their own code, 
-                    code reviews focus on logic instead of quality, and bugs make it to production.
-                </p>
-                <p>
-                    The problem? <strong>Developers test like builders, not users.</strong> They know the system too well. 
-                    They miss edge cases. They skip the &ldquo;stupid user&rdquo; scenarios.
-                </p>
-                <p>
-                    The result isn&rsquo;t just bugs &mdash; it&rsquo;s a <strong>velocity tax</strong> that silently kills momentum:
-                </p>
-                <ul class="why-list">
-                    <li>30-40% of your sprint capacity goes to rework and bug fixes</li>
-                    <li>Your team context-switches between building new features and fixing old ones</li>
-                    <li>You shift from product mode to maintenance mode before you even find PMF</li>
-                    <li>Releases feel like a gamble because no one really knows what will break</li>
-                </ul>
-                <p>
-                    <strong>The first QA hire should change that.</strong> They should catch requirements gaps before 
-                    development starts. Challenge designs for testability. Create comprehensive test plans. Review PRs 
-                    through a quality lens. Test features before they hit production. Automate regression testing. 
-                    Give engineers confidence to ship fast.
-                </p>
-                <p class="why-closer">
-                    <strong>That&rsquo;s what Ovi does. From day one.</strong>
-                </p>
+        <div class="section-header">
+            <span class="section-tag">The Real Problem</span>
+            <h2>Moving Fast &mdash; But Paying a <span class="highlight">Hidden Tax</span></h2>
+            <p>Developers test like builders, not users. They know the system too well, miss edge cases, and skip the &ldquo;stupid user&rdquo; scenarios. The result is a velocity tax that silently kills momentum.</p>
+        </div>
+
+        <div class="tax-grid">
+            <div class="tax-item">
+                <div class="tax-icon"><i class="fas fa-rotate-left"></i></div>
+                <div class="tax-text">
+                    <strong>30-40% rework</strong>
+                    <span>Sprint capacity lost to bugs and fixes</span>
+                </div>
             </div>
+            <div class="tax-item">
+                <div class="tax-icon"><i class="fas fa-shuffle"></i></div>
+                <div class="tax-text">
+                    <strong>Constant context-switching</strong>
+                    <span>Building new features vs. fixing old ones</span>
+                </div>
+            </div>
+            <div class="tax-item">
+                <div class="tax-icon"><i class="fas fa-bug"></i></div>
+                <div class="tax-text">
+                    <strong>Bugs in production</strong>
+                    <span>Found by users, not caught on staging</span>
+                </div>
+            </div>
+            <div class="tax-item">
+                <div class="tax-icon"><i class="fas fa-dice"></i></div>
+                <div class="tax-text">
+                    <strong>Releases feel like a gamble</strong>
+                    <span>No one really knows what will break</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="why-solution">
+            <p><strong>The first QA hire should change that.</strong> Catch gaps before development. Review PRs through a quality lens. Test on staging. Automate regressions. Give the go/no-go on releases.</p>
+            <p class="why-closer"><strong>That&rsquo;s what Ovi does. From day one.</strong></p>
         </div>
 
         <div class="why-comparison">
@@ -305,14 +314,13 @@
                 <div class="comparison-item bad">
                     <div class="comparison-header">
                         <span class="comparison-icon">&#10007;</span>
-                        <span>Without a QA Engineer</span>
+                        <span>Without QA</span>
                     </div>
                     <ul>
-                        <li><i class="fas fa-times"></i> Developers test their own code (blind spots everywhere)</li>
-                        <li><i class="fas fa-times"></i> Bugs found in production, not staging</li>
-                        <li><i class="fas fa-times"></i> No one reviews requirements for testability</li>
-                        <li><i class="fas fa-times"></i> Testing is an afterthought, not a process</li>
-                        <li><i class="fas fa-times"></i> 30-40% of capacity spent on rework and fixes</li>
+                        <li><i class="fas fa-times"></i> Devs test their own code (blind spots)</li>
+                        <li><i class="fas fa-times"></i> Bugs found in production</li>
+                        <li><i class="fas fa-times"></i> No requirements review</li>
+                        <li><i class="fas fa-times"></i> Testing is an afterthought</li>
                         <li><i class="fas fa-times"></i> Releases feel like a gamble</li>
                     </ul>
                 </div>
@@ -331,12 +339,11 @@
                         <span>With Ovi</span>
                     </div>
                     <ul>
-                        <li><i class="fas fa-check"></i> Every ticket reviewed before development starts</li>
+                        <li><i class="fas fa-check"></i> Every ticket reviewed before dev starts</li>
                         <li><i class="fas fa-check"></i> Every PR analyzed through a QA lens</li>
-                        <li><i class="fas fa-check"></i> Features tested on staging before release</li>
-                        <li><i class="fas fa-check"></i> Engineers empowered with test cases to verify their work</li>
-                        <li><i class="fas fa-check"></i> 30-40% more capacity for building new features</li>
-                        <li><i class="fas fa-check"></i> Release decisions based on evidence, not hope</li>
+                        <li><i class="fas fa-check"></i> Features tested on staging first</li>
+                        <li><i class="fas fa-check"></i> Engineers empowered to test their own work</li>
+                        <li><i class="fas fa-check"></i> Release decisions based on evidence</li>
                     </ul>
                 </div>
             </div>
@@ -665,7 +672,7 @@ body {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding: 120px 0 80px;
+    padding: 100px 0 60px;
     overflow: hidden;
 }
 
@@ -712,8 +719,9 @@ body {
 .hero .container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
+    gap: 48px;
+    align-items: start;
+    padding-top: 40px;
     position: relative;
     z-index: 1;
 }
@@ -871,7 +879,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     width: 100%;
-    max-width: 500px;
+    max-width: 540px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -907,9 +915,9 @@ body {
 }
 
 .terminal-body {
-    padding: 20px;
+    padding: 24px;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 13.5px;
 }
 
 .terminal-line {
@@ -941,18 +949,29 @@ body {
 }
 
 .fade-in-1 { animation-delay: 0.5s; }
-.fade-in-2 { animation-delay: 1s; }
-.fade-in-3 { animation-delay: 1.5s; }
-.fade-in-4 { animation-delay: 2s; }
-.fade-in-5 { animation-delay: 2.5s; }
-.fade-in-6 { animation-delay: 3s; }
+.fade-in-2 { animation-delay: 1.1s; }
+.fade-in-3 { animation-delay: 1.7s; }
+.fade-in-4 { animation-delay: 2.3s; }
+.fade-in-5 { animation-delay: 2.9s; }
+.fade-in-6 { animation-delay: 3.5s; }
+.fade-in-7 { animation-delay: 4.1s; }
 
 @keyframes fadeIn {
     to { opacity: 1; }
 }
 
 .output-line .icon {
-    font-size: 14px;
+    font-size: 15px;
+}
+
+.go-badge {
+    display: inline-block;
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--success);
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 12px;
 }
 
 .output-line .success {
@@ -1021,7 +1040,7 @@ body {
     background: var(--bg-dark);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 32px 24px;
+    padding: 32px 28px;
     position: relative;
     transition: all 0.3s;
     width: calc(33.333% - 14px);
@@ -1030,43 +1049,42 @@ body {
 .pillar-card:hover {
     border-color: var(--accent);
     transform: translateY(-4px);
-    background: linear-gradient(180deg, rgba(34, 211, 238, 0.05) 0%, transparent 50%);
+    background: linear-gradient(180deg, rgba(34, 211, 238, 0.06) 0%, transparent 60%);
+    box-shadow: 0 12px 40px rgba(34, 211, 238, 0.06);
 }
 
 .pillar-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--bg-elevated);
-    border-radius: 12px;
+    width: 52px;
+    height: 52px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .pillar-icon i {
-    font-size: 20px;
-    color: var(--text-secondary);
-}
-
-.pillar-card:hover .pillar-icon {
-    background: var(--accent-glow);
-}
-
-.pillar-card:hover .pillar-icon i {
+    font-size: 21px;
     color: var(--accent);
 }
 
+.pillar-card:hover .pillar-icon {
+    background: rgba(34, 211, 238, 0.2);
+    border-color: var(--accent);
+}
+
 .pillar-card h3 {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .pillar-card p {
     font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.7;
+    color: var(--text-secondary);
+    line-height: 1.65;
 }
 
 /* ============================================
@@ -1159,65 +1177,88 @@ body {
     border-top: 1px solid var(--border);
 }
 
-.why-content {
-    max-width: 720px;
-    margin: 0 auto;
+.tax-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 800px;
+    margin: 0 auto 56px;
 }
 
-.why-text .section-tag {
-    margin-bottom: 16px;
+.tax-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    transition: all 0.3s;
 }
 
-.why-text h2 {
-    font-size: 38px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 32px;
+.tax-item:hover {
+    border-color: rgba(248, 113, 113, 0.3);
 }
 
-.why-text p {
-    font-size: 16px;
-    color: var(--text-secondary);
-    line-height: 1.8;
-    margin-bottom: 20px;
+.tax-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(248, 113, 113, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.why-text p strong {
+.tax-icon i {
+    font-size: 18px;
+    color: var(--danger);
+}
+
+.tax-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tax-text strong {
+    font-size: 15px;
+    font-weight: 600;
     color: var(--text-primary);
 }
 
-.why-list {
-    list-style: none;
-    margin: 0 0 24px 0;
-    padding: 0;
+.tax-text span {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
 }
 
-.why-list li {
-    position: relative;
-    font-size: 15px;
+.why-solution {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 64px;
+}
+
+.why-solution p {
+    font-size: 16px;
     color: var(--text-secondary);
     line-height: 1.7;
-    padding-left: 24px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
-.why-list li::before {
-    content: '\2022';
-    position: absolute;
-    left: 8px;
-    color: var(--text-muted);
+.why-solution p strong {
+    color: var(--text-primary);
 }
 
 .why-closer {
-    margin-top: 32px;
-    font-size: 17px !important;
+    font-size: 20px !important;
+    margin-top: 8px;
 }
 
 .why-comparison {
-    display: grid;
-    grid-template-columns: 1fr;
     max-width: 800px;
-    margin: 64px auto 0;
+    margin: 0 auto;
 }
 
 .comparison {
@@ -1229,7 +1270,7 @@ body {
 .comparison-item {
     background: var(--bg-dark);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 28px;
 }
 
@@ -1245,14 +1286,16 @@ body {
 .comparison-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
 }
 
 .comparison-icon {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--danger);
 }
 
@@ -1281,6 +1324,7 @@ body {
 .comparison-item li i {
     margin-top: 3px;
     flex-shrink: 0;
+    font-size: 12px;
 }
 
 .comparison-item.bad li i {
@@ -1628,15 +1672,15 @@ body {
     }
     
     .terminal {
-        max-width: 450px;
+        max-width: 480px;
     }
     
     .pillar-card {
         width: calc(50% - 10px);
     }
     
-    .why-content {
-        max-width: 100%;
+    .tax-grid {
+        grid-template-columns: 1fr 1fr;
     }
 
     .comparison {
@@ -1678,6 +1722,14 @@ body {
     .stat-divider {
         display: none;
     }
+
+    .tax-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison {
+        grid-template-columns: 1fr;
+    }
     
     .footer-main {
         grid-template-columns: 1fr;
@@ -1717,10 +1769,6 @@ body {
 
     .why-text h2 br {
         display: none;
-    }
-
-    .comparison {
-        grid-template-columns: 1fr;
     }
 }
 
