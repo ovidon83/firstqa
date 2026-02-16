@@ -1276,13 +1276,14 @@ function parseTestRecipeFromAiResponse(aiData) {
  * Handle test request - core functionality
  */
 async function handleTestRequest(repository, issue, comment, sender, userId = null, installationId = null) {
+  const analysisStartMs = Date.now();
   try {
     const oviTagCount = require('./oviTagCount');
     oviTagCount.increment();
   } catch (e) {
     // non-fatal
   }
-  console.log(`Processing test request from ${sender.login} on PR #${issue.number}`);
+  console.log(`Processing test request from ${sender.login} on PR #${issue.number} (${repository.full_name})`);
   console.log(`Repository: ${repository.full_name}`);
   console.log(`Comment: ${comment.body}`);
   console.log(`User ID: ${userId || 'unknown'}`);
@@ -2059,6 +2060,8 @@ Or wait until next month when your limit resets.
 *Note: Ovi QA Agent insights could not be generated for this PR (${aiInsights.error}), but manual testing will proceed as normal.*
     `;
   }
+  const elapsedSec = ((Date.now() - analysisStartMs) / 1000).toFixed(1);
+  console.log(`⏱️ PR analysis completed in ${elapsedSec}s, posting comment`);
   const commentResult = await postComment(repository.full_name, issue.number, acknowledgmentComment);
   console.log(`✅ Acknowledgment comment ${commentResult.simulated ? 'would be' : 'was'} posted`);
   
@@ -2319,6 +2322,8 @@ Or wait until next month when your limit resets.
 *Note: Ovi QA Agent insights could not be generated for this PR (${aiInsights.error}), but manual testing will proceed as normal.*
     `;
   }
+  const elapsedSecShort = ((Date.now() - analysisStartMs) / 1000).toFixed(1);
+  console.log(`⏱️ Short PR analysis completed in ${elapsedSecShort}s, posting comment`);
   const commentResult = await postComment(repository.full_name, issue.number, acknowledgmentComment);
   console.log(`✅ Acknowledgment comment ${commentResult.simulated ? 'would be' : 'was'} posted`);
   
@@ -2392,11 +2397,7 @@ function formatHybridAnalysisForComment(aiInsights) {
 
 💡 Need a human tester to help? [FirstQA.dev](https://firstqa.dev) - Professional QA testing for your releases.`;
     
-    // Debug the final comment that will be posted
-    console.log('🔍 Final Comment Debug:');
     console.log('Final comment length:', finalComment.length);
-    console.log('Final comment preview:', finalComment.substring(0, 500) + '...');
-    console.log('Final comment end:', finalComment.substring(finalComment.length - 200));
     
     return finalComment;
   }
@@ -2837,11 +2838,11 @@ async function processWebhookEvent(event) {
       }
     }
     
-    // Only log first 500 characters to avoid flooding the console
-    const payloadString = JSON.stringify(payload, null, 2);
-    console.log('Event payload:', payloadString.length > 500 
-      ? payloadString.substring(0, 500) + '...(truncated)' 
-      : payloadString);
+    // Log a short summary only (no payload body/diff to avoid leaking code and flooding logs)
+    const repo = payload.repository?.full_name || payload.pull_request?.base?.repo?.full_name || '?';
+    const prNum = payload.pull_request?.number ?? payload.issue?.number;
+    const action = payload.action || payload.review?.state;
+    console.log(`Event: ${eventType} action=${action} repo=${repo}${prNum != null ? ` #${prNum}` : ''}`);
 
     // Handle installation_repositories - auto-index on repo connection
     if (eventType === 'installation_repositories' && payload.action === 'added' && process.env.AUTO_INDEX_ON_INSTALL === 'true') {
