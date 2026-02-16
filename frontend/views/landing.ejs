@@ -88,8 +88,9 @@
                     <span>Join Waitlist</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
-                <a href="https://calendly.com/firstqa/demo" class="btn-ghost" target="_blank" rel="noopener">
-                    Talk to founder
+                <a href="/discovery-interview" class="btn-launch-partner">
+                    <span class="btn-launch-partner-main">Become a Launch Partner</span>
+                    <span class="btn-launch-partner-tag">3 months free · 50% off for life</span>
                 </a>
             </div>
             <div class="hero-stats">
@@ -883,6 +884,46 @@ body {
     color: var(--text-primary);
     border-color: var(--border);
     background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-launch-partner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px 20px 14px;
+    border-radius: 12px;
+    background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+                var(--gradient) border-box;
+    border: 2px solid transparent;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.btn-launch-partner:hover {
+    box-shadow: 0 4px 24px var(--accent-glow), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    color: var(--text-primary);
+}
+
+.btn-launch-partner-main {
+    line-height: 1.2;
+}
+
+.btn-launch-partner-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    opacity: 0.95;
+}
+
+.btn-launch-partner:hover .btn-launch-partner-tag {
+    color: #a78bfa;
 }
 
 .hero-stats {
@@ -2005,7 +2046,8 @@ body {
     }
     
     .btn-primary,
-    .btn-ghost {
+    .btn-ghost,
+    .btn-launch-partner {
         width: 100%;
         justify-content: center;
     }
