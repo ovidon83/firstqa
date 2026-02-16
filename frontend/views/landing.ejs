@@ -12,23 +12,23 @@
 </head>
 <body>
 
-<!-- Early Access Modal -->
+<!-- Join Waitlist Modal -->
 <div class="modal-overlay" id="ea-modal">
     <div class="modal-card">
         <button class="modal-close" id="modal-close">&times;</button>
-        <h2>Get Early Access</h2>
-        <p>Give your team a QA engineer today. Early access teams get founder-direct support and help shape Ovi&rsquo;s roadmap.</p>
+        <h2>Join Waitlist</h2>
+        <p>Give your team a QA engineer today. Waitlist teams get founder-direct support and help shape Ovi&rsquo;s roadmap.</p>
         <form class="ea-form" id="subscribe-form" action="/subscribe" method="POST">
             <div class="ea-input-group">
                 <input type="email" name="email" placeholder="you@company.com" required>
                 <button type="submit" class="btn-submit">
-                    <span>Get Early Access</span>
+                    <span>Join Waitlist</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
             <p class="ea-message" id="subscribe-message"></p>
         </form>
-        <p class="ea-demo-link">Prefer a walkthrough? <a href="https://calendly.com/firstqa/demo" target="_blank">Book a call</a></p>
+        <p class="ea-demo-link"><a href="https://calendly.com/firstqa/demo" target="_blank" rel="noopener">Talk to founder</a> &mdash; book a call</p>
     </div>
 </div>
 
@@ -49,10 +49,12 @@
             <span class="logo-text">FirstQA</span>
         </a>
         <div class="nav-menu">
-            <a href="#features" class="nav-link">What Ovi Does</a>
+            <a href="#problem" class="nav-link">The Problem</a>
             <a href="#how-it-works" class="nav-link">How It Works</a>
+            <a href="#features" class="nav-link">What Ovi Does</a>
+            <a href="#how-it-looks" class="nav-link">See It</a>
             <a href="/docs" class="nav-link">Docs</a>
-            <a href="#" class="btn-signup" data-ea-trigger>Get Early Access</a>
+            <a href="#" class="btn-signup" data-ea-trigger>Join Waitlist</a>
         </div>
         <button class="mobile-menu-btn" aria-label="Menu">
             <span></span>
@@ -73,29 +75,28 @@
         <div class="hero-content">
             <div class="hero-badge">
                 <span class="pulse"></span>
-                Now in Early Access
+                Join the Waitlist
             </div>
             <h1>
                 Meet <span class="highlight">Ovi</span>, Your<br>
                 AI QA Engineer
             </h1>
             <p class="hero-sub">
-                The AI QA that reviews requirements, design, PRs, writes test cases, 
-                executes them, and catches bugs early.
+                By FirstQA — the QA platform that combines AI QA agents with on-demand human QA.
             </p>
             <div class="hero-cta">
                 <a href="#" class="btn-primary" data-ea-trigger>
-                    <span>Get Early Access</span>
+                    <span>Join Waitlist</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
-                <a href="#how-it-works" class="btn-ghost">
-                    See How It Works
+                <a href="https://calendly.com/firstqa/demo" class="btn-ghost" target="_blank" rel="noopener">
+                    Talk to founder
                 </a>
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-value">5</span>
-                    <span class="stat-label">QA Pillars Covered</span>
+                    <span class="stat-value" id="ovi-tag-count">182</span>
+                    <span class="stat-label">Times Ovi got tagged in PRs & Tickets</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
@@ -115,16 +116,12 @@
                     <div class="terminal-dots">
                         <span></span><span></span><span></span>
                     </div>
-                    <span class="terminal-title">ovi-qa-engineer</span>
+                    <span class="terminal-title">@ovi</span>
                 </div>
                 <div class="terminal-body">
-                    <div class="terminal-line">
-                        <span class="prompt">$</span>
-                        <span class="command">@ovi review ticket</span>
-                    </div>
                     <div class="terminal-output">
                         <div class="output-line fade-in-1">
-                            <span class="icon">&#128270;</span> Analyzing changes &amp; requirements...
+                            <span class="icon">&#128270;</span> Analyzing requirements &amp; design...
                         </div>
                         <div class="output-line fade-in-2">
                             <span class="icon">&#9888;&#65039;</span> 2 gaps flagged in acceptance criteria
@@ -133,16 +130,16 @@
                             <span class="icon">&#128203;</span> Generated 8 test cases
                         </div>
                         <div class="output-line fade-in-4">
-                            <span class="icon">&#127917;</span> Reviewing PR...
-                        </div>
-                        <div class="output-line fade-in-4">
-                            <span class="icon">&#127917;</span> Testing on staging...
-                        </div>
-                        <div class="output-line fade-in-5">
-                            <span class="icon">&#9989;</span> 7 passed <span class="warning">&bull; 2 bugs filed</span>
+                            <span class="icon">&#128064;</span> Reviewing PR...
                         </div>
                         <div class="output-line fade-in-6">
                             <span class="icon">&#128221;</span> QA review posted to PR
+                        </div>
+                        <div class="output-line fade-in-4">
+                            <span class="icon">&#129514;</span> Testing on staging...
+                        </div>
+                        <div class="output-line fade-in-5">
+                            <span class="icon">&#9989;</span> 7 passed <span class="warning">&bull; 2 bugs filed</span>
                         </div>
                         <div class="output-line fade-in-7">
                             <span class="icon">&#128640;</span> Release v2.4 &rarr; <span class="go-badge">Go</span>
@@ -154,11 +151,152 @@
     </div>
 </section>
 
+<!-- The Real Problem -->
+<section id="problem" class="why-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">The Real Problem</span>
+            <h2>Every Bug Is a Tax on Your Runway</h2>
+            <p>You have 12&ndash;18 months runway to find product-market fit and grow.</p>
+        </div>
+
+        <div class="runway-visual" aria-hidden="true">
+            <div class="runway-bar">
+                <span class="runway-segment runway-build" style="flex: 14;" title="14 months building &amp; iterating"></span>
+                <span class="runway-segment runway-lost" style="flex: 4;" title="4 months lost to bugs"></span>
+            </div>
+            <div class="runway-labels">
+                <span class="runway-label-build">14 mo building</span>
+                <span class="runway-label-lost">4 mo lost to bugs</span>
+            </div>
+            <p class="runway-caption">18 months runway &rarr; 30% engineer time on bugs = 4 months gone</p>
+        </div>
+
+        <div class="runway-math">
+            <p class="runway-math-intro">Let&rsquo;s do the math:</p>
+            <p class="runway-math-statement">If your engineers spend 30% of their time fixing bugs (staging + production) instead of building features or iterating on the product, you just lost <strong class="runway-highlight">4 months of runway</strong> to … rework (not iteration!).</p>
+        </div>
+
+        <div class="bug-costs">
+            <p class="bug-costs-intro">Every staging and production bug is:</p>
+            <ul class="bug-costs-list">
+                <li>Lower trust, NPS, and churn</li>
+                <li>Customer support time fielding complaints</li>
+                <li>Engineering time to debug, fix, and test</li>
+                <li>Designer time to rework broken UX</li>
+                <li>Product time to re-prioritize roadmap</li>
+                <li>Your time firefighting instead of building</li>
+            </ul>
+        </div>
+
+        <div class="why-ovi-job">
+            <p><strong>Bugs aren&rsquo;t just annoying. They&rsquo;re expensive.</strong></p>
+        </div>
+
+        <div class="process-compare">
+            <div class="process-column process-current">
+                <h3>Your Current Process</h3>
+                <ol class="process-steps">
+                    <li>Developer writes code &rarr; &ldquo;It works on my machine&rdquo;</li>
+                    <li>Basic Code review(AI + Human) -> LGTM</li>
+                    <li>Code merges, deploys to staging</li>
+                    <li>Some manual testing and a bugfix cycle</li>
+                    <li>Ships to production</li>
+                    <li>Users find real bugs</li>
+                    <li>Engineer context-switches to fix it</li>
+                    <li>Repeat forever</li>
+                </ol>
+            </div>
+            <div class="process-column process-ovi">
+                <h3>With Ovi</h3>
+                <ol class="process-steps">
+                    <li>Linear ticket for ACs and designs</li>
+                    <li>Ovi - Ticket Review: gaps, questions, test recipe</li>
+                    <li>Engineer writes code - clarity and support</li>
+                    <li>Ovi - PR Review: Bugs, Risks, Test cases</li>
+                    <li>Developer fixes it before merge</li>
+                    <li>Ovi tests in staging &amp; logs bugs</li>
+                    <li>Short bugfix cycle</li>
+                    <li>Ship clean</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section-cta" style="margin-top: 64px;">
+            <a href="#" class="btn-primary" data-ea-trigger>
+                <span>Join Waitlist</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section id="how-it-works" class="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Onboard Ovi Like a New Hire</span>
+            <h2>First Hour &mdash; Already Contributing.</h2>
+        </div>
+        
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Give Ovi Access to your tools</h3>
+                    <p>Ovi learns your codebase, and builds full context on your product. Set up in minutes, not days.</p>
+                    <div class="step-tools">
+                        <span class="tool-badge"><i class="fab fa-github"></i> GitHub</span>
+                        <span class="tool-badge"><svg class="tool-badge-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 100 100" aria-hidden="true"><path d="M1.22541 61.5228c-.2225-.9485.90748-1.5459 1.59638-.857L39.3342 97.1782c.6889.6889.0915 1.8189-.857 1.5964C20.0515 94.4522 5.54779 79.9485 1.22541 61.5228ZM.00189135 46.8891c-.01764375.2833.08887215.5599.28957165.7606L52.3503 99.7085c.2007.2007.4773.3075.7606.2896 2.3692-.1476 4.6938-.46 6.9624-.9259.7645-.157 1.0301-1.0963.4782-1.6481L2.57595 39.4485c-.55186-.5519-1.49117-.2863-1.648174.4782-.465915 2.2686-.77832 4.5932-.92588465 6.9624ZM4.21093 29.7054c-.16649.3738-.08169.8106.20765 1.1l64.77602 64.776c.2894.2894.7262.3742 1.1.2077 1.7861-.7956 3.5171-1.6927 5.1855-2.684.5521-.328.6373-1.0867.1832-1.5407L8.43566 24.3367c-.45409-.4541-1.21271-.3689-1.54074.1832-.99132 1.6684-1.88843 3.3994-2.68399 5.1855ZM12.6587 18.074c-.3701-.3701-.393-.9637-.0443-1.3541C21.7795 6.45931 35.1114 0 49.9519 0 77.5927 0 100 22.4073 100 50.0481c0 14.8405-6.4593 28.1724-16.7199 37.3375-.3903.3487-.984.3258-1.3542-.0443L12.6587 18.074Z"/></svg> Linear</span>
+                        <span class="tool-badge"><i class="fab fa-slack"></i> Slack</span>
+                        <span class="tool-badge"><i class="fab fa-figma"></i> Figma</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-connector">
+                <svg viewBox="0 0 24 80" fill="none">
+                    <path d="M12 0 L12 80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+                </svg>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Tag Ovi When Needed</h3>
+                    <p>Mention @ovi in Slack, tag on Linear issues, or in GitHub pull requests. Ovi lives in your workflow &mdash; one tag away.</p>
+                </div>
+            </div>
+            
+            <div class="step-connector">
+                <svg viewBox="0 0 24 80" fill="none">
+                    <path d="M12 0 L12 80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+                </svg>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Ovi Does the QA Work</h3>
+                    <p>Requirements reviewed. PRs analyzed. Staging tested. Bugs filed. Regressions automated. Release decision made. Every single day.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-cta">
+            <a href="#" class="btn-primary" data-ea-trigger>
+                <span>Join Waitlist</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
 <!-- What Ovi Does -->
 <section id="features" class="features">
     <div class="container">
         <div class="section-header">
-            <span class="section-tag">The Complete QA Engineer</span>
+            <span class="section-tag">The Complete AI-Powered QA Engineer</span>
             <h2>Everything a QA Engineer Does A-Z.</h2>
         </div>
         
@@ -206,130 +344,63 @@
     </div>
 </section>
 
-<!-- How It Works -->
-<section id="how-it-works" class="how-it-works">
+<!-- How It Looks Like -->
+<section id="how-it-looks" class="how-it-looks">
     <div class="container">
         <div class="section-header">
-            <span class="section-tag">Onboard Ovi Like a New Hire</span>
-            <h2>First Day. Already Contributing.</h2>
+            <span class="section-tag">See Ovi in Action</span>
+            <h2>How It Looks Like</h2>
+            <p>Ticket review, PR review, agentic testing, and more &mdash; in your tools.</p>
         </div>
         
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h3>Give Ovi Access</h3>
-                    <p>Connect your tools. Ovi learns your codebase, indexes your repo, and builds full context on your product. Set up in minutes, not days.</p>
-                    <div class="step-tools">
-                        <span class="tool-badge"><i class="fab fa-github"></i> GitHub</span>
-                        <span class="tool-badge">Linear</span>
-                        <span class="tool-badge"><i class="fab fa-slack"></i> Slack</span>
+        <div class="looks-grid">
+            <div class="looks-card">
+                <div class="looks-image">
+                    <img src="/images/landing/ticket-review.png" alt="Ovi reviewing a Linear ticket: requirements, acceptance criteria, and test cases" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
+                    <div class="looks-placeholder">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Ticket / requirements review</span>
                     </div>
                 </div>
+                <h3>Ticket &amp; Requirements Review</h3>
+                <p>Pulse, affected areas, risk, recommendations, and test recipe before dev.</p>
             </div>
             
-            <div class="step-connector">
-                <svg viewBox="0 0 24 80" fill="none">
-                    <path d="M12 0 L12 80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
-                </svg>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h3>Tag Ovi Where You Need Quality</h3>
-                    <p>Mention @ovi in Slack, tag on Linear issues, or let Ovi watch your GitHub repos. Ovi joins your workflow &mdash; you don&rsquo;t change yours.</p>
+            <div class="looks-card">
+                <div class="looks-image">
+                    <img src="/images/landing/pr-review.png" alt="Ovi PR review comment on GitHub with risks and test cases" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
+                    <div class="looks-placeholder">
+                        <i class="fas fa-code-pull-request"></i>
+                        <span>PR review (QA lens)</span>
+                    </div>
                 </div>
+                <h3>PR Review</h3>
+                <p>Risks, edge cases, and test cases for the author and reviewers.</p>
             </div>
             
-            <div class="step-connector">
-                <svg viewBox="0 0 24 80" fill="none">
-                    <path d="M12 0 L12 80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
-                </svg>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h3>Ovi Does the QA Work</h3>
-                    <p>Requirements reviewed. PRs analyzed. Staging tested. Bugs filed. Regressions automated. Release decision made. Every sprint, every day.</p>
+            <div class="looks-card">
+                <div class="looks-image">
+                    <img src="/images/landing/agentic-testing.png" alt="Ovi running tests in the browser with step-by-step execution" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
+                    <div class="looks-placeholder">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Agentic testing in browser</span>
+                    </div>
                 </div>
+                <h3>Agentic Testing</h3>
+                <p>Test cases executed in the browser, and bugs filed with repro steps.</p>
             </div>
-        </div>
-
-        <div class="section-cta">
-            <a href="#" class="btn-primary" data-ea-trigger>
-                <span>Get Early Access</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Why Section -->
-<section class="why-section">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">The Real Problem</span>
-            <h2>Every Bug Is a Tax on Your Runway</h2>
-            <p>You raised $1M. That&rsquo;s 12&ndash;18 months to find product-market fit.</p>
-        </div>
-
-        <div class="runway-math">
-            <p class="runway-math-intro">Let&rsquo;s do the math:</p>
-            <p class="runway-math-statement">If your engineers spend 30% of their time fixing bugs(staging + production) instead of building features or iterating on the product, you just lost <strong class="runway-highlight">4 months of runway</strong> to lack of testing. Not to reduced velocity. To rework.</p>
-        </div>
-
-        <div class="bug-costs">
-            <p class="bug-costs-intro">Every staging and production bug is:</p>
-            <ul class="bug-costs-list">
-                <li>Engineering time to debug, fix, and test</li>
-                <li>Designer time to rework broken UX</li>
-                <li>Product time to re-prioritize roadmap</li>
-                <li>Customer support time fielding complaints</li>
-                <li>Your time firefighting instead of fundraising</li>
-            </ul>
-        </div>
-
-        <div class="why-ovi-job">
-            <p><strong>Bugs aren&rsquo;t just annoying. They&rsquo;re expensive.</strong></p>
-        </div>
-
-        <div class="process-compare">
-            <div class="process-column process-current">
-                <h3>Your Current Process</h3>
-                <ol class="process-steps">
-                    <li>Developer writes code &rarr; &ldquo;It works on my machine&rdquo;</li>
-                    <li>PR review(including QA-powered) focuses on basic logic and architecture</li>
-                    <li>Code merges, deploys to staging</li>
-                    <li>Some manual testing and a long bugfix cycle</li>
-                    <li>Ships to production</li>
-                    <li>Users finds bugs</li>
-                    <li>Engineer context-switches to fix it</li>
-                    <li>Repeat</li>
-                </ol>
+            
+            <div class="looks-card">
+                <div class="looks-image">
+                    <img src="/images/landing/test-automation.png" alt="Playwright test code and run results" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
+                    <div class="looks-placeholder">
+                        <i class="fas fa-robot"></i>
+                        <span>Test automation</span>
+                    </div>
+                </div>
+                <h3>Test Automation</h3>
+                <p>Generates Playwright tests and keeps them up to date.</p>
             </div>
-            <div class="process-column process-ovi">
-                <h3>With Ovi</h3>
-                <ol class="process-steps">
-                    <li>Product creates requirements and ACs</li>
-                    <li>Designs are being created</li>
-                    <li>Ovi reviews requirements and designs and finds gaps, asks questions, writes test cases</li>
-                    <li>Developer writes code</li>
-                    <li>Ovi reviews PR: &ldquo;This will break if user does X&rdquo; and offers test cases to engineers</li>
-                    <li>Developer fixes it before merge</li>
-                    <li>Ovi tests in staging & logs bugs</li>
-                    <li>Features ship clean</li>
-                    <li>Engineers keep building</li>
-                </ol>
-            </div>
-        </div>
-
-        <div class="section-cta" style="margin-top: 64px;">
-            <a href="#" class="btn-primary" data-ea-trigger>
-                <span>Get Early Access</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
         </div>
     </div>
 </section>
@@ -342,21 +413,22 @@
                 <i class="fas fa-user-check"></i>
             </div>
             <div class="human-qa-content">
-                <span class="human-qa-tag">When You Need Human Expertise</span>
-                <h3>On-Demand Human QA</h3>
+                <span class="human-qa-tag">When Ovi Isn&rsquo;t Enough</span>
+                <h3>Senior Human QA When It Matters</h3>
                 <p>
-                    Ovi covers day-to-day QA. But for complex exploratory testing, UX deep dives, 
-                    or pre-launch audits &mdash; FirstQA provides senior human QA engineers on demand. 
-                    No contracts, no commitments. They work alongside Ovi.
+                    Ovi handles the daily grind. For high-stakes releases, complex flows, or 
+                    building the QA strategy; &mdash; get senior human QA on demand. 
+                    No hiring. No long-term commitments; they slot in alongside Ovi.
                 </p>
                 <ul class="human-qa-list">
                     <li><i class="fas fa-check"></i> Exploratory testing before major releases</li>
-                    <li><i class="fas fa-check"></i> Complex user flows that need human intuition</li>
-                    <li><i class="fas fa-check"></i> Security &amp; edge case deep dives</li>
-                    <li><i class="fas fa-check"></i> Seamlessly complements Ovi&rsquo;s coverage</li>
+                    <li><i class="fas fa-check"></i> Human judgment over agentic testing on every major change</li>
+                    <li><i class="fas fa-check"></i> Pre-launch audits and go/no-go confidence</li>
+                    <li><i class="fas fa-check"></i> QA strategy and in-the-loop QA</li>
+                    <li><i class="fas fa-check"></i> Pay per engagement &mdash; scale up when it matters</li>
                 </ul>
                 <a href="https://calendly.com/firstqa/demo" class="btn-human-qa" target="_blank">
-                    <span>Talk to Us About Human QA</span>
+                    <span>Get Human QA Backup</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -369,9 +441,9 @@
     <div class="container">
         <div class="bottom-cta-content">
             <h2>Ready to Give Your Team a QA Engineer?</h2>
-            <p>Join early access and bring Ovi onto your team today.</p>
+            <p>Join the waitlist and bring Ovi onto your team today.</p>
             <a href="#" class="btn-primary btn-large" data-ea-trigger>
-                <span>Get Early Access</span>
+                <span>Join Waitlist</span>
                 <i class="fas fa-arrow-right"></i>
             </a>
         </div>
@@ -401,8 +473,10 @@
             <div class="footer-links">
                 <div class="footer-col">
                     <h4>Product</h4>
-                    <a href="#features">What Ovi Does</a>
+                    <a href="#problem">The Problem</a>
                     <a href="#how-it-works">How It Works</a>
+                    <a href="#features">What Ovi Does</a>
+                    <a href="#how-it-looks">See It</a>
                     <a href="/docs">Documentation</a>
                 </div>
                 <div class="footer-col">
@@ -1080,6 +1154,86 @@ body {
 }
 
 /* ============================================
+   How It Looks Like
+   ============================================ */
+.how-it-looks {
+    padding: 120px 0;
+    background: var(--bg-dark);
+    border-top: 1px solid var(--border);
+}
+
+.looks-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    margin-top: 48px;
+}
+
+.looks-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.looks-card:hover {
+    border-color: rgba(34, 211, 238, 0.35);
+    box-shadow: 0 12px 40px rgba(34, 211, 238, 0.08);
+}
+
+.looks-image {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--bg-elevated);
+}
+
+.looks-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.looks-placeholder {
+    display: none;
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.looks-placeholder.visible {
+    display: flex;
+}
+
+.looks-placeholder i {
+    font-size: 48px;
+    color: var(--accent);
+    opacity: 0.7;
+}
+
+.looks-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 20px 24px 8px;
+    color: var(--text-primary);
+}
+
+.looks-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 24px 24px;
+}
+
+/* ============================================
    How It Works
    ============================================ */
 .how-it-works {
@@ -1143,6 +1297,11 @@ body {
     color: var(--text-secondary);
 }
 
+.tool-badge .tool-badge-icon,
+.tool-badge svg {
+    flex-shrink: 0;
+}
+
 .tool-badge:hover {
     color: var(--text-primary);
     border-color: var(--text-muted);
@@ -1177,6 +1336,48 @@ body {
 
 .why-section .section-header p {
     max-width: 560px;
+}
+
+.runway-visual {
+    max-width: 560px;
+    margin: 0 auto 40px;
+}
+
+.runway-bar {
+    display: flex;
+    height: 48px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.runway-segment {
+    min-width: 0;
+}
+
+.runway-segment.runway-build {
+    background: linear-gradient(135deg, var(--accent) 0%, rgba(34, 211, 238, 0.6) 100%);
+}
+
+.runway-segment.runway-lost {
+    background: linear-gradient(135deg, var(--danger) 0%, rgba(239, 68, 68, 0.7) 100%);
+}
+
+.runway-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.runway-caption {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 0;
 }
 
 .runway-math {
@@ -1759,6 +1960,10 @@ body {
     .process-compare {
         grid-template-columns: 1fr;
     }
+
+    .looks-grid {
+        grid-template-columns: 1fr;
+    }
     
     .footer-main {
         grid-template-columns: 1fr;
@@ -1840,6 +2045,15 @@ body {
 // Modal functionality
 const modal = document.getElementById('ea-modal');
 const modalClose = document.getElementById('modal-close');
+
+// Ovi tag count (times /qa used in PRs & tickets)
+fetch('/api/stats/ovi-tag-count')
+  .then(function(r) { return r.ok ? r.json() : null; })
+  .then(function(data) {
+    var el = document.getElementById('ovi-tag-count');
+    if (el && data && typeof data.count === 'number') el.textContent = data.count;
+  })
+  .catch(function() {});
 
 document.querySelectorAll('[data-ea-trigger]').forEach(btn => {
     btn.addEventListener('click', (e) => {

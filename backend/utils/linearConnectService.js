@@ -202,6 +202,11 @@ async function processLinearWebhook(payload, installation) {
     }
     markProcessed(issueId, commentId);
 
+    try {
+      const oviTagCount = require('./oviTagCount');
+      oviTagCount.increment();
+    } catch (e) { /* non-fatal */ }
+
     const { getUserIdFromLinearOrg, userHasAnyProductKnowledge, indexAllUserRepos, extractReposFromTicketContent } = require('../services/knowledgeBase/firstTimeIndexTrigger');
     const orgId = installation.organization_id;
     const userId = await getUserIdFromLinearOrg(orgId);

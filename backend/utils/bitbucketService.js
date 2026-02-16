@@ -421,12 +421,15 @@ async function processWebhookEvent(event) {
         const installation = bitbucketAppAuth.getInstallation(workspace);
         if (!installation) {
           console.error(`No Bitbucket installation found for workspace: ${workspace}`);
-          return { 
-            success: false, 
-            message: `FirstQA is not installed for this workspace. Please install at: ${process.env.BASE_URL || 'https://firstqa.dev'}/bitbucket/install` 
-          };
+return { 
+          success: false, 
+          message: `FirstQA is not installed for this workspace. Please install at: ${process.env.BASE_URL || 'https://firstqa.dev'}/bitbucket/install` 
+        };
         }
-        
+        try {
+          const oviTagCount = require('./oviTagCount');
+          oviTagCount.increment();
+        } catch (e) { /* non-fatal */ }
         return await handleTestRequest(workspace, repoSlug, prId, comment, actor);
       }
     }

@@ -148,6 +148,17 @@ app.post('/api/customers', (req, res) => {
   }
 });
 
+// Public stats for landing page (Ovi tag count = /qa uses in PRs & tickets)
+const oviTagCount = require('./backend/utils/oviTagCount');
+app.get('/api/stats/ovi-tag-count', (req, res) => {
+  try {
+    const count = oviTagCount.getCount();
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get count', count: 182 });
+  }
+});
+
 app.use('/admin', adminRoutes);
 app.use('/stripe', stripeRoutes);
 
