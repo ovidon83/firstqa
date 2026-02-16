@@ -72,6 +72,10 @@ Description: <%= body %>
 **AUTOMATION SELECTORS (use these in test steps when applicable - enables Playwright/automation):**
 <%= selectorHintsFormatted %>
 <% } %>
+<% if (typeof flowContextFormatted !== 'undefined' && flowContextFormatted) { %>
+**FLOW DISCOVERY (extracted from code — use for test recipe accuracy):**
+<%= flowContextFormatted %>
+<% } %>
 <% if (typeof fileContentsForPrompt !== 'undefined' && fileContentsForPrompt) { %>
 **FULL FILE CONTENTS (key changed files - use for exact UI elements, component structure, strings):**
 <%= fileContentsForPrompt %>
@@ -125,6 +129,9 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 <% } %>
   - Use exact UI names/labels from code. When AUTOMATION SELECTORS exist above, include them: `(data-testid="value")` in parentheses after the human-readable action.
   - Format steps with `<br>` between each: `1. Navigate to ActView (or /act-view)<br>2. Click "Mark as Shared" button (data-testid="mark-shared-btn")<br>3. Verify that the text "Marked as shared! ✔" appears`
+<% if (typeof flowDiscoveryRules !== 'undefined' && flowDiscoveryRules) { %>
+<%= flowDiscoveryRules %>
+<% } %>
 - **EXPECTED RESULT**: Specific, observable outcomes. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
 - **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)

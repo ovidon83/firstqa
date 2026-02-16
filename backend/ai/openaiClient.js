@@ -92,6 +92,21 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         console.warn('Product context retrieval failed (degrading gracefully):', pkErr.message);
       }
     }
+
+    // Flow discovery: extract routes, UI elements, messages, APIs from file contents for accurate test recipes
+    let flowContextFormatted = null;
+    if (Object.keys(fileContents).length > 0) {
+      try {
+        const { discoverFlows, formatFlowContextForPrompt } = require('./flowDiscovery');
+        const flowContext = discoverFlows(fileContents, selectorHints);
+        flowContextFormatted = formatFlowContextForPrompt(flowContext);
+        if (flowContextFormatted) {
+          console.log(`📍 Flow discovery: routes=${flowContext.routes?.length || 0}, UI=${flowContext.uiElements?.length || 0}, APIs=${flowContext.apiEndpoints?.length || 0}, selectors=${flowContext.selectors?.length || 0}`);
+        }
+      } catch (fdErr) {
+        console.warn('Flow discovery failed (degrading gracefully):', fdErr.message);
+      }
+    }
     
     // Validate that we have real PR data, not simulated/fake data
     const isSimulatedData = diff && (
@@ -195,7 +210,9 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         newCommitsCount: isUpdateAnalysis && newCommits ? newCommits.length : 0,
         selectorHintsFormatted: selectorHintsFormatted || 'None extracted.',
         fileContentsForPrompt: fileContentsForPrompt || '',
-        testRecipeRules
+        testRecipeRules,
+        flowContextFormatted: flowContextFormatted || '',
+        flowDiscoveryRules: flowContextFormatted ? require('./prompts/flow-discovery-rules') : ''
       });
     } else if (fs.existsSync(deepPromptTemplatePath)) {
       console.log('✅ Using deep analysis template for comprehensive code review');
