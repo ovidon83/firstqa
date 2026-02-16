@@ -30,6 +30,7 @@ const linearRoutes = require('./backend/routes/linear');
 const linearConnectRoutes = require('./backend/routes/linearConnect');
 const authRoutes = require('./backend/routes/auth');
 const dashboardRoutes = require('./backend/routes/dashboard');
+const discoveryInterviewRoutes = require('./backend/routes/discoveryInterview');
 // customerRoutes will be imported AFTER directory fix
 
 // Create Express app
@@ -107,6 +108,8 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// Discovery interview (Launch Partner) - mount before index so /discovery-interview is matched
+app.use('/', discoveryInterviewRoutes);
 // Use the index routes
 app.use('/', indexRoutes);
 app.use('/docs', docsRoutes);

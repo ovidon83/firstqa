@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Become a Launch Partner - FirstQA' %></title>
+  <meta name="description" content="Help shape the future of QA for startups. Try FirstQA free for 3 months, give feedback, get 50% off for life.">
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --fqa-primary: #0d9488;
+      --fqa-primary-dark: #0f766e;
+      --fqa-accent: #059669;
+      --fqa-card-bg: #ffffff;
+      --fqa-body-bg: #f8fafc;
+      --fqa-text: #1e293b;
+      --fqa-text-muted: #64748b;
+      --fqa-border: #e2e8f0;
+      --fqa-max-width: 640px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      background: var(--fqa-body-bg);
+      color: var(--fqa-text);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .di-wrap {
+      max-width: var(--fqa-max-width);
+      margin: 0 auto;
+      padding: 1.5rem;
+      padding-bottom: 3rem;
+    }
+    .di-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--fqa-text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.125rem;
+      margin-bottom: 2rem;
+    }
+    .di-logo svg { flex-shrink: 0; }
+    .di-card {
+      background: var(--fqa-card-bg);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .di-hero h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+    .di-hero .sub {
+      color: var(--fqa-text-muted);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .di-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    .di-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--fqa-primary);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background .2s, transform .05s;
+    }
+    .di-cta:hover { background: var(--fqa-primary-dark); color: #fff; }
+    .di-cta:active { transform: scale(0.98); }
+    .di-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .di-feature {
+      text-align: center;
+      padding: 1rem 0.5rem;
+    }
+    .di-feature i {
+      font-size: 1.5rem;
+      color: var(--fqa-primary);
+      margin-bottom: 0.5rem;
+    }
+    .di-feature span { font-size: 0.875rem; font-weight: 500; }
+    /* Progress */
+    .di-progress-wrap {
+      margin-bottom: 1.5rem;
+    }
+    .di-progress-bar {
+      height: 6px;
+      background: var(--fqa-border);
+      border-radius: 999px;
+      overflow: hidden;
+      transition: width .3s ease;
+    }
+    .di-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--fqa-primary), var(--fqa-accent));
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+    .di-progress-label {
+      font-size: 0.8125rem;
+      color: var(--fqa-text-muted);
+      margin-top: 0.5rem;
+    }
+    /* Steps */
+    .di-step { display: none; }
+    .di-step.active {
+      display: block;
+      animation: di-fadeIn .3s ease;
+    }
+    @keyframes di-fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .di-step h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .di-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .di-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--fqa-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      text-align: left;
+    }
+    .di-option:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .di-option.selected { border-color: var(--fqa-primary); background: #f0fdfa; }
+    .di-option input { margin-top: 2px; }
+    .di-option .emoji { font-size: 1.25rem; }
+    .di-form-group { margin-bottom: 1rem; }
+    .di-form-group label { font-weight: 500; margin-bottom: 0.35rem; display: block; font-size: 0.9375rem; }
+    .di-form-group input,
+    .di-form-group select,
+    .di-form-group textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--fqa-border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    .di-form-group input:focus,
+    .di-form-group select:focus,
+    .di-form-group textarea:focus {
+      outline: none;
+      border-color: var(--fqa-primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, .15);
+    }
+    .di-form-group .invalid { border-color: #dc2626; }
+    .di-form-group .error-msg { font-size: 0.8125rem; color: #dc2626; margin-top: 0.25rem; }
+    .di-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .di-btn-back {
+      background: transparent;
+      color: var(--fqa-text-muted);
+      border: 1px solid var(--fqa-border);
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .di-btn-back:hover { background: #f1f5f9; color: var(--fqa-text); }
+    .di-video-wrap {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #0f172a;
+      margin-bottom: 1rem;
+    }
+    .di-video-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+    .di-commit-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem 0;
+    }
+    .di-commit-list li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    .di-commit-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--fqa-primary);
+      font-weight: 700;
+    }
+    .di-meeting-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .di-meeting-btns button {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--fqa-border);
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9375rem;
+      transition: all .2s;
+    }
+    .di-meeting-btns button:hover { border-color: #cbd5e1; }
+    .di-meeting-btns button.selected { border-color: var(--fqa-primary); background: #f0fdfa; }
+    .di-privacy { font-size: 0.8125rem; color: var(--fqa-text-muted); margin-top: 1rem; }
+    /* Thank you */
+    .di-thankyou { display: none; }
+    .di-thankyou.active { display: block; animation: di-fadeIn .4s ease; }
+    .di-thankyou h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .di-thankyou p { color: var(--fqa-text-muted); margin-bottom: 1rem; line-height: 1.5; }
+    .di-thankyou .ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .di-thankyou .footer { font-size: 0.875rem; color: var(--fqa-text-muted); }
+    .di-thankyou .footer a { color: var(--fqa-primary); }
+    .di-screenshots {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .di-screenshots img {
+      height: 140px;
+      width: auto;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .di-view-landing { display: block; }
+    .di-view-form { display: none; }
+    .di-view-form.active { display: block; }
+    .di-view-thankyou { display: none; }
+    .di-view-thankyou.active { display: block; }
+    @media (max-width: 480px) {
+      .di-features { grid-template-columns: 1fr; }
+      .di-card { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="di-wrap">
+    <a href="/" class="di-logo">
+      <svg width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="diLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0d9488" />
+            <stop offset="100%" style="stop-color:#059669" />
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="14" fill="url(#diLogoGrad)"/>
+        <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      FirstQA
+    </a>
+
+    <!-- Landing -->
+    <div id="di-view-landing" class="di-view-landing">
+      <div class="di-card di-hero">
+        <h1>Become a FirstQA Launch Partner</h1>
+        <p class="sub">Help shape the future of QA for startups. Try FirstQA free for 3 months, give us feedback, get 50% off for life.</p>
+        <span class="di-badge">Only 5 spots available</span>
+        <br>
+        <button type="button" class="di-cta" id="di-start-btn">
+          Start Application <i class="bi bi-arrow-right"></i>
+        </button>
+        <div class="di-features">
+          <div class="di-feature">
+            <i class="bi bi-gift"></i>
+            <br><span>Free for 3 Months</span>
+          </div>
+          <div class="di-feature">
+            <i class="bi bi-chat-dots"></i>
+            <br><span>Weekly Feedback</span>
+          </div>
+          <div class="di-feature">
+            <i class="bi bi-patch-check"></i>
+            <br><span>50% Off Forever</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form (steps) -->
+    <div id="di-view-form" class="di-view-form">
+      <div class="di-progress-wrap">
+        <div class="di-progress-bar">
+          <div class="di-progress-fill" id="di-progress-fill" style="width: 16.66%;"></div>
+        </div>
+        <div class="di-progress-label" id="di-progress-label">Step 1 of 6</div>
+      </div>
+
+      <form id="di-form" class="di-card">
+        <!-- Step 1 -->
+        <div class="di-step active" data-step="1">
+          <h2>How does your team currently handle QA/testing?</h2>
+          <div class="di-options" data-name="qa_process">
+            <label class="di-option" data-value="Developers test their own code"><input type="radio" name="qa_process" value="Developers test their own code"> Developers test their own code</label>
+            <label class="di-option" data-value="We have a dedicated QA person/team"><input type="radio" name="qa_process" value="We have a dedicated QA person/team"> We have a dedicated QA person/team</label>
+            <label class="di-option" data-value="We use automated testing tools (Cypress, Playwright, etc.)"><input type="radio" name="qa_process" value="We use automated testing tools (Cypress, Playwright, etc.)"> We use automated testing tools (Cypress, Playwright, etc.)</label>
+            <label class="di-option" data-value="We don't really test systematically"><input type="radio" name="qa_process" value="We don't really test systematically"> We don't really test systematically</label>
+            <label class="di-option" data-value="Other"><input type="radio" name="qa_process" value="Other"> Other</label>
+          </div>
+          <div class="di-form-group" id="di-qa-other-wrap" style="display:none;">
+            <label for="qa_process_other">Please specify</label>
+            <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="di-step" data-step="2">
+          <h2>Roughly what % of your sprint capacity goes to bug fixes vs building new features?</h2>
+          <div class="di-options" data-name="bug_fix_percentage">
+            <label class="di-option" data-value="0-10% (We rarely have bugs)"><input type="radio" name="bug_fix_percentage" value="0-10% (We rarely have bugs)"> <span class="emoji">😊</span> 0-10% (We rarely have bugs)</label>
+            <label class="di-option" data-value="10-25%"><input type="radio" name="bug_fix_percentage" value="10-25%"> <span class="emoji">😐</span> 10-25%</label>
+            <label class="di-option" data-value="25-40%"><input type="radio" name="bug_fix_percentage" value="25-40%"> <span class="emoji">😓</span> 25-40%</label>
+            <label class="di-option" data-value="40%+ (It's a constant firefight)"><input type="radio" name="bug_fix_percentage" value="40%+ (It's a constant firefight)"> <span class="emoji">🔥</span> 40%+ (It's a constant firefight)</label>
+            <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="di-step" data-step="3">
+          <h2>Here's how FirstQA works:</h2>
+          <div class="di-video-wrap">
+            <!-- Replace src with your Loom embed URL (e.g. https://www.loom.com/embed/xxx) or YouTube: https://www.youtube.com/embed/VIDEO_ID -->
+            <iframe src="https://www.loom.com/embed/placeholder" title="FirstQA demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <p class="mb-3">Would something like this help your team ship faster?</p>
+          <div class="di-options" data-name="solution_interest">
+            <label class="di-option" data-value="Yes, this would be game-changing"><input type="radio" name="solution_interest" value="Yes, this would be game-changing"> Yes, this would be game-changing</label>
+            <label class="di-option" data-value="Maybe, depends on how well it works"><input type="radio" name="solution_interest" value="Maybe, depends on how well it works"> Maybe, depends on how well it works</label>
+            <label class="di-option" data-value="No, we're good with our current process"><input type="radio" name="solution_interest" value="No, we're good with our current process"> No, we're good with our current process</label>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="di-step" data-step="4">
+          <h2>As a Launch Partner, you'd get FirstQA free for 3 months. In exchange, we need:</h2>
+          <ul class="di-commit-list">
+            <li>Weekly 15-min feedback calls (or async form)</li>
+            <li>Permission to share your results (can be anonymous)</li>
+            <li>Honest feedback on what works and doesn't</li>
+          </ul>
+          <p><strong>Can you commit to this?</strong></p>
+          <div class="di-options" data-name="commitment_level">
+            <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
+            <label class="di-option" data-value="Maybe, need to discuss with my team first"><input type="radio" name="commitment_level" value="Maybe, need to discuss with my team first"> Maybe, need to discuss with my team first</label>
+            <label class="di-option" data-value="No, too much commitment right now"><input type="radio" name="commitment_level" value="No, too much commitment right now"> No, too much commitment right now</label>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="di-step" data-step="5">
+          <h2>Tell us about your startup:</h2>
+          <div class="di-form-group">
+            <label for="company_name">Company name *</label>
+            <input type="text" id="company_name" name="company_name" required placeholder="Your company">
+            <span class="error-msg" data-for="company_name"></span>
+          </div>
+          <div class="di-form-group">
+            <label for="role">Your role *</label>
+            <input type="text" id="role" name="role" required placeholder="e.g., CTO, VP Engineering">
+            <span class="error-msg" data-for="role"></span>
+          </div>
+          <div class="di-form-group">
+            <label for="team_size">Team size *</label>
+            <select id="team_size" name="team_size" required>
+              <option value="">Select...</option>
+              <option value="1-5">1-5</option>
+              <option value="6-10">6-10</option>
+              <option value="11-25">11-25</option>
+              <option value="26-50">26-50</option>
+              <option value="51+">51+</option>
+            </select>
+            <span class="error-msg" data-for="team_size"></span>
+          </div>
+          <div class="di-form-group">
+            <label for="tech_stack">Tech stack *</label>
+            <input type="text" id="tech_stack" name="tech_stack" required placeholder="e.g., React, Node.js, Python">
+            <span class="error-msg" data-for="tech_stack"></span>
+          </div>
+          <div class="di-form-group">
+            <label for="start_timeline">When could you start testing? *</label>
+            <select id="start_timeline" name="start_timeline" required>
+              <option value="">Select...</option>
+              <option value="This week">This week</option>
+              <option value="Next week">Next week</option>
+              <option value="2-4 weeks">2-4 weeks</option>
+              <option value="Not sure yet">Not sure yet</option>
+            </select>
+            <span class="error-msg" data-for="start_timeline"></span>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="di-step" data-step="6">
+          <h2>How can we reach you?</h2>
+          <div class="di-form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required placeholder="you@company.com">
+            <span class="error-msg" data-for="email"></span>
+          </div>
+          <div class="di-form-group">
+            <label for="linkedin_url">LinkedIn URL (optional)</label>
+            <input type="url" id="linkedin_url" name="linkedin_url" placeholder="https://linkedin.com/in/...">
+            <span class="error-msg" data-for="linkedin_url"></span>
+          </div>
+          <div class="di-form-group">
+            <label>Preferred meeting tool (optional)</label>
+            <div class="di-meeting-btns" data-name="meeting_tool">
+              <button type="button" data-value="Zoom">Zoom</button>
+              <button type="button" data-value="Google Meet">Google Meet</button>
+              <button type="button" data-value="Other">Other</button>
+            </div>
+            <input type="hidden" name="meeting_tool" id="meeting_tool" value="">
+          </div>
+          <div class="di-form-group">
+            <label for="additional_notes">Anything else we should know? (optional, max 500 chars)</label>
+            <textarea id="additional_notes" name="additional_notes" rows="3" maxlength="500" placeholder="..."></textarea>
+            <span class="error-msg" data-for="additional_notes"></span>
+          </div>
+          <p class="di-privacy">We'll never share your information. <a href="/privacy" target="_blank">Read our privacy policy</a>.</p>
+        </div>
+
+        <div class="di-buttons">
+          <button type="button" class="di-btn-back" id="di-back-btn" style="visibility: hidden;">Back</button>
+          <button type="button" class="di-cta" id="di-next-btn">Next</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Thank you: qualified -->
+    <div id="di-view-thankyou-qualified" class="di-view-thankyou di-card">
+      <h2>Application Submitted!</h2>
+      <p id="di-thankyou-message-qualified">Thanks! We'll review your application and get back to you within 2 business days.</p>
+      <div class="ctas">
+        <a href="/#subscribe" class="di-cta" style="text-decoration:none;">Join waitlist</a>
+        <a href="https://calendly.com/firstqa/demo" class="di-cta" style="text-decoration:none; background: var(--fqa-primary-dark);" target="_blank" rel="noopener">Book a call</a>
+      </div>
+      <p class="footer">Questions? Email <a href="mailto:ovi@firstqa.dev">ovi@firstqa.dev</a></p>
+      <div class="di-screenshots" id="di-screenshots-qualified">
+        <!-- Optional: add screenshot carousel via JS or static imgs -->
+      </div>
+    </div>
+
+    <!-- Thank you: disqualified -->
+    <div id="di-view-thankyou-disqualified" class="di-view-thankyou di-card">
+      <h2>Thanks for your interest!</h2>
+      <p>Based on your responses, FirstQA might not be the perfect fit right now. But we'd love to keep you in the loop!</p>
+      <div class="ctas">
+        <a href="/#subscribe" class="di-cta" style="text-decoration:none;">Join waitlist</a>
+      </div>
+      <p class="footer">Questions? Email <a href="mailto:ovi@firstqa.dev">ovi@firstqa.dev</a></p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- Optional: define window.diTrackStep = function(step) { ... } for Vercel Analytics / PostHog -->
+  <script>
+    (function() {
+      const STORAGE_KEY = 'firstqa_discovery_interview';
+      const TOTAL_STEPS = 6;
+
+      const viewLanding = document.getElementById('di-view-landing');
+      const viewForm = document.getElementById('di-view-form');
+      const viewThankyouQualified = document.getElementById('di-view-thankyou-qualified');
+      const viewThankyouDisqualified = document.getElementById('di-view-thankyou-disqualified');
+      const form = document.getElementById('di-form');
+      const progressFill = document.getElementById('di-progress-fill');
+      const progressLabel = document.getElementById('di-progress-label');
+      const backBtn = document.getElementById('di-back-btn');
+      const nextBtn = document.getElementById('di-next-btn');
+      const startBtn = document.getElementById('di-start-btn');
+
+      let currentStep = 1;
+      let state = {};
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) state = JSON.parse(raw);
+        } catch (_) {}
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (_) {}
+      }
+
+      function clearState() {
+        state = {};
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      }
+
+      function collectState() {
+        const fd = new FormData(form);
+        for (const [k, v] of fd) if (v) state[k] = v;
+        state.meeting_tool = document.getElementById('meeting_tool').value || state.meeting_tool;
+        state.qa_process_other = document.getElementById('qa_process_other').value || state.qa_process_other;
+        saveState();
+      }
+
+      function applyState() {
+        Object.keys(state).forEach(function(key) {
+          const input = form.querySelector('[name="' + key + '"]');
+          if (!input) return;
+          if (input.type === 'radio') {
+            const opt = form.querySelector('[name="' + key + '"][value="' + state[key] + '"]');
+            if (opt) { opt.checked = true; opt.closest('.di-option').classList.add('selected'); }
+          } else {
+            input.value = state[key] || '';
+          }
+        });
+        const mt = document.querySelector('.di-meeting-btns button[data-value="' + (state.meeting_tool || '') + '"]');
+        if (mt) { mt.classList.add('selected'); document.getElementById('meeting_tool').value = state.meeting_tool || ''; }
+        const qaOther = document.getElementById('qa_process_other');
+        const otherWrap = document.getElementById('di-qa-other-wrap');
+        if (state.qa_process === 'Other') { otherWrap.style.display = 'block'; if (qaOther) qaOther.value = state.qa_process_other || ''; }
+      }
+
+      function showStep(step) {
+        currentStep = step;
+        form.querySelectorAll('.di-step').forEach(function(el) {
+          el.classList.toggle('active', parseInt(el.getAttribute('data-step'), 10) === step);
+        });
+        progressFill.style.width = (step / TOTAL_STEPS * 100) + '%';
+        progressLabel.textContent = 'Step ' + step + ' of ' + TOTAL_STEPS;
+        backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+        nextBtn.textContent = step === TOTAL_STEPS ? 'Submit' : 'Next';
+        nextBtn.type = step === TOTAL_STEPS ? 'submit' : 'button';
+        state.currentStep = step;
+        saveState();
+        if (typeof window.diTrackStep === 'function') window.diTrackStep(step);
+      }
+
+      function validateStep(step) {
+        form.querySelectorAll('.di-form-group .invalid').forEach(function(el) { el.classList.remove('invalid'); });
+        form.querySelectorAll('.error-msg').forEach(function(el) { el.textContent = ''; });
+        if (step === 1) {
+          const qa = form.querySelector('[name="qa_process"]:checked');
+          if (!qa) return false;
+          const otherWrap = document.getElementById('di-qa-other-wrap');
+          if (qa.value === 'Other') {
+            otherWrap.style.display = 'block';
+            const other = document.getElementById('qa_process_other');
+            if (!other || !other.value.trim()) { other.classList.add('invalid'); return false; }
+          }
+          return true;
+        }
+        if (step === 2) return !!form.querySelector('[name="bug_fix_percentage"]:checked');
+        if (step === 3) return !!form.querySelector('[name="solution_interest"]:checked');
+        if (step === 4) return !!form.querySelector('[name="commitment_level"]:checked');
+        if (step === 5) {
+          let ok = true;
+          ['company_name','role','team_size','tech_stack','start_timeline'].forEach(function(name) {
+            const el = form.querySelector('[name="' + name + '"]');
+            const err = form.querySelector('.error-msg[data-for="' + name + '"]');
+            if (!el || !el.value.trim()) { if (el) el.classList.add('invalid'); if (err) err.textContent = 'This field is required'; ok = false; }
+          });
+          return ok;
+        }
+        if (step === 6) {
+          let ok = true;
+          const emailEl = form.querySelector('[name="email"]');
+          const emailErr = form.querySelector('.error-msg[data-for="email"]');
+          if (!emailEl || !emailEl.value.trim()) { if (emailEl) emailEl.classList.add('invalid'); if (emailErr) emailErr.textContent = 'Email is required'; ok = false; }
+          else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value)) { emailEl.classList.add('invalid'); if (emailErr) emailErr.textContent = 'Please enter a valid email'; ok = false; }
+          const linkedin = form.querySelector('[name="linkedin_url"]');
+          if (linkedin && linkedin.value.trim()) {
+            try { new URL(linkedin.value); } catch (_) { linkedin.classList.add('invalid'); var e = form.querySelector('.error-msg[data-for="linkedin_url"]'); if (e) e.textContent = 'Please enter a valid URL'; ok = false; }
+          }
+          const notes = form.querySelector('[name="additional_notes"]');
+          if (notes && notes.value.length > 500) { notes.classList.add('invalid'); var e = form.querySelector('.error-msg[data-for="additional_notes"]'); if (e) e.textContent = 'Max 500 characters'; ok = false; }
+          return ok;
+        }
+        return true;
+      }
+
+      function showThankyou(qualified, companyName) {
+        viewLanding.classList.remove('di-view-landing');
+        viewForm.classList.remove('active');
+        viewThankyouQualified.classList.toggle('active', qualified);
+        viewThankyouDisqualified.classList.toggle('active', !qualified);
+        var msgEl = document.getElementById('di-thankyou-message-qualified');
+        if (qualified && msgEl && companyName) msgEl.textContent = 'Thanks, ' + companyName + '! We\'ll review your application and get back to you within 2 business days.';
+        if (qualified && typeof confetti === 'function') {
+          setTimeout(function() {
+            confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+          }, 300);
+        }
+      }
+
+      startBtn.addEventListener('click', function() {
+        viewLanding.style.display = 'none';
+        viewForm.classList.add('active');
+        loadState();
+        applyState();
+        var step = 1;
+        for (var s = 1; s <= TOTAL_STEPS; s++) {
+          if (form.querySelector('.di-step[data-step="' + s + '"]')) { step = s; break; }
+        }
+        showStep(step);
+      });
+
+      backBtn.addEventListener('click', function() {
+        if (currentStep <= 1) return;
+        collectState();
+        showStep(currentStep - 1);
+      });
+
+      nextBtn.addEventListener('click', function() {
+        if (currentStep < TOTAL_STEPS) {
+          collectState();
+          if (!validateStep(currentStep)) return;
+          showStep(currentStep + 1);
+        }
+      });
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        collectState();
+        if (!validateStep(TOTAL_STEPS)) return;
+        var fd = new FormData(form);
+        var body = {};
+        fd.forEach(function(v, k) { body[k] = v; });
+        body.meeting_tool = document.getElementById('meeting_tool').value || '';
+        nextBtn.disabled = true;
+        nextBtn.textContent = 'Submitting...';
+        fetch('/discovery-interview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        })
+        .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+        .then(function(result) {
+          if (result.ok && result.data.success) {
+            var companyName = body.company_name || '';
+            clearState();
+            showThankyou(result.data.qualified, companyName);
+          } else {
+            nextBtn.disabled = false;
+            nextBtn.textContent = 'Submit';
+            var errs = result.data.errors || ['Something went wrong.'];
+            alert(errs.join('\n'));
+          }
+        })
+        .catch(function() {
+          nextBtn.disabled = false;
+          nextBtn.textContent = 'Submit';
+          alert('Network error. Please try again.');
+        });
+      });
+
+      form.querySelectorAll('.di-options').forEach(function(container) {
+        const name = container.getAttribute('data-name');
+        container.querySelectorAll('.di-option').forEach(function(opt) {
+          opt.addEventListener('click', function() {
+            container.querySelectorAll('.di-option').forEach(function(o) { o.classList.remove('selected'); });
+            opt.classList.add('selected');
+            const input = opt.querySelector('input');
+            if (input) input.checked = true;
+            if (name === 'qa_process') {
+              document.getElementById('di-qa-other-wrap').style.display = opt.getAttribute('data-value') === 'Other' ? 'block' : 'none';
+            }
+          });
+        });
+      });
+
+      form.querySelectorAll('.di-meeting-btns button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          form.querySelectorAll('.di-meeting-btns button').forEach(function(b) { b.classList.remove('selected'); });
+          btn.classList.add('selected');
+          document.getElementById('meeting_tool').value = btn.getAttribute('data-value');
+        });
+      });
+
+      document.querySelectorAll('input[name="qa_process"]').forEach(function(r) {
+        r.addEventListener('change', function() {
+          document.getElementById('di-qa-other-wrap').style.display = r.value === 'Other' ? 'block' : 'none';
+        });
+      });
+
+      loadState();
+      if (Object.keys(state).length > 0 && state.currentStep) {
+        viewLanding.style.display = 'none';
+        viewForm.classList.add('active');
+        applyState();
+        currentStep = Math.min(Math.max(1, parseInt(state.currentStep, 10) || 1), TOTAL_STEPS);
+        showStep(currentStep);
+      }
+
+      document.addEventListener('keydown', function(e) {
+        if (!viewForm.classList.contains('active') || viewThankyouQualified.classList.contains('active') || viewThankyouDisqualified.classList.contains('active')) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          if (currentStep > 1) backBtn.click();
+        } else if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          if (currentStep < TOTAL_STEPS) nextBtn.click();
+          else if (currentStep === TOTAL_STEPS) form.requestSubmit();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

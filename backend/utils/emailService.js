@@ -179,8 +179,100 @@ function getStatusColor(status) {
   }
 }
 
+/**
+ * Send admin notification for new Launch Partner (discovery interview) submission
+ */
+async function sendDiscoveryInterviewAdminEmail(data) {
+  if (!transporter) initialize();
+
+  const adminEmail = process.env.DISCOVERY_ADMIN_EMAIL || 'ovi@firstqa.dev';
+  const priorityLabel = (data.qualification_status || 'medium').replace('_', ' ');
+  const subject = `New Launch Partner Application - ${priorityLabel.charAt(0).toUpperCase() + priorityLabel.slice(1)} Priority`;
+
+  const html = `
+    <h2>New Launch Partner Application</h2>
+    <p><strong>Qualification:</strong> ${data.qualification_status}</p>
+    ${data.disqualification_reason ? `<p><strong>Disqualification reason:</strong> ${data.disqualification_reason}</p>` : ''}
+    <hr>
+    <h3>Responses</h3>
+    <ul>
+      <li><strong>QA process:</strong> ${data.qa_process || '—'} ${data.qa_process_other ? `(${data.qa_process_other})` : ''}</li>
+      <li><strong>Bug fix %:</strong> ${data.bug_fix_percentage || '—'}</li>
+      <li><strong>Solution interest:</strong> ${data.solution_interest || '—'}</li>
+      <li><strong>Commitment:</strong> ${data.commitment_level || '—'}</li>
+      <li><strong>Company:</strong> ${data.company_name || '—'}</li>
+      <li><strong>Role:</strong> ${data.role || '—'}</li>
+      <li><strong>Team size:</strong> ${data.team_size || '—'}</li>
+      <li><strong>Tech stack:</strong> ${data.tech_stack || '—'}</li>
+      <li><strong>Start timeline:</strong> ${data.start_timeline || '—'}</li>
+      <li><strong>Email:</strong> ${data.email || '—'}</li>
+      <li><strong>LinkedIn:</strong> ${data.linkedin_url || '—'}</li>
+      <li><strong>Meeting tool:</strong> ${data.meeting_tool || '—'}</li>
+      <li><strong>Notes:</strong> ${data.additional_notes || '—'}</li>
+    </ul>
+    <p><em>Submitted at ${new Date(data.submitted_at).toLocaleString()}</em></p>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'noreply@firstqa.dev',
+      to: adminEmail,
+      subject,
+      html,
+      text: html.replace(/<[^>]*>/g, '')
+    });
+    console.log(`Discovery interview admin email sent to ${adminEmail}`);
+    return true;
+  } catch (err) {
+    console.error('Error sending discovery interview admin email:', err);
+    return false;
+  }
+}
+
+/**
+ * Send confirmation email to applicant after discovery interview submission
+ */
+async function sendDiscoveryInterviewConfirmationEmail(to, qualified) {
+  if (!transporter) initialize();
+
+  const subject = qualified
+    ? "We received your Launch Partner application"
+    : "Thanks for your interest in FirstQA";
+
+  const html = qualified
+    ? `
+      <p>Thanks for applying to become a FirstQA Launch Partner.</p>
+      <p>We'll review your application and get back to you within 2 business days.</p>
+      <p>Questions? Reply to this email or contact ovi@firstqa.dev.</p>
+      <p>— The FirstQA team</p>
+    `
+    : `
+      <p>Thanks for your interest in FirstQA.</p>
+      <p>Based on your responses, we might not be the perfect fit right now — we'd love to keep you in the loop on product updates.</p>
+      <p>Questions? Email ovi@firstqa.dev.</p>
+      <p>— The FirstQA team</p>
+    `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'noreply@firstqa.dev',
+      to,
+      subject,
+      html,
+      text: html.replace(/<[^>]*>/g, '')
+    });
+    console.log(`Discovery interview confirmation sent to ${to}`);
+    return true;
+  } catch (err) {
+    console.error('Error sending discovery interview confirmation:', err);
+    return false;
+  }
+}
+
 module.exports = {
   initialize,
   sendTestRequestEmail,
-  sendTestUpdateEmail
+  sendTestUpdateEmail,
+  sendDiscoveryInterviewAdminEmail,
+  sendDiscoveryInterviewConfirmationEmail
 }; 
