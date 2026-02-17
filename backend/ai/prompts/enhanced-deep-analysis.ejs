@@ -87,15 +87,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🧪 Release Pulse
 
-**TABLE RULES: Keep Metric and Level columns SHORT so they fit in one line. Level = only the value (e.g. "Go", "No-Go", "Medium"). Details = max 10–15 words, keyword-style.**
+**TABLE RULES: Metric | Level | Details. Level = only the value. Details = concrete, specific (max 15 words).**
 
-<table style="width: 100%; border-collapse: collapse;">
-<tr><th style="width: 22%; text-align: left; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Metric</th><th style="width: 18%; text-align: center; padding: 8px; border: 1px solid #ddd; white-space: nowrap;">Level</th><th style="width: 60%; text-align: left; padding: 8px; border: 1px solid #ddd;">Details</th></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🚦 Decision</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">Go / Caution / No-Go</td><td style="padding: 8px; border: 1px solid #ddd;">[One short line, max 15 words]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">📍 Areas</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">High / Medium / Low</td><td style="padding: 8px; border: 1px solid #ddd;">[2–4 components, comma-separated, max 15 words]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">⚠️ Risk</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">High / Medium / Low</td><td style="padding: 8px; border: 1px solid #ddd;">[Keywords only, max 15 words]</td></tr>
-<tr><td style="padding: 8px; border: 1px solid #ddd; white-space: nowrap;">🎯 Rec.</td><td style="padding: 8px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">GO / NO-GO</td><td style="padding: 8px; border: 1px solid #ddd;">[One short sentence, max 15 words]</td></tr>
-</table>
+| Metric | Level | Details |
+|--------|-------|---------|
+| 🚦 Decision | Go / Caution / NO-GO | [Concrete issue or "Safe to ship after testing"] |
+| 📍 Areas | High / Medium / Low | [2–4 affected components, comma-separated] |
+| ⚠️ Risk | High / Medium / Low | [Key risks if shipped, e.g. invalid A/B results, poor UX] |
 
 ## 🔍 Bugs & Risks
 
@@ -357,11 +355,10 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **FORMAT**: `[SEVERITY] Issue type: Description at \`file:line\` - impact`
   - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text.
   - **DO NOT ADD**: No summaries or extra explanations after the list.
-- For Release Pulse (Metric and Level columns SHORT; Level = only the value):
-  - **Decision**: First row. If clear or important issues exist → No-Go. Caution only for minor concerns. Level = Go / Caution / No-Go. Details = max 15 words.
-  - **Areas**: Second row. Level = High/Medium/Low. Details = 2-4 components, max 15 words.
-  - **Risk**: Third row. Level = High/Medium/Low. Details = keywords, max 15 words.
-  - **Rec.**: Fourth row. Level = GO or NO-GO. Details = one short sentence, max 15 words.
+- For Release Pulse (3 rows only: Decision, Areas, Risk):
+  - **Decision**: Level = "Go", "Caution", or "NO-GO". Details = concrete reason (e.g., "Experiment logic always assigns 'treatment', breaking A/B test validity" or "Safe to ship after testing").
+  - **Areas**: Level = High/Medium/Low. Details = 2-4 affected components.
+  - **Risk**: Level = High/Medium/Low. Details = key risks if shipped (e.g., "Invalid A/B results if shipped, poor dark mode UX").
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
@@ -375,20 +372,32 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 **REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE (or after "✅ To Do (for Go)" if present). DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
-**RELEASE PULSE EVALUATION REQUIREMENTS:**
+**RELEASE PULSE EVALUATION — GO / NO-GO LOGIC (CRITICAL):**
 
-**IMPORTANT: Be REALISTIC and BASE ON ACTUAL FINDINGS. If there are clear or important issues, say No-Go (not Caution).**
+**Decision MUST be driven by Bugs & Risks. Be STRICT and CONSISTENT. Base on actual code findings, not assumptions.**
 
-- **Decision** (FIRST ROW): Level = only "Go", "Caution", or "No-Go". Details = max 15 words.
-  - **Go**: No blockers, no important issues; safe after testing.
-  - **Caution**: Only for minor concerns (e.g. docs/style); no blockers or high-severity bugs.
-  - **No-Go**: Clear blockers, important bugs, or significant risks. Use No-Go whenever issues are clear or important—do not use Caution for those.
+**NO-GO** — Use when ANY of these apply (output "NO-GO" in Level):
+- There is a 🚫 BLOCKER in Bugs & Risks (security, data corruption, critical path break)
+- There is a 🔴 HIGH severity bug that breaks core functionality (e.g., wrong logic, null crash)
+- Logic bug that invalidates feature purpose (e.g., A/B test always returns same variant, experiment results meaningless)
+- Data integrity risk (corruption, wrong writes, overwriting valid data)
+- Security vulnerability or auth bypass
+- **Details**: State the concrete issue and impact (e.g., "Experiment logic always assigns 'treatment', breaking A/B test validity")
 
-- **Areas** (SECOND ROW): Level = High/Medium/Low only. Details = 2-4 components, max 15 words.
+**Caution** — Use ONLY when:
+- Minor issues only (docs, style, non-critical edge cases)
+- No BLOCKER or HIGH bugs
+- Issues are 🟡 MEDIUM and can be fixed post-merge or are low likelihood
+- **Details**: Brief note of concern
 
-- **Risk** (THIRD ROW): Level = High/Medium/Low only. Details = keywords, max 15 words.
+**Go** — Use when:
+- No BLOCKER or HIGH severity items
+- No logic bugs that break functionality
+- At most minor, acceptable risks
+- **Details**: "Safe to ship after testing" or similar
 
-- **Rec.** (FOURTH ROW): Level = GO or NO-GO only. Details = one short sentence, max 15 words.
+**Areas**: Affected product areas (e.g., "SMS draft handoff, experiment variant assignment, QR code dark mode").
+**Risk**: Consequences if shipped without fixes (e.g., "Invalid A/B results if shipped, poor dark mode UX").
 
 **BUGS & RISKS REQUIREMENTS:**
 - **ONLY SIGNAL, NO NOISE**: Only real, verifiable issues with HIGH LIKELIHOOD based on the code. No theoretical or low-probability concerns. NO FALSE POSITIVES.
