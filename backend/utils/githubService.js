@@ -2373,14 +2373,19 @@ Or wait until next month when your limit resets.
 function formatHybridAnalysisForComment(aiInsights) {
   const aiData = aiInsights.data;
 
-  // Check if we have the new AI prompt format
-  if (typeof aiData === 'string' && (
+  // Check if we have the new AI prompt format (multiple possible headers)
+  const hasNewFormat = typeof aiData === 'string' && (
     aiData.includes('📊 Release Pulse') ||
+    aiData.includes('🧪 Release Pulse') ||
     aiData.includes('🎯 QA Analysis - by Ovi (the AI QA)')
-  )) {
-    console.log('🔍 Detected new AI prompt format');
-    console.log('Contains Release Pulse:', aiData.includes('📊 Release Pulse'));
-    console.log('Full AI Response:', aiData);
+  );
+  const hasKeySections = hasNewFormat && (
+    (aiData.includes('Release Pulse') || aiData.includes('Bugs & Risks')) &&
+    (aiData.includes('Test Recipe') || aiData.includes('🧪 Test Recipe'))
+  );
+
+  if (hasNewFormat && hasKeySections) {
+    console.log('🔍 Detected new AI prompt format with key sections');
     
     // New AI prompt format - just add FirstQA branding around it
     // Clean up any potential formatting issues that GitHub might not like
@@ -2401,6 +2406,21 @@ function formatHybridAnalysisForComment(aiInsights) {
     
     return finalComment;
   }
+
+  // Incomplete analysis: has new format markers but missing key sections (truncated/failed)
+  if (typeof aiData === 'string' && aiData.includes('🎯 QA Analysis') && !hasKeySections) {
+    console.warn('⚠️ AI response appears incomplete (missing Release Pulse, Bugs, or Test Recipe)');
+    return `## ⚠️ Analysis Incomplete
+
+The QA analysis could not be fully generated. This may be due to a large PR or API limits.
+
+**Please try again** by commenting \`/qa\` on this PR, or run analysis on a smaller change set.
+
+---
+
+*🤖 **With Quality By Ovi** - AI-powered QA analysis by FirstQA*`;
+  }
+
   // Fallback for legacy JSON format (backward compatibility)
   if (typeof aiData === 'object' && aiData.summary) {
     // Get ship status with color indicators

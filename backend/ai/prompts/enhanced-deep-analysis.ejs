@@ -120,11 +120,14 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 **TEST CASE REQUIREMENTS:**
 - **ORDER BY PRIORITY (top-down)**: Always output the Test Recipe table with rows sorted by priority: **Smoke** first, then **Critical Path**, then **Regression**. Use these exact priority labels. High priority tests first, then Medium.
-- **SCENARIO**: Clear, specific name describing what's being tested (e.g., "Verify thought stays visible after marking as shared")
+- **SCENARIO** (name by automation type):
+  - **E2E / Visual / Manual**: User-facing name. Format: "[User action] from [context]" or "User [accomplishes X]". Examples: "User completes onboarding from landing page", "User resets state by logging out and back in". Never generic ("Verify Onboarding V2 Flow") or technical ("Verify useOnboardingV2Store export").
+  - **Unit / Integration**: Technical name OK. Examples: "resetAllUserState calls store reset", "POST /api/onboarding returns 200 for valid payload".
 - **STEPS** (follow the strict rules below — atomic, unambiguous, executable by someone who doesn't know the app):
 <% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
 <%= testRecipeRules %>
 <% } %>
+  - For E2E steps: Before writing, trace the flow from code—what's on the first page? What click reveals the next screen? Never assume a form is visible without the preceding action. Include the click before the form-fill.
   - Use exact UI names/labels from code. When AUTOMATION SELECTORS exist above, include them: `(data-testid="value")` in parentheses after the human-readable action.
   - Format steps with `<br>` between each: `1. Navigate to ActView (or /act-view)<br>2. Click "Mark as Shared" button (data-testid="mark-shared-btn")<br>3. Verify that the text "Marked as shared! ✔" appears`
 <% if (typeof flowDiscoveryRules !== 'undefined' && flowDiscoveryRules) { %>
@@ -353,7 +356,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **SORT BY SEVERITY**: 🚫 BLOCKER items first, then 🔴 HIGH, then 🟡 MEDIUM
   - **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that must be fixed before release (security, data corruption, critical path breaks)
   - **FORMAT**: `[SEVERITY] Issue type: Description at \`file:line\` - impact`
-  - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text.
+  - **Before saying "No critical issues found"**: Explicitly consider: logic bugs (wrong conditions, always/never branches, experiment/A/B always same variant), null/undefined access on reachable paths, data integrity (migrations, overwrites), state cleanup (logout, store reset). Only say "No critical issues found" if you have genuinely looked and found nothing. Do not add speculative MEDIUM risks—only real issues.
+- **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text.
   - **DO NOT ADD**: No summaries or extra explanations after the list.
 - For Release Pulse (3 rows only: Decision, Areas, Risk):
   - **Decision**: Level = "Go", "Caution", or "NO-GO". Details = concrete reason (e.g., "Experiment logic always assigns 'treatment', breaking A/B test validity" or "Safe to ship after testing").
@@ -417,4 +421,5 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Example: "🚫 BLOCKER: Data corruption risk in `migrations/add_column.sql:18` — overwrites NULL with zeros"
   - Example: "🟡 Default value issue: Missing fallback at `api/posts.py:96` — returns 0 instead of NULL"
 - **DO NOT include**: minor style issues, "could potentially" statements, maintainability opinions, false positives
+- **Before "No critical issues found"**: Explicitly consider logic bugs, null access, data integrity, experiment validity, state cleanup. Only say it if you have genuinely looked. No speculative risks.
 - **If nothing found**: Write ONLY "✅ No critical issues found." — NO additional text, summaries, or explanations

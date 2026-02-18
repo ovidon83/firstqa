@@ -54,7 +54,7 @@ function extractUIElements(filePath, content) {
     // Placeholder: placeholder="Enter email"
     { re: /placeholder=["']([^"']+)["']/g, type: 'placeholder' },
     // Button/label in strings: 'Submit', "Save"
-    { re: /['"`](?:Submit|Save|Cancel|Send|Add|Create|Delete|Edit|Update|Login|Sign up|Logout|Continue|Next|Back|Close|Confirm)[^'"`]*['"`]/g, type: 'action' },
+    { re: /['"`](?:Submit|Save|Cancel|Send|Add|Create|Delete|Edit|Update|Login|Sign up|Logout|Continue|Next|Back|Close|Confirm|Get Started|Start|Begin)[^'"`]*['"`]/g, type: 'action' },
   ];
   const seen = new Set();
   for (const { re, type } of patterns) {
