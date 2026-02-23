@@ -2936,17 +2936,8 @@ async function processWebhookEvent(event) {
       }
     }
 
-    // Handle pull_request closed + merged into staging - auto-generate analysis for staging testing
-    if (eventType === 'pull_request' && payload.action === 'closed' && payload.pull_request?.merged === true) {
-      const { repository, pull_request: pr } = payload;
-      const baseRef = (pr.base?.ref || '').toLowerCase();
-      const isStagingBranch = STAGING_BRANCHES.includes(baseRef);
-      if (isStagingBranch) {
-        console.log(`🚀 PR #${pr.number} merged into ${baseRef} - triggering post-merge staging analysis`);
-        return await handlePRMergedToStaging(repository, pr, userId, installationId);
-      }
-      console.log(`📋 PR #${pr?.number} closed/merged into ${baseRef} - not a staging branch, skipping`);
-    }
+    // PR merged into staging - post-merge analysis disabled for now (re-enable when ready)
+    // if (eventType === 'pull_request' && ... merged into STAGING_BRANCHES) -> handlePRMergedToStaging()
 
     // Handle issue comment event (for /qa commands)
     if (eventType === 'issue_comment' && payload.action === 'created') {
