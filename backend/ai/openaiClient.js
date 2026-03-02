@@ -262,8 +262,8 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
               content: prompt
             }
           ],
-          temperature: 0.1, // Very low temperature for maximum consistency
-          max_tokens: 2500 // Higher limit for detailed analysis
+          temperature: 0.1,
+          max_tokens: 4096
         });
 
         const response = completion.choices[0]?.message?.content;
@@ -301,24 +301,44 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
       }
     }
 
-    console.log('🔄 All AI attempts failed, generating intelligent fallback analysis based on code context');
-    const fallbackInsights = generateDeepFallbackAnalysis(sanitizedTitle, sanitizedBody, sanitizedDiff, codeContext);
+    console.error('🔄 All AI attempts failed for PR', pr_number, 'in', repo, '- last error:', lastError?.message);
+    const fallbackMessage = `# 🎯 QA Analysis - by Ovi (the AI QA)
+
+## ⚠️ Analysis could not be generated
+
+The AI analysis failed after 3 attempts. This may be due to API limits or a very large PR diff.
+
+**Please try again** by commenting \`/qa\` on this PR.
+
+---
+
+*🤖 **With Quality By Ovi** - AI-powered QA analysis by FirstQA*`;
     return {
       success: true,
-      data: fallbackInsights,
+      data: fallbackMessage,
       metadata: {
         repo, pr_number, model: 'deep-fallback', attempt: 'fallback', timestamp: new Date().toISOString(),
-        note: 'Deep fallback analysis generated due to AI processing issues',
+        note: 'AI analysis failed - returned honest fallback message',
         analysisType: 'deep-fallback'
       }
     };
 
   } catch (error) {
     console.error('❌ Error in generateQAInsights:', error.message);
-    const ultimateFallback = generateUltimateFallback(title || 'Unknown PR');
+    const ultimateFallbackMessage = `# 🎯 QA Analysis - by Ovi (the AI QA)
+
+## ⚠️ Analysis could not be generated
+
+A system error prevented the QA analysis from completing: ${error.message}
+
+**Please try again** by commenting \`/qa\` on this PR.
+
+---
+
+*🤖 **With Quality By Ovi** - AI-powered QA analysis by FirstQA*`;
     return {
       success: true,
-      data: ultimateFallback,
+      data: ultimateFallbackMessage,
       metadata: {
         repo: repo || 'unknown', pr_number: pr_number || 0, model: 'ultimate-fallback',
         attempt: 'ultimate-fallback', timestamp: new Date().toISOString(), error: error.message,
@@ -334,9 +354,13 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
  */
 async function parseAIResponse(response, title, body, diff) {
   try {
-    // Check if response is the new compressed markdown format
-    if (response.includes('# Ovi QA Analysis') || response.includes('📋 Summary')) {
-      // Return the markdown response directly
+    // Check if response is the new/enhanced markdown format
+    if (response.includes('🎯 QA Analysis') || 
+        response.includes('# Ovi QA Analysis') || 
+        response.includes('📋 Summary') ||
+        response.includes('Release Pulse') ||
+        response.includes('Bugs & Risks') ||
+        response.includes('Test Recipe')) {
       return response.trim();
     }
     
