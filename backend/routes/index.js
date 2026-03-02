@@ -321,8 +321,8 @@ router.post('/generate-test-recipe', async (req, res) => {
   try {
     const { generateQAInsights } = require('../ai/openaiClient');
     
-    // Extract required fields from request body
-    const { repo, pr_number, title, body, diff } = req.body;
+    // Extract all fields from request body (including optional enrichment data)
+    const { repo, pr_number, title, body, diff, newCommits, fileContents, selectorHints } = req.body;
     
     // Validate required fields
     if (!repo || !pr_number || !title) {
@@ -340,14 +340,18 @@ router.post('/generate-test-recipe', async (req, res) => {
     console.log(`   Title: ${title}`);
     console.log(`   Body length: ${body?.length || 0}`);
     console.log(`   Diff length: ${diff?.length || 0}`);
+    console.log(`   Commits: ${newCommits?.length || 0}, Files: ${Object.keys(fileContents || {}).length}, Selectors: ${selectorHints?.length || 0}`);
     
-    // Generate AI insights
+    // Generate AI insights with full context
     const aiInsights = await generateQAInsights({
       repo,
       pr_number,
       title,
       body,
-      diff
+      diff,
+      newCommits,
+      fileContents,
+      selectorHints
     });
     
     if (aiInsights && aiInsights.success) {

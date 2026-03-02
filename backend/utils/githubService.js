@@ -1946,51 +1946,18 @@ Or wait until next month when your limit resets.
       details: error.message
     };
   }
-  // If AI insights failed, create a basic fallback analysis
+  // If AI insights failed, return an honest message instead of fabricated analysis
   if (!aiInsights || !aiInsights.success) {
-    console.log('🔄 Creating fallback analysis due to AI failure');
+    console.log('🔄 AI analysis failed, using honest fallback message');
     aiInsights = {
       success: true,
-      data: {
-        summary: {
-          riskLevel: "MEDIUM",
-          shipScore: 5,
-          reasoning: "AI analysis failed - manual review required to assess production readiness"
-        },
-        questions: [
-          "What is the main purpose of these changes?",
-          "Are there any breaking changes that could affect existing functionality?",
-          "Have you tested the core functionality manually?",
-          "Are there any dependencies or integrations that might be affected?"
-        ],
-        featureTestRecipe: [
-          {
-            scenario: "Test core feature functionality",
-            priority: "Critical", 
-            automation: "Manual",
-            description: "Verify main user workflows work as expected"
-          }
-        ],
-        technicalTestRecipe: [
-          {
-            scenario: "Test main functionality changes",
-            priority: "Critical", 
-            automation: "Manual",
-            description: "Verify core changes work as expected"
-          },
-          {
-            scenario: "Test error handling and edge cases",
-            priority: "Medium",
-            automation: "Manual",
-            description: "Validate error scenarios and boundary conditions"
-          }
-        ],
-        bugs: [],
-        criticalRisks: [
-          "AI analysis could not be completed - manual review needed",
-          "Unable to perform detailed risk analysis due to AI processing error"
-        ]
-      }
+      data: `# 🎯 QA Analysis - by Ovi (the AI QA)
+
+## ⚠️ Analysis could not be generated
+
+The AI analysis failed: ${aiInsights?.error || 'unknown error'}
+
+**Please try again** by commenting \`/qa\` on this PR.`
     };
   }
   // Generate test request object
@@ -2373,26 +2340,22 @@ Or wait until next month when your limit resets.
 function formatHybridAnalysisForComment(aiInsights) {
   const aiData = aiInsights.data;
 
-  // Check if we have the new AI prompt format (multiple possible headers)
+  // Check if we have the new AI prompt format (markdown with known headers)
   const hasNewFormat = typeof aiData === 'string' && (
     aiData.includes('📊 Release Pulse') ||
     aiData.includes('🧪 Release Pulse') ||
-    aiData.includes('🎯 QA Analysis - by Ovi (the AI QA)')
-  );
-  const hasKeySections = hasNewFormat && (
-    (aiData.includes('Release Pulse') || aiData.includes('Bugs & Risks')) &&
-    (aiData.includes('Test Recipe') || aiData.includes('🧪 Test Recipe'))
+    aiData.includes('🎯 QA Analysis') ||
+    aiData.includes('Bugs & Risks') ||
+    aiData.includes('Test Recipe')
   );
 
-  if (hasNewFormat && hasKeySections) {
-    console.log('🔍 Detected new AI prompt format with key sections');
+  if (hasNewFormat) {
+    console.log('🔍 Detected new AI prompt format, using as-is');
     
-    // New AI prompt format - just add FirstQA branding around it
-    // Clean up any potential formatting issues that GitHub might not like
     const cleanedData = aiData
-      .replace(/\n{3,}/g, '\n\n')  // Remove excessive blank lines
-      .replace(/\t/g, '\n')    // Convert tabs to newlines for better GitHub compatibility
-      .trim();                  // Remove extra whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/\t/g, '\n')
+      .trim();
     
     const finalComment = `${cleanedData}
 
@@ -2405,20 +2368,6 @@ function formatHybridAnalysisForComment(aiInsights) {
     console.log('Final comment length:', finalComment.length);
     
     return finalComment;
-  }
-
-  // Incomplete analysis: has new format markers but missing key sections (truncated/failed)
-  if (typeof aiData === 'string' && aiData.includes('🎯 QA Analysis') && !hasKeySections) {
-    console.warn('⚠️ AI response appears incomplete (missing Release Pulse, Bugs, or Test Recipe)');
-    return `## ⚠️ Analysis Incomplete
-
-The QA analysis could not be fully generated. This may be due to a large PR or API limits.
-
-**Please try again** by commenting \`/qa\` on this PR, or run analysis on a smaller change set.
-
----
-
-*🤖 **With Quality By Ovi** - AI-powered QA analysis by FirstQA*`;
   }
 
   // Fallback for legacy JSON format (backward compatibility)
