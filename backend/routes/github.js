@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const axios = require('axios');
 const githubService = require('../utils/githubService');
 const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 const { Octokit } = require('@octokit/rest');
@@ -90,6 +91,98 @@ router.get('/health', (req, res) => {
 });
 
 /**
+ * GET /github/identify - Lightweight GitHub OAuth to capture the user's GitHub username.
+ * Used when githubLogin is not in the session (email/password signups).
+ * After identifying, redirects back to /github/install-redirect.
+ */
+router.get('/identify', (req, res) => {
+  if (!req.session?.user) {
+    return res.redirect('/login');
+  }
+
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  if (!clientId) {
+    console.error('GITHUB_CLIENT_ID not configured');
+    return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('GitHub OAuth not configured'));
+  }
+
+  const state = crypto.randomBytes(16).toString('hex');
+  req.session.githubIdentifyState = state;
+  if (req.query.returnTo) {
+    req.session.githubIdentifyReturnTo = req.query.returnTo;
+  }
+
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  const authUrl = new URL('https://github.com/login/oauth/authorize');
+  authUrl.searchParams.set('client_id', clientId);
+  authUrl.searchParams.set('redirect_uri', `${baseUrl}/github/identify/callback`);
+  authUrl.searchParams.set('scope', 'read:user');
+  authUrl.searchParams.set('state', state);
+
+  console.log('🔗 Redirecting to GitHub OAuth to identify user');
+  res.redirect(authUrl.toString());
+});
+
+/**
+ * GET /github/identify/callback - Handle the identify OAuth callback.
+ * Fetches the user's GitHub username, stores it in session, then redirects
+ * back to /github/install-redirect so auto-detection can run.
+ */
+router.get('/identify/callback', async (req, res) => {
+  try {
+    const { code, state } = req.query;
+
+    if (!code) {
+      console.error('GitHub identify callback: no code received');
+      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('GitHub identification failed'));
+    }
+
+    if (state !== req.session?.githubIdentifyState) {
+      console.error('GitHub identify callback: invalid state token');
+      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('Invalid state token'));
+    }
+
+    const tokenResponse = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: `${process.env.BASE_URL || 'http://localhost:3000'}/github/identify/callback`
+      },
+      { headers: { Accept: 'application/json' } }
+    );
+
+    const accessToken = tokenResponse.data?.access_token;
+    if (!accessToken) {
+      console.error('GitHub identify callback: no access token received');
+      return res.redirect('/dashboard/integrations?error=' + encodeURIComponent('GitHub identification failed'));
+    }
+
+    const userResponse = await axios.get('https://api.github.com/user', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    const githubLogin = userResponse.data?.login;
+    if (githubLogin && req.session.user) {
+      req.session.user.githubLogin = githubLogin;
+      console.log(`✅ GitHub identity captured: ${githubLogin}`);
+    }
+
+    const returnTo = req.session.githubIdentifyReturnTo;
+    delete req.session.githubIdentifyState;
+    delete req.session.githubIdentifyReturnTo;
+
+    const installRedirectUrl = '/github/install-redirect' +
+      (returnTo ? '?returnTo=' + encodeURIComponent(returnTo) : '');
+    res.redirect(installRedirectUrl);
+  } catch (error) {
+    console.error('GitHub identify callback error:', error.message);
+    res.redirect('/dashboard/integrations?error=' + encodeURIComponent('GitHub identification failed'));
+  }
+});
+
+/**
  * GET /github/install-redirect - Redirect to GitHub App install with state
  * Also checks if app is already installed and syncs the database
  */
@@ -168,6 +261,14 @@ router.get('/install-redirect', async (req, res) => {
           console.error('Error checking GitHub installations:', error.message);
         }
       }
+    } else if (process.env.GITHUB_CLIENT_ID) {
+      // No githubLogin in session (email/password signup) -- identify via GitHub OAuth first
+      // so we can auto-detect existing installations before sending user to GitHub's install page
+      console.log('🔄 No GitHub login in session, redirecting to /github/identify first');
+      const returnTo = req.query.returnTo;
+      const identifyUrl = '/github/identify' +
+        (returnTo ? '?returnTo=' + encodeURIComponent(returnTo) : '');
+      return res.redirect(identifyUrl);
     }
     
     // Generate state token and store user ID
