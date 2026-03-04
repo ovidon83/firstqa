@@ -119,8 +119,9 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - [ ] … (3–5 items total)
 
 **TEST CASE REQUIREMENTS:**
-- **ORDER BY PRIORITY (top-down)**: Always output the Test Recipe table with rows sorted by priority: **Smoke** first, then **Critical Path**, then **Regression**. Use these exact priority labels. High priority tests first, then Medium.
-- **SCENARIO** (name by automation type):
+- **ORDER BY PRIORITY (top-down)**: Always output the Test Recipe table with rows sorted by priority: **Smoke** first, then **Critical Path**, then **Regression**. Use ONLY these three priority labels.
+- **SCENARIO** (name rules):
+  - NEVER include the test type or automation type in the scenario name. Wrong: "E2E: Submit Contact Form", "Visual: Footer Layout", "Manual: Accessibility Check". Right: "Submit Contact Form", "Footer Layout", "Accessibility Check".
   - **E2E / Visual / Manual**: User-facing name. Format: "[User action] from [context]" or "User [accomplishes X]". Examples: "User completes onboarding from landing page", "User resets state by logging out and back in". Never generic ("Verify Onboarding V2 Flow") or technical ("Verify useOnboardingV2Store export").
   - **Unit / Integration**: Technical name OK. Examples: "resetAllUserState calls store reset", "POST /api/onboarding returns 200 for valid payload".
 - **STEPS** (follow the strict rules below — atomic, unambiguous, executable by someone who doesn't know the app):
@@ -135,7 +136,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 <% } %>
 - **EXPECTED RESULT**: Specific, observable outcomes. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
-- **PRIORITY**: High (core flows, fixes) or Medium (edge cases, validations)
+- **PRIORITY**: Use ONLY these three values: **Smoke** (core flows, fixes, must-work scenarios), **Critical Path** (important user-facing scenarios, error handling), **Regression** (existing functionality that might be affected)
 - **AUTOMATION TYPE**: Best-fit test type based on changes and testing strategy:
   - **E2E (End-to-End)**: Full user flows through UI, critical paths, user journeys spanning multiple components
   - **Integration**: Be SPECIFIC - use one of: API Contract (HTTP endpoints, request/response), Database (schema, migrations, CRUD, queries), Service-to-Service (API-to-API, webhooks), Component (React/module interactions), Third-party (external APIs, OAuth, payment gateways)
@@ -155,11 +156,10 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - Look for potential performance, security, or accessibility implications from the actual code
 - **Test recipe based on the diff + other impacted files — no guessing, no overtesting**
 - **Identify assumptions, missing context, suspicious diffs**
-- Prioritize tests using unified system:
-  - **Happy Path**: Core user workflows and functionality that must work as intended (HIGH PRIORITY)
-  - **Critical Path**: Important user-facing scenarios that affect user experience (HIGH PRIORITY)
-  - **Edge Case**: Important error handling and boundary conditions (MEDIUM PRIORITY - avoid obscure cases)
-  - **Regression**: Existing functionality that might be affected by these changes (HIGH PRIORITY)
+- Prioritize tests using these three priority labels ONLY:
+  - **Smoke**: Core user workflows, fix verifications, must-work scenarios
+  - **Critical Path**: Important user-facing scenarios, error handling, edge cases
+  - **Regression**: Existing functionality that might be affected by these changes
 - **PRIORITIZE USER-FACING CHANGES**: Focus test cases on features users directly interact with (UI, navigation, visibility, buttons, forms)
 - **COVER ALL CHANGES**: Ensure test cases cover ALL added, fixed, changed, and REMOVED features across ALL commits
 - **VERIFY ADDITIONS**: Test that added features are present and working correctly
@@ -260,8 +260,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **STEP 2: TEST CASE GENERATION**:
     - Generate **5-7 comprehensive test cases** total, prioritizing fixes and user-facing changes
     - **CRITICAL**: For EACH distinct fix mentioned in commit messages, generate a SEPARATE test case that specifically verifies that fix
-    - Include ALL priority levels: Happy Path, Critical Path, Edge Case, Negative Test, and Regression
-    - Order scenarios by priority (Happy Path first, then Critical Path, Edge Case/Negative Test, then Regression)
+    - Use ONLY these priority levels: Smoke, Critical Path, Regression
+    - Order scenarios by priority (Smoke first, then Critical Path, then Regression)
     - **TEST CASE STRUCTURE REQUIREMENTS:**
       - **Scenario Name**: Descriptive name focusing on what's being tested (e.g., "Mark as Shared from Draft Filter", "Verify Flicker Fix", "Rapid Toggle Mark/Unmark")
       - **Steps** (automation-ready - atomic, one action per step, executable by Playwright):
@@ -303,7 +303,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
           - "Thought should NOT disappear from view unexpectedly"
           - "Filter should NOT switch unless explicitly triggered by the logic"
           - "No errors should appear in console"
-      - **Priority**: Appropriate priority based on impact (Happy Path/Critical Path/Edge Case/Negative Test/Regression)
+      - **Priority**: Smoke | Critical Path | Regression
     - **ONLY INCLUDE RELEVANT TEST CASES**: Test cases must be directly related to the changes in the PR/commits
     - **AVOID GENERIC TEST CASES**: Don't include generic test cases like "Error Handling on Update Failure" or "Memory Leak Prevention" unless they are specifically related to the actual changes
     - **FOCUS ON CHANGES**: Every test case should test something that was actually changed, added, fixed, or removed in this PR
@@ -312,13 +312,13 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Focus on scenarios that directly test the changed functionality, especially fixes mentioned in commits
     - Make steps detailed, actionable, and specific to the actual code changes
     - If a test case doesn't clearly relate to the changes, don't include it
-    - **ORDER TEST CASES BY PRIORITY**: High priority tests MUST come first in the table, then Medium
+    - **ORDER TEST CASES BY PRIORITY**: Smoke first, then Critical Path, then Regression
     - **Priority Examples**: 
-      - Fix verification = High (each fix gets its own test case)
-      - Core user workflow = High
-      - Error handling = Negative Test (MEDIUM-HIGH)
-      - Rapid actions/multiple states = Edge Case (MEDIUM-HIGH)
-      - Existing features = Regression (HIGH)
+      - Fix verification = Smoke (each fix gets its own test case)
+      - Core user workflow = Smoke
+      - Error handling = Critical Path
+      - Rapid actions/multiple states = Critical Path
+      - Existing features = Regression
     - **Test Fixes Directly**: If commit says "prevent thoughts from disappearing", test case should verify thoughts don't disappear with exact UI states
     - **Test Complete Flows**: Test full user journeys, not just isolated actions
     - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors extracted from code

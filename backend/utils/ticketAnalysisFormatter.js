@@ -136,17 +136,21 @@ function formatAnalysisComment(analysis) {
     if (a.testRecipe.length > 0) {
       comment += '### 🧪 Test Recipe\n\n';
       const priorityEmoji = { Smoke: '🔴', 'Critical Path': '🟡', Regression: '🟢' };
-      a.testRecipe.forEach((t, idx) => {
+      comment += '| Scenario | Priority | Type |\n';
+      comment += '|----------|----------|------|\n';
+      a.testRecipe.forEach((t) => {
         const prio = priorityEmoji[t.priority] || '🟡';
+        const escapedName = asString(t.name).replace(/\|/g, '\\|');
+        comment += `| ${escapedName} | ${prio} ${t.priority} | ${t.automationLevel} |\n`;
+      });
+      comment += '\n';
+      a.testRecipe.forEach((t) => {
         const steps = asSteps(t.scenario);
-        // Collapsible section per scenario (Linear >>> syntax)
-        comment += `>>> **${t.name}** · ${prio} ${t.priority} · ${t.automationLevel}\n`;
         if (steps.length > 1) {
+          comment += `>>> **${t.name}** — Steps\n`;
           steps.forEach((s, i) => { comment += `${i + 1}. ${s}\n`; });
-        } else {
-          comment += `${truncate(asString(t.scenario), 400)}\n`;
+          comment += `>>>\n\n`;
         }
-        comment += `>>>\n\n`;
       });
     }
 
