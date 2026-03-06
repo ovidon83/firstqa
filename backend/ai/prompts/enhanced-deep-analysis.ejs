@@ -138,6 +138,9 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 <% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
 <%= testRecipeRules %>
 <% } %>
+  - **NAMING (mandatory)**: Use only page names, section titles, and component names from **FLOW DISCOVERY** (Routes & suggested page names, Page and section titles, UI Elements) or from **FULL FILE CONTENTS**. Do not invent synonyms (e.g. do not say "engagement calendar" if the code uses "Total Engagements" or "heatmap"; do not say "calendar day" if the UI is a grid of cells).
+  - **NAVIGATION**: Prefer "Navigate to [Page name] (path: [route])" using the route and page names from FLOW DISCOVERY (e.g. "Navigate to Overview (path: /analytics/overview)").
+  - **SECTIONS**: For actions inside a screen, use "In the **[Section Title]** section, …" with the exact section title from FLOW DISCOVERY (e.g. "In the **Total Engagements** section, hover over a cell").
   - For E2E steps: Before writing, trace the flow from code—what's on the first page? What click reveals the next screen? Never assume a form is visible without the preceding action. Include the click before the form-fill.
   - Use exact UI names/labels from code. When AUTOMATION SELECTORS exist above, include them: `(data-testid="value")` in parentheses after the human-readable action.
   - Format steps with `<br>` between each: `1. Navigate to ActView (or /act-view)<br>2. Click "Mark as Shared" button (data-testid="mark-shared-btn")<br>3. Verify that the text "Marked as shared! ✔" appears`

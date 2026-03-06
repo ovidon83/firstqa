@@ -143,6 +143,49 @@ function extractValidationRules(filePath, content) {
 }
 
 /**
+ * Extract section and page titles (headings, title props) for accurate test steps.
+ * Returns strings that appear as visible section/page names in the UI.
+ */
+function extractSectionTitles(filePath, content) {
+  const titles = [];
+  const seen = new Set();
+  const isValid = (s) => {
+    const t = s.trim();
+    if (t.length < 2 || t.length > 50) return false;
+    if (/^[\s\-_:]+$/.test(t)) return false;
+    if (t.includes('\n')) return false;
+    const words = t.split(/\s+/).length;
+    if (words > 8) return false;
+    if (/\.\s+[a-z]/.test(t)) return false;
+    return true;
+  };
+  const add = (title) => {
+    const n = title.trim();
+    if (isValid(n) && !seen.has(n.toLowerCase())) {
+      seen.add(n.toLowerCase());
+      titles.push({ title: n, file: filePath });
+    }
+  };
+  const patterns = [
+    /<h[1-3][^>]*>\s*([^<]{1,80}?)<\/h[1-3]>/gi,
+    /<title[^>]*>\s*([^<]{1,80}?)<\/title>/gi,
+    /title\s*=\s*["']([^"']{1,50})["']/g,
+    /label\s*=\s*["']([^"']{1,50})["']/g,
+    /heading\s*=\s*["']([^"']{1,50})["']/gi,
+    /sectionTitle\s*=\s*["']([^"']{1,50})["']/gi,
+    />\s*([A-Z][A-Za-z0-9\s&\-]{1,45}?)\s*<\/(?:Section|Card|Panel|Box|Block)/g,
+  ];
+  for (const re of patterns) {
+    let m;
+    while ((m = re.exec(content)) !== null) {
+      const raw = (m[1] || '').replace(/\s+/g, ' ').trim();
+      if (raw) add(raw);
+    }
+  }
+  return titles;
+}
+
+/**
  * Extract selectors (data-testid, aria-label, id) - enhanced version
  */
 function extractSelectorsFromContent(filePath, content) {
@@ -176,6 +219,7 @@ function extractSelectorsFromContent(filePath, content) {
  */
 function discoverFlows(fileContents = {}, selectorHints = []) {
   const routes = [];
+  const sectionTitles = [];
   const uiElements = [];
   const messages = [];
   const apiEndpoints = [];
@@ -201,6 +245,7 @@ function discoverFlows(fileContents = {}, selectorHints = []) {
   for (const [filePath, content] of Object.entries(fileContents)) {
     if (!content || typeof content !== 'string') continue;
     routes.push(...extractRoutes(filePath, content));
+    sectionTitles.push(...extractSectionTitles(filePath, content));
     uiElements.push(...extractUIElements(filePath, content));
     messages.push(...extractMessages(filePath, content));
     apiEndpoints.push(...extractAPIEndpoints(filePath, content));
@@ -212,12 +257,14 @@ function discoverFlows(fileContents = {}, selectorHints = []) {
 
   // Deduplicate and limit
   const uniqueRoutes = [...new Map(routes.map(r => [r.path, r])).values()].slice(0, 30);
+  const uniqueSectionTitles = [...new Map(sectionTitles.map(s => [s.title.toLowerCase(), s])).values()].slice(0, 30);
   const uniqueUI = [...new Map(uiElements.map(u => [`${u.type}:${u.text}`, u])).values()].slice(0, 40);
   const uniqueMessages = [...new Map(messages.map(m => [m.message, m])).values()].slice(0, 20);
   const uniqueAPI = [...new Map(apiEndpoints.map(e => [e.endpoint, e])).values()].slice(0, 25);
 
   return {
     routes: uniqueRoutes,
+    sectionTitles: uniqueSectionTitles,
     uiElements: uniqueUI,
     messages: uniqueMessages,
     apiEndpoints: uniqueAPI,
@@ -227,17 +274,38 @@ function discoverFlows(fileContents = {}, selectorHints = []) {
 }
 
 /**
+ * Derive a short page label from a route path (e.g. /analytics/overview -> "Overview (Analytics)")
+ */
+function routeToPageLabel(path) {
+  const segments = path.replace(/^\//, '').split('/').filter(Boolean);
+  if (segments.length === 0) return null;
+  const last = segments[segments.length - 1];
+  const name = last.charAt(0).toUpperCase() + last.slice(1).replace(/[-_](.)/g, (_, c) => ' ' + c.toUpperCase());
+  if (segments.length === 1) return `${name}`;
+  const parent = segments[segments.length - 2];
+  const parentName = parent.charAt(0).toUpperCase() + parent.slice(1).replace(/[-_](.)/g, (_, c) => ' ' + c.toUpperCase());
+  return `${name} (${parentName})`;
+}
+
+/**
  * Format flow discovery for prompt inclusion
  */
 function formatFlowContextForPrompt(flowContext) {
-  if (!flowContext || (!flowContext.routes?.length && !flowContext.uiElements?.length &&
+  if (!flowContext || (!flowContext.routes?.length && !flowContext.sectionTitles?.length && !flowContext.uiElements?.length &&
       !flowContext.messages?.length && !flowContext.apiEndpoints?.length && !flowContext.selectors?.length)) {
     return null;
   }
   const parts = [];
   if (flowContext.routes?.length) {
-    parts.push('### Routes & Navigation\n' + flowContext.routes.map(r =>
-      `- \`${r.path}\` (${r.file})`
+    const routeLines = flowContext.routes.map(r => {
+      const label = routeToPageLabel(r.path);
+      return label ? `- \`${r.path}\` → ${label} (${r.file})` : `- \`${r.path}\` (${r.file})`;
+    });
+    parts.push('### Routes & suggested page names (use for navigation steps)\n' + routeLines.join('\n'));
+  }
+  if (flowContext.sectionTitles?.length) {
+    parts.push('### Page and section titles (use these exact names in test steps)\n' + flowContext.sectionTitles.map(s =>
+      `- "${s.title}" (${s.file})`
     ).join('\n'));
   }
   if (flowContext.uiElements?.length) {
@@ -278,6 +346,7 @@ module.exports = {
   discoverFlows,
   formatFlowContextForPrompt,
   extractRoutes,
+  extractSectionTitles,
   extractUIElements,
   extractMessages,
   extractAPIEndpoints,
