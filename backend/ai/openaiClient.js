@@ -81,13 +81,28 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     // Get comprehensive code context (includes fileContents and selectorHints for accuracy)
     const codeContext = await buildCodeContext(repo, pr_number, changedFiles, diff, { fileContents, selectorHints });
 
-    // Get product knowledge context (if knowledge sync is enabled)
+    // Get product knowledge context and risk assessment (if knowledge sync is enabled)
     let productKnowledgeContext = '';
+    let productContext = null;
+    let riskSummary = null;
+    let affectedFlows = [];
+    let productContextSummary = '';
     if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true') {
       try {
         const { getProductContext, formatProductContextForPrompt } = require('../services/knowledgeBase/contextRetriever');
-        const productContext = await getProductContext(repo, changedFiles, `${title || ''} ${body || ''}`);
+        productContext = await getProductContext(repo, changedFiles, `${title || ''} ${body || ''}`);
         productKnowledgeContext = formatProductContextForPrompt(productContext);
+        affectedFlows = productContext.affectedFlows || [];
+        productContextSummary = [productContext.productAreas?.length ? `Areas: ${productContext.productAreas.map(a => a.name).join(', ')}` : '', productContext.userFlows?.length ? `Flows: ${productContext.userFlows.slice(0, 5).map(f => f.name).join(', ')}` : ''].filter(Boolean).join('. ');
+        const { evaluate: riskEvaluate } = require('../services/riskEngine');
+        riskSummary = riskEvaluate({
+          changedFiles,
+          diff,
+          prDescription: `${title || ''} ${body || ''}`,
+          affectedFlows,
+          repoContext: productContext.repoContext,
+          existingRisks: codeContext.risks || {}
+        });
       } catch (pkErr) {
         console.warn('Product context retrieval failed (degrading gracefully):', pkErr.message);
       }
@@ -212,7 +227,10 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         fileContentsForPrompt: fileContentsForPrompt || '',
         testRecipeRules,
         flowContextFormatted: flowContextFormatted || '',
-        flowDiscoveryRules: flowContextFormatted ? require('./prompts/flow-discovery-rules') : ''
+        flowDiscoveryRules: flowContextFormatted ? require('./prompts/flow-discovery-rules') : '',
+        riskSummary,
+        affectedFlows,
+        productContextSummary: productContextSummary || ''
       });
     } else if (fs.existsSync(deepPromptTemplatePath)) {
       console.log('✅ Using deep analysis template for comprehensive code review');
@@ -227,7 +245,10 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         codeContext: sanitizedContext,
         productKnowledgeContext: productKnowledgeContext || 'No product knowledge context available.',
         changedFiles: changedFiles,
-        testRecipeRules
+        testRecipeRules,
+        riskSummary: riskSummary || null,
+        affectedFlows: affectedFlows || [],
+        productContextSummary: productContextSummary || ''
       });
     } else {
       // Fallback to default template if deep analysis template doesn't exist
@@ -280,6 +301,11 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
 
         // Try to parse the JSON response with multiple fallback strategies
         let insights = await parseAIResponse(response, sanitizedTitle, sanitizedBody, sanitizedDiff);
+
+        if (insights && riskSummary && typeof insights === 'object' && insights.summary) {
+          insights.summary.riskLevel = riskSummary.level.toUpperCase();
+          if (riskSummary.reasoning) insights.summary.riskReasoning = riskSummary.reasoning;
+        }
 
         if (insights) {
           console.log('✅ Successfully generated DEEP CODE ANALYSIS insights');

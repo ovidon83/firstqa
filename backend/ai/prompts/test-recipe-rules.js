@@ -32,6 +32,10 @@ module.exports = `
 - "Test the flow"
 - "Verify functionality"
 
+**AUTOMATION COLUMN:** Use only one of: **UI**, **API**, **Unit**, **Other**. UI = browser/E2E flows. API = HTTP/endpoints/contracts. Unit = isolated logic. Other = visual/manual/mixed.
+
+**Test recipe must be based on indexed product context, affected flows, and dependency impact — no invented flows. Max 5 scenarios. Scenario names: clear, platform-language words from the codebase.**
+
 **FOR UI/FRONTEND CHANGES:** Use exact labels, button text, field names, and URLs from the code. Include selectors in parentheses when available: (data-testid="submit-btn").
 
 **FOR BACKEND/API CHANGES:** Use concrete requests and assertions:

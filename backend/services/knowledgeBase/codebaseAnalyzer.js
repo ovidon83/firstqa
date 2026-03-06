@@ -12,16 +12,25 @@ const EXCLUDED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '
 const BATCH_SIZE = parseInt(process.env.INITIAL_ANALYSIS_BATCH_SIZE || '50', 10);
 const MAX_FILE_SIZE = 100000; // ~100KB per file
 const ANALYSISABLE_EXTENSIONS = ['.js', '.ts', '.jsx', '.tsx', '.vue', '.py', '.java', '.go', '.rb', '.php', '.cs', '.rs', '.swift', '.kt'];
+const TEST_FILE_PATTERNS = [
+  /\.(test|spec)\.(js|ts|jsx|tsx)$/i,
+  /__(tests|test)__\/.+\.(js|ts|jsx|tsx)$/i
+];
 
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 
-const EXTRACTION_PROMPT = `Extract structured knowledge from this code file. Return a JSON array of knowledge entries.
-Each entry: { "knowledge_type": "component"|"function"|"api"|"data_model"|"feature"|"other", "entity_name": string, "description": string, "dependencies": string[] }
+const VALID_KNOWLEDGE_TYPES = ['component', 'function', 'api', 'data_model', 'feature', 'other', 'product_area', 'user_flow'];
+
+const EXTRACTION_PROMPT = `Extract structured knowledge from this code file. Return a JSON object with "entries" array.
+Each entry: { "knowledge_type": string, "entity_name": string, "description": string, "dependencies": string[], "file_paths": string[] (optional) }
+knowledge_type must be one of: component, function, api, data_model, feature, other, product_area, user_flow
 - component: React/Vue components, UI modules
 - function: Key functions, handlers, utilities
 - api: API endpoints, routes, contracts
 - data_model: DB schemas, types, interfaces
 - feature: Business logic, feature modules
+- product_area: High-level product area (e.g. billing, auth, checkout). entity_name = slug (e.g. billing). description = short scope.
+- user_flow: End-to-end user journey (e.g. "upgrade subscription"). entity_name = flow name. description = what user does. file_paths = array of files involved if known.
 If the file has multiple entities, extract each. Be concise. Limit to 5 entries per file.`;
 
 /**
@@ -60,12 +69,17 @@ async function extractKnowledge(filePath, content) {
     if (!text) return [];
     const parsed = JSON.parse(text);
     const entries = Array.isArray(parsed.entries) ? parsed.entries : (Array.isArray(parsed) ? parsed : [parsed]);
-    return entries.slice(0, 5).map(e => ({
-      knowledge_type: e.knowledge_type || 'other',
-      entity_name: e.entity_name || 'Unknown',
-      description: e.description || '',
-      dependencies: Array.isArray(e.dependencies) ? e.dependencies : []
-    }));
+    return entries.slice(0, 5).map(e => {
+      const kt = VALID_KNOWLEDGE_TYPES.includes(e.knowledge_type) ? e.knowledge_type : 'other';
+      const filePaths = Array.isArray(e.file_paths) ? e.file_paths : [filePath];
+      return {
+        knowledge_type: kt,
+        entity_name: (e.entity_name || 'Unknown').trim(),
+        description: (e.description || '').trim(),
+        dependencies: Array.isArray(e.dependencies) ? e.dependencies : [],
+        file_paths: filePaths
+      };
+    });
   } catch (err) {
     console.error(`Extraction failed for ${filePath}:`, err.message);
     return [];
@@ -73,14 +87,89 @@ async function extractKnowledge(filePath, content) {
 }
 
 /**
- * Filter file paths to exclude irrelevant files
+ * Filter file paths to exclude irrelevant files (source + test files)
  */
 function filterRelevantFiles(paths) {
   return paths.filter(p => {
     if (EXCLUDED_PATTERNS.some(pat => p.includes(pat))) return false;
     if (EXCLUDED_EXTENSIONS.some(ext => p.endsWith(ext))) return false;
-    return ANALYSISABLE_EXTENSIONS.some(ext => p.endsWith(ext));
+    if (ANALYSISABLE_EXTENSIONS.some(ext => p.endsWith(ext))) return true;
+    if (TEST_FILE_PATTERNS.some(re => re.test(p))) return true;
+    return false;
   });
+}
+
+function isTestFile(filePath) {
+  return TEST_FILE_PATTERNS.some(re => re.test(filePath));
+}
+
+/**
+ * Derive product areas from folder structure heuristics
+ * @param {string[]} filePaths - Repo file paths
+ * @returns {Array<{ slug: string, name: string, paths: string[] }>}
+ */
+function deriveProductAreasFromPaths(filePaths) {
+  const areaBySlug = new Map();
+  const pathToArea = [
+    { pattern: /^services\/billing\/?/i, slug: 'billing', name: 'Billing' },
+    { pattern: /^services\/auth\/?/i, slug: 'auth', name: 'Authentication' },
+    { pattern: /^services\/checkout\/?/i, slug: 'checkout', name: 'Checkout' },
+    { pattern: /^webhooks\/?/i, slug: 'webhooks', name: 'External integrations' },
+    { pattern: /^(frontend\/)?pages\/?/i, slug: 'ui_flows', name: 'UI flows' },
+    { pattern: /^pages\/?/i, slug: 'ui_flows', name: 'UI flows' },
+    { pattern: /^api\/?/i, slug: 'api', name: 'API layer' },
+    { pattern: /^routes\/?/i, slug: 'api', name: 'API layer' },
+    { pattern: /^services\/([^/]+)/i, slug: null, name: null },
+    { pattern: /^controllers?\//i, slug: 'controllers', name: 'Controllers' },
+    { pattern: /^lib\/?/i, slug: 'lib', name: 'Shared lib' }
+  ];
+  for (const p of filePaths) {
+    for (const { pattern, slug, name } of pathToArea) {
+      const m = p.match(pattern);
+      if (!m) continue;
+      let s = slug;
+      let n = name;
+      if (s === null && m[1]) {
+        s = m[1].toLowerCase().replace(/\W/g, '_');
+        n = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+      }
+      if (!s) continue;
+      if (!areaBySlug.has(s)) areaBySlug.set(s, { slug: s, name: n || s, paths: [] });
+      areaBySlug.get(s).paths.push(p);
+      break;
+    }
+  }
+  return Array.from(areaBySlug.values());
+}
+
+/**
+ * Extract user flow name from test file path/name
+ * e.g. subscriptionUpgrade.test.ts -> "upgrade subscription", loginFlow.test.js -> "login flow"
+ */
+function extractUserFlowFromTestFile(filePath, content) {
+  const base = filePath.split('/').pop().replace(/\.(test|spec)\.(js|ts|jsx|tsx)$/i, '');
+  const flowName = base
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[-_]/g, ' ')
+    .trim()
+    .toLowerCase();
+  const describeMatch = typeof content === 'string' && content.match(/describe\s*\(\s*['"`]([^'"`]{2,80})['"`]/);
+  const name = (describeMatch ? describeMatch[1] : flowName || base).trim();
+  return name || base;
+}
+
+/**
+ * Parse import/require statements to get dependency module names (repo-relative or service name)
+ */
+function parseImports(content, filePath) {
+  const deps = new Set();
+  if (!content || typeof content !== 'string') return Array.from(deps);
+  const reRequire = /require\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  const reImport = /import\s+(?:[\w{}\s,*]+\s+from\s+)?['"`]([^'"`]+)['"`]/g;
+  let m;
+  while ((m = reRequire.exec(content)) !== null) deps.add(m[1].trim());
+  while ((m = reImport.exec(content)) !== null) deps.add(m[1].trim());
+  return Array.from(deps).filter(Boolean);
 }
 
 /**
@@ -163,6 +252,9 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
       batches.push(filePaths.slice(i, i + BATCH_SIZE));
     }
 
+    const dependencyGraph = {};
+    const testFlowsByArea = {};
+
     for (let b = 0; b < batches.length; b++) {
       const batch = batches[b];
       const progress = Math.round(((b + 1) / batches.length) * 100);
@@ -173,22 +265,48 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
           const content = contentRes.data.content ? Buffer.from(contentRes.data.content, 'base64').toString('utf8') : '';
           if (content.length > MAX_FILE_SIZE || content.length < 10) continue;
 
-          const entries = await extractKnowledge(filePath, content);
-          for (const entry of entries) {
-            const embedding = await createEmbedding(`${entry.entity_name}: ${entry.description}`);
+          const imports = parseImports(content, filePath);
+          if (imports.length) dependencyGraph[filePath] = imports;
+
+          if (isTestFile(filePath)) {
+            const flowName = extractUserFlowFromTestFile(filePath, content);
+            const areas = deriveProductAreasFromPaths([filePath]);
+            const areaSlug = areas.length ? areas[0].slug : 'other';
+            if (!testFlowsByArea[areaSlug]) testFlowsByArea[areaSlug] = [];
+            if (!testFlowsByArea[areaSlug].includes(flowName)) testFlowsByArea[areaSlug].push(flowName);
+            const embedding = await createEmbedding(`${flowName}: test flow`);
             await supabaseAdmin.from('product_knowledge').insert({
               repo_id: repoId,
-              knowledge_type: entry.knowledge_type,
-              entity_name: entry.entity_name,
-              description: entry.description,
+              knowledge_type: 'user_flow',
+              entity_name: flowName,
+              description: `User flow covered by test: ${filePath}`,
               file_paths: [filePath],
-              dependencies: entry.dependencies || [],
-              metadata: {},
+              dependencies: [],
+              metadata: { area: areaSlug, from_test: true },
               embedding: embedding || null,
               git_sha: treeSha,
               source_pr_number: null
             });
             entriesCreated++;
+          } else {
+            const entries = await extractKnowledge(filePath, content);
+            for (const entry of entries) {
+              const paths = (entry.file_paths && entry.file_paths.length) ? entry.file_paths : [filePath];
+              const embedding = await createEmbedding(`${entry.entity_name}: ${entry.description}`);
+              await supabaseAdmin.from('product_knowledge').insert({
+                repo_id: repoId,
+                knowledge_type: entry.knowledge_type,
+                entity_name: entry.entity_name,
+                description: entry.description,
+                file_paths: paths,
+                dependencies: entry.dependencies || [],
+                metadata: {},
+                embedding: embedding || null,
+                git_sha: treeSha,
+                source_pr_number: null
+              });
+              entriesCreated++;
+            }
           }
           filesAnalyzed++;
         } catch (fileErr) {
@@ -201,6 +319,81 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
         .update({ progress, metadata: { files_analyzed: filesAnalyzed, entries_created: entriesCreated } })
         .eq('id', jobId);
     }
+
+    const productAreasHeuristic = deriveProductAreasFromPaths(filePaths);
+    for (const area of productAreasHeuristic) {
+      const slug = area.slug;
+      const { data: existing } = await supabaseAdmin
+        .from('product_knowledge')
+        .select('id')
+        .eq('repo_id', repoId)
+        .eq('knowledge_type', 'product_area')
+        .eq('entity_name', slug)
+        .limit(1)
+        .maybeSingle();
+      const embedding = await createEmbedding(`${area.name}: ${area.paths.slice(0, 5).join(', ')}`);
+      const payload = {
+        repo_id: repoId,
+        knowledge_type: 'product_area',
+        entity_name: slug,
+        description: area.name,
+        file_paths: area.paths.slice(0, 200),
+        dependencies: [],
+        metadata: {},
+        embedding,
+        git_sha: treeSha,
+        source_pr_number: null
+      };
+      if (existing) {
+        await supabaseAdmin.from('product_knowledge').update({
+          description: payload.description,
+          file_paths: payload.file_paths,
+          embedding: payload.embedding,
+          last_updated: new Date().toISOString()
+        }).eq('id', existing.id);
+      } else {
+        await supabaseAdmin.from('product_knowledge').insert(payload);
+        entriesCreated++;
+      }
+    }
+
+    const { data: userFlowRows } = await supabaseAdmin
+      .from('product_knowledge')
+      .select('entity_name, description, file_paths, metadata')
+      .eq('repo_id', repoId)
+      .eq('knowledge_type', 'user_flow');
+    const userFlows = (userFlowRows || []).map(r => ({
+      name: r.entity_name,
+      description: r.description,
+      file_paths: r.file_paths || [],
+      area: (r.metadata && r.metadata.area) || null
+    }));
+
+    const { data: serviceRows } = await supabaseAdmin
+      .from('product_knowledge')
+      .select('entity_name, description, file_paths, dependencies')
+      .eq('repo_id', repoId)
+      .in('knowledge_type', ['api', 'feature']);
+    const services = {};
+    for (const r of serviceRows || []) {
+      services[r.entity_name] = { path: (r.file_paths && r.file_paths[0]) || '', dependencies: r.dependencies || [] };
+    }
+
+    const productAreasMap = {};
+    for (const a of productAreasHeuristic) {
+      productAreasMap[a.slug] = { name: a.name, paths: a.paths };
+    }
+
+    await supabaseAdmin.from('repo_context').upsert({
+      repo_id: repoId,
+      product_areas: productAreasMap,
+      user_flows: userFlows,
+      services: services,
+      tests_by_area: testFlowsByArea,
+      dependency_graph: dependencyGraph,
+      git_sha: treeSha,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'repo_id' });
 
     await supabaseAdmin
       .from('knowledge_sync_jobs')
@@ -245,5 +438,9 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
 
 module.exports = {
   analyzeRepository,
-  filterRelevantFiles
+  filterRelevantFiles,
+  deriveProductAreasFromPaths,
+  extractUserFlowFromTestFile,
+  parseImports,
+  isTestFile
 };

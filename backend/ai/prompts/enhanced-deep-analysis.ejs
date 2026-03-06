@@ -65,8 +65,17 @@ Description: <%= body %>
 **ADVANCED CODE ANALYSIS:**
 <%= codeContext %>
 <% if (typeof productKnowledgeContext !== 'undefined' && productKnowledgeContext && productKnowledgeContext !== 'No product knowledge context available.') { %>
-**PRODUCT KNOWLEDGE CONTEXT (components, APIs, data models - use for deeper understanding):**
+**PRODUCT KNOWLEDGE CONTEXT (components, APIs, data models, affected flows - use for deeper understanding):**
 <%= productKnowledgeContext %>
+<% } %>
+<% if (typeof riskSummary !== 'undefined' && riskSummary && riskSummary.level) { %>
+**RISK ASSESSMENT (product-aware):** Level <%= riskSummary.level %> (score <%= riskSummary.score %>). <%= riskSummary.reasoning %> Use this to inform the Risk row in Release Pulse.
+<% } %>
+<% if (typeof affectedFlows !== 'undefined' && affectedFlows && affectedFlows.length) { %>
+**AFFECTED USER FLOWS:** <%= affectedFlows.map(f => f.flowName + ' (' + f.reason + ')').join('; ') %>
+<% } %>
+<% if (typeof productContextSummary !== 'undefined' && productContextSummary) { %>
+**PRODUCT CONTEXT SUMMARY:** <%= productContextSummary %>
 <% } %>
 <% if (typeof selectorHintsFormatted !== 'undefined' && selectorHintsFormatted && selectorHintsFormatted !== 'None extracted.') { %>
 **AUTOMATION SELECTORS (use these in test steps when applicable - enables Playwright/automation):**
@@ -108,9 +117,9 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🧪 Test Recipe
 
-| Scenario | Steps | Expected Result | Priority | Automation Type |
-|----------|-------|-----------------|----------|-----------------|
-[AI will generate test cases here — ORDERED BY PRIORITY top-down: Smoke, then Critical Path, then Regression]
+| Scenario | Steps | Expected Result | Priority | Automation |
+|----------|-------|-----------------|----------|-------------|
+[AI will generate test cases here — MAX 5 scenarios. ORDER BY PRIORITY: Smoke, then Critical Path, then Regression. Automation column: UI | API | Unit | Other only.]
 
 **If Decision is Caution or No-Go, add:**
 ## ✅ To Do (for Go)
@@ -137,13 +146,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **EXPECTED RESULT**: Specific, observable outcomes. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
 - **PRIORITY**: Use ONLY these three values: **Smoke** (core flows, fixes, must-work scenarios), **Critical Path** (important user-facing scenarios, error handling), **Regression** (existing functionality that might be affected)
-- **AUTOMATION TYPE**: Best-fit test type based on changes and testing strategy:
-  - **E2E (End-to-End)**: Full user flows through UI, critical paths, user journeys spanning multiple components
-  - **Integration**: Be SPECIFIC - use one of: API Contract (HTTP endpoints, request/response), Database (schema, migrations, CRUD, queries), Service-to-Service (API-to-API, webhooks), Component (React/module interactions), Third-party (external APIs, OAuth, payment gateways)
-  - **Unit**: Specific function/logic tests, utility functions, isolated component behavior
-  - **Visual**: UI appearance, styling, layout, responsive design (if UI changes detected)
-  - **Manual**: Complex scenarios requiring human judgment, exploratory testing, UX validation
-  - Choose based on: what changed (UI/backend/logic), affected components, test scope, automation feasibility
+- **AUTOMATION** (column values — use ONLY these four): **UI** (browser/E2E, user flows, forms, navigation), **API** (HTTP, endpoints, contracts), **Unit** (functions, utilities, isolated logic), **Other** (visual, manual, or mixed). Choose based on what changed and test scope.
 
 
 ---
@@ -184,7 +187,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **EDGE CASES**: Include important edge cases (rapid actions, multiple states, concurrent operations, boundary conditions)
 - **NEGATIVE TESTS**: Include negative test cases (error conditions, failure scenarios, invalid states)
 - **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions
-- Generate 5-7 comprehensive test cases total, prioritizing fixes and user-facing changes
+- Generate at most **5** test scenarios total (max 5 flows). Base test recipe on indexed product context, affected flows, and dependency impact — no invented flows. Prioritize fixes and user-facing changes.
 - **ONE TEST CASE PER FIX**: Each distinct fix mentioned in commits should get its own dedicated test case
 - Provide concrete, actionable test steps with specific details based on the real changes
 - Consider the full user journey and how ALL changes work together
@@ -258,7 +261,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Understand conditional logic: when filters switch, when items appear/disappear, when toasts show
     - Map out the exact flow: user action → state change → UI update → toast notification
   - **STEP 2: TEST CASE GENERATION**:
-    - Generate **5-7 comprehensive test cases** total, prioritizing fixes and user-facing changes
+    - Generate at most **5** test scenarios total (max 5 flows), prioritizing fixes and user-facing changes
     - **CRITICAL**: For EACH distinct fix mentioned in commit messages, generate a SEPARATE test case that specifically verifies that fix
     - Use ONLY these priority levels: Smoke, Critical Path, Regression
     - Order scenarios by priority (Smoke first, then Critical Path, then Regression)
@@ -323,30 +326,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **Test Complete Flows**: Test full user journeys, not just isolated actions
     - **Specific Expected Results**: Never use generic descriptions like "works correctly" - use exact UI states, messages, behaviors extracted from code
     - **One Test Case Per Fix**: Each distinct fix should get its own dedicated test case
-    - **Automation Type** (NEW COLUMN - CRITICAL):
-      - Analyze what changed and recommend the BEST-FIT test automation type for each scenario
-      - **E2E (End-to-End)**: Use for full user flows through UI, multi-step journeys, critical paths spanning multiple pages/components
-        - Examples: Login → Create → Submit flow, Purchase checkout, Full feature workflows
-      - **Integration**: Be SPECIFIC about the type. Use one of:
-        - **API Contract**: HTTP endpoints, request/response validation, status codes, API schema
-        - **Database**: Schema migrations, CRUD operations, queries, transactions, ORM behavior
-        - **Service-to-Service**: API-to-API calls, webhooks, microservice communication
-        - **Component**: React components with hooks/context, module interactions, parent-child component flows
-        - **Third-party**: External APIs, OAuth flows, payment gateways, SDK integrations
-      - **Unit**: Use for isolated function/logic tests, utility functions, single component behavior, pure logic
-        - Examples: Validation functions, data transformers, calculations, isolated helper methods
-      - **Visual**: Use for UI appearance, styling, layout, responsive design, visual regression
-        - Examples: Button color changes, layout adjustments, CSS modifications, responsive breakpoints
-      - **Manual**: Use ONLY for complex scenarios requiring human judgment, exploratory testing, UX validation
-        - Examples: Complex UX flows, accessibility checks, exploratory edge cases, subjective quality assessment
-      - **Selection Strategy** (APPLY EXPERT TEST AUTOMATION JUDGMENT):
-        - Frontend UI changes (buttons, forms, pages, navigation) → E2E
-        - API/HTTP changes → Integration (API Contract); DB changes → Integration (Database); service calls → Integration (Service-to-Service)
-        - Pure functions, utilities, calculations, helpers → Unit
-        - CSS/styling only changes → Visual
-        - Complex UX requiring judgment → Manual
-        - Multi-layer changes (UI + API + DB) → E2E for critical path + Integration for backend
-      - **IMPORTANT**: Choose based on: what actually changed in the PR, scope of test scenario, feasibility of automation, ROI of automation vs manual testing
+    - **Automation** (column — use ONLY: **UI** | **API** | **Unit** | **Other**):
+      UI = browser/E2E, user flows, forms, navigation. API = HTTP, endpoints, contracts, DB. Unit = isolated functions, utilities, pure logic. Other = visual, manual, or mixed. Choose based on what changed; keep output short and scannable.
 
 - For Bugs & Risks (MERGED SECTION):
   - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real, verifiable issues - NO FALSE POSITIVES.
