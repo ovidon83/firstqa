@@ -22,7 +22,7 @@ Before analyzing anything, categorize the changed files:
 1. **If ALL files are non-code**: 
    - Release Confidence: 🟢 High
    - Change Impact: 🟢 Low
-   - Release Decision: 🟢 Go
+   - QA Pulse Decision: 🟢 Ship
    - Bugs & Risks: "✅ No critical issues found."
    - Bugs: "No bugs identified - non-code changes only."
    - Test Recipe: Simple verification test only (e.g., "Verify file exists and is readable")
@@ -69,7 +69,7 @@ Description: <%= body %>
 <%= productKnowledgeContext %>
 <% } %>
 <% if (typeof riskSummary !== 'undefined' && riskSummary && riskSummary.level) { %>
-**RISK ASSESSMENT (product-aware):** Level <%= riskSummary.level %> (score <%= riskSummary.score %>). <%= riskSummary.reasoning %> Use this to inform the Risk row in Release Pulse.
+**RISK ASSESSMENT (product-aware):** Level <%= riskSummary.level %> (score <%= riskSummary.score %>). <%= riskSummary.reasoning %> Use this to inform the Risk row in QA Pulse.
 <% } %>
 <% if (typeof affectedFlows !== 'undefined' && affectedFlows && affectedFlows.length) { %>
 **AFFECTED USER FLOWS:** <%= affectedFlows.map(f => f.flowName + ' (' + f.reason + ')').join('; ') %>
@@ -94,15 +94,15 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 # 🎯 QA Analysis - by Ovi (the AI QA)
 
-## 🧪 Release Pulse
+## 🎯 QA Pulse
 
-**TABLE RULES: Metric | Level | Details. Level = only the value. Details = concrete, specific (max 15 words).**
+**TABLE RULES: Metric | Value | Details. Value = only the value. Details = short, readable (max 15 words). Maximum 3 rows only.**
 
-| Metric | Level | Details |
+| Metric | Value | Details |
 |--------|-------|---------|
-| 🚦 Decision | Go / Caution / NO-GO | [Concrete issue or "Safe to ship after testing"] |
-| 📍 Areas | High / Medium / Low | [2–4 affected components, comma-separated] |
-| ⚠️ Risk | High / Medium / Low | [Key risks if shipped, e.g. invalid A/B results, poor UX] |
+| Decision | 🟢 Ship / 🟡 Investigate / 🔴 No-Go | Short explanation of why |
+| Risk | Low / Medium / High | Based on detected issues |
+| Impact | Product areas affected | Short list of areas or flows (no file names) |
 
 ## 🔍 Bugs & Risks
 
@@ -121,7 +121,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 |----------|-------|-----------------|----------|-------------|
 [AI will generate test cases here — MAX 5 scenarios. ORDER BY PRIORITY: Smoke, then Critical Path, then Regression. Automation column: UI | API | Unit | Other only.]
 
-**If Decision is Caution or No-Go, add:**
+**If Decision is Investigate or No-Go, add:**
 ## ✅ To Do (for Go)
 - [ ] Item 1 (concrete action)
 - [ ] Item 2
@@ -340,49 +340,43 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **Before saying "No critical issues found"**: Explicitly consider: logic bugs (wrong conditions, always/never branches, experiment/A/B always same variant), null/undefined access on reachable paths, data integrity (migrations, overwrites), state cleanup (logout, store reset). Only say "No critical issues found" if you have genuinely looked and found nothing. Do not add speculative MEDIUM risks—only real issues.
 - **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text.
   - **DO NOT ADD**: No summaries or extra explanations after the list.
-- For Release Pulse (3 rows only: Decision, Areas, Risk):
-  - **Decision**: Level = "Go", "Caution", or "NO-GO". Details = concrete reason (e.g., "Experiment logic always assigns 'treatment', breaking A/B test validity" or "Safe to ship after testing").
-  - **Areas**: Level = High/Medium/Low. Details = 2-4 affected components.
-  - **Risk**: Level = High/Medium/Low. Details = key risks if shipped (e.g., "Invalid A/B results if shipped, poor dark mode UX").
+- For QA Pulse (3 rows only: Decision, Risk, Impact):
+  - **Decision**: Value = "🟢 Ship", "🟡 Investigate", or "🔴 No-Go". Details = short explanation. 🟢 Ship = no significant risks; combination of risk+area+code supports merge. 🟡 Investigate = potential issues; verify flows below before merge. 🔴 No-Go = clear bug or high-confidence risk; fix before merging.
+  - **Risk**: Value = Low / Medium / High. Details = based on detected issues.
+  - **Impact**: Value = product areas affected. Details = short list of product areas or user flows only (no file names).
 - For Steps: Use HTML line breaks within table cells to ensure proper formatting:
   - Each step must be on its own line using `<br>` tags
   - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
   - NOT: "1. Open form 2. Fill fields 3. Submit"
   - This ensures the table displays steps as proper numbered lists
 
-**TO DO CHECKLIST (when Decision is Caution or No-Go):**
-- If Release Decision is **Caution** or **No-Go**, add a section **## ✅ To Do (for Go)** immediately after the Test Recipe table.
+**TO DO CHECKLIST (when Decision is Investigate or No-Go):**
+- If QA Pulse Decision is **🟡 Investigate** or **🔴 No-Go**, add a section **## ✅ To Do (for Go)** immediately after the Test Recipe table.
 - Include 3–5 concrete, actionable checklist items for the PR author (e.g. "Fix null check at `file:line`", "Add test for X", "Clarify Y with team"). Base items on Bugs & Risks and missing validations. Use clear, copy-pasteable actions.
-- If Decision is **Go**, do NOT add the To Do section.
+- If Decision is **🟢 Ship**, do NOT add the To Do section.
 
 **REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE (or after "✅ To Do (for Go)" if present). DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
 
-**RELEASE PULSE EVALUATION — GO / NO-GO LOGIC (CRITICAL):**
+**QA PULSE — DECISION LOGIC (CRITICAL):**
 
-**Decision MUST be driven by Bugs & Risks. Be STRICT and CONSISTENT. Base on actual code findings, not assumptions.**
+**Decision MUST be driven by Bugs & Risks. Be STRICT and CONSISTENT. Base on actual code findings, not assumptions. Keep details short so engineers can read the Pulse in 2 seconds.**
 
-**NO-GO** — Use when ANY of these apply (output "NO-GO" in Level):
-- There is a 🚫 BLOCKER in Bugs & Risks (security, data corruption, critical path break)
-- There is a 🔴 HIGH severity bug that breaks core functionality (e.g., wrong logic, null crash)
-- Logic bug that invalidates feature purpose (e.g., A/B test always returns same variant, experiment results meaningless)
-- Data integrity risk (corruption, wrong writes, overwriting valid data)
-- Security vulnerability or auth bypass
-- **Details**: State the concrete issue and impact (e.g., "Experiment logic always assigns 'treatment', breaking A/B test validity")
+**🟢 Ship** — Use when:
+- No significant risks detected. Combination of risk + impact + code supports merge.
+- **Details**: e.g. "Safe to ship after testing" or "No blocking issues."
 
-**Caution** — Use ONLY when:
-- Minor issues only (docs, style, non-critical edge cases)
-- No BLOCKER or HIGH bugs
-- Issues are 🟡 MEDIUM and can be fixed post-merge or are low likelihood
-- **Details**: Brief note of concern
+**🟡 Investigate** — Use when:
+- Potential issues detected; verify flows listed below before merge.
+- No BLOCKER or HIGH bugs, but 🟡 MEDIUM items or edge cases worth checking.
+- **Details**: Brief note of what to verify (e.g. "Verify OAuth callback cache invalidation").
 
-**Go** — Use when:
-- No BLOCKER or HIGH severity items
-- No logic bugs that break functionality
-- At most minor, acceptable risks
-- **Details**: "Safe to ship after testing" or similar
+**🔴 No-Go** — Use when:
+- Clear bug or high-confidence risk detected; fix before merging.
+- 🚫 BLOCKER or 🔴 HIGH in Bugs & Risks (security, data corruption, critical path break, logic bug that breaks functionality).
+- **Details**: State the concrete issue (e.g. "Experiment logic always assigns 'treatment', breaking A/B test validity").
 
-**Areas**: Affected product areas (e.g., "SMS draft handoff, experiment variant assignment, QR code dark mode").
-**Risk**: Consequences if shipped without fixes (e.g., "Invalid A/B results if shipped, poor dark mode UX").
+**Risk**: Value = Low / Medium / High based on detected issues. Details = key risks if shipped (short).
+**Impact**: Value = product areas affected. Details = short list of product areas or user flows only — no file names (e.g. "Slack integration, Settings, OAuth callback").
 
 **BUGS & RISKS REQUIREMENTS:**
 - **ONLY SIGNAL, NO NOISE**: Only real, verifiable issues with HIGH LIKELIHOOD based on the code. No theoretical or low-probability concerns. NO FALSE POSITIVES.

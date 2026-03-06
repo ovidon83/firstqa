@@ -385,6 +385,7 @@ async function parseAIResponse(response, title, body, diff) {
         response.includes('# Ovi QA Analysis') || 
         response.includes('📋 Summary') ||
         response.includes('Release Pulse') ||
+        response.includes('QA Pulse') ||
         response.includes('Bugs & Risks') ||
         response.includes('Test Recipe')) {
       return response.trim();

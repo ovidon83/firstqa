@@ -2349,6 +2349,7 @@ function formatHybridAnalysisForComment(aiInsights) {
   const hasNewFormat = typeof aiData === 'string' && (
     aiData.includes('📊 Release Pulse') ||
     aiData.includes('🧪 Release Pulse') ||
+    aiData.includes('🎯 QA Pulse') ||
     aiData.includes('🎯 QA Analysis') ||
     aiData.includes('Bugs & Risks') ||
     aiData.includes('Test Recipe')
