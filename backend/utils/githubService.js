@@ -1222,10 +1222,15 @@ That's it! We'll handle the rest. 🚀
  */
 function parseQaFlags(commentBody) {
   const body = String(commentBody || '').trim();
-  const testRun = /\b-testrun\b/i.test(body);
+  const hasFlag = (flag) => new RegExp(`(^|\\s)${flag}(\\s|$)`, 'i').test(body);
+  const testRun = hasFlag('-testrun');
   const envMatch = body.match(/-env=(\S+)/i);
   const envUrl = envMatch ? envMatch[1].trim() : null;
-  const indexCodebase = /\b-index\b/i.test(body) || /\b-reindex\b/i.test(body) || /\b-analyze_codebase\b/i.test(body) || /\b-setup\b/i.test(body);
+  const indexCodebase =
+    hasFlag('-index') ||
+    hasFlag('-reindex') ||
+    hasFlag('-analyze_codebase') ||
+    hasFlag('-setup');
   return { testRun, envUrl, indexCodebase };
 }
 
