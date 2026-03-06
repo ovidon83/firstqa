@@ -2339,6 +2339,56 @@ Or wait until next month when your limit resets.
     simulated: simulatedMode
   };
 }
+/** Priority order for Test Recipe: Smoke first, then Critical Path, then Regression */
+function testRecipePriorityOrder(priority) {
+  const p = (priority || '').trim().toLowerCase();
+  if (p === 'smoke') return 0;
+  if (p === 'critical path') return 1;
+  if (p === 'regression') return 2;
+  return 3;
+}
+
+/**
+ * Sort Test Recipe table rows by Priority: Smoke -> Critical Path -> Regression.
+ * Leaves table structure unchanged; only reorders data rows.
+ * @param {string} markdown - Full comment markdown
+ * @returns {string} Markdown with Test Recipe table rows sorted by priority
+ */
+function sortTestRecipeTableByPriority(markdown) {
+  const tableStart = markdown.indexOf('## 🧪 Test Recipe');
+  if (tableStart === -1) return markdown;
+  const afterHeader = markdown.slice(tableStart);
+  const headerMatch = afterHeader.match(/\|\s*Scenario\s*\|\s*Steps\s*\|\s*Expected Result\s*\|\s*Priority\s*\|\s*Automation\s*\|/i);
+  if (!headerMatch) return markdown;
+  const tableBlockStart = tableStart + afterHeader.indexOf(headerMatch[0]);
+  const fromTable = markdown.slice(tableBlockStart);
+  const lines = fromTable.split('\n');
+  const dataRows = [];
+  let i = 0;
+  if (lines[0] && lines[0].includes('Scenario') && lines[0].includes('Priority')) i = 1;
+  if (lines[i] && /^\|[\s\-:]+\|/.test(lines[i])) i++;
+  for (; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line || !line.trim().startsWith('|')) break;
+    if (/^\|[\s\-:]+\|/.test(line)) continue;
+    const cells = line.split('|').map(c => c.trim());
+    if (cells.length >= 5 && cells[1]) {
+      const priority = (cells[4] || cells[3] || '').trim();
+      dataRows.push({ line, index: i, order: testRecipePriorityOrder(priority) });
+    }
+  }
+  if (dataRows.length <= 1) return markdown;
+  dataRows.sort((a, b) => a.order - b.order);
+  const firstIdx = dataRows[0].index;
+  const lastIdx = dataRows[dataRows.length - 1].index;
+  const sortedLines = lines.slice(0, firstIdx)
+    .concat(dataRows.map(r => r.line))
+    .concat(lines.slice(lastIdx + 1));
+  const sortedBlock = sortedLines.join('\n');
+  const before = markdown.slice(0, tableBlockStart);
+  return before + sortedBlock;
+}
+
 /**
  * Format hybrid analysis for GitHub comment (shared by /qa and automatic PR analysis)
  */
@@ -2358,10 +2408,11 @@ function formatHybridAnalysisForComment(aiInsights) {
   if (hasNewFormat) {
     console.log('🔍 Detected new AI prompt format, using as-is');
     
-    const cleanedData = aiData
+    let cleanedData = aiData
       .replace(/\n{3,}/g, '\n\n')
       .replace(/\t/g, '\n')
       .trim();
+    cleanedData = sortTestRecipeTableByPriority(cleanedData);
     
     const finalComment = `${cleanedData}
 

@@ -119,7 +119,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 | Scenario | Steps | Expected Result | Priority | Automation |
 |----------|-------|-----------------|----------|-------------|
-[AI will generate test cases here — MAX 5 scenarios. ORDER BY PRIORITY: Smoke, then Critical Path, then Regression. Automation column: UI | API | Unit | Other only.]
+[AI will generate test cases here — MAX 5 scenarios. **MANDATORY ROW ORDER**: Output ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Do not interleave. Automation: UI | API | Unit | Other only. Keep Steps and Expected Result concise so table cells align; use one short line per step, separate with <br>.]
 
 **If Decision is Investigate or No-Go, add:**
 ## ✅ To Do (for Go)
@@ -128,7 +128,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - [ ] … (3–5 items total)
 
 **TEST CASE REQUIREMENTS:**
-- **ORDER BY PRIORITY (top-down)**: Always output the Test Recipe table with rows sorted by priority: **Smoke** first, then **Critical Path**, then **Regression**. Use ONLY these three priority labels.
+- **MANDATORY ROW ORDER**: Output the Test Recipe table with rows in this exact order: (1) every **Smoke** row, (2) then every **Critical Path** row, (3) then every **Regression** row. Do not interleave priorities. Use ONLY these three priority labels.
+- **TABLE FORMAT**: Keep Steps and Expected Result cells concise so the table renders with consistent alignment. Use one short line per step; separate steps with `<br>`. Avoid long run-on sentences inside a single cell. Max 2 lines per step line when possible.
 - **SCENARIO** (name rules):
   - NEVER include the test type or automation type in the scenario name. Wrong: "E2E: Submit Contact Form", "Visual: Footer Layout", "Manual: Accessibility Check". Right: "Submit Contact Form", "Footer Layout", "Accessibility Check".
   - **E2E / Visual / Manual**: User-facing name. Format: "[User action] from [context]" or "User [accomplishes X]". Examples: "User completes onboarding from landing page", "User resets state by logging out and back in". Never generic ("Verify Onboarding V2 Flow") or technical ("Verify useOnboardingV2Store export").
@@ -146,7 +147,11 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **EXPECTED RESULT**: Specific, observable outcomes. Use `<br>` for multiple expectations:
   - `Thought remains visible in list<br>Toast shows "Marked as shared! ✔"<br>Badge "Shared" appears on thought`
 - **PRIORITY**: Use ONLY these three values: **Smoke** (core flows, fixes, must-work scenarios), **Critical Path** (important user-facing scenarios, error handling), **Regression** (existing functionality that might be affected)
-- **AUTOMATION** (column values — use ONLY these four): **UI** (browser/E2E, user flows, forms, navigation), **API** (HTTP, endpoints, contracts), **Unit** (functions, utilities, isolated logic), **Other** (visual, manual, or mixed). Choose based on what changed and test scope.
+- **AUTOMATION** (column — use ONLY: **UI** | **API** | **Unit** | **Other**). Choose by test execution target:
+  - **UI**: Test runs in a browser or against the DOM (click, type, navigate, visible state). Use for: E2E, Playwright/Cypress, any scenario that requires a rendered page or user interaction with the UI.
+  - **API**: Test asserts on HTTP request/response, status codes, or payloads without driving a browser. Use for: endpoint tests, contract tests, integration tests that call APIs directly.
+  - **Unit**: Test runs against a single function or module in isolation (mocked dependencies). Use for: pure functions, utilities, isolated component/hook tests with mocks.
+  - **Other**: Analytics/telemetry checks, visual regression, manual exploratory, or mixed (e.g. UI + API in one scenario). Use when the primary verification is not clearly UI, API, or unit.
 
 
 ---
@@ -159,6 +164,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - Look for potential performance, security, or accessibility implications from the actual code
 - **Test recipe based on the diff + other impacted files — no guessing, no overtesting**
 - **Identify assumptions, missing context, suspicious diffs**
+- **Test Recipe row order (MANDATORY)**: Emit table rows sorted by priority only: first all **Smoke** rows, then all **Critical Path** rows, then all **Regression** rows. Never interleave.
 - Prioritize tests using these three priority labels ONLY:
   - **Smoke**: Core user workflows, fix verifications, must-work scenarios
   - **Critical Path**: Important user-facing scenarios, error handling, edge cases
