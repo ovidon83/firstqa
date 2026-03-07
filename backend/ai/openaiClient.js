@@ -122,7 +122,13 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         console.warn('Flow discovery failed (degrading gracefully):', fdErr.message);
       }
     }
-    
+
+    if (productContext && productContext.sectionTitles && productContext.sectionTitles.length) {
+      const indexTitlesBlock = '\n\n### Page and section titles (from index – use these exact names in test steps)\n' +
+        productContext.sectionTitles.map(s => `- "${s.title}" (${s.file})`).join('\n');
+      flowContextFormatted = (flowContextFormatted || '') + indexTitlesBlock;
+    }
+
     // Validate that we have real PR data, not simulated/fake data
     const isSimulatedData = diff && (
       diff.includes('This is a simulated PR description') ||

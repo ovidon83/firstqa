@@ -111,6 +111,12 @@ function isTestFile(filePath) {
 function deriveProductAreasFromPaths(filePaths) {
   const areaBySlug = new Map();
   const pathToArea = [
+    { pattern: /^src\/components\/analytics\/?/i, slug: 'analytics', name: 'Analytics' },
+    { pattern: /^src\/components\/onboarding\/?/i, slug: 'onboarding', name: 'Onboarding' },
+    { pattern: /^src\/components\/settings\/?/i, slug: 'settings', name: 'Settings' },
+    { pattern: /^src\/components\/([^/]+)/i, slug: null, name: null },
+    { pattern: /^src\/routes\/?/i, slug: 'ui_flows', name: 'UI flows' },
+    { pattern: /^src\/pages\/?/i, slug: 'ui_flows', name: 'UI flows' },
     { pattern: /^services\/billing\/?/i, slug: 'billing', name: 'Billing' },
     { pattern: /^services\/auth\/?/i, slug: 'auth', name: 'Authentication' },
     { pattern: /^services\/checkout\/?/i, slug: 'checkout', name: 'Checkout' },
@@ -254,6 +260,8 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
 
     const dependencyGraph = {};
     const testFlowsByArea = {};
+    const sectionTitlesAccum = [];
+    const { extractSectionTitles } = require('../../ai/flowDiscovery');
 
     for (let b = 0; b < batches.length; b++) {
       const batch = batches[b];
@@ -267,6 +275,9 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
 
           const imports = parseImports(content, filePath);
           if (imports.length) dependencyGraph[filePath] = imports;
+
+          const titles = extractSectionTitles(filePath, content);
+          if (titles.length) sectionTitlesAccum.push(...titles);
 
           if (isTestFile(filePath)) {
             const flowName = extractUserFlowFromTestFile(filePath, content);
@@ -384,6 +395,8 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
       productAreasMap[a.slug] = { name: a.name, paths: a.paths };
     }
 
+    const sectionTitles = [...new Map(sectionTitlesAccum.map(s => [s.title.toLowerCase(), s])).values()].slice(0, 30);
+
     await supabaseAdmin.from('repo_context').upsert({
       repo_id: repoId,
       product_areas: productAreasMap,
@@ -391,6 +404,7 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
       services: services,
       tests_by_area: testFlowsByArea,
       dependency_graph: dependencyGraph,
+      section_titles: sectionTitles,
       git_sha: treeSha,
       updated_at: new Date().toISOString()
     }, { onConflict: 'repo_id' });

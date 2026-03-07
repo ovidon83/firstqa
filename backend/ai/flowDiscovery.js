@@ -182,6 +182,16 @@ function extractSectionTitles(filePath, content) {
       if (raw) add(raw);
     }
   }
+  // JSX string literals in ternaries (e.g. ? 'Total Engagements' : 'Posts Published')
+  const isJsx = /\.(tsx|jsx)$/i.test(filePath);
+  if (isJsx && content) {
+    const jsxLiteralRe = /[?:]\s*["']([^"']{2,50})["']/g;
+    let m;
+    while ((m = jsxLiteralRe.exec(content)) !== null) {
+      const raw = (m[1] || '').trim();
+      if (raw && /^[A-Za-z]/.test(raw)) add(raw);
+    }
+  }
   return titles;
 }
 

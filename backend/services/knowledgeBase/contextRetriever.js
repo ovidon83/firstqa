@@ -116,7 +116,8 @@ async function getProductContext(repoFullName, changedFiles = [], description = 
     productAreas: [],
     userFlows: [],
     affectedFlows: [],
-    repoContext: null
+    repoContext: null,
+    sectionTitles: []
   };
 
   if (!isSupabaseConfigured()) return result;
@@ -134,10 +135,13 @@ async function getProductContext(repoFullName, changedFiles = [], description = 
       result.affectedFlows = await getAffectedFlows(repoId, changedFiles);
       const { data: rc } = await supabaseAdmin
         .from('repo_context')
-        .select('product_areas, user_flows, services, tests_by_area, dependency_graph')
+        .select('product_areas, user_flows, services, tests_by_area, dependency_graph, section_titles')
         .eq('repo_id', repoId)
         .maybeSingle();
       result.repoContext = rc || null;
+      if (rc && Array.isArray(rc.section_titles) && rc.section_titles.length) {
+        result.sectionTitles = rc.section_titles;
+      }
       if (rc) {
         result.productAreas = Object.entries(rc.product_areas || {}).map(([slug, data]) => ({
           slug,
