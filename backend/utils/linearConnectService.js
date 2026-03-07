@@ -9,6 +9,14 @@ const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 // Linear GraphQL API endpoint
 const LINEAR_API_URL = 'https://api.linear.app/graphql';
 
+// Linear expects: OAuth tokens (lin_oa*) as "Bearer <token>"; Personal API keys (lin_api_*) as raw key
+function getLinearAuthHeader(apiKey) {
+  const raw = String(apiKey || '').replace(/^Bearer\s+/i, '').trim();
+  if (!raw) return '';
+  if (raw.startsWith('lin_oa')) return `Bearer ${raw}`;
+  return raw;
+}
+
 // Deduplication: prevent duplicate analyses when Linear sends multiple webhooks for same comment
 const recentlyProcessed = new Map();
 const DEDUPE_TTL_MS = 120000; // 2 minutes
@@ -53,8 +61,7 @@ async function verifyLinearApiKey(apiKey) {
     }
   `;
 
-  // Normalize API key: remove Bearer prefix if present
-  const token = String(apiKey || '').replace(/^Bearer\s+/i, '').trim();
+  const authHeader = getLinearAuthHeader(apiKey);
 
   try {
     const response = await axios.post(
@@ -62,14 +69,14 @@ async function verifyLinearApiKey(apiKey) {
       { query },
       {
         headers: {
-          'Authorization': token,
+          'Authorization': authHeader,
           'Content-Type': 'application/json'
         }
       }
     );
 
     if (response.data.errors) {
-      const tokenPreview = String(token).slice(0, 6);
+      const tokenPreview = String(apiKey || '').slice(0, 6);
       console.error(`❌ Linear API verification failed (status: ${response.status || 'N/A'}, token: ${tokenPreview}...):`, response.data.errors);
       return null;
     }
@@ -88,7 +95,7 @@ async function verifyLinearApiKey(apiKey) {
       viewer: viewer ? { id: viewer.id, name: viewer.name, email: viewer.email } : null
     };
   } catch (error) {
-    const tokenPreview = String(token).slice(0, 6);
+    const tokenPreview = String(apiKey || '').slice(0, 6);
     const status = error.response?.status || 'N/A';
     const graphqlErrors = error.response?.data?.errors || [];
     console.error(`❌ Failed to verify Linear API key (status: ${status}, token: ${tokenPreview}...):`, graphqlErrors.length > 0 ? graphqlErrors : error.message);
@@ -312,8 +319,7 @@ async function fetchLinearComment(commentId, installation) {
     }
   `;
 
-  // Normalize API key: remove Bearer prefix if present
-  const token = String(installation.api_key || '').replace(/^Bearer\s+/i, '').trim();
+  const authHeader = getLinearAuthHeader(installation.api_key);
 
   try {
     const response = await axios.post(
@@ -324,14 +330,14 @@ async function fetchLinearComment(commentId, installation) {
       },
       {
         headers: {
-          'Authorization': token,
+          'Authorization': authHeader,
           'Content-Type': 'application/json'
         }
       }
     );
 
     if (response.data.errors) {
-      const tokenPreview = String(token).slice(0, 6);
+      const tokenPreview = String(installation.api_key || '').slice(0, 6);
       console.error(`❌ GraphQL errors (status: ${response.status || 'N/A'}, token: ${tokenPreview}...):`, response.data.errors);
       return null;
     }
@@ -345,7 +351,7 @@ async function fetchLinearComment(commentId, installation) {
 
     return comment;
   } catch (error) {
-    const tokenPreview = String(token).slice(0, 6);
+    const tokenPreview = String(installation.api_key || '').slice(0, 6);
     const status = error.response?.status || 'N/A';
     const graphqlErrors = error.response?.data?.errors || [];
     console.error(`❌ Failed to fetch comment (status: ${status}, token: ${tokenPreview}...):`, graphqlErrors.length > 0 ? graphqlErrors : error.message);
@@ -420,8 +426,7 @@ async function fetchIssueDetails(issueId, installation) {
     }
   `;
 
-  // Normalize API key: remove Bearer prefix if present
-  const token = String(installation.api_key || '').replace(/^Bearer\s+/i, '').trim();
+  const authHeader = getLinearAuthHeader(installation.api_key);
 
   try {
     const response = await axios.post(
@@ -432,14 +437,14 @@ async function fetchIssueDetails(issueId, installation) {
       },
       {
         headers: {
-          'Authorization': token,
+          'Authorization': authHeader,
           'Content-Type': 'application/json'
         }
       }
     );
 
     if (response.data.errors) {
-      const tokenPreview = token.substring(0, 6);
+      const tokenPreview = String(installation.api_key || '').slice(0, 6);
       console.error(`❌ GraphQL errors (status: ${response.status || 'N/A'}, token: ${tokenPreview}...):`, response.data.errors);
       throw new Error('GraphQL query failed');
     }
@@ -471,7 +476,7 @@ async function fetchIssueDetails(issueId, installation) {
       url: issue.url
     };
   } catch (error) {
-    const tokenPreview = token.substring(0, 6);
+    const tokenPreview = String(installation.api_key || '').slice(0, 6);
     const status = error.response?.status || 'N/A';
     const graphqlErrors = error.response?.data?.errors || [];
     console.error(`❌ Failed to fetch issue (status: ${status}, token: ${tokenPreview}...):`, graphqlErrors.length > 0 ? graphqlErrors : error.message);
@@ -497,8 +502,7 @@ async function postComment(issueId, commentBody, installation) {
     }
   `;
 
-  // Normalize API key: remove Bearer prefix if present
-  const token = String(installation.api_key || '').replace(/^Bearer\s+/i, '').trim();
+  const authHeader = getLinearAuthHeader(installation.api_key);
 
   try {
     const response = await axios.post(
@@ -514,14 +518,14 @@ async function postComment(issueId, commentBody, installation) {
       },
       {
         headers: {
-          'Authorization': token,
+          'Authorization': authHeader,
           'Content-Type': 'application/json'
         }
       }
     );
 
     if (response.data.errors) {
-      const tokenPreview = token.substring(0, 6);
+      const tokenPreview = String(installation.api_key || '').slice(0, 6);
       console.error(`❌ GraphQL errors (status: ${response.status || 'N/A'}, token: ${tokenPreview}...):`, response.data.errors);
       throw new Error('Failed to create comment');
     }
@@ -529,7 +533,7 @@ async function postComment(issueId, commentBody, installation) {
     console.log(`✅ Comment posted to ${issueId}`);
     return response.data.data.commentCreate.comment;
   } catch (error) {
-    const tokenPreview = token.substring(0, 6);
+    const tokenPreview = String(installation.api_key || '').slice(0, 6);
     const status = error.response?.status || 'N/A';
     const graphqlErrors = error.response?.data?.errors || [];
     console.error(`❌ Failed to post comment (status: ${status}, token: ${tokenPreview}...):`, graphqlErrors.length > 0 ? graphqlErrors : error.message);
