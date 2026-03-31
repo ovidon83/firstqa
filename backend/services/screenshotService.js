@@ -17,39 +17,22 @@ const axios = require('axios');
  */
 async function uploadScreenshotToGitHub(screenshotPath, filename) {
   try {
-    // Read screenshot
-    const imageBuffer = await fs.readFile(screenshotPath);
-    
-    // For now, we'll use a simple approach:
-    // Option 1: Upload to external service (Imgur, ImgBB)
-    // Option 2: Store locally and serve via our own server
-    // Option 3: Convert to base64 and embed (not recommended for large images)
-    
-    // We'll implement a simple local storage with public URL
-    const publicDir = path.join(process.cwd(), 'public', 'test-screenshots');
-    await fs.mkdir(publicDir, { recursive: true });
-    
-    const timestamp = Date.now();
-    const safeFilename = `${timestamp}-${filename.replace(/[^a-z0-9.-]/gi, '_')}`;
-    const publicPath = path.join(publicDir, safeFilename);
-    
-    // Copy screenshot to public directory
-    await fs.copyFile(screenshotPath, publicPath);
-    
-    // Generate URL (assuming server is running on BASE_URL)
+    await fs.stat(screenshotPath);
+
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const url = `${baseUrl}/test-screenshots/${safeFilename}`;
+    const testResultsRoot = path.join(__dirname, '..', '..', 'test-results');
+    const relativePath = path.relative(testResultsRoot, screenshotPath);
+    const url = `${baseUrl}/test-results/${relativePath}`;
     
-    console.log(`📸 Screenshot uploaded: ${url}`);
+    console.log(`📸 Screenshot available: ${url}`);
     
     return {
       url,
-      path: publicPath,
+      path: screenshotPath,
       originalPath: screenshotPath
     };
   } catch (error) {
-    console.error('Error uploading screenshot:', error);
-    // Return null URL but don't fail
+    console.error('Error with screenshot:', error);
     return {
       url: null,
       path: screenshotPath,
