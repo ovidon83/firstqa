@@ -107,14 +107,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🔍 Bugs & Risks
 
-[AI will generate a bullet list of bugs and risks, SORTED BY SEVERITY (blockers first, then high, then medium):
-- Every item MUST include `file:line` reference
-- Format: "[SEVERITY] Issue description at `file.js:line` — impact"
-- Severity markers: 🚫 BLOCKER (must fix before release), 🔴 HIGH, 🟡 MEDIUM
-- Example: "🔴 Null check missing: `user.profile.name` at `src/Button.js:56` — crashes if profile is null"
-- Example: "🚫 BLOCKER: Data corruption risk in `scripts/sql/migrations/add_reaction_breakdown.sql:18` — overwrites NULL with zeros"
-- If nothing found: "✅ No critical issues found."
-- MAX 6 items — focus on real issues that affect quality, no false positives]
+[FIRST write <bug_check> verification blocks for every candidate bug. Then output ONLY verified REAL BUGs here as a bullet list. Max 6 items, sorted by severity (🚫 BLOCKER > 🔴 HIGH > 🟡 MEDIUM). Format: "[SEVERITY] Description at `file:line` — impact". If no verified bugs: "✅ No critical issues found."]
 
 ## 🧪 Test Recipe
 
@@ -340,74 +333,32 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - **Automation** (column — use ONLY: **UI** | **API** | **Unit** | **Other**):
       UI = browser/E2E, user flows, forms, navigation. API = HTTP, endpoints, contracts, DB. Unit = isolated functions, utilities, pure logic. Other = visual, manual, or mixed. Choose based on what changed; keep output short and scannable.
 
-- For Bugs & Risks (MERGED SECTION):
-  - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real, verifiable issues - NO FALSE POSITIVES.
-  - **ONLY HIGH LIKELIHOOD**: List only issues with high likelihood based on the code (e.g. missing null check on a used path, wrong condition in diff). Do NOT list theoretical risks or low-probability concerns.
-  - **VERIFY AGAINST DIFF AND CODE**: Before reporting ANY bug, you MUST verify: (1) Read the actual code at the line you're referencing — does the code already handle the case (null guard, try/catch, validation check, whitelist)? If yes, do NOT flag it. (2) Check if the diff itself fixes the issue — do NOT flag something the PR is actively resolving. (3) If you cannot confirm the bug exists by citing the exact unguarded code path, do NOT include it.
-  - **REQUIRED**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
-  - **MAX 6 ITEMS**: Only critical issues that affect quality. Prefer fewer, high-confidence items.
-  - **SORT BY SEVERITY**: 🚫 BLOCKER items first, then 🔴 HIGH, then 🟡 MEDIUM
-  - **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that must be fixed before release (security, data corruption, critical path breaks)
-  - **FORMAT**: `[SEVERITY] Issue type: Description at \`file:line\` - impact`
-  - **Before saying "No critical issues found"**: Explicitly consider: logic bugs (wrong conditions, always/never branches, experiment/A/B always same variant), null/undefined access on reachable paths, data integrity (migrations, overwrites), state cleanup (logout, store reset). Only say "No critical issues found" if you have genuinely looked and found nothing. Do not add speculative MEDIUM risks—only real issues.
-- **If nothing found**: Write ONLY "✅ No critical issues found." - DO NOT add any other text.
-  - **DO NOT ADD**: No summaries or extra explanations after the list.
-- For QA Pulse (3 rows only: Decision, Risk, Impact):
-  - **Decision**: Value = "🟢 Ship", "🟡 Investigate", or "🔴 No-Go". Details = short explanation. 🟢 Ship = no significant risks; combination of risk+area+code supports merge. 🟡 Investigate = potential issues; verify flows below before merge. 🔴 No-Go = clear bug or high-confidence risk; fix before merging.
-  - **Risk**: Value = Low / Medium / High. Details = based on detected issues.
-  - **Impact**: Value = product areas affected. Details = short list of product areas or user flows only (no file names).
-- For Steps: Use HTML line breaks within table cells to ensure proper formatting:
-  - Each step must be on its own line using `<br>` tags
-  - Example format: `1. Open the form<br>2. Fill in required fields<br>3. Submit the form`
-  - NOT: "1. Open form 2. Fill fields 3. Submit"
-  - This ensures the table displays steps as proper numbered lists
+- **Bugs & Risks — VERIFICATION REQUIRED:**
+  - For EACH candidate bug, write a `<bug_check>` block BEFORE the Bugs & Risks section:
+    ```
+    <bug_check>
+    CLAIM: [what the bug is]
+    CODE QUOTE: [exact code from the diff — copy/paste the relevant lines]
+    GUARD CHECK: [does surrounding code handle this? quote the guard/try-catch/validation if yes]
+    VERDICT: REAL BUG | FALSE POSITIVE
+    </bug_check>
+    ```
+  - ONLY include items where VERDICT is REAL BUG in the final output.
+  - If all candidates are FALSE POSITIVE, write "✅ No critical issues found." — this is correct, not a failure.
+  - Max 6 items. Format: `[SEVERITY] Description at \`file:line\` — impact`
+  - Severity: 🚫 BLOCKER → 🔴 HIGH → 🟡 MEDIUM (sorted)
+  - **DEPLOYMENT**: Flag `.sql` migrations and new environment variables as deployment prerequisites.
+  - If nothing found: "✅ No critical issues found." — no extra text.
 
-**TO DO CHECKLIST (when Decision is Investigate or No-Go):**
-- If QA Pulse Decision is **🟡 Investigate** or **🔴 No-Go**, add a section **## ✅ To Do (for Go)** immediately after the Test Recipe table.
-- Include 3–5 concrete, actionable checklist items for the PR author (e.g. "Fix null check at `file:line`", "Add test for X", "Clarify Y with team"). Base items on Bugs & Risks and missing validations. Use clear, copy-pasteable actions.
-- If Decision is **🟢 Ship**, do NOT add the To Do section.
+- **QA Pulse (3 rows: Decision, Risk, Impact):**
+  - 🟢 **Ship**: No verified bugs. Safe to merge after testing.
+  - 🟡 **Investigate**: Only if verified MEDIUM bugs exist. State what to check.
+  - 🔴 **No-Go**: Only if verified BLOCKER or HIGH bugs exist. State the concrete issue.
+  - **Risk**: Low / Medium / High based on verified bugs only.
+  - **Impact**: Product areas affected (no file names).
 
-**REMEMBER: STOP YOUR OUTPUT AFTER THE "🧪 Test Recipe" TABLE (or after "✅ To Do (for Go)" if present). DO NOT INCLUDE ANY INSTRUCTIONS OR ADDITIONAL TEXT.**
+- **Steps formatting**: Use `<br>` between steps in table cells.
 
-**QA PULSE — DECISION LOGIC (CRITICAL):**
+- **To Do (for Go)**: Add only when Decision is Investigate or No-Go. 3–5 concrete actions. Omit for Ship.
 
-**Decision MUST be driven by Bugs & Risks. Be STRICT and CONSISTENT. Base on actual code findings, not assumptions. Keep details short so engineers can read the Pulse in 2 seconds.**
-
-**🟢 Ship** — Use when:
-- No significant risks detected. Combination of risk + impact + code supports merge.
-- **Details**: e.g. "Safe to ship after testing" or "No blocking issues."
-
-**🟡 Investigate** — Use when:
-- Potential issues detected; verify flows listed below before merge.
-- No BLOCKER or HIGH bugs, but 🟡 MEDIUM items or edge cases worth checking.
-- **Details**: Brief note of what to verify (e.g. "Verify OAuth callback cache invalidation").
-
-**🔴 No-Go** — Use when:
-- Clear bug or high-confidence risk detected; fix before merging.
-- 🚫 BLOCKER or 🔴 HIGH in Bugs & Risks (security, data corruption, critical path break, logic bug that breaks functionality).
-- **Details**: State the concrete issue (e.g. "Experiment logic always assigns 'treatment', breaking A/B test validity").
-
-**Risk**: Value = Low / Medium / High based on detected issues. Details = key risks if shipped (short).
-**Impact**: Value = product areas affected. Details = short list of product areas or user flows only — no file names (e.g. "Slack integration, Settings, OAuth callback").
-
-**BUGS & RISKS REQUIREMENTS:**
-- **ONLY SIGNAL, NO NOISE**: Only real, verifiable issues with HIGH LIKELIHOOD based on the code. No theoretical or low-probability concerns. NO FALSE POSITIVES. Before reporting, verify the code doesn't already handle the case and the diff doesn't fix it.
-- **STRICT RULE**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
-- **MAX 6 ITEMS**: Only the most critical issues. Prefer fewer, high-confidence items.
-- **SORT BY SEVERITY**: List items in order: 🚫 BLOCKER first, then 🔴 HIGH, then 🟡 MEDIUM
-- **MARK BLOCKERS**: Use 🚫 BLOCKER for issues that MUST be fixed before release:
-  - Security vulnerabilities
-  - Data corruption/integrity risks
-  - Critical path breaks
-  - Unhandled errors in critical flows
-- **CATEGORIES**:
-  - Code Issues: null checks, incorrect logic, security risks, memory leaks, performance problems
-  - Functional Bugs: broken flows, edge case failures, UI bugs, integration issues
-- **FORMAT**: `[SEVERITY] Issue type: Brief description at \`file:line\` - impact`
-  - Example: "🔴 Null check missing: `user.profile.name` at `src/Button.js:56` — crashes if profile is null"
-  - Example: "🚫 BLOCKER: Data corruption risk in `migrations/add_column.sql:18` — overwrites NULL with zeros"
-  - Example: "🟡 Default value issue: Missing fallback at `api/posts.py:96` — returns 0 instead of NULL"
-- **DO NOT include**: minor style issues, "could potentially" statements, maintainability opinions, false positives
-- **Before "No critical issues found"**: Explicitly consider logic bugs, null access, data integrity, experiment validity, state cleanup. Only say it if you have genuinely looked. No speculative risks.
-- **DEPLOYMENT RISKS**: If the PR includes `.sql` files, database migration directories, or schema changes, flag them as a deployment prerequisite (e.g., "🟡 Migration required: `supabase/migrations/017_xxx.sql` must be applied before deploying this change"). Also flag new environment variables that must be set.
-- **If nothing found**: Write ONLY "✅ No critical issues found." — NO additional text, summaries, or explanations
+**STOP OUTPUT after Test Recipe table (or To Do section if present). No trailing text.**

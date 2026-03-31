@@ -19,9 +19,10 @@ const STEPS = [
   { id: 1, slug: 'workspace', title: 'Set up your workspace' },
   { id: 2, slug: 'trial', title: 'Start your trial' },
   { id: 3, slug: 'tools', title: 'Give Ovi access' },
-  { id: 4, slug: 'indexing', title: 'Ovi is learning' },
-  { id: 5, slug: 'first-review', title: "Ovi's first review" },
-  { id: 6, slug: 'done', title: 'All set' }
+  { id: 4, slug: 'staging', title: 'Configure staging' },
+  { id: 5, slug: 'indexing', title: 'Ovi is learning' },
+  { id: 6, slug: 'first-review', title: "Ovi's first review" },
+  { id: 7, slug: 'done', title: 'All set' }
 ];
 
 function requireAuth(req, res, next) {
@@ -84,7 +85,7 @@ function renderStep(req, res, view, locals = {}) {
 // Redirect to current step
 router.get('/', async (req, res) => {
   const state = await getOnboardingState(req.session.user.id);
-  if (state.completedAt || state.step >= 6) {
+  if (state.completedAt || state.step >= 7) {
     return res.redirect('/dashboard');
   }
   const stepSlug = STEPS.find(s => s.id === state.step)?.slug || 'workspace';
@@ -184,16 +185,74 @@ router.post('/tools/continue', async (req, res) => {
     return res.redirect('/onboarding/tools?error=' + encodeURIComponent('Connect at least one code repository to continue'));
   }
   await updateOnboardingState(req.session.user.id, { onboarding_step: 4 });
+  res.redirect('/onboarding/staging');
+});
+
+// Step 4: Staging URL
+router.get('/staging', async (req, res) => {
+  const state = await getOnboardingState(req.session.user.id);
+  if (state.completedAt) return res.redirect('/dashboard');
+  if (state.step < 4) return res.redirect('/onboarding/tools');
+
+  let currentUrl = '';
+  if (isSupabaseConfigured()) {
+    const { data } = await supabaseAdmin
+      .from('client_settings')
+      .select('staging_url')
+      .eq('user_id', req.session.user.id)
+      .maybeSingle();
+    currentUrl = data?.staging_url || '';
+  }
+
+  renderStep(req, res, 'onboarding/staging', {
+    step: 4,
+    progress: 4,
+    stagingUrl: currentUrl,
+    error: req.query.error || null
+  });
+});
+
+router.post('/staging', async (req, res) => {
+  let stagingUrl = (req.body.staging_url || '').trim() || null;
+
+  if (stagingUrl) {
+    try {
+      const parsed = new URL(stagingUrl);
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        return res.redirect('/onboarding/staging?error=' + encodeURIComponent('URL must use http or https'));
+      }
+      stagingUrl = stagingUrl.replace(/\/+$/, '');
+    } catch {
+      return res.redirect('/onboarding/staging?error=' + encodeURIComponent('Invalid URL format'));
+    }
+  }
+
+  if (isSupabaseConfigured()) {
+    await supabaseAdmin
+      .from('client_settings')
+      .upsert({
+        user_id: req.session.user.id,
+        staging_url: stagingUrl,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+  }
+
+  await updateOnboardingState(req.session.user.id, { onboarding_step: 5 });
+  res.redirect('/onboarding/indexing');
+});
+
+router.post('/staging/skip', async (req, res) => {
+  await updateOnboardingState(req.session.user.id, { onboarding_step: 5 });
   res.redirect('/onboarding/indexing');
 });
 
 const INDEX_CAP = parseInt(process.env.FIRST_TIME_INDEX_REPO_CAP || '5', 10);
 
-// Step 4: Indexing
+// Step 5: Indexing
 router.get('/indexing', async (req, res) => {
   const state = await getOnboardingState(req.session.user.id);
   if (state.completedAt) return res.redirect('/dashboard');
-  if (state.step < 4) return res.redirect('/onboarding/tools');
+  if (state.step < 5) return res.redirect('/onboarding/staging');
 
   let jobId = null;
   let hasKnowledge = false;
@@ -253,8 +312,8 @@ router.get('/indexing', async (req, res) => {
   const anyRunning = repoStatus.some(r => r.status === 'running');
 
   renderStep(req, res, 'onboarding/indexing', {
-    step: 4,
-    progress: 4,
+    step: 5,
+    progress: 5,
     hasKnowledge,
     repoStatus,
     availableRepos,
@@ -350,15 +409,15 @@ router.get('/api/indexing-status', async (req, res) => {
 });
 
 router.post('/indexing/continue', async (req, res) => {
-  await updateOnboardingState(req.session.user.id, { onboarding_step: 5 });
+  await updateOnboardingState(req.session.user.id, { onboarding_step: 6 });
   res.redirect('/onboarding/first-review');
 });
 
-// Step 5: First review
+// Step 6: First review
 router.get('/first-review', async (req, res) => {
   const state = await getOnboardingState(req.session.user.id);
   if (state.completedAt) return res.redirect('/dashboard');
-  if (state.step < 5) return res.redirect('/onboarding/indexing');
+  if (state.step < 6) return res.redirect('/onboarding/indexing');
 
   let prs = [];
   if (isSupabaseConfigured()) {
@@ -423,8 +482,8 @@ router.get('/first-review', async (req, res) => {
   }
 
   renderStep(req, res, 'onboarding/first-review', {
-    step: 5,
-    progress: 5,
+    step: 6,
+    progress: 6,
     prs
   });
 });
@@ -432,7 +491,7 @@ router.get('/first-review', async (req, res) => {
 router.post('/first-review/complete', async (req, res) => {
   const now = new Date().toISOString();
   await updateOnboardingState(req.session.user.id, {
-    onboarding_step: 6,
+    onboarding_step: 7,
     onboarding_completed_at: now
   });
   res.redirect('/dashboard?onboarding=complete');

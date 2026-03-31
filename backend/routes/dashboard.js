@@ -547,9 +547,76 @@ router.get('/history', async (req, res) => {
 /**
  * GET /dashboard/settings - User settings
  */
-router.get('/settings', (req, res) => {
+router.get('/settings', async (req, res) => {
   const user = req.session.user;
-  res.render('dashboard/settings', { user });
+  let settings = null;
+  let message = req.query.message || null;
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data } = await supabaseAdmin
+        .from('client_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      settings = data;
+    } catch (err) {
+      // No settings row yet — that's fine
+    }
+  }
+
+  res.render('dashboard/settings', { user, settings, message });
+});
+
+/**
+ * POST /dashboard/settings - Save user settings
+ */
+router.post('/settings', async (req, res) => {
+  const user = req.session.user;
+
+  if (!isSupabaseConfigured()) {
+    return res.redirect('/dashboard/settings?message=Database not configured');
+  }
+
+  try {
+    let stagingUrl = (req.body.staging_url || '').trim() || null;
+    if (stagingUrl) {
+      try {
+        const parsed = new URL(stagingUrl);
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return res.redirect('/dashboard/settings?message=Staging URL must use http or https');
+        }
+        stagingUrl = stagingUrl.replace(/\/+$/, '');
+      } catch {
+        return res.redirect('/dashboard/settings?message=Invalid staging URL format');
+      }
+    }
+
+    const autoAnalyzePrs = req.body.auto_analyze_prs === 'on';
+    const postMergeTests = req.body.post_merge_tests === 'on';
+    const postMergeDelayMs = parseInt(req.body.post_merge_delay_ms, 10) || 300000;
+
+    const { error } = await supabaseAdmin
+      .from('client_settings')
+      .upsert({
+        user_id: user.id,
+        staging_url: stagingUrl,
+        auto_analyze_prs: autoAnalyzePrs,
+        post_merge_tests: postMergeTests,
+        post_merge_delay_ms: postMergeDelayMs,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+    if (error) {
+      console.error('Error saving settings:', error);
+      return res.redirect('/dashboard/settings?message=Error saving settings');
+    }
+
+    res.redirect('/dashboard/settings?message=Settings saved');
+  } catch (err) {
+    console.error('Settings save error:', err.message);
+    res.redirect('/dashboard/settings?message=Error saving settings');
+  }
 });
 
 module.exports = router;
