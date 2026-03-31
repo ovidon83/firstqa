@@ -2880,7 +2880,7 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
     return { success: true, message: 'All Unit scenarios — skipped' };
   }
 
-  // 5. Classify change type and warn (but don't block — user explicitly requested)
+  // 5. Classify change type — block docs/infra, warn backend-only
   let changeNote = '';
   if (installationId) {
     try {
@@ -2889,6 +2889,14 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
       const { data: files } = await octokit.pulls.listFiles({ owner, repo, pull_number: prNumber, per_page: 100 });
       const { classifyPRChangeType } = require('./changeTypeClassifier');
       const classification = classifyPRChangeType(files.map(f => f.filename));
+
+      if (classification.type === 'documentation' || classification.type === 'infrastructure') {
+        await postComment(repoFullName, prNumber,
+          `⏭️ This PR is classified as **${classification.type}** — no testable UI changes detected. Skipping test execution.`
+        );
+        return { success: true, message: `Skipped: ${classification.type} PR` };
+      }
+
       if (!classification.shouldRunBrowserTests) {
         changeNote = `\n> ℹ️ This PR is classified as **${classification.type}** — browser tests may have limited coverage for non-frontend changes.\n`;
       }

@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "webhook": "node backend/utils/fixed-webhook.js",
     "test:automation": "node scripts/test-automated-testing.js",
-    "build": "npx playwright install chromium --with-deps",
+    "build": "echo 'No browser install needed — using Browserbase cloud browsers'",
     "build:extension": "bash scripts/create-chrome-extension-release.sh"
   },
   "keywords": [
@@ -23,9 +23,9 @@
   "author": "FirstQA Team",
   "license": "ISC",
   "dependencies": {
+    "@browserbasehq/sdk": "^2.9.0",
     "@octokit/auth-app": "^8.1.1",
     "@octokit/rest": "^19.0.13",
-    "@playwright/test": "^1.56.0",
     "@supabase/supabase-js": "^2.90.1",
     "atlassian-jwt": "^2.0.3",
     "axios": "^1.10.0",
@@ -44,8 +44,7 @@
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.7",
     "openai": "^5.5.1",
-    "playwright": "^1.56.0",
-    "playwright-video": "^2.4.0",
+    "playwright-core": "^1.58.2",
     "smee-client": "^1.2.5",
     "stripe": "^18.4.0",
     "uuid": "^9.0.1"

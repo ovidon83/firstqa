@@ -34,19 +34,19 @@ async function testAutomatedTesting() {
     console.log(`   ✓ OpenAI API Key: ${process.env.OPENAI_API_KEY.substring(0, 10)}...`);
   }
   
-  // Check Playwright installation
-  console.log('\n2. Checking Playwright Installation:');
+  // Check Browserbase / Playwright-core
+  console.log('\n2. Checking Browser Setup:');
+  if (process.env.BROWSERBASE_API_KEY && process.env.BROWSERBASE_PROJECT_ID) {
+    console.log('   ✓ Browserbase API key configured');
+    console.log('   ✓ Browserbase project ID configured');
+  } else {
+    console.log('   ⚠️ BROWSERBASE_API_KEY / BROWSERBASE_PROJECT_ID not set — will fall back to local Chromium');
+  }
   try {
-    const { chromium } = require('playwright');
-    console.log('   ✓ Playwright installed');
-    
-    // Try launching browser
-    const browser = await chromium.launch({ headless: true });
-    console.log('   ✓ Chromium browser can launch');
-    await browser.close();
+    require('playwright-core');
+    console.log('   ✓ playwright-core installed');
   } catch (error) {
-    console.log(`   ❌ Playwright error: ${error.message}`);
-    console.log('   Run: npx playwright install chromium');
+    console.log(`   ❌ playwright-core not found: ${error.message}`);
     process.exit(1);
   }
   

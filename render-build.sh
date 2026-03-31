@@ -8,8 +8,4 @@ rm -rf package-lock.json
 echo "📦 Installing dependencies (clean install)..."
 npm install --no-cache --prefer-offline=false
 
-echo "🎭 Installing Playwright Chromium browser..."
-export PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/playwright-browsers
-npx playwright install chromium
-
 echo "✅ Build complete!"
