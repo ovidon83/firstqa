@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - FirstQA</title>
+    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: #0a0a0b;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            text-align: center;
+            max-width: 420px;
+            padding: 3rem 2rem;
+        }
+        .icon { font-size: 3.5rem; margin-bottom: 1.25rem; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; }
+        p { color: #a1a1aa; line-height: 1.6; font-size: 1rem; }
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #10b981;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <% if (status === 'success') { %>
+            <div class="icon"><%= vote === 'positive' ? '👍' : '👎' %></div>
+            <h1>Thank you for your feedback!</h1>
+            <p><%= message %></p>
+        <% } else { %>
+            <div class="icon">⚠️</div>
+            <h1>Something went wrong</h1>
+            <p><%= message %></p>
+        <% } %>
+        <a href="https://firstqa.dev" class="back-link">← Back to FirstQA</a>
+    </div>
+</body>
+</html>
