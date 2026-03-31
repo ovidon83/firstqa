@@ -30,7 +30,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   } = options;
 
   const executionId = uuidv4();
-  const resultsDir = path.join(process.cwd(), 'test-results', executionId);
+  const resultsDir = path.join(__dirname, '..', '..', 'test-results', executionId);
   
   // Create results directory
   await fs.mkdir(resultsDir, { recursive: true });
