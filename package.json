@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "webhook": "node backend/utils/fixed-webhook.js",
     "test:automation": "node scripts/test-automated-testing.js",
+    "build": "npx playwright install chromium --with-deps",
     "build:extension": "bash scripts/create-chrome-extension-release.sh"
   },
   "keywords": [
