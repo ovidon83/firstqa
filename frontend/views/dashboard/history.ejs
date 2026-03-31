@@ -297,32 +297,60 @@
                 </div>
             <% } %>
 
+            <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+              <form method="GET" action="/dashboard/history" style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <select name="provider" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:0.5rem 0.75rem;color:#fff;font-family:inherit;font-size:0.9rem;">
+                  <option value="" <%= !providerFilter ? 'selected' : '' %>>All providers</option>
+                  <option value="github" <%= providerFilter === 'github' ? 'selected' : '' %>>GitHub</option>
+                  <option value="linear" <%= providerFilter === 'linear' ? 'selected' : '' %>>Linear</option>
+                  <option value="jira" <%= providerFilter === 'jira' ? 'selected' : '' %>>Jira</option>
+                </select>
+                <select name="days" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:0.5rem 0.75rem;color:#fff;font-family:inherit;font-size:0.9rem;">
+                  <option value="0" <%= !daysFilter ? 'selected' : '' %>>All time</option>
+                  <option value="7" <%= daysFilter === 7 ? 'selected' : '' %>>Last 7 days</option>
+                  <option value="30" <%= daysFilter === 30 ? 'selected' : '' %>>Last 30 days</option>
+                  <option value="90" <%= daysFilter === 90 ? 'selected' : '' %>>Last 90 days</option>
+                </select>
+                <button type="submit" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:0.5rem 1rem;color:#10b981;font-family:inherit;font-size:0.9rem;cursor:pointer;">Filter</button>
+              </form>
+            </div>
+
             <% if (analyses && analyses.length > 0) { %>
                 <div class="history-list">
                     <% analyses.forEach(analysis => { %>
                         <% const isJira = analysis.provider === 'jira' || (analysis.pr_number === 0 && analysis.repository); %>
+                        <% const isLinear = analysis.provider === 'linear'; %>
                         <div class="history-item">
                             <div class="history-header">
                                 <div class="history-title">
                                     <h3>
                                         <a href="<%= analysis.pr_url %>" target="_blank">
-                                            <%= analysis.pr_title || (isJira ? analysis.repository : `PR #${analysis.pr_number}`) %>
+                                            <%= analysis.pr_title || (isJira ? analysis.repository : isLinear ? analysis.repository : `PR #${analysis.pr_number}`) %>
                                             <i class="fas fa-external-link-alt" style="font-size: 0.8rem; opacity: 0.6;"></i>
                                         </a>
                                     </h3>
                                     <div class="history-meta">
-                                        <% if (isJira) { %>
+                                        <% if (isLinear) { %>
+                                            <i class="fas fa-bolt" style="color:#5e6ad2;"></i>
+                                            <%= analysis.repository %> • Linear
+                                        <% } else if (isJira) { %>
                                             <i class="fab fa-jira"></i>
-                                            <%= analysis.repository %> • Jira Ticket
+                                            <%= analysis.repository %> • Jira
                                         <% } else { %>
                                             <i class="fab fa-github"></i>
                                             <%= analysis.repository %> #<%= analysis.pr_number %>
                                         <% } %>
                                     </div>
                                 </div>
-                                <span class="history-badge <%= analysis.analysis_type === 'full' ? 'badge-full' : 'badge-short' %>">
-                                    <%= analysis.analysis_type %>
-                                </span>
+                                <div style="display:flex;gap:0.5rem;align-items:center;">
+                                  <% if (analysis.decision) { %>
+                                    <% const decColor = analysis.decision === 'Ship' ? '#22c55e' : analysis.decision === 'Investigate' ? '#f59e0b' : '#ef4444'; %>
+                                    <span style="padding:0.25rem 0.6rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:<%=decColor%>20;color:<%=decColor%>;border:1px solid <%=decColor%>40;"><%= analysis.decision %></span>
+                                  <% } %>
+                                  <span class="history-badge <%= analysis.analysis_type === 'full' ? 'badge-full' : 'badge-short' %>">
+                                      <%= analysis.analysis_type %>
+                                  </span>
+                                </div>
                             </div>
                             <div class="history-stats">
                                 <div class="stat-item">

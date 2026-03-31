@@ -51,6 +51,7 @@ Before analyzing anything, categorize the changed files:
    - Understand conditional logic: when things appear/disappear, when filters switch
 2. **USE EXACT CODE DETAILS** in test cases - don't guess or use generic terms
 3. **REFERENCE ACTUAL CODE ELEMENTS** by their names as they appear in the diff
+4. **CRITICAL: Only use UI element names, page names, button text, and URLs that you can directly cite from the CODE DIFF, FULL FILE CONTENTS, FLOW DISCOVERY, or PRODUCT KNOWLEDGE CONTEXT sections above. If you cannot find the exact element name in the provided context, describe the expected behavior instead of guessing. Never invent UI elements.**
 
 **PR CONTEXT:**
 Title: <%= title %>
@@ -119,7 +120,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 | Scenario | Steps | Expected Result | Priority | Automation |
 |----------|-------|-----------------|----------|-------------|
-[AI will generate test cases here — MAX 5 scenarios. **MANDATORY ROW ORDER**: Output ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Do not interleave. Automation: UI | API | Unit | Other only. Keep Steps and Expected Result concise so table cells align; use one short line per step, separate with <br>.]
+[AI will generate test cases here — MAX 5 scenarios, prioritizing accuracy over quantity. **MANDATORY ROW ORDER**: Output ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Do not interleave. Automation: UI | API | Unit | Other only. Keep Steps and Expected Result concise so table cells align; use one short line per step, separate with <br>.]
 
 **If Decision is Investigate or No-Go, add:**
 ## ✅ To Do (for Go)
@@ -197,6 +198,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **NEGATIVE TESTS**: Include negative test cases (error conditions, failure scenarios, invalid states)
 - **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions
 - Generate at most **5** test scenarios total (max 5 flows). Base test recipe on indexed product context, affected flows, and dependency impact — no invented flows. Prioritize fixes and user-facing changes.
+- **COVERAGE PROPORTIONAL TO SCOPE**: Before writing test cases, list every distinct feature area modified in the PR (group by directory/module). Each major area MUST be represented by at least one test scenario. If the PR touches 4+ distinct areas but you only have 5 slots, combine smaller areas into one scenario or prioritize the highest-risk areas. Never leave an entire feature area uncovered.
 - **ONE TEST CASE PER FIX**: Each distinct fix mentioned in commits should get its own dedicated test case
 - Provide concrete, actionable test steps with specific details based on the real changes
 - Consider the full user journey and how ALL changes work together
@@ -341,6 +343,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - For Bugs & Risks (MERGED SECTION):
   - **ONLY SIGNAL, NO NOISE**: Trustworthy for developers. Only real, verifiable issues - NO FALSE POSITIVES.
   - **ONLY HIGH LIKELIHOOD**: List only issues with high likelihood based on the code (e.g. missing null check on a used path, wrong condition in diff). Do NOT list theoretical risks or low-probability concerns.
+  - **VERIFY AGAINST DIFF AND CODE**: Before reporting ANY bug, you MUST verify: (1) Read the actual code at the line you're referencing — does the code already handle the case (null guard, try/catch, validation check, whitelist)? If yes, do NOT flag it. (2) Check if the diff itself fixes the issue — do NOT flag something the PR is actively resolving. (3) If you cannot confirm the bug exists by citing the exact unguarded code path, do NOT include it.
   - **REQUIRED**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
   - **MAX 6 ITEMS**: Only critical issues that affect quality. Prefer fewer, high-confidence items.
   - **SORT BY SEVERITY**: 🚫 BLOCKER items first, then 🔴 HIGH, then 🟡 MEDIUM
@@ -388,7 +391,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 **Impact**: Value = product areas affected. Details = short list of product areas or user flows only — no file names (e.g. "Slack integration, Settings, OAuth callback").
 
 **BUGS & RISKS REQUIREMENTS:**
-- **ONLY SIGNAL, NO NOISE**: Only real, verifiable issues with HIGH LIKELIHOOD based on the code. No theoretical or low-probability concerns. NO FALSE POSITIVES.
+- **ONLY SIGNAL, NO NOISE**: Only real, verifiable issues with HIGH LIKELIHOOD based on the code. No theoretical or low-probability concerns. NO FALSE POSITIVES. Before reporting, verify the code doesn't already handle the case and the diff doesn't fix it.
 - **STRICT RULE**: Every item MUST include exact file name and line number (e.g., `src/api/user.js:45`)
 - **MAX 6 ITEMS**: Only the most critical issues. Prefer fewer, high-confidence items.
 - **SORT BY SEVERITY**: List items in order: 🚫 BLOCKER first, then 🔴 HIGH, then 🟡 MEDIUM
@@ -406,4 +409,5 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - Example: "🟡 Default value issue: Missing fallback at `api/posts.py:96` — returns 0 instead of NULL"
 - **DO NOT include**: minor style issues, "could potentially" statements, maintainability opinions, false positives
 - **Before "No critical issues found"**: Explicitly consider logic bugs, null access, data integrity, experiment validity, state cleanup. Only say it if you have genuinely looked. No speculative risks.
+- **DEPLOYMENT RISKS**: If the PR includes `.sql` files, database migration directories, or schema changes, flag them as a deployment prerequisite (e.g., "🟡 Migration required: `supabase/migrations/017_xxx.sql` must be applied before deploying this change"). Also flag new environment variables that must be set.
 - **If nothing found**: Write ONLY "✅ No critical issues found." — NO additional text, summaries, or explanations

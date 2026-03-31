@@ -261,11 +261,16 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
     const dependencyGraph = {};
     const testFlowsByArea = {};
     const sectionTitlesAccum = [];
-    const { extractSectionTitles } = require('../../ai/flowDiscovery');
+    const routesAccum = [];
+    const uiElementsAccum = [];
+    const apiEndpointsAccum = [];
+    const messagesAccum = [];
+    const { extractSectionTitles, extractRoutes, extractUIElements, extractAPIEndpoints, extractMessages } = require('../../ai/flowDiscovery');
 
     for (let b = 0; b < batches.length; b++) {
       const batch = batches[b];
       const progress = Math.round(((b + 1) / batches.length) * 100);
+      let batchErrors = 0;
 
       for (const filePath of batch) {
         try {
@@ -278,6 +283,11 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
 
           const titles = extractSectionTitles(filePath, content);
           if (titles.length) sectionTitlesAccum.push(...titles);
+
+          routesAccum.push(...extractRoutes(filePath, content));
+          uiElementsAccum.push(...extractUIElements(filePath, content));
+          apiEndpointsAccum.push(...extractAPIEndpoints(filePath, content));
+          messagesAccum.push(...extractMessages(filePath, content));
 
           if (isTestFile(filePath)) {
             const flowName = extractUserFlowFromTestFile(filePath, content);
@@ -321,13 +331,28 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
           }
           filesAnalyzed++;
         } catch (fileErr) {
+          batchErrors++;
           console.warn(`Skipped ${filePath}: ${fileErr.message}`);
         }
       }
 
+      if (batch.length > 0 && batchErrors / batch.length > 0.5) {
+        console.error(`❌ Batch ${b + 1}/${batches.length} had ${batchErrors}/${batch.length} failures (>50%), marking job as failed`);
+        await supabaseAdmin
+          .from('knowledge_sync_jobs')
+          .update({
+            status: 'failed',
+            error_message: `Too many file failures in batch ${b + 1}: ${batchErrors}/${batch.length} files failed`,
+            completed_at: new Date().toISOString(),
+            metadata: { files_analyzed: filesAnalyzed, entries_created: entriesCreated, failed_batch: b + 1 }
+          })
+          .eq('id', jobId);
+        throw new Error(`Batch ${b + 1} had >50% failures (${batchErrors}/${batch.length})`);
+      }
+
       await supabaseAdmin
         .from('knowledge_sync_jobs')
-        .update({ progress, metadata: { files_analyzed: filesAnalyzed, entries_created: entriesCreated } })
+        .update({ progress, metadata: { files_analyzed: filesAnalyzed, entries_created: entriesCreated, total_files: totalFiles } })
         .eq('id', jobId);
     }
 
@@ -396,6 +421,10 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
     }
 
     const sectionTitles = [...new Map(sectionTitlesAccum.map(s => [s.title.toLowerCase(), s])).values()].slice(0, 30);
+    const uniqueRoutes = [...new Map(routesAccum.map(r => [r.path, r])).values()].slice(0, 50);
+    const uniqueUIElements = [...new Map(uiElementsAccum.map(u => [`${u.type}:${u.text}`, u])).values()].slice(0, 60);
+    const uniqueAPIEndpoints = [...new Map(apiEndpointsAccum.map(e => [e.endpoint, e])).values()].slice(0, 40);
+    const uniqueMessages = [...new Map(messagesAccum.map(m => [m.message, m])).values()].slice(0, 30);
 
     await supabaseAdmin.from('repo_context').upsert({
       repo_id: repoId,
@@ -405,6 +434,10 @@ async function analyzeRepository(repoFullName, installationId, defaultBranch = '
       tests_by_area: testFlowsByArea,
       dependency_graph: dependencyGraph,
       section_titles: sectionTitles,
+      routes: uniqueRoutes,
+      ui_elements: uniqueUIElements,
+      api_endpoints: uniqueAPIEndpoints,
+      messages: uniqueMessages,
       git_sha: treeSha,
       updated_at: new Date().toISOString()
     }, { onConflict: 'repo_id' });

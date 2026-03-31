@@ -347,6 +347,56 @@
                 </div>
             </div>
 
+            <% if (stats.analytics && stats.analytics.totalThisMonth > 0) { %>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
+              <div class="stat-card">
+                <div class="stat-label">Total (30 days)</div>
+                <div class="stat-value" style="font-size:1.5rem;"><%= stats.analytics.totalThisMonth %></div>
+              </div>
+              <% if (stats.analytics.byProvider) { %>
+                <div class="stat-card">
+                  <div class="stat-label">By Provider</div>
+                  <div style="margin-top:0.5rem;">
+                    <% Object.entries(stats.analytics.byProvider).forEach(([p, c]) => { %>
+                      <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:0.25rem;">
+                        <span style="color:#a1a1aa;text-transform:capitalize;"><%= p %></span>
+                        <span style="font-weight:600;"><%= c %></span>
+                      </div>
+                    <% }) %>
+                  </div>
+                </div>
+              <% } %>
+              <div class="stat-card">
+                <div class="stat-label">QA Decisions</div>
+                <div style="margin-top:0.5rem;">
+                  <% if (stats.analytics.byDecision.Ship) { %>
+                    <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:0.25rem;"><span style="color:#22c55e;">Ship</span><span style="font-weight:600;"><%= stats.analytics.byDecision.Ship %></span></div>
+                  <% } %>
+                  <% if (stats.analytics.byDecision.Investigate) { %>
+                    <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:0.25rem;"><span style="color:#f59e0b;">Investigate</span><span style="font-weight:600;"><%= stats.analytics.byDecision.Investigate %></span></div>
+                  <% } %>
+                  <% if (stats.analytics.byDecision['No-Go']) { %>
+                    <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:0.25rem;"><span style="color:#ef4444;">No-Go</span><span style="font-weight:600;"><%= stats.analytics.byDecision['No-Go'] %></span></div>
+                  <% } %>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Weekly Trend</div>
+                <div style="display:flex;align-items:flex-end;gap:4px;height:50px;margin-top:0.5rem;">
+                  <% const maxW = Math.max(...stats.analytics.weeklyTrend, 1); %>
+                  <% stats.analytics.weeklyTrend.forEach((w, i) => { %>
+                    <div style="flex:1;background:rgba(16,185,129,0.3);border-radius:3px 3px 0 0;height:<%= Math.max(w / maxW * 100, 5) %>%;position:relative;" title="Week <%= i+1 %>: <%= w %>">
+                      <span style="position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:0.7rem;color:#a1a1aa;"><%= w %></span>
+                    </div>
+                  <% }) %>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:#666;margin-top:0.25rem;">
+                  <span>4w ago</span><span>This week</span>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
             <% if (typeof onboarding !== 'undefined' && onboarding === 'complete') { %>
             <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
               <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem;">You're all set!</h3>
@@ -377,8 +427,13 @@
                                         <i class="fas fa-external-link-alt" style="font-size: 0.7rem; opacity: 0.6;"></i>
                                     </a>
                                     <div style="font-size: 0.85rem; color: #888; margin-top: 0.25rem;">
-                                        <i class="fab fa-github"></i>
-                                        <%= analysis.repository %> #<%= analysis.pr_number %>
+                                        <% if (analysis.provider === 'linear') { %>
+                                          <i class="fas fa-bolt" style="color:#5e6ad2;"></i> <%= analysis.repository %> • Linear
+                                        <% } else if (analysis.provider === 'jira') { %>
+                                          <i class="fab fa-jira" style="color:#0052cc;"></i> <%= analysis.repository %> • Jira
+                                        <% } else { %>
+                                          <i class="fab fa-github"></i> <%= analysis.repository %> #<%= analysis.pr_number %>
+                                        <% } %>
                                     </div>
                                 </div>
                                 <div style="text-align: right;">

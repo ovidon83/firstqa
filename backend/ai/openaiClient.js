@@ -171,9 +171,9 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     ).join('\n') || 'None extracted from code.';
 
     // Include key file contents for UI components (truncated) - helps AI see exact elements/structure
-    const fileContentsForPrompt = Object.entries(fileContents || {}).slice(0, 4).map(([path, content]) => {
-      const snipped = trunc(content, 2000);
-      return `\n--- FILE: ${path} ---\n${snipped}${content.length > 2000 ? '\n...[truncated]' : ''}`;
+    const fileContentsForPrompt = Object.entries(fileContents || {}).slice(0, 8).map(([path, content]) => {
+      const snipped = trunc(content, 4000);
+      return `\n--- FILE: ${path} ---\n${snipped}${content.length > 4000 ? '\n...[truncated]' : ''}`;
     }).join('\n') || '';
 
     console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars, Context=${sanitizedContext.length} chars`);
@@ -1684,7 +1684,7 @@ function generateShortDataAccessError(title, repo, prNumber) {
  * @param {string} options.type - Ticket type
  * @returns {Promise<Object>} QA insights or error object
  */
-async function generateTicketInsights({ ticketId, title, description, comments, labels, platform, priority, type }) {
+async function generateTicketInsights({ ticketId, title, description, comments, labels, platform, priority, type, designContext, discussionContext }) {
   try {
     // Validate OpenAI client
     if (!openai) {
@@ -1702,7 +1702,7 @@ async function generateTicketInsights({ ticketId, title, description, comments, 
     console.log(`🔍 Ticket analysis input: Title=${sanitizedTitle.length} chars, Description=${sanitizedDescription.length} chars, Comments=${sanitizedComments.length}, Labels=${sanitizedLabels.length}`);
 
     // Generate single fast analysis with low temperature
-    const analysis = await generateSingleAnalysis(sanitizedTitle, sanitizedDescription, sanitizedComments, sanitizedLabels, platform, priority, type);
+    const analysis = await generateSingleAnalysis(sanitizedTitle, sanitizedDescription, sanitizedComments, sanitizedLabels, platform, priority, type, designContext, discussionContext);
     
     return {
       success: true,
@@ -1738,7 +1738,7 @@ async function generateTicketInsights({ ticketId, title, description, comments, 
 
 // Removed calculateInitialReadinessScore - now handled by AI
 
-async function generateSingleAnalysis(title, description, comments, labels, platform, priority, type) {
+async function generateSingleAnalysis(title, description, comments, labels, platform, priority, type, designContext, discussionContext) {
   const testRecipeRules = require('./prompts/test-recipe-rules');
   const prompt = `You are a senior QA engineer analyzing tickets for development readiness. 
 
@@ -1796,6 +1796,7 @@ TICKET DATA:
 - Labels: ${labels.join(', ')}
 - Priority: ${priority}
 - Type: ${type}
+${designContext ? '\n' + designContext : ''}${discussionContext ? '\n' + discussionContext : ''}
 
 You are analyzing as a senior QA Engineer and CTO with deep startup experience. Be direct, actionable, and prioritize what matters.
 

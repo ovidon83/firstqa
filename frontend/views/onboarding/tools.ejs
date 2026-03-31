@@ -42,6 +42,12 @@
           <% } %>
         </div>
       </div>
+      <% if (!integrations.github || !integrations.github.length) { %>
+        <p style="color:#a1a1aa;font-size:0.8rem;margin-top:0.25rem;"><i class="fas fa-info-circle"></i> If your GitHub organization requires admin approval for app installations, ask your org admin to approve <strong>OviAI by FirstQA</strong>.</p>
+      <% } %>
+      <% if (typeof githubError !== 'undefined' && githubError) { %>
+        <div class="alert alert-error" style="margin-top:0.5rem;"><i class="fas fa-exclamation-triangle"></i> GitHub connection issue: <%= githubError %>. Please try again.</div>
+      <% } %>
 
       <span class="section-label">Ticket System <span style="color:#a1a1aa;">Optional</span></span>
       <div class="integration-grid">

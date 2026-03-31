@@ -166,6 +166,7 @@ router.get('/tools', async (req, res) => {
     integrations,
     hasCodeRepo,
     connected: req.query.connected,
+    githubError: req.query.github_error || null,
     linearOAuthEnabled: !!process.env.LINEAR_CLIENT_ID
   });
 });
@@ -283,6 +284,8 @@ router.post('/indexing/start', async (req, res) => {
 router.get('/api/indexing-status', async (req, res) => {
   const userId = req.session.user.id;
   let repoStatus = [];
+  let stalled = false;
+  const STALL_THRESHOLD_MS = 10 * 60 * 1000;
 
   if (isSupabaseConfigured()) {
     const { data: githubInts } = await supabaseAdmin
@@ -306,17 +309,29 @@ router.get('/api/indexing-status', async (req, res) => {
               .limit(1);
             const { data: job } = await supabaseAdmin
               .from('knowledge_sync_jobs')
-              .select('id, status, progress')
+              .select('id, status, progress, started_at, metadata, error_message')
               .eq('repo_id', repoId)
               .eq('job_type', 'initial_analysis')
               .order('created_at', { ascending: false })
               .limit(1)
               .maybeSingle();
+
+            if (job?.status === 'running' && job.started_at) {
+              const runningFor = Date.now() - new Date(job.started_at).getTime();
+              if (runningFor > STALL_THRESHOLD_MS) {
+                stalled = true;
+              }
+            }
+
+            const meta = job?.metadata || {};
             repoStatus.push({
               repoId,
               hasKnowledge: (count || 0) > 0,
               status: job?.status,
-              progress: job?.progress ?? 0
+              progress: job?.progress ?? 0,
+              filesAnalyzed: meta.files_analyzed || 0,
+              totalFiles: meta.total_files || 0,
+              errorMessage: job?.error_message || null
             });
           }
           break;
@@ -331,7 +346,7 @@ router.get('/api/indexing-status', async (req, res) => {
   const anyRunning = repoStatus.some(r => r.status === 'running');
   const indexingEnabled = process.env.ENABLE_KNOWLEDGE_SYNC === 'true';
 
-  res.json({ repoStatus, allIndexed, anyRunning, indexingEnabled });
+  res.json({ repoStatus, allIndexed, anyRunning, indexingEnabled, stalled });
 });
 
 router.post('/indexing/continue', async (req, res) => {
