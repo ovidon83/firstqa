@@ -156,6 +156,53 @@ router.post('/request', async (req, res) => {
   }
 });
 
+// Hire a human tester page
+router.get('/hire', (req, res) => {
+  res.render('hire', {
+    title: 'Hire a Human Tester - FirstQA',
+    success: req.query.success === 'true'
+  });
+});
+
+router.post('/hire', async (req, res) => {
+  try {
+    const { name, email, app_url, urgency, scope, details } = req.body;
+
+    const emailContent = `
+      <h2>New Human Testing Request</h2>
+      <p><strong>Name:</strong> ${name || 'Not provided'}</p>
+      <p><strong>Email:</strong> ${email || 'Not provided'}</p>
+      <p><strong>App URL:</strong> ${app_url || 'Not provided'}</p>
+      <p><strong>Urgency:</strong> ${urgency || 'normal'}</p>
+      <p><strong>Scope:</strong> ${scope || 'Not specified'}</p>
+      <h3>What to test:</h3>
+      <p>${(details || 'Not provided').replace(/\n/g, '<br>')}</p>
+    `;
+
+    if (transporter) {
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM || 'noreply@firstqa.dev',
+        to: 'hello@firstqa.dev',
+        replyTo: email,
+        subject: `[FirstQA Hire] ${urgency === 'urgent' ? '🔴 URGENT — ' : ''}Testing request from ${name}`,
+        html: emailContent,
+        text: emailContent.replace(/<[^>]*>/g, '')
+      });
+      console.log(`✅ Hire request email sent from ${email}`);
+    } else {
+      console.log(`⚠️ Email not configured — hire request from ${email}: ${app_url}`);
+    }
+
+    res.redirect('/hire?success=true');
+  } catch (error) {
+    console.error('Error processing hire request:', error);
+    res.status(500).render('error', {
+      title: 'Error',
+      message: 'There was a problem submitting your request. Please try again.'
+    });
+  }
+});
+
 // Contact page
 router.get('/contact', (req, res) => {
   res.render('contact', { 
