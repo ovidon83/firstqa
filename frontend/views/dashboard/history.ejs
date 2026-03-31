@@ -311,6 +311,12 @@
                   <option value="30" <%= daysFilter === 30 ? 'selected' : '' %>>Last 30 days</option>
                   <option value="90" <%= daysFilter === 90 ? 'selected' : '' %>>Last 90 days</option>
                 </select>
+                <select name="feedback" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:0.5rem 0.75rem;color:#fff;font-family:inherit;font-size:0.9rem;">
+                  <option value="" <%= !feedbackFilter ? 'selected' : '' %>>All feedback</option>
+                  <option value="any" <%= feedbackFilter === 'any' ? 'selected' : '' %>>Has feedback</option>
+                  <option value="positive" <%= feedbackFilter === 'positive' ? 'selected' : '' %>>👍 Positive</option>
+                  <option value="negative" <%= feedbackFilter === 'negative' ? 'selected' : '' %>>👎 Negative</option>
+                </select>
                 <button type="submit" style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:0.5rem 1rem;color:#10b981;font-family:inherit;font-size:0.9rem;cursor:pointer;">Filter</button>
               </form>
             </div>
@@ -343,6 +349,9 @@
                                     </div>
                                 </div>
                                 <div style="display:flex;gap:0.5rem;align-items:center;">
+                                  <% if (analysis.feedback) { %>
+                                    <span style="padding:0.25rem 0.5rem;border-radius:4px;font-size:0.8rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);" title="User feedback: <%= analysis.feedback %>"><%= analysis.feedback === 'positive' ? '👍' : '👎' %></span>
+                                  <% } %>
                                   <% if (analysis.decision) { %>
                                     <% const decColor = analysis.decision === 'Ship' ? '#22c55e' : analysis.decision === 'Investigate' ? '#f59e0b' : '#ef4444'; %>
                                     <span style="padding:0.25rem 0.6rem;border-radius:4px;font-size:0.75rem;font-weight:600;background:<%=decColor%>20;color:<%=decColor%>;border:1px solid <%=decColor%>40;"><%= analysis.decision %></span>

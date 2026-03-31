@@ -521,4 +521,38 @@ router.post('/api/analyze-ticket', async (req, res) => {
   }
 });
 
+// Feedback recording (public, no auth — linked from GitHub/Linear analysis comments)
+router.get('/feedback/:analysisId/:vote', async (req, res) => {
+  const { analysisId, vote } = req.params;
+  const token = req.query.t;
+
+  if (!['positive', 'negative'].includes(vote) || !token) {
+    return res.render('feedback', { status: 'error', vote: null, message: 'Invalid feedback link.' });
+  }
+
+  const { verifyFeedbackToken } = require('../utils/feedbackHelper');
+  if (!verifyFeedbackToken(analysisId, vote, token)) {
+    return res.render('feedback', { status: 'error', vote: null, message: 'Invalid or expired feedback link.' });
+  }
+
+  try {
+    const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
+    if (isSupabaseConfigured()) {
+      const { error } = await supabaseAdmin
+        .from('analyses')
+        .update({ feedback: vote, feedback_at: new Date().toISOString() })
+        .eq('id', analysisId);
+      if (error) console.error('Feedback save error:', error);
+    }
+  } catch (err) {
+    console.error('Feedback recording error:', err.message);
+  }
+
+  res.render('feedback', {
+    status: 'success',
+    vote,
+    message: vote === 'positive' ? 'Glad the analysis helped!' : "Thanks for letting us know — we'll keep improving."
+  });
+});
+
 module.exports = router; 

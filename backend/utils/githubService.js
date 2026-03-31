@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 const githubAppAuth = require('./githubAppAuth');
 const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
+const { generateAnalysisId, feedbackFooter } = require('./feedbackHelper');
 // Initialize GitHub client with token (for backward compatibility)
 let octokit;
 let simulatedMode = false;
@@ -78,23 +79,26 @@ async function saveAnalysisToDatabase(data) {
     return null;
   }
   
-  const { userId, provider, repository, prNumber, prTitle, prUrl, analysisType, analysisOutput } = data;
+  const { userId, provider, repository, prNumber, prTitle, prUrl, analysisType, analysisOutput, analysisId } = data;
   
   try {
+    const insertRow = {
+      user_id: userId,
+      provider: provider,
+      repository: repository,
+      pr_number: prNumber,
+      pr_title: prTitle,
+      pr_url: prUrl,
+      analysis_type: analysisType,
+      status: 'completed',
+      result: analysisOutput,
+      completed_at: new Date().toISOString()
+    };
+    if (analysisId) insertRow.id = analysisId;
+
     const { data: result, error } = await supabaseAdmin
       .from('analyses')
-      .insert({
-        user_id: userId,
-        provider: provider,
-        repository: repository,
-        pr_number: prNumber,
-        pr_title: prTitle,
-        pr_url: prUrl,
-        analysis_type: analysisType,
-        status: 'completed',
-        result: analysisOutput,
-        completed_at: new Date().toISOString()
-      })
+      .insert(insertRow)
       .select()
       .single();
     
@@ -2044,6 +2048,10 @@ The AI analysis failed: ${aiInsights?.error || 'unknown error'}
 *Note: Ovi QA Agent insights could not be generated for this PR (${aiInsights.error}), but manual testing will proceed as normal.*
     `;
   }
+  const fullAnalysisId = generateAnalysisId();
+  if (aiInsights && aiInsights.success) {
+    acknowledgmentComment += feedbackFooter(fullAnalysisId);
+  }
   const elapsedSec = ((Date.now() - analysisStartMs) / 1000).toFixed(1);
   console.log(`⏱️ PR analysis completed in ${elapsedSec}s, posting comment`);
   const commentResult = await postComment(repository.full_name, issue.number, acknowledgmentComment);
@@ -2053,6 +2061,7 @@ The AI analysis failed: ${aiInsights?.error || 'unknown error'}
   if (userId && isSupabaseConfigured() && aiInsights && aiInsights.success) {
     try {
       await saveAnalysisToDatabase({
+        analysisId: fullAnalysisId,
         userId,
         provider: 'github',
         repository: repository.full_name,
@@ -2069,7 +2078,6 @@ The AI analysis failed: ${aiInsights?.error || 'unknown error'}
       console.log(`✅ Analysis saved to database for user ${userId}`);
     } catch (error) {
       console.error('❌ Error saving analysis to database:', error.message);
-      // Don't fail the whole process if database save fails
     }
   }
   
@@ -2306,6 +2314,10 @@ Or wait until next month when your limit resets.
 *Note: Ovi QA Agent insights could not be generated for this PR (${aiInsights.error}), but manual testing will proceed as normal.*
     `;
   }
+  const shortAnalysisId = generateAnalysisId();
+  if (aiInsights && aiInsights.success) {
+    acknowledgmentComment += feedbackFooter(shortAnalysisId);
+  }
   const elapsedSecShort = ((Date.now() - analysisStartMs) / 1000).toFixed(1);
   console.log(`⏱️ Short PR analysis completed in ${elapsedSecShort}s, posting comment`);
   const commentResult = await postComment(repository.full_name, issue.number, acknowledgmentComment);
@@ -2315,6 +2327,7 @@ Or wait until next month when your limit resets.
   if (userId && isSupabaseConfigured() && aiInsights && aiInsights.success) {
     try {
       await saveAnalysisToDatabase({
+        analysisId: shortAnalysisId,
         userId,
         provider: 'github',
         repository: repository.full_name,
@@ -2331,7 +2344,6 @@ Or wait until next month when your limit resets.
       console.log(`✅ Short analysis saved to database for user ${userId}`);
     } catch (error) {
       console.error('❌ Error saving short analysis to database:', error.message);
-      // Don't fail the whole process if database save fails
     }
   }
   
@@ -2621,7 +2633,7 @@ ${aiData}`;
  * Format and post detailed analysis with hybrid structure
  * @param {string} [options.banner] - Optional banner to prepend (e.g. for post-merge staging analysis)
  */
-async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights, options = {}) {
+async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights, options = {}, analysisId = null) {
   // Handle fallback if AI insights failed
   if (!aiInsights || !aiInsights.success) {
     console.log('🔄 Creating fallback analysis due to AI failure');
@@ -2674,6 +2686,9 @@ async function formatAndPostDetailedAnalysis(repository, prNumber, aiInsights, o
   if (options.banner) {
     detailedComment = `${options.banner}\n\n${detailedComment}`;
   }
+  if (analysisId && aiInsights?.success) {
+    detailedComment += feedbackFooter(analysisId);
+  }
   return await postComment(repository, prNumber, detailedComment);
 }
 
@@ -2714,7 +2729,8 @@ async function handlePROpened(repository, pr, installationId) {
 }
   
   // Post the analysis first
-  const analysisResult = await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights);
+  const prOpenedAnalysisId = generateAnalysisId();
+  const analysisResult = await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights, {}, prOpenedAnalysisId);
   
   // Check if automated testing should run
   const { shouldRunAutomatedTests, executeAutomatedTests } = require('../services/automatedTestOrchestrator');
@@ -2807,12 +2823,14 @@ async function handlePRMergedToStaging(repository, pr, userId, installationId) {
     aiInsights = { success: false, error: error.message };
   }
 
+  const postMergeAnalysisId = generateAnalysisId();
   const banner = `## 🚀 Post-Merge Staging Analysis\n\n*Automatically generated when this PR was merged into \`${baseRef}\`. Use this to prepare staging testing.*\n`;
-  await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights, { banner });
+  await formatAndPostDetailedAnalysis(repository.full_name, pr.number, aiInsights, { banner }, postMergeAnalysisId);
 
   if (userId && isSupabaseConfigured() && aiInsights?.success) {
     try {
       await saveAnalysisToDatabase({
+        analysisId: postMergeAnalysisId,
         userId,
         provider: 'github',
         repository: repository.full_name,

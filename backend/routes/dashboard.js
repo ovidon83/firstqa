@@ -98,13 +98,14 @@ router.get('/', async (req, res) => {
       // Aggregate analytics: by provider, by decision, weekly trend
       const { data: allMonthAnalyses } = await supabaseAdmin
         .from('analyses')
-        .select('provider, result, created_at, processing_time_ms')
+        .select('provider, result, created_at, processing_time_ms, feedback')
         .eq('user_id', user.id)
         .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
         .order('created_at', { ascending: false });
 
       const byProvider = {};
       const byDecision = { Ship: 0, Investigate: 0, 'No-Go': 0 };
+      const feedbackCounts = { positive: 0, negative: 0, total: 0 };
       let totalProcessingMs = 0;
       let processedCount = 0;
       const weeklyBuckets = [0, 0, 0, 0];
@@ -122,11 +123,17 @@ router.get('/', async (req, res) => {
         } catch (_) {}
         const weeksAgo = Math.floor((Date.now() - new Date(a.created_at).getTime()) / (7 * 86400000));
         if (weeksAgo >= 0 && weeksAgo < 4) weeklyBuckets[weeksAgo]++;
+        if (a.feedback) {
+          feedbackCounts.total++;
+          if (a.feedback === 'positive') feedbackCounts.positive++;
+          if (a.feedback === 'negative') feedbackCounts.negative++;
+        }
       }
 
       stats.analytics = {
         byProvider,
         byDecision,
+        feedbackCounts,
         avgProcessingMs: processedCount > 0 ? Math.round(totalProcessingMs / processedCount) : 0,
         weeklyTrend: weeklyBuckets.reverse(),
         totalThisMonth: (allMonthAnalyses || []).length
@@ -473,6 +480,7 @@ router.get('/history', async (req, res) => {
     let analyses = [];
     const providerFilter = req.query.provider || null;
     const daysFilter = parseInt(req.query.days, 10) || 0;
+    const feedbackFilter = req.query.feedback || null;
     
     if (isSupabaseConfigured()) {
       let query = supabaseAdmin
@@ -484,6 +492,13 @@ router.get('/history', async (req, res) => {
 
       if (providerFilter && ['github', 'linear', 'jira'].includes(providerFilter)) {
         query = query.eq('provider', providerFilter);
+      }
+      if (feedbackFilter && ['positive', 'negative', 'any'].includes(feedbackFilter)) {
+        if (feedbackFilter === 'any') {
+          query = query.not('feedback', 'is', null);
+        } else {
+          query = query.eq('feedback', feedbackFilter);
+        }
       }
       if (daysFilter > 0) {
         const since = new Date(Date.now() - daysFilter * 86400000).toISOString();
@@ -501,7 +516,7 @@ router.get('/history', async (req, res) => {
             const result = typeof a.result === 'string' ? JSON.parse(a.result) : a.result;
             decision = result?.decision || result?.qaPulse?.decision || null;
           } catch (_) {}
-          return { ...a, decision };
+          return { ...a, decision, feedback: a.feedback || null };
         });
         console.log(`📊 Fetched ${analyses.length} analyses for user ${user.email}`);
       }
@@ -512,6 +527,7 @@ router.get('/history', async (req, res) => {
       analyses,
       providerFilter,
       daysFilter,
+      feedbackFilter,
       success: req.query.success,
       error: req.query.error
     });
@@ -522,6 +538,7 @@ router.get('/history', async (req, res) => {
       analyses: [],
       providerFilter: null,
       daysFilter: 0,
+      feedbackFilter: null,
       error: 'Failed to load analysis history'
     });
   }

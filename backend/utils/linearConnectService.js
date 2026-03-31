@@ -5,6 +5,7 @@
 
 const axios = require('axios');
 const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
+const { generateAnalysisId, feedbackFooter } = require('./feedbackHelper');
 
 // Linear GraphQL API endpoint
 const LINEAR_API_URL = 'https://api.linear.app/graphql';
@@ -285,11 +286,14 @@ async function processLinearWebhook(payload, installation) {
         console.error('❌ AI analysis failed');
         return;
       }
+      const linearAnalysisId = generateAnalysisId();
       let analysisComment = formatAnalysisComment(aiInsights.data);
       analysisComment = `**QA analysis ready.**\n\n${analysisComment}`;
+      analysisComment += feedbackFooter(linearAnalysisId);
       await postComment(issueId, analysisComment, installation);
       if (isSupabaseConfigured()) {
         await saveAnalysisToDatabase({
+          analysisId: linearAnalysisId,
           installationId: installation.id,
           provider: 'linear',
           issueKey: issueDetails.identifier,
@@ -606,28 +610,31 @@ function asString(val) {
  * Save analysis to database
  */
 async function saveAnalysisToDatabase(data) {
-  const { installationId, provider, issueKey, issueTitle, issueUrl, analysisResult, userId } = data;
+  const { installationId, provider, issueKey, issueTitle, issueUrl, analysisResult, userId, analysisId } = data;
   
   try {
+    const insertRow = {
+      user_id: userId || null,
+      integration_id: null,
+      provider: provider,
+      repository: issueKey,
+      pr_number: 0,
+      pr_title: issueTitle,
+      pr_url: issueUrl,
+      analysis_type: 'full',
+      status: 'completed',
+      result: analysisResult,
+      completed_at: new Date().toISOString(),
+      metadata: { 
+        linear_installation_id: installationId,
+        issue_key: issueKey
+      }
+    };
+    if (analysisId) insertRow.id = analysisId;
+
     const { data: savedAnalysis, error } = await supabaseAdmin
       .from('analyses')
-      .insert({
-        user_id: userId || null,
-        integration_id: null,
-        provider: provider,
-        repository: issueKey,
-        pr_number: 0,
-        pr_title: issueTitle,
-        pr_url: issueUrl,
-        analysis_type: 'full',
-        status: 'completed',
-        result: analysisResult,
-        completed_at: new Date().toISOString(),
-        metadata: { 
-          linear_installation_id: installationId,
-          issue_key: issueKey
-        }
-      })
+      .insert(insertRow)
       .select();
 
     if (error) {
