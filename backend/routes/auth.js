@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { supabase, supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
+const { sendWelcomeEmail } = require('../utils/emailService');
 
 /**
  * Auto-sync GitHub App installations for the logged-in user
@@ -173,7 +174,7 @@ router.post('/signup', async (req, res) => {
 
     // Check if email confirmation is required
     if (data.user && !data.session) {
-      // Email confirmation required
+      sendWelcomeEmail(email, name).catch(() => {});
       return res.redirect('/login?success=' + encodeURIComponent('Check your email to confirm your account'));
     }
 
@@ -186,6 +187,7 @@ router.post('/signup', async (req, res) => {
       };
       req.session.accessToken = data.session.access_token;
       req.session.refreshToken = data.session.refresh_token;
+      sendWelcomeEmail(email, name).catch(() => {});
       const redirect = req.body.redirect && String(req.body.redirect).startsWith('/') && !String(req.body.redirect).startsWith('//');
       return res.redirect(redirect ? req.body.redirect : '/dashboard');
     }
@@ -324,6 +326,13 @@ router.get('/callback', async (req, res) => {
     req.session.refreshToken = data.session.refresh_token;
 
     console.log(`✅ User logged in via GitHub: ${data.user.email}`);
+
+    const createdAt = data.user.created_at ? new Date(data.user.created_at) : null;
+    const isNewUser = createdAt && (Date.now() - createdAt.getTime() < 60000);
+    if (isNewUser) {
+      sendWelcomeEmail(data.user.email, req.session.user.name).catch(() => {});
+    }
+
     // GitHub OAuth: sync installations for this user (they signed up/logged in via GitHub)
     autoSyncGitHubInstallations(data.user.id, data.user.email).catch(err => {
       console.error('Background sync error:', err);

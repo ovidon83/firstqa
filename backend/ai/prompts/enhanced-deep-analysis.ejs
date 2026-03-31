@@ -51,6 +51,7 @@ Before analyzing anything, categorize the changed files:
    - Understand conditional logic: when things appear/disappear, when filters switch
 2. **USE EXACT CODE DETAILS** in test cases - don't guess or use generic terms
 3. **REFERENCE ACTUAL CODE ELEMENTS** by their names as they appear in the diff
+4. **CRITICAL: Only use UI element names, page names, button text, and URLs that you can directly cite from the CODE DIFF, FULL FILE CONTENTS, FLOW DISCOVERY, or PRODUCT KNOWLEDGE CONTEXT sections above. If you cannot find the exact element name in the provided context, describe the expected behavior instead of guessing. Never invent UI elements.**
 
 **PR CONTEXT:**
 Title: <%= title %>
@@ -119,7 +120,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 | Scenario | Steps | Expected Result | Priority | Automation |
 |----------|-------|-----------------|----------|-------------|
-[AI will generate test cases here — MAX 5 scenarios. **MANDATORY ROW ORDER**: Output ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Do not interleave. Automation: UI | API | Unit | Other only. Keep Steps and Expected Result concise so table cells align; use one short line per step, separate with <br>.]
+[AI will generate test cases here — MAX 5 scenarios, prioritizing accuracy over quantity. **MANDATORY ROW ORDER**: Output ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Do not interleave. Automation: UI | API | Unit | Other only. Keep Steps and Expected Result concise so table cells align; use one short line per step, separate with <br>.]
 
 **If Decision is Investigate or No-Go, add:**
 ## ✅ To Do (for Go)

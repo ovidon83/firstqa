@@ -1345,11 +1345,23 @@ Or wait until next month when your limit resets.
   // Create a unique ID for this test request
   const requestId = `${repository.full_name.replace('/', '-')}-${issue.number}-${Date.now()}`;
 
-  // First-time auto-index: if repo has no product knowledge, trigger codebase analysis in background (once)
-  const { triggerGitHubFirstTimeIndex } = require('../services/knowledgeBase/firstTimeIndexTrigger');
-  const postCommentFn = (body) => postComment(repository.full_name, issue.number, body);
-  triggerGitHubFirstTimeIndex(repository.full_name, installationId, postCommentFn);
-  
+  // First-time auto-index: if repo has no product knowledge, wait for indexing before analysis
+  if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true' && installationId) {
+    const { repoNeedsFirstTimeIndex } = require('../services/knowledgeBase/firstTimeIndexTrigger');
+    const { analyzeRepository } = require('../services/knowledgeBase/codebaseAnalyzer');
+    try {
+      const needsIndex = await repoNeedsFirstTimeIndex(repository.full_name);
+      if (needsIndex) {
+        console.log(`📚 First-time indexing for ${repository.full_name} — waiting before analysis`);
+        await postComment(repository.full_name, issue.number, '📚 **Building product knowledge from your codebase.** Analysis will follow shortly.');
+        await analyzeRepository(repository.full_name, installationId, 'main');
+        console.log(`✅ First-time indexing complete for ${repository.full_name}, proceeding with analysis`);
+      }
+    } catch (indexErr) {
+      console.warn(`⚠️ First-time indexing failed for ${repository.full_name}, continuing with analysis:`, indexErr.message);
+    }
+  }
+
   // Get the last analyzed commit SHA for this PR
   const lastAnalyzedSHA = getLastAnalyzedCommitSHA(repository.full_name, issue.number);
   console.log(`🔍 Last analyzed commit SHA: ${lastAnalyzedSHA || 'none (first analysis)'}`);

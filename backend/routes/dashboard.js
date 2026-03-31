@@ -85,17 +85,54 @@ router.get('/', async (req, res) => {
         stats.connectedIntegrations = uniqueProviders.length;
       }
       
-      // Fetch recent analyses (last 5)
+      // Fetch recent analyses (last 10)
       const { data: recentAnalyses } = await supabaseAdmin
         .from('analyses')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
       
       stats.recentAnalyses = recentAnalyses || [];
+
+      // Aggregate analytics: by provider, by decision, weekly trend
+      const { data: allMonthAnalyses } = await supabaseAdmin
+        .from('analyses')
+        .select('provider, result, created_at, processing_time_ms')
+        .eq('user_id', user.id)
+        .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
+        .order('created_at', { ascending: false });
+
+      const byProvider = {};
+      const byDecision = { Ship: 0, Investigate: 0, 'No-Go': 0 };
+      let totalProcessingMs = 0;
+      let processedCount = 0;
+      const weeklyBuckets = [0, 0, 0, 0];
+
+      for (const a of (allMonthAnalyses || [])) {
+        byProvider[a.provider || 'github'] = (byProvider[a.provider || 'github'] || 0) + 1;
+        if (a.processing_time_ms) {
+          totalProcessingMs += a.processing_time_ms;
+          processedCount++;
+        }
+        try {
+          const r = typeof a.result === 'string' ? JSON.parse(a.result) : a.result;
+          const dec = r?.decision || r?.qaPulse?.decision;
+          if (dec && byDecision.hasOwnProperty(dec)) byDecision[dec]++;
+        } catch (_) {}
+        const weeksAgo = Math.floor((Date.now() - new Date(a.created_at).getTime()) / (7 * 86400000));
+        if (weeksAgo >= 0 && weeksAgo < 4) weeklyBuckets[weeksAgo]++;
+      }
+
+      stats.analytics = {
+        byProvider,
+        byDecision,
+        avgProcessingMs: processedCount > 0 ? Math.round(totalProcessingMs / processedCount) : 0,
+        weeklyTrend: weeklyBuckets.reverse(),
+        totalThisMonth: (allMonthAnalyses || []).length
+      };
       
-      console.log(`📊 Dashboard stats for ${user.email}:`, stats);
+      console.log(`📊 Dashboard stats for ${user.email}:`, { ...stats, recentAnalyses: `${stats.recentAnalyses.length} items` });
     }
     
     res.render('dashboard/index', { 
@@ -434,20 +471,38 @@ router.get('/history', async (req, res) => {
   try {
     const user = req.session.user;
     let analyses = [];
+    const providerFilter = req.query.provider || null;
+    const daysFilter = parseInt(req.query.days, 10) || 0;
     
     if (isSupabaseConfigured()) {
-      // Fetch analysis history from database
-      const { data, error } = await supabaseAdmin
+      let query = supabaseAdmin
         .from('analyses')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(50); // Show last 50 analyses
+        .limit(100);
+
+      if (providerFilter && ['github', 'linear', 'jira'].includes(providerFilter)) {
+        query = query.eq('provider', providerFilter);
+      }
+      if (daysFilter > 0) {
+        const since = new Date(Date.now() - daysFilter * 86400000).toISOString();
+        query = query.gte('created_at', since);
+      }
+      
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error fetching analyses:', error);
       } else {
-        analyses = data || [];
+        analyses = (data || []).map(a => {
+          let decision = null;
+          try {
+            const result = typeof a.result === 'string' ? JSON.parse(a.result) : a.result;
+            decision = result?.decision || result?.qaPulse?.decision || null;
+          } catch (_) {}
+          return { ...a, decision };
+        });
         console.log(`📊 Fetched ${analyses.length} analyses for user ${user.email}`);
       }
     }
@@ -455,6 +510,8 @@ router.get('/history', async (req, res) => {
     res.render('dashboard/history', { 
       user, 
       analyses,
+      providerFilter,
+      daysFilter,
       success: req.query.success,
       error: req.query.error
     });
@@ -463,6 +520,8 @@ router.get('/history', async (req, res) => {
     res.render('dashboard/history', { 
       user: req.session.user, 
       analyses: [],
+      providerFilter: null,
+      daysFilter: 0,
       error: 'Failed to load analysis history'
     });
   }

@@ -8,6 +8,7 @@ const { supabaseAdmin, isSupabaseConfigured } = require('../../lib/supabase');
 const { getOctokit } = require('../githubChecksService');
 
 const { parseImports, extractUserFlowFromTestFile, isTestFile, deriveProductAreasFromPaths } = require('./codebaseAnalyzer');
+const { extractRoutes, extractUIElements, extractAPIEndpoints, extractMessages } = require('../../ai/flowDiscovery');
 
 const EXTRACTION_PROMPT = `Extract structured knowledge from this code file. Return a JSON object with "entries" array.
 Each entry: { "knowledge_type": "component"|"function"|"api"|"data_model"|"feature"|"other"|"product_area"|"user_flow", "entity_name": string, "description": string, "dependencies": string[] }
@@ -114,6 +115,10 @@ async function syncPRKnowledge(prNumber, repoFullName, installationId, headSHA) 
     );
 
     const dependencyGraphUpdates = {};
+    const newRoutes = [];
+    const newUIElements = [];
+    const newAPIEndpoints = [];
+    const newMessages = [];
     let processed = 0;
     for (const file of relevant) {
       try {
@@ -125,6 +130,11 @@ async function syncPRKnowledge(prNumber, repoFullName, installationId, headSHA) 
 
         const imports = parseImports(content, file.filename);
         if (imports.length) dependencyGraphUpdates[file.filename] = imports;
+
+        newRoutes.push(...extractRoutes(file.filename, content));
+        newUIElements.push(...extractUIElements(file.filename, content));
+        newAPIEndpoints.push(...extractAPIEndpoints(file.filename, content));
+        newMessages.push(...extractMessages(file.filename, content));
 
         if (isTestFile(file.filename)) {
           const flowName = extractUserFlowFromTestFile(file.filename, content);
@@ -210,11 +220,22 @@ async function syncPRKnowledge(prNumber, repoFullName, installationId, headSHA) 
 
     const { data: existingRc } = await supabaseAdmin
       .from('repo_context')
-      .select('product_areas, user_flows, services, tests_by_area, dependency_graph')
+      .select('product_areas, user_flows, services, tests_by_area, dependency_graph, routes, ui_elements, api_endpoints, messages')
       .eq('repo_id', repoId)
       .maybeSingle();
     const existingGraph = (existingRc && existingRc.dependency_graph) || {};
     const mergedGraph = { ...existingGraph, ...dependencyGraphUpdates };
+
+    const mergeByKey = (existing, incoming, keyFn, limit) => {
+      const map = new Map();
+      for (const item of (existing || [])) map.set(keyFn(item), item);
+      for (const item of incoming) map.set(keyFn(item), item);
+      return [...map.values()].slice(0, limit);
+    };
+    const mergedRoutes = mergeByKey(existingRc?.routes, newRoutes, r => r.path, 50);
+    const mergedUIElements = mergeByKey(existingRc?.ui_elements, newUIElements, u => `${u.type}:${u.text}`, 60);
+    const mergedAPIEndpoints = mergeByKey(existingRc?.api_endpoints, newAPIEndpoints, e => e.endpoint, 40);
+    const mergedMessages = mergeByKey(existingRc?.messages, newMessages, m => m.message, 30);
     const { data: userFlowRows } = await supabaseAdmin
       .from('product_knowledge')
       .select('entity_name, description, file_paths, metadata')
@@ -245,6 +266,10 @@ async function syncPRKnowledge(prNumber, repoFullName, installationId, headSHA) 
         dependency_graph: payload.dependency_graph,
         user_flows: payload.user_flows,
         tests_by_area: payload.tests_by_area,
+        routes: mergedRoutes,
+        ui_elements: mergedUIElements,
+        api_endpoints: mergedAPIEndpoints,
+        messages: mergedMessages,
         git_sha: payload.git_sha,
         updated_at: payload.updated_at
       }).eq('repo_id', repoId);
@@ -252,7 +277,11 @@ async function syncPRKnowledge(prNumber, repoFullName, installationId, headSHA) 
       await supabaseAdmin.from('repo_context').insert({
         ...payload,
         product_areas: {},
-        services: {}
+        services: {},
+        routes: mergedRoutes,
+        ui_elements: mergedUIElements,
+        api_endpoints: mergedAPIEndpoints,
+        messages: mergedMessages
       });
     }
 

@@ -30,6 +30,8 @@
                     <span style="color:#22c55e;"><i class="fas fa-check-circle"></i> Indexed</span>
                   <% } else if (r.status === 'running') { %>
                     <span style="color:#8b5cf6;">Indexing... <%= r.progress %>%</span>
+                  <% } else if (r.status === 'failed') { %>
+                    <span style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Failed</span>
                   <% } else { %>
                     <span style="color:#a1a1aa;">Pending</span>
                   <% } %>
@@ -87,37 +89,50 @@
   </main>
   <% if (anyRunning) { %>
   <script>
-    (function poll() {
-      fetch('/onboarding/api/indexing-status')
-        .then(r => r.json())
-        .then(data => {
-          if (data.anyRunning) {
-            setTimeout(poll, 3000);
-            const el = document.getElementById('indexing-status');
-            if (el) {
-              el.innerHTML = data.repoStatus.map(r => `
-                <div style="margin-bottom:1rem;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
-                    <span>${r.repoId}</span>
-                    <span style="color:${r.hasKnowledge?'#22c55e':r.status==='running'?'#8b5cf6':'#a1a1aa'}">
-                      ${r.hasKnowledge?'✓ Indexed':r.status==='running'?`Indexing... ${r.progress}%`:'Pending'}
-                    </span>
-                  </div>
-                  <div class="indexing-progress">
-                    <div class="indexing-progress-bar" style="width:${r.hasKnowledge?100:r.progress||0}%;"></div>
-                  </div>
-                </div>
-              `).join('');
-            }
+    (function() {
+      var pollStart = Date.now();
+      var TIMEOUT_MS = 3 * 60 * 1000;
+      function poll() {
+        if (Date.now() - pollStart > TIMEOUT_MS) {
+          var el = document.getElementById('indexing-status');
+          if (el) {
+            el.innerHTML = '<p style="color:#f59e0b;margin-bottom:0.5rem;"><i class="fas fa-clock"></i> Indexing is taking longer than expected.</p><p style="color:#a1a1aa;font-size:0.9rem;">It will continue in the background — you can proceed now.</p>';
           }
-        })
-        .catch(() => setTimeout(poll, 5000));
+          return;
+        }
+        fetch('/onboarding/api/indexing-status')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var el = document.getElementById('indexing-status');
+            if (data.stalled) {
+              if (el) {
+                el.innerHTML = '<p style="color:#f59e0b;margin-bottom:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Indexing appears stalled.</p><p style="color:#a1a1aa;font-size:0.9rem;">It will continue in the background — you can proceed now.</p>';
+              }
+              return;
+            }
+            if (data.anyRunning) {
+              setTimeout(poll, 3000);
+              if (el) {
+                el.innerHTML = data.repoStatus.map(function(r) {
+                  var statusColor = r.hasKnowledge ? '#22c55e' : r.status === 'running' ? '#8b5cf6' : r.status === 'failed' ? '#ef4444' : '#a1a1aa';
+                  var fileInfo = r.totalFiles ? ' (' + (r.filesAnalyzed || 0) + '/' + r.totalFiles + ' files)' : '';
+                  var statusText = r.hasKnowledge ? '✓ Indexed' : r.status === 'running' ? 'Indexing... ' + (r.progress || 0) + '%' + fileInfo : r.status === 'failed' ? '✗ Failed' : 'Pending';
+                  var errorLine = r.status === 'failed' && r.errorMessage ? '<p style="color:#ef4444;font-size:0.8rem;margin:0.25rem 0 0 0;">' + r.errorMessage + '</p>' : '';
+                  return '<div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;"><span>' + r.repoId + '</span><span style="color:' + statusColor + '">' + statusText + '</span></div><div class="indexing-progress"><div class="indexing-progress-bar" style="width:' + (r.hasKnowledge ? 100 : r.progress || 0) + '%;"></div></div>' + errorLine + '</div>';
+                }).join('');
+              }
+            }
+          })
+          .catch(function() { setTimeout(poll, 5000); });
+      }
+      poll();
     })();
   </script>
   <% } else if (typeof started !== 'undefined' && started && !anyRunning && !allIndexed) { %>
   <script>
     (function() {
       var startTime = Date.now();
+      var TIMEOUT_MS = 3 * 60 * 1000;
       var hintEl = document.getElementById('indexing-hint');
       var statusLineEl = document.getElementById('indexing-status-line');
       function updateFallback(msg, hideSpinner) {
@@ -125,21 +140,31 @@
         if (hideSpinner && statusLineEl) statusLineEl.innerHTML = 'Indexing not started';
       }
       function poll() {
-        if (Date.now() - startTime > 60000) {
-          updateFallback('No progress yet. You can continue to the next step.', true);
+        if (Date.now() - startTime > TIMEOUT_MS) {
+          var el = document.getElementById('indexing-status');
+          if (el) {
+            el.innerHTML = '<p style="color:#f59e0b;margin-bottom:0.5rem;"><i class="fas fa-clock"></i> Indexing is taking longer than expected.</p><p style="color:#a1a1aa;font-size:0.9rem;">It will continue in the background — you can proceed now.</p>';
+          }
           return;
         }
         fetch('/onboarding/api/indexing-status')
-          .then(r => r.json())
+          .then(function(r) { return r.json(); })
           .then(function(data) {
             var el = document.getElementById('indexing-status');
             if (!el) return;
             if (data.indexingEnabled === false) {
               updateFallback('Indexing is not enabled. You can continue to the next step.', true);
+              return;
+            }
+            if (data.stalled) {
+              el.innerHTML = '<p style="color:#f59e0b;margin-bottom:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Indexing appears stalled.</p><p style="color:#a1a1aa;font-size:0.9rem;">It will continue in the background — you can proceed now.</p>';
+              return;
             }
             if (data.anyRunning || data.allIndexed) {
               el.innerHTML = data.repoStatus.map(function(r) {
-                return '<div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;"><span>' + r.repoId + '</span><span style="color:' + (r.hasKnowledge ? '#22c55e' : r.status === 'running' ? '#8b5cf6' : '#a1a1aa') + '">' + (r.hasKnowledge ? '✓ Indexed' : r.status === 'running' ? 'Indexing... ' + (r.progress || 0) + '%' : 'Pending') + '</span></div><div class="indexing-progress"><div class="indexing-progress-bar" style="width:' + (r.hasKnowledge ? 100 : r.progress || 0) + '%;"></div></div></div>';
+                var statusColor = r.hasKnowledge ? '#22c55e' : r.status === 'running' ? '#8b5cf6' : r.status === 'failed' ? '#ef4444' : '#a1a1aa';
+                var statusText = r.hasKnowledge ? '✓ Indexed' : r.status === 'running' ? 'Indexing... ' + (r.progress || 0) + '%' : r.status === 'failed' ? '✗ Failed' : 'Pending';
+                return '<div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;"><span>' + r.repoId + '</span><span style="color:' + statusColor + '">' + statusText + '</span></div><div class="indexing-progress"><div class="indexing-progress-bar" style="width:' + (r.hasKnowledge ? 100 : r.progress || 0) + '%;"></div></div></div>';
               }).join('');
               if (data.anyRunning) setTimeout(poll, 3000);
               return;

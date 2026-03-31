@@ -576,6 +576,9 @@
                                     </button>
                                 </div>
                                 <% } %>
+                                <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 6px; font-size: 0.85rem; color: #93c5fd;">
+                                    <i class="fas fa-lightbulb"></i> Try commenting <code style="background:rgba(255,255,255,0.1);padding:0.1rem 0.3rem;border-radius:3px;">/qa</code> on any Linear issue to verify everything works.
+                                </div>
                             </div>
                         <% } else { %>
                             <div class="integration-status status-not-connected">
@@ -586,6 +589,11 @@
                     </div>
                     <div class="integration-actions">
                         <% if (locals.linearIntegration) { %>
+                            <button type="button" class="btn btn-secondary" id="testLinearBtn" onclick="testLinearConnection()" style="margin-bottom: 0.5rem;">
+                                <i class="fas fa-plug"></i>
+                                Test Connection
+                            </button>
+                            <div id="testLinearResult" style="display:none;font-size:0.85rem;margin-bottom:0.5rem;padding:0.5rem 0.75rem;border-radius:6px;"></div>
                             <form action="/dashboard/integrations/linear/disconnect" method="POST" style="margin: 0;">
                                 <button type="submit" class="btn btn-danger">
                                     <i class="fas fa-unlink"></i>
@@ -788,6 +796,38 @@
             }
         });
         
+        async function testLinearConnection() {
+            var btn = document.getElementById('testLinearBtn');
+            var result = document.getElementById('testLinearResult');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            result.style.display = 'none';
+            try {
+                var resp = await fetch('/linear-connect/test', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                var data = await resp.json();
+                if (data.success) {
+                    result.style.background = 'rgba(16,185,129,0.1)';
+                    result.style.border = '1px solid rgba(16,185,129,0.3)';
+                    result.style.color = '#6ee7b7';
+                    result.innerHTML = '✅ Connection OK — ' + (data.viewer || 'verified');
+                } else {
+                    result.style.background = 'rgba(239,68,68,0.1)';
+                    result.style.border = '1px solid rgba(239,68,68,0.3)';
+                    result.style.color = '#fca5a5';
+                    result.innerHTML = '❌ ' + (data.error || 'Connection failed');
+                }
+                result.style.display = 'block';
+            } catch (e) {
+                result.style.background = 'rgba(239,68,68,0.1)';
+                result.style.border = '1px solid rgba(239,68,68,0.3)';
+                result.style.color = '#fca5a5';
+                result.innerHTML = '❌ Network error';
+                result.style.display = 'block';
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plug"></i> Test Connection';
+        }
+
         // Handle webhook secret form submission
         document.getElementById('webhookSecretForm').addEventListener('submit', async function(e) {
             e.preventDefault();

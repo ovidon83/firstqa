@@ -228,6 +228,46 @@ async function processLinearWebhook(payload, installation) {
     }
 
     const runAnalysisAndPost = async () => {
+      let designContext = null;
+      let discussionContext = null;
+
+      const attachmentUrls = issueDetails.attachmentUrls || [];
+      if (attachmentUrls.length > 0) {
+        try {
+          const { isFigmaUrl, extractFigmaFileKeys, fetchFigmaContext, formatFigmaContextForPrompt } = require('./figmaService');
+          const figmaUrls = attachmentUrls.filter(isFigmaUrl);
+          if (figmaUrls.length > 0 && process.env.FIGMA_ACCESS_TOKEN) {
+            const fileKeys = extractFigmaFileKeys(figmaUrls);
+            const figmaResults = [];
+            for (const fk of fileKeys.slice(0, 3)) {
+              const ctx = await fetchFigmaContext(fk.fileKey, fk.nodeId, process.env.FIGMA_ACCESS_TOKEN);
+              if (ctx) figmaResults.push(ctx);
+            }
+            designContext = formatFigmaContextForPrompt(figmaResults);
+            if (designContext) console.log(`🎨 Figma context fetched from ${figmaResults.length} file(s)`);
+          }
+        } catch (figmaErr) {
+          console.warn('Figma context fetch failed:', figmaErr.message);
+        }
+
+        try {
+          const { isSlackUrl, extractSlackThreadInfo, fetchSlackThread, formatSlackContextForPrompt } = require('./slackService');
+          const slackUrls = attachmentUrls.filter(isSlackUrl);
+          if (slackUrls.length > 0 && process.env.SLACK_BOT_TOKEN) {
+            const threads = extractSlackThreadInfo(slackUrls);
+            const slackMessages = [];
+            for (const t of threads.slice(0, 3)) {
+              const msgs = await fetchSlackThread(t.channelId, t.threadTs, process.env.SLACK_BOT_TOKEN);
+              if (msgs) slackMessages.push(...msgs);
+            }
+            discussionContext = formatSlackContextForPrompt(slackMessages);
+            if (discussionContext) console.log(`💬 Slack context fetched from ${threads.length} thread(s)`);
+          }
+        } catch (slackErr) {
+          console.warn('Slack context fetch failed:', slackErr.message);
+        }
+      }
+
       const { generateTicketInsights } = require('../ai/openaiClient');
       const aiInsights = await generateTicketInsights({
         ticketId: issueDetails.identifier,
@@ -237,7 +277,9 @@ async function processLinearWebhook(payload, installation) {
         labels: issueDetails.labels,
         platform: 'linear',
         priority: issueDetails.priority,
-        type: issueDetails.type
+        type: issueDetails.type,
+        designContext,
+        discussionContext
       });
       if (!aiInsights || !aiInsights.success) {
         console.error('❌ AI analysis failed');
@@ -253,7 +295,8 @@ async function processLinearWebhook(payload, installation) {
           issueKey: issueDetails.identifier,
           issueTitle: issueDetails.title,
           issueUrl: issueDetails.url,
-          analysisResult: aiInsights.data
+          analysisResult: aiInsights.data,
+          userId
         });
       }
       console.log('🎉 Linear issue analysis complete!');
@@ -416,6 +459,8 @@ async function fetchIssueDetails(issueId, installation) {
         attachments {
           nodes {
             url
+            title
+            sourceType
           }
         }
         team {
@@ -561,13 +606,13 @@ function asString(val) {
  * Save analysis to database
  */
 async function saveAnalysisToDatabase(data) {
-  const { installationId, provider, issueKey, issueTitle, issueUrl, analysisResult } = data;
+  const { installationId, provider, issueKey, issueTitle, issueUrl, analysisResult, userId } = data;
   
   try {
     const { data: savedAnalysis, error } = await supabaseAdmin
       .from('analyses')
       .insert({
-        user_id: null,
+        user_id: userId || null,
         integration_id: null,
         provider: provider,
         repository: issueKey,

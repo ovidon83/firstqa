@@ -269,10 +269,58 @@ async function sendDiscoveryInterviewConfirmationEmail(to, qualified) {
   }
 }
 
+/**
+ * Send welcome email to new user with quick-start steps
+ */
+async function sendWelcomeEmail(email, name) {
+  if (!transporter) initialize();
+  if (!process.env.SMTP_USER) return false;
+
+  const displayName = name || email.split('@')[0];
+  const dashboardUrl = (process.env.BASE_URL || 'https://www.firstqa.dev') + '/dashboard';
+
+  const html = `
+    <div style="font-family: 'DM Sans', -apple-system, sans-serif; max-width: 560px; margin: 0 auto; color: #1a1a2e;">
+      <h2 style="margin-bottom: 4px;">Welcome to FirstQA, ${displayName}!</h2>
+      <p style="color: #555; margin-top: 0;">Ovi, your AI QA teammate, is ready to help.</p>
+      <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 20px 0;">
+      <h3 style="margin-bottom: 8px;">Get started in 3 steps:</h3>
+      <ol style="padding-left: 20px; line-height: 1.8;">
+        <li><strong>Connect GitHub</strong> — Link your repositories so Ovi can analyze PRs.</li>
+        <li><strong>Connect Linear</strong> (optional) — Get QA insights on tickets too.</li>
+        <li><strong>Comment <code>/qa</code></strong> on any PR or Linear issue to get your first analysis.</li>
+      </ol>
+      <p style="margin-top: 24px;">
+        <a href="${dashboardUrl}" style="background-color: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
+          Go to Dashboard
+        </a>
+      </p>
+      <p style="color: #888; font-size: 0.85rem; margin-top: 24px;">Questions? Reply to this email or contact ovi@firstqa.dev.</p>
+      <p style="color: #888; font-size: 0.85rem;">— The FirstQA team</p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'noreply@firstqa.dev',
+      to: email,
+      subject: 'Welcome to FirstQA — Get started in 3 steps',
+      html,
+      text: `Welcome to FirstQA, ${displayName}!\n\nGet started in 3 steps:\n1. Connect GitHub — Link your repositories so Ovi can analyze PRs.\n2. Connect Linear (optional) — Get QA insights on tickets too.\n3. Comment /qa on any PR or Linear issue to get your first analysis.\n\nGo to Dashboard: ${dashboardUrl}\n\nQuestions? Reply to this email or contact ovi@firstqa.dev.\n— The FirstQA team`
+    });
+    console.log(`Welcome email sent to ${email}`);
+    return true;
+  } catch (err) {
+    console.error('Error sending welcome email:', err.message);
+    return false;
+  }
+}
+
 module.exports = {
   initialize,
   sendTestRequestEmail,
   sendTestUpdateEmail,
   sendDiscoveryInterviewAdminEmail,
-  sendDiscoveryInterviewConfirmationEmail
-}; 
+  sendDiscoveryInterviewConfirmationEmail,
+  sendWelcomeEmail
+};

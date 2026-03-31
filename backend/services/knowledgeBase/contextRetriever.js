@@ -135,7 +135,7 @@ async function getProductContext(repoFullName, changedFiles = [], description = 
       result.affectedFlows = await getAffectedFlows(repoId, changedFiles);
       const { data: rc } = await supabaseAdmin
         .from('repo_context')
-        .select('product_areas, user_flows, services, tests_by_area, dependency_graph, section_titles')
+        .select('product_areas, user_flows, services, tests_by_area, dependency_graph, section_titles, routes, ui_elements, api_endpoints, messages')
         .eq('repo_id', repoId)
         .maybeSingle();
       result.repoContext = rc || null;
@@ -244,6 +244,8 @@ async function getProductContext(repoFullName, changedFiles = [], description = 
  * Format product context for prompt inclusion (includes product areas, user flows, affected flows)
  */
 function formatProductContextForPrompt(context) {
+  const rc = context.repoContext || {};
+  const hasProductMap = rc.routes?.length || rc.ui_elements?.length || rc.api_endpoints?.length || rc.messages?.length;
   const hasBasic = context && (
     (context.components && context.components.length) ||
     (context.apis && context.apis.length) ||
@@ -255,7 +257,7 @@ function formatProductContextForPrompt(context) {
     (context.productAreas && context.productAreas.length) ||
     (context.userFlows && context.userFlows.length)
   );
-  if (!context || (!hasBasic && !hasExtended)) {
+  if (!context || (!hasBasic && !hasExtended && !hasProductMap)) {
     return 'No product knowledge context available for this repository.';
   }
   const parts = [];
@@ -293,6 +295,29 @@ function formatProductContextForPrompt(context) {
     parts.push('### Related Features\n' + context.relatedFeatures.map(f =>
       `- **${f.name}**: ${f.description || 'No description'}`
     ).join('\n'));
+  }
+  if (hasProductMap) {
+    const mapParts = [];
+    if (rc.routes?.length) {
+      mapParts.push('**Routes**: ' + rc.routes.slice(0, 25).map(r => `\`${r.path}\``).join(', '));
+    }
+    if (rc.ui_elements?.length) {
+      const byType = {};
+      for (const el of rc.ui_elements.slice(0, 40)) {
+        if (!byType[el.type]) byType[el.type] = [];
+        byType[el.type].push(el.text);
+      }
+      mapParts.push('**UI Elements**: ' + Object.entries(byType).map(([type, texts]) =>
+        `${type}: ${[...new Set(texts)].slice(0, 10).map(t => `"${t}"`).join(', ')}`
+      ).join('; '));
+    }
+    if (rc.api_endpoints?.length) {
+      mapParts.push('**API Endpoints**: ' + rc.api_endpoints.slice(0, 20).map(e => `\`${e.endpoint}\``).join(', '));
+    }
+    if (rc.messages?.length) {
+      mapParts.push('**Messages**: ' + rc.messages.slice(0, 15).map(m => `"${m.message}"`).join(', '));
+    }
+    parts.push('### Product Map (from codebase indexing)\n' + mapParts.join('\n'));
   }
   return parts.join('\n\n');
 }
