@@ -156,7 +156,7 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     
     // Sanitize inputs — no hard truncation on diff; use dynamic token budget
     const sanitizedTitle = trunc(title || 'No title provided', 300);
-    let sanitizedBody = trunc(body || 'No description provided', 3000);
+    let sanitizedBody = trunc(body || 'No description provided', 8000);
 
     // Build other context pieces first so we know how much budget the diff gets
     const sanitizedContext = trunc(JSON.stringify(codeContext), 8000);
@@ -173,7 +173,7 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     // Dynamic diff budget: model context (128k) minus output (4k) minus other parts
     const { budgetDiff, estimateTokens } = require('./diffLineMapper');
     const MODEL_CONTEXT_TOKENS = 128000;
-    const OUTPUT_RESERVE_TOKENS = 5000;
+    const OUTPUT_RESERVE_TOKENS = 7000;
     const otherTokens = estimateTokens(sanitizedBody) + estimateTokens(sanitizedContext) +
       estimateTokens(selectorHintsFormatted) + estimateTokens(fileContentsForPrompt) +
       estimateTokens(productKnowledgeContext) + estimateTokens(flowContextFormatted || '') +
@@ -207,7 +207,7 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         }
         
         analysisInstruction += `**CRITICAL REQUIREMENTS FOR TEST GENERATION:**\n`;
-        analysisInstruction += `1. Generate **5-7 comprehensive test cases** total\n`;
+        analysisInstruction += `1. Generate test scenarios for **every meaningful change** — at least 1 Smoke + 1 Critical Path per change area\n`;
         analysisInstruction += `2. **HIGHEST PRIORITY**: For EACH fix mentioned in commit messages, generate a test case that specifically verifies that fix works\n`;
         analysisInstruction += `3. Include **specific, detailed expected results** with:\n`;
         analysisInstruction += `   - Exact UI states (what's visible/hidden/selected)\n`;
@@ -319,7 +319,7 @@ LINE NUMBERS: The diff below includes actual file line numbers (e.g. "  42|+code
             { role: 'user', content: prompt }
           ],
           temperature: 0.1,
-          max_tokens: 5000
+          max_tokens: 7000
         });
 
         const response = completion.choices[0]?.message?.content;

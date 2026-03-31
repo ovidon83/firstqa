@@ -698,7 +698,7 @@ async function fetchChangedFileContents(repository, prNumber) {
     const filesResponse = await repoOctokit.pulls.listFiles({ owner, repo: repoName, pull_number: prNumber });
     const codeFiles = filesResponse.data
       .filter(f => f.filename && !f.filename.includes('node_modules') && !f.filename.includes('dist'))
-      .filter(f => /\.(js|ts|jsx|tsx|vue|svelte|py|java|go|rb|c|cs|php)$/i.test(f.filename));
+      .filter(f => /\.(js|ts|jsx|tsx|vue|svelte|py|java|go|rb|c|cs|php|ejs|html|erb|hbs|pug)$/i.test(f.filename));
 
     // Prioritize UI files (contain selectors, test IDs)
     codeFiles.sort((a, b) => {

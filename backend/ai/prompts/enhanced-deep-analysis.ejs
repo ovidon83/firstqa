@@ -113,7 +113,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 | Scenario | Steps | Expected Result | Priority | Automation |
 |----------|-------|-----------------|----------|-------------|
-[AI will generate test cases here — MAX 5 scenarios, prioritizing accuracy over quantity. **MANDATORY ROW ORDER**: Output ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Do not interleave. Automation: UI | API | Unit | Other only. Keep Steps and Expected Result concise so table cells align; use one short line per step, separate with <br>.]
+[AI will generate test scenarios to cover every meaningful change in this PR. **COVERAGE RULE**: For each distinct change area, include at least 1 Smoke (happy path) + 1 Critical Path (edge case or failure mode). Trivial changes (typo, copy) need only 1 Smoke. Never pad with low-value tests. Never skip a change that could break in production. **CRITICALITY**: Rank by production impact — data loss, security, broken user flows, auth/payment = highest priority. Config, copy, style = lowest. **ROW ORDER**: ALL Smoke rows first, then ALL Critical Path rows, then ALL Regression rows. Automation: UI | API | Unit | Other only.]
 
 **If Decision is Investigate or No-Go, add:**
 ## ✅ To Do (for Go)
@@ -190,8 +190,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **EDGE CASES**: Include important edge cases (rapid actions, multiple states, concurrent operations, boundary conditions)
 - **NEGATIVE TESTS**: Include negative test cases (error conditions, failure scenarios, invalid states)
 - **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions
-- Generate at most **5** test scenarios total (max 5 flows). Base test recipe on indexed product context, affected flows, and dependency impact — no invented flows. Prioritize fixes and user-facing changes.
-- **COVERAGE PROPORTIONAL TO SCOPE**: Before writing test cases, list every distinct feature area modified in the PR (group by directory/module). Each major area MUST be represented by at least one test scenario. If the PR touches 4+ distinct areas but you only have 5 slots, combine smaller areas into one scenario or prioritize the highest-risk areas. Never leave an entire feature area uncovered.
+- Generate test scenarios for every meaningful change. Each distinct change area needs at least 1 Smoke (happy path) + 1 Critical Path (key edge case). Base test recipe on indexed product context, affected flows, and dependency impact — no invented flows.
+- **COVERAGE PROPORTIONAL TO SCOPE**: Before writing test cases, list every distinct feature area modified in the PR (group by directory/module). Each major area MUST be represented by at least one Smoke + one Critical Path scenario. If a change could break in production, it MUST have a test. Evaluate criticality: data loss, security, broken user flows, auth/payment paths = highest. Config, copy, style = lowest.
 - **ONE TEST CASE PER FIX**: Each distinct fix mentioned in commits should get its own dedicated test case
 - Provide concrete, actionable test steps with specific details based on the real changes
 - Consider the full user journey and how ALL changes work together
@@ -265,7 +265,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Understand conditional logic: when filters switch, when items appear/disappear, when toasts show
     - Map out the exact flow: user action → state change → UI update → toast notification
   - **STEP 2: TEST CASE GENERATION**:
-    - Generate at most **5** test scenarios total (max 5 flows), prioritizing fixes and user-facing changes
+    - Generate test scenarios to cover every meaningful change — at least 1 Smoke + 1 Critical Path per change area. Prioritize fixes and user-facing changes
     - **CRITICAL**: For EACH distinct fix mentioned in commit messages, generate a SEPARATE test case that specifically verifies that fix
     - Use ONLY these priority levels: Smoke, Critical Path, Regression
     - Order scenarios by priority (Smoke first, then Critical Path, then Regression)
