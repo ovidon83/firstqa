@@ -394,6 +394,19 @@
                   <span>4w ago</span><span>This week</span>
                 </div>
               </div>
+              <% if (stats.analytics.feedbackCounts && stats.analytics.feedbackCounts.total > 0) { %>
+              <div class="stat-card">
+                <div class="stat-label">User Feedback</div>
+                <div style="font-size:1.5rem;font-weight:700;margin-top:0.25rem;">
+                  <%= stats.analytics.feedbackCounts.total %>
+                </div>
+                <div style="margin-top:0.5rem;">
+                  <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:0.25rem;"><span style="color:#22c55e;">👍 Helpful</span><span style="font-weight:600;"><%= stats.analytics.feedbackCounts.positive %></span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.9rem;"><span style="color:#ef4444;">👎 Not helpful</span><span style="font-weight:600;"><%= stats.analytics.feedbackCounts.negative %></span></div>
+                </div>
+                <a href="/dashboard/history?feedback=any" style="display:block;margin-top:0.5rem;font-size:0.8rem;color:#10b981;text-decoration:none;">View all →</a>
+              </div>
+              <% } %>
             </div>
             <% } %>
 
