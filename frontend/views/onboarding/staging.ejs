@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configure Staging - FirstQA</title>
+  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+</head>
+<body class="onboarding">
+  <%- include('_nav') %>
+  <main class="main">
+    <div class="card">
+      <h1>Configure staging</h1>
+      <p class="subtitle">Where does your app deploy after a PR is merged? FirstQA will run tests there automatically.</p>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/onboarding/staging" style="margin-top:1.5rem;">
+        <label style="display:block;font-size:0.9rem;font-weight:500;margin-bottom:0.5rem;color:#e4e4e7;">Staging / Preview URL</label>
+        <input type="text" name="staging_url"
+               placeholder="https://staging.yourapp.com"
+               value="<%= typeof stagingUrl !== 'undefined' ? stagingUrl : '' %>"
+               style="width:100%;padding:0.75rem 1rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:0.95rem;font-family:'DM Sans',sans-serif;">
+
+        <p style="color:#71717a;font-size:0.8rem;margin-top:0.5rem;">
+          This is the URL where your staging or preview environment lives. After a PR is merged, FirstQA will wait a few minutes for deployment, then run the test recipe against this URL. You can change this later in Settings.
+        </p>
+
+        <button type="submit" class="btn-primary" style="margin-top:1.5rem;">Continue</button>
+      </form>
+
+      <form method="POST" action="/onboarding/staging/skip" style="margin-top:0.75rem;">
+        <button type="submit" class="btn-secondary" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#a1a1aa;cursor:pointer;padding:0.75rem;border-radius:8px;font-size:0.95rem;font-family:'DM Sans',sans-serif;">
+          Skip for now
+        </button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

@@ -163,6 +163,129 @@
             font-size: 0.95rem;
             color: #fff;
         }
+        .form-input {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 0.6rem 0.85rem;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            width: 100%;
+            max-width: 400px;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        .form-input::placeholder { color: #555; }
+        .form-select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 0.6rem 0.85rem;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            max-width: 200px;
+        }
+        .form-select option { background: #1a1a1b; }
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .toggle-row:first-child { padding-top: 0; }
+        .toggle-label {
+            flex: 1;
+        }
+        .toggle-label .label-text {
+            font-size: 0.95rem;
+            color: #fff;
+        }
+        .toggle-label .label-hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.15rem;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background: #10b981;
+        }
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+        }
+        .toggle-switch input:disabled + .toggle-slider {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .save-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .save-btn:hover { opacity: 0.9; }
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 2rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 200;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        }
+        .toast-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        .toast-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         @media (max-width: 768px) {
             .dashboard-layout { flex-direction: column; }
             .sidebar { width: 100%; }
@@ -172,11 +295,17 @@
                 gap: 0.5rem;
             }
             .sidebar-link { white-space: nowrap; }
+            .form-input { max-width: 100%; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div class="toast <%= message === 'Settings saved' ? 'toast-success' : 'toast-error' %>">
+            <%= message === 'Settings saved' ? '✓' : '!' %> <%= message %>
+        </div>
+    <% } %>
+
     <nav class="navbar">
         <div class="container">
             <a href="/" class="logo">
@@ -200,9 +329,7 @@
         </div>
     </nav>
 
-    <!-- Dashboard Layout -->
     <div class="dashboard-layout">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
                 <a href="/dashboard" class="sidebar-link">
@@ -224,13 +351,13 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
                 <h1>Settings</h1>
-                <p>Manage your account and preferences</p>
+                <p>Manage your account and FirstQA configuration</p>
             </div>
 
+            <!-- Account (read-only) -->
             <div class="settings-section">
                 <h2>Account</h2>
                 <div class="settings-row">
@@ -241,11 +368,77 @@
                     <span class="settings-label">Name</span>
                     <span class="settings-value"><%= user.name || user.full_name || '—' %></span>
                 </div>
-                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">
-                    Account details are managed through your authentication provider (e.g., GitHub, email). Changes to name or email must be made there.
-                </p>
             </div>
+
+            <form method="POST" action="/dashboard/settings">
+                <!-- Analysis Settings -->
+                <div class="settings-section">
+                    <h2>Analysis</h2>
+                    <div class="toggle-row">
+                        <div class="toggle-label">
+                            <div class="label-text">Auto-analyze PRs on open</div>
+                            <div class="label-hint">Coming soon — analysis currently runs on /qa command only</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="auto_analyze_prs" disabled
+                                   <%= (settings && settings.auto_analyze_prs) ? 'checked' : '' %>>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Staging & Test Execution -->
+                <div class="settings-section">
+                    <h2>Staging & Test Execution</h2>
+
+                    <div class="settings-row">
+                        <span class="settings-label">Staging URL</span>
+                        <input type="text" name="staging_url" class="form-input"
+                               placeholder="https://staging.yourapp.com"
+                               value="<%= (settings && settings.staging_url) ? settings.staging_url : '' %>">
+                        <span class="settings-label" style="margin-top:0.25rem">
+                            Where your app deploys after a PR is merged. FirstQA will run tests here.
+                        </span>
+                    </div>
+
+                    <div class="toggle-row">
+                        <div class="toggle-label">
+                            <div class="label-text">Run tests after merge</div>
+                            <div class="label-hint">Automatically execute the test recipe on your staging URL when a PR is merged</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="post_merge_tests"
+                                   <%= (settings && settings.post_merge_tests) ? 'checked' : '' %>>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-row">
+                        <span class="settings-label">Delay before running tests</span>
+                        <select name="post_merge_delay_ms" class="form-select">
+                            <% const currentDelay = (settings && settings.post_merge_delay_ms) || 300000; %>
+                            <option value="60000" <%= currentDelay === 60000 ? 'selected' : '' %>>1 minute</option>
+                            <option value="180000" <%= currentDelay === 180000 ? 'selected' : '' %>>3 minutes</option>
+                            <option value="300000" <%= currentDelay === 300000 ? 'selected' : '' %>>5 minutes</option>
+                            <option value="600000" <%= currentDelay === 600000 ? 'selected' : '' %>>10 minutes</option>
+                        </select>
+                        <span class="settings-label" style="margin-top:0.25rem">
+                            Wait time after merge to allow your staging deployment to finish
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="save-btn">
+                    <i class="fas fa-save"></i>
+                    Save Settings
+                </button>
+            </form>
         </main>
     </div>
+
+    <script>
+        const toast = document.querySelector('.toast');
+        if (toast) setTimeout(() => toast.remove(), 3200);
+    </script>
 </body>
 </html>

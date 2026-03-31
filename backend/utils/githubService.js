@@ -1248,19 +1248,20 @@ function parseTestRecipeFromAiResponse(aiData) {
       scenario: t.scenario || t.description,
       steps: t.steps || t.description,
       expected: t.expected || t.description,
-      priority: t.priority || 'Medium'
+      priority: t.priority || 'Medium',
+      automation: t.automation || null
     }));
   }
   if (typeof aiData !== 'string') return [];
-  // Parse markdown table: | Scenario | Steps | Expected Result | Priority |
-  const tableMatch = aiData.match(/\|\s*Scenario\s*\|\s*Steps\s*\|\s*Expected Result\s*\|\s*Priority\s*\|[\s\S]*?(?=\n## |\n---|\n\*\*|$)/i);
+  // Parse markdown table: | Scenario | Steps | Expected Result | Priority | Automation |
+  const tableMatch = aiData.match(/\|\s*Scenario\s*\|\s*Steps\s*\|\s*Expected Result\s*\|\s*Priority\s*(?:\|\s*Automation\s*)?\|[\s\S]*?(?=\n## |\n---|\n\*\*|$)/i);
   if (!tableMatch) return [];
   const tableBody = tableMatch[0];
   const rows = tableBody.split('\n').filter(line => {
     const t = line.trim();
     if (!t.startsWith('|') || line.includes('Scenario')) return false;
     const firstCell = t.split('|').map(c => c.trim())[1] || '';
-    return !/^[\s\-:]+$/.test(firstCell); // skip separator rows
+    return !/^[\s\-:]+$/.test(firstCell);
   });
   const recipe = [];
   for (const row of rows) {
@@ -1270,7 +1271,8 @@ function parseTestRecipeFromAiResponse(aiData) {
         scenario: cells[0] || 'Test scenario',
         steps: cells[1] || '',
         expected: cells[2] || '',
-        priority: cells[3] || 'Medium'
+        priority: cells[3] || 'Medium',
+        automation: cells[4] || null
       });
     }
   }
@@ -2073,68 +2075,36 @@ The AI analysis failed: ${aiInsights?.error || 'unknown error'}
     }
   }
   
+  // Post GitHub Check status (non-blocking)
+  if (installationId && currentHeadSHA && aiInsights?.success) {
+    try {
+      const { extractQAPulseDecision, createQAAnalysisCheck } = require('../services/githubChecksService');
+      const decision = extractQAPulseDecision(aiInsights.data);
+      if (decision) {
+        const [chkOwner, chkRepo] = repository.full_name.split('/');
+        const bugCount = typeof aiInsights.data?.bugsAndRisks?.length === 'number'
+          ? aiInsights.data.bugsAndRisks.length
+          : null;
+        await createQAAnalysisCheck({
+          installationId,
+          owner: chkOwner,
+          repo: chkRepo,
+          sha: currentHeadSHA,
+          decision,
+          bugCount,
+          analysisUrl: `https://github.com/${repository.full_name}/pull/${issue.number}`
+        });
+      }
+    } catch (checkErr) {
+      console.warn('⚠️ QA Check creation failed (non-fatal):', checkErr.message);
+    }
+  }
+
   // Add "Reviewed by Ovi" label after AI analysis is complete
   const labelResult = await addOviReviewedLabel(repository.full_name, issue.number);
   console.log(`✅ "Reviewed by Ovi" label ${labelResult.simulated ? 'would be' : 'was'} added`);
 
-  // On-demand test run: /qa -testrun -env=https://...
-  const baseUrlForTestRun = qaFlags.envUrl || process.env.TEST_AUTOMATION_BASE_URL;
-  console.log(`🔬 [testrun] Check: flags=`, qaFlags, `baseUrl=`, baseUrlForTestRun, `aiOk=`, !!aiInsights?.success);
-
-  if (qaFlags.testRun) {
-    console.log(`🔬 [testrun] Flags: testRun=${qaFlags.testRun}, envUrl=${qaFlags.envUrl || '(none)'}, baseUrlForTestRun=${baseUrlForTestRun || '(none)'}, aiSuccess=${!!aiInsights?.success}, installationId=${installationId ?? '(null)'}`);
-  }
-
-  if (qaFlags.testRun && baseUrlForTestRun && aiInsights?.success) {
-    const [owner, repo] = repository.full_name.split('/');
-    const testRecipe = parseTestRecipeFromAiResponse(aiInsights?.data) ||
-      aiInsights?.data?.testRecipe || [];
-
-    console.log(`🔬 [testrun] Extracted testRecipe: ${testRecipe.length} scenarios`);
-
-    if (testRecipe.length > 0 && installationId) {
-      let prDetails = null;
-      try {
-        const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repo);
-        if (repoOctokit) {
-          const prResponse = await repoOctokit.pulls.get({ owner, repo, pull_number: issue.number });
-          prDetails = prResponse.data;
-        } else {
-          console.warn('🔬 [testrun] getOctokitForRepo returned null');
-        }
-      } catch (e) {
-        console.warn('🔬 [testrun] Could not fetch PR for test run:', e.message);
-        console.warn('🔬 [testrun] Stack:', e.stack);
-      }
-
-      if (prDetails?.head?.sha) {
-        console.log(`🤖 On-demand test run: ${testRecipe.length} scenarios at ${baseUrlForTestRun}`);
-        const { executeAutomatedTests } = require('../services/automatedTestOrchestrator');
-        executeAutomatedTests({
-          owner,
-          repo,
-          prNumber: issue.number,
-          sha: prDetails.head.sha,
-          testRecipe,
-          baseUrl: baseUrlForTestRun.replace(/\/$/, ''),
-          installationId
-        }).catch(error => {
-          console.error('❌ Automated test execution failed:', error.message);
-          console.error('❌ Stack:', error.stack);
-        });
-      } else {
-        console.warn('⚠️ Could not get PR SHA for test run, skipping (prDetails?.head?.sha:', prDetails?.head?.sha ?? 'missing', ')');
-      }
-    } else if (testRecipe.length === 0) {
-      console.log('⏭️ No test recipe extracted for -testrun, skipping');
-    } else if (!installationId) {
-      console.log('⏭️ No installationId for test run, skipping');
-    } else {
-      console.log('⏭️ No base URL for -testrun (use -env=URL or TEST_AUTOMATION_BASE_URL)');
-    }
-  } else if (qaFlags.testRun) {
-    console.log(`⏭️ [testrun] Skipping: baseUrl=${!!baseUrlForTestRun}, aiSuccess=${!!aiInsights?.success}`);
-  }
+  // Note: test execution is now handled by the separate /qa testrun command (handleTestRunCommand).
   
   // Send email notification - DISABLED to prevent spam
   // const emailResult = await sendEmailNotification(testRequest);
@@ -2833,6 +2803,153 @@ async function handlePRMergedToStaging(repository, pr, userId, installationId) {
 }
 
 /**
+ * Handle /qa testrun command.
+ * Looks up the most recent /qa analysis for the PR and executes the test recipe
+ * against the staging URL (from -env=URL flag or client settings).
+ * Requires a prior /qa analysis to exist.
+ */
+async function handleTestRunCommand(repository, issue, comment, sender, userId, installationId) {
+  const repoFullName = repository.full_name;
+  const prNumber = issue.number;
+  const [owner, repo] = repoFullName.split('/');
+
+  console.log(`🔬 [testrun] Manual test run requested by ${sender.login} for ${repoFullName}#${prNumber}`);
+
+  // Parse -env=URL flag from comment
+  const envMatch = comment.body.match(/-env=(\S+)/i);
+  const envUrl = envMatch ? envMatch[1].trim() : null;
+
+  // 1. Look up staging URL: command flag > client settings > env var
+  let baseUrl = envUrl || process.env.TEST_AUTOMATION_BASE_URL || null;
+
+  if (!baseUrl && isSupabaseConfigured() && userId) {
+    const { data: settings } = await supabaseAdmin
+      .from('client_settings')
+      .select('staging_url')
+      .eq('user_id', userId)
+      .maybeSingle();
+    baseUrl = settings?.staging_url || null;
+  }
+
+  if (!baseUrl) {
+    await postComment(repoFullName, prNumber,
+      `⚠️ **No staging URL configured.**\n\nProvide one inline:\n\`\`\`\n/qa testrun -env=https://staging.yourapp.com\n\`\`\`\nOr set it in [FirstQA Settings](${process.env.BASE_URL || 'https://www.firstqa.dev'}/dashboard/settings).`
+    );
+    return { success: false, message: 'No staging URL' };
+  }
+  baseUrl = baseUrl.replace(/\/+$/, '');
+
+  // 2. Look up the most recent /qa analysis for this PR
+  if (!isSupabaseConfigured()) {
+    await postComment(repoFullName, prNumber, '❌ Database not configured — cannot look up prior analysis.');
+    return { success: false, message: 'No database' };
+  }
+
+  const { data: analysis } = await supabaseAdmin
+    .from('analyses')
+    .select('result')
+    .eq('repository', repoFullName)
+    .eq('pr_number', prNumber)
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!analysis?.result) {
+    await postComment(repoFullName, prNumber,
+      `⚠️ **No prior analysis found for this PR.**\n\nRun \`/qa\` first to generate a QA analysis with a test recipe, then use \`/qa testrun\` to execute those tests.`
+    );
+    return { success: false, message: 'No prior analysis' };
+  }
+
+  // 3. Extract test recipe
+  const rawData = analysis.result.raw || analysis.result;
+  const fullRecipe = parseTestRecipeFromAiResponse(rawData);
+
+  if (fullRecipe.length === 0) {
+    await postComment(repoFullName, prNumber,
+      `⚠️ **No test recipe found in the last analysis.**\n\nThe prior \`/qa\` analysis didn't produce a test recipe. Try running \`/qa\` again.`
+    );
+    return { success: false, message: 'No test recipe in analysis' };
+  }
+
+  // 4. Filter: run UI + API scenarios, skip Unit
+  const unitSkipped = fullRecipe.filter(s => s.automation && s.automation.toLowerCase() === 'unit');
+  const runnableRecipe = fullRecipe.filter(s => {
+    if (!s.automation) return true;
+    return s.automation.toLowerCase() !== 'unit';
+  });
+
+  if (runnableRecipe.length === 0) {
+    await postComment(repoFullName, prNumber,
+      `⏭️ All ${fullRecipe.length} test scenario(s) are Unit-level — these need a code test runner, not a browser. Nothing to execute.`
+    );
+    return { success: true, message: 'All Unit scenarios — skipped' };
+  }
+
+  // 5. Classify change type and warn (but don't block — user explicitly requested)
+  let changeNote = '';
+  if (installationId) {
+    try {
+      const { getOctokit } = require('../services/githubChecksService');
+      const octokit = await getOctokit(installationId);
+      const { data: files } = await octokit.pulls.listFiles({ owner, repo, pull_number: prNumber, per_page: 100 });
+      const { classifyPRChangeType } = require('./changeTypeClassifier');
+      const classification = classifyPRChangeType(files.map(f => f.filename));
+      if (!classification.shouldRunBrowserTests) {
+        changeNote = `\n> ℹ️ This PR is classified as **${classification.type}** — browser tests may have limited coverage for non-frontend changes.\n`;
+      }
+    } catch (err) {
+      console.warn('⚠️ [testrun] Could not classify change type:', err.message);
+    }
+  }
+
+  // 6. Post acknowledgment and start execution
+  let unitNote = '';
+  if (unitSkipped.length > 0) {
+    unitNote = `\n> ${unitSkipped.length} unit test scenario${unitSkipped.length > 1 ? 's' : ''} skipped (run in your test suite):\n${unitSkipped.map(s => `> - ${s.scenario}`).join('\n')}\n`;
+  }
+
+  await postComment(repoFullName, prNumber,
+    `🤖 **Starting test execution** — ${runnableRecipe.length} scenario${runnableRecipe.length > 1 ? 's' : ''} against \`${baseUrl}\`${changeNote}${unitNote}\nResults will be posted here when complete.`
+  );
+
+  // 7. Get PR head SHA for the Check Run
+  let sha = null;
+  try {
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repo);
+    if (repoOctokit) {
+      const { data: prData } = await repoOctokit.pulls.get({ owner, repo, pull_number: prNumber });
+      sha = prData.head.sha;
+    }
+  } catch (err) {
+    console.warn('⚠️ [testrun] Could not fetch PR SHA:', err.message);
+  }
+
+  if (!sha) {
+    console.warn('⚠️ [testrun] No SHA available — Check Run will not be created');
+  }
+
+  // 8. Execute tests (non-blocking)
+  const { executeAutomatedTests } = require('../services/automatedTestOrchestrator');
+  executeAutomatedTests({
+    owner,
+    repo,
+    prNumber,
+    sha: sha || 'unknown',
+    testRecipe: runnableRecipe,
+    baseUrl,
+    installationId
+  }).catch(err => {
+    console.error(`❌ [testrun] Execution failed for ${repoFullName}#${prNumber}:`, err.message);
+    postComment(repoFullName, prNumber,
+      `❌ **Test execution failed:** ${err.message}\n\nCheck the logs or try again with \`/qa testrun\`.`
+    ).catch(() => {});
+  });
+
+  return { success: true, message: `Test execution started: ${runnableRecipe.length} scenarios` };
+}
+
+/**
  * Process a GitHub webhook event
  */
 async function processWebhookEvent(event) {
@@ -2943,7 +3060,7 @@ async function processWebhookEvent(event) {
       }
     }
 
-    // Handle pull_request closed + merged - knowledge sync and staging analysis
+    // Handle pull_request closed + merged - knowledge sync
     if (eventType === 'pull_request' && payload.action === 'closed' && payload.pull_request?.merged === true) {
       const { repository, pull_request: pr } = payload;
       if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true' && installationId && pr?.head?.sha) {
@@ -2953,9 +3070,6 @@ async function processWebhookEvent(event) {
         );
       }
     }
-
-    // PR merged into staging - post-merge analysis disabled for now (re-enable when ready)
-    // if (eventType === 'pull_request' && ... merged into STAGING_BRANCHES) -> handlePRMergedToStaging()
 
     // Handle issue comment event (for /qa commands)
     if (eventType === 'issue_comment' && payload.action === 'created') {
@@ -2981,7 +3095,13 @@ async function processWebhookEvent(event) {
         return { success: true, message: 'Skipped bot comment' };
       }
       console.log(`Comment body: ${comment.body}`);
-      // Check for /qa command (manual QA re-run)
+      // Check for /qa testrun command (run tests from prior analysis)
+      const commentTrimmed = comment.body.trim().toLowerCase();
+      if (commentTrimmed.startsWith('/qa testrun') || commentTrimmed.startsWith('/qa -testrun')) {
+        console.log('🔬 /qa testrun command detected!');
+        return await handleTestRunCommand(repository, issue, comment, sender, userId, installationId);
+      }
+      // Check for /qa command (manual QA analysis)
       if (comment.body.trim().startsWith('/qa')) {
         console.log('🧪 /qa command detected!');
         return await handleTestRequest(repository, issue, comment, sender, userId, installationId);

@@ -262,10 +262,100 @@ function generateAnnotationDetails(scenario) {
   return details;
 }
 
+/**
+ * Extract QA Pulse decision from AI analysis data.
+ * Looks through raw AI response strings and structured data for Ship / Investigate / No-Go.
+ */
+function extractQAPulseDecision(aiData) {
+  if (!aiData) return null;
+
+  const searchTargets = [];
+  if (typeof aiData === 'string') {
+    searchTargets.push(aiData);
+  } else {
+    if (aiData.qaPulse?.decision) return normalizeDecision(aiData.qaPulse.decision);
+    if (aiData.qa_pulse?.decision) return normalizeDecision(aiData.qa_pulse.decision);
+    if (typeof aiData.raw === 'string') searchTargets.push(aiData.raw);
+    if (typeof aiData.formatted === 'string') searchTargets.push(aiData.formatted);
+    if (typeof aiData.analysis === 'string') searchTargets.push(aiData.analysis);
+    searchTargets.push(JSON.stringify(aiData));
+  }
+
+  for (const text of searchTargets) {
+    const match = text.match(/Decision[:\s|*]*\*{0,2}\s*(Ship\s*It!?|Investigate|No[- ]Go)/i);
+    if (match) return normalizeDecision(match[1]);
+  }
+  return null;
+}
+
+function normalizeDecision(raw) {
+  const lower = (raw || '').toLowerCase().trim();
+  if (lower.startsWith('ship')) return 'ship';
+  if (lower.startsWith('investigate')) return 'investigate';
+  if (lower.includes('no') && lower.includes('go')) return 'no-go';
+  return null;
+}
+
+const DECISION_TO_CONCLUSION = {
+  'ship': 'success',
+  'investigate': 'neutral',
+  'no-go': 'action_required'
+};
+
+const DECISION_LABELS = {
+  'ship': 'Ship It!',
+  'investigate': 'Investigate',
+  'no-go': 'No-Go'
+};
+
+/**
+ * Create a GitHub Check Run for QA analysis results (non-blocking).
+ * Separate from test-execution checks.
+ */
+async function createQAAnalysisCheck({ installationId, owner, repo, sha, decision, bugCount, analysisUrl }) {
+  if (!installationId || !sha) {
+    console.log('⏭️ Skipping QA analysis check: missing installationId or SHA');
+    return null;
+  }
+
+  try {
+    const octokit = await getOctokit(installationId);
+    const conclusion = DECISION_TO_CONCLUSION[decision] || 'neutral';
+    const label = DECISION_LABELS[decision] || 'Unknown';
+
+    const bugLine = typeof bugCount === 'number' && bugCount > 0
+      ? `\n**Bugs & Risks:** ${bugCount} identified`
+      : '';
+
+    const response = await octokit.checks.create({
+      owner,
+      repo,
+      name: 'FirstQA — QA Analysis',
+      head_sha: sha,
+      status: 'completed',
+      conclusion,
+      completed_at: new Date().toISOString(),
+      output: {
+        title: `QA Pulse: ${label}`,
+        summary: `**Decision:** ${label}${bugLine}\n\nSee the PR comment for the full analysis.`
+      },
+      details_url: analysisUrl || `${process.env.BASE_URL || 'http://localhost:3000'}/dashboard`
+    });
+
+    console.log(`✅ QA Analysis Check created: ${response.data.id} (${conclusion})`);
+    return response.data.id;
+  } catch (error) {
+    console.error('⚠️ Failed to create QA analysis check (non-fatal):', error.message);
+    return null;
+  }
+}
+
 module.exports = {
   getOctokit,
   createCheckRun,
   updateCheckRunWithResults,
-  updateCheckRunWithError
+  updateCheckRunWithError,
+  extractQAPulseDecision,
+  createQAAnalysisCheck
 };
 
