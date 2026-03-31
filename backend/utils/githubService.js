@@ -590,17 +590,12 @@ Ovi QA Assistant
  */
 async function fetchPRDescription(repository, prNumber) {
   try {
-    if (simulatedMode || !octokit) {
-      console.error(`❌ Cannot fetch real PR description for ${repository}#${prNumber} - Authentication not available`);
-      return 'Error: Authentication not configured or app not installed';
-    }
     const [owner, repoName] = repository.split('/');
     if (!owner || !repoName) {
       console.error(`Invalid repository format: ${repository}. Should be in format 'owner/repo'`);
       return 'Error: Invalid repository format';
     }
-    // Try to get repository-specific authentication first
-    let repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
     if (!repoOctokit) {
       console.error(`❌ Failed to get authentication for ${repository} - app may not be installed`);
       return `Error: GitHub App not installed on ${repository} or insufficient permissions`;
@@ -621,7 +616,6 @@ async function fetchPRDescription(repository, prNumber) {
  */
 async function fetchPR(repository, prNumber) {
   try {
-    if (simulatedMode) return { changed_files: 0, additions: 0, deletions: 0, files: [] };
     const [owner, repoName] = repository.split('/');
     if (!owner || !repoName) return { changed_files: 0, additions: 0, deletions: 0, files: [] };
     const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
@@ -645,19 +639,12 @@ async function fetchPR(repository, prNumber) {
  */
 async function fetchPRDiff(repository, prNumber) {
   try {
-    // Check if we're in simulated mode or don't have authentication
-    if (simulatedMode || !octokit) {
-      console.error(`❌ Cannot fetch real PR diff for ${repository}#${prNumber} - Authentication not available`);
-      console.log(`📋 Simulated mode: ${simulatedMode}, Octokit available: ${!!octokit}`);
-      return 'Error fetching PR diff: Authentication not configured or app not installed';
-    }
     const [owner, repoName] = repository.split('/');
     if (!owner || !repoName) {
       console.error(`Invalid repository format: ${repository}. Should be in format 'owner/repo'`);
       return 'Error: Invalid repository format';
     }
-    // Try to get repository-specific authentication first
-    let repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
     if (!repoOctokit) {
       console.error(`❌ Failed to get authentication for ${repository} - app may not be installed`);
       return `Error fetching PR diff: GitHub App not installed on ${repository} or insufficient permissions`;
@@ -699,7 +686,6 @@ const PRIORITY_EXTENSIONS = ['.tsx', '.jsx', '.ts', '.js', '.vue', '.svelte', '.
  */
 async function fetchChangedFileContents(repository, prNumber) {
   try {
-    if (simulatedMode) return { fileContents: {}, selectorHints: [] };
     const [owner, repoName] = repository.split('/');
     if (!owner || !repoName) return { fileContents: {}, selectorHints: [] };
 
@@ -804,11 +790,6 @@ function getLastAnalyzedCommitSHA(repository, prNumber) {
  */
 async function fetchCommitsSince(repository, prNumber, sinceSHA) {
   try {
-    if (simulatedMode || !octokit) {
-      console.error(`❌ Cannot fetch commits for ${repository}#${prNumber} - Authentication not available`);
-      return [];
-    }
-    
     const [owner, repoName] = repository.split('/');
     if (!owner || !repoName) {
       console.error(`Invalid repository format: ${repository}`);
@@ -920,17 +901,12 @@ async function fetchCommitsSince(repository, prNumber, sinceSHA) {
  */
 async function fetchCommitDetails(repository, commitSHA) {
   try {
-    if (simulatedMode || !octokit) {
-      console.error(`❌ Cannot fetch commit details for ${commitSHA} - Authentication not available`);
-      return { sha: commitSHA, message: '', diff: '' };
-    }
-
     const [owner, repoName] = repository.split('/');
     if (!owner || !repoName) {
       return { sha: commitSHA, message: '', diff: '' };
     }
 
-    let repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
+    const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repoName);
     if (!repoOctokit) {
       return { sha: commitSHA, message: '', diff: '' };
     }
