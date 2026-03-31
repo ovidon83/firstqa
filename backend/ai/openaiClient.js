@@ -129,17 +129,16 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
       flowContextFormatted = (flowContextFormatted || '') + indexTitlesBlock;
     }
 
-    // Validate that we have real PR data, not simulated/fake data
-    const isSimulatedData = diff && (
-      diff.includes('This is a simulated PR description') ||
-      diff.includes('diff --git a/src/auth.js b/src/auth.js') ||
-      diff.includes('const jwt = require(\'jsonwebtoken\')') ||
-      diff.includes('Error fetching PR diff') ||
-      diff === 'No code changes detected'
-    );
+    // Only reject when the diff IS an error/empty — not when real code mentions error strings
+    const diffTrimmed = (diff || '').trim();
+    const isDiffError = !diffTrimmed ||
+      diffTrimmed.length < 50 ||
+      diffTrimmed === 'No code changes detected' ||
+      diffTrimmed.startsWith('Error fetching PR diff') ||
+      diffTrimmed.startsWith('Error:');
 
-    if (isSimulatedData || !diff || diff.length < 50) {
-      console.log('⚠️ Detected simulated/fake data or missing PR diff - cannot perform real analysis');
+    if (isDiffError) {
+      console.log(`⚠️ Diff is empty or error (${diffTrimmed.length} chars): "${diffTrimmed.substring(0, 100)}"`);
       const errorInsights = generateDataAccessError(title, repo, pr_number);
       return {
         success: true,
@@ -1515,17 +1514,15 @@ async function generateShortAnalysis({ repo, pr_number, title, body, diff }) {
 
     console.log(`🔍 Starting SHORT ANALYSIS for PR #${pr_number} in ${repo}`);
 
-    // Validate that we have real PR data, not simulated/fake data
-    const isSimulatedData = diff && (
-      diff.includes('This is a simulated PR description') ||
-      diff.includes('diff --git a/src/auth.js b/src/auth.js') ||
-      diff.includes('const jwt = require(\'jsonwebtoken\')') ||
-      diff.includes('Error fetching PR diff') ||
-      diff === 'No code changes detected'
-    );
+    const shortDiffTrimmed = (diff || '').trim();
+    const isShortDiffError = !shortDiffTrimmed ||
+      shortDiffTrimmed.length < 50 ||
+      shortDiffTrimmed === 'No code changes detected' ||
+      shortDiffTrimmed.startsWith('Error fetching PR diff') ||
+      shortDiffTrimmed.startsWith('Error:');
 
-    if (isSimulatedData || !diff || diff.length < 50) {
-      console.log('⚠️ Detected simulated/fake data or missing PR diff - cannot perform real analysis');
+    if (isShortDiffError) {
+      console.log(`⚠️ Diff is empty or error (${shortDiffTrimmed.length} chars): "${shortDiffTrimmed.substring(0, 100)}"`);
       const errorInsights = generateShortDataAccessError(title, repo, pr_number);
       return {
         success: true,
