@@ -155,28 +155,34 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     // Check if this is an update analysis (new commits detected)
     const isUpdateAnalysis = newCommits && newCommits.length > 0;
     
-    // Sanitize inputs with much higher limits for deep analysis
+    // Sanitize inputs — no hard truncation on diff; use dynamic token budget
     const sanitizedTitle = trunc(title || 'No title provided', 300);
-    let sanitizedBody = trunc(body || 'No description provided', 3000); // Higher limit for update context
-    
-    // Note: The body already contains new commits context from githubService.js
-    // We're analyzing the FULL PR diff, but with awareness of what's new
-    
-    const sanitizedDiff = trunc(diff, 12000); // Full PR diff
-    const sanitizedContext = trunc(JSON.stringify(codeContext), 6000); // Code context
+    let sanitizedBody = trunc(body || 'No description provided', 3000);
 
-    // Format selector hints for automation-ready test cases (exclude fullFileContents from context string to save tokens)
+    // Build other context pieces first so we know how much budget the diff gets
+    const sanitizedContext = trunc(JSON.stringify(codeContext), 8000);
+
     const selectorHintsFormatted = (selectorHints || []).slice(0, 40).map(h =>
       `- ${h.type || 'selector'}: "${h.value}" (${h.file || 'unknown'})`
     ).join('\n') || 'None extracted from code.';
 
-    // Include key file contents for UI components (truncated) - helps AI see exact elements/structure
-    const fileContentsForPrompt = Object.entries(fileContents || {}).slice(0, 8).map(([path, content]) => {
-      const snipped = trunc(content, 4000);
-      return `\n--- FILE: ${path} ---\n${snipped}${content.length > 4000 ? '\n...[truncated]' : ''}`;
+    const fileContentsForPrompt = Object.entries(fileContents || {}).slice(0, 12).map(([filePath, content]) => {
+      const snipped = trunc(content, 6000);
+      return `\n--- FILE: ${filePath} ---\n${snipped}${content.length > 6000 ? '\n...[truncated]' : ''}`;
     }).join('\n') || '';
 
-    console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length} chars, Body=${sanitizedBody.length} chars, Diff=${sanitizedDiff.length} chars, Context=${sanitizedContext.length} chars`);
+    // Dynamic diff budget: model context (128k) minus output (4k) minus other parts
+    const { budgetDiff, estimateTokens } = require('./diffLineMapper');
+    const MODEL_CONTEXT_TOKENS = 128000;
+    const OUTPUT_RESERVE_TOKENS = 5000;
+    const otherTokens = estimateTokens(sanitizedBody) + estimateTokens(sanitizedContext) +
+      estimateTokens(selectorHintsFormatted) + estimateTokens(fileContentsForPrompt) +
+      estimateTokens(productKnowledgeContext) + estimateTokens(flowContextFormatted || '') +
+      6000; // prompt template + system message overhead
+    const diffBudget = MODEL_CONTEXT_TOKENS - OUTPUT_RESERVE_TOKENS - otherTokens;
+    const { diff: sanitizedDiff, truncated: diffTruncated, fileCount: diffFileCount } = budgetDiff(diff, Math.max(diffBudget, 10000));
+
+    console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length}ch, Body=${sanitizedBody.length}ch, Diff=${sanitizedDiff.length}ch (${diffFileCount} files${diffTruncated ? ', truncated' : ', full'}), Context=${sanitizedContext.length}ch, FileContents=${fileContentsForPrompt.length}ch`);
     if (isUpdateAnalysis) {
       console.log(`🔄 REGENERATING COMPLETE ANALYSIS: ${newCommits.length} new commit(s) detected - analyzing FULL PR with new commits context`);
     } else {
@@ -275,6 +281,32 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     // Get model from environment or use default
     const model = process.env.OPENAI_MODEL || 'gpt-4o';
 
+    // System message: role, rules, verification requirements (stable across PRs)
+    const systemMessage = `You are Ovi AI, FirstQA's senior QA engineer. You review PRs with a focus on accuracy and zero false positives.
+
+CRITICAL RULES FOR BUGS & RISKS:
+- Default to "✅ No critical issues found." Report a bug ONLY if you can quote the exact unguarded code path from the diff.
+- False positives destroy trust. If you are not 95%+ confident a bug is real, do NOT include it.
+- Before reporting ANY bug, you MUST write a <bug_check> verification block (hidden from final output).
+- The <bug_check> block format:
+  <bug_check>
+  CLAIM: [what the bug is]
+  CODE QUOTE: [exact code from the diff that has the issue — copy/paste, not paraphrased]
+  GUARD CHECK: [does surrounding code already handle this? quote the guard if yes]
+  VERDICT: REAL BUG | FALSE POSITIVE
+  </bug_check>
+- ONLY include bugs where VERDICT is REAL BUG. Discard all FALSE POSITIVE entries.
+- If all candidates are FALSE POSITIVE, output "✅ No critical issues found." — that is the CORRECT answer, not a failure.
+
+FALSE POSITIVE EXAMPLES (DO NOT MAKE THESE MISTAKES):
+- Flagging "URL validation may allow invalid URLs" when the code has try/catch around new URL() + protocol check
+- Flagging "error handling gap" when the code has both inner if(error) and outer try/catch
+- Flagging "step progression issue" when all step guards (if state.step < N) are consistent
+- Flagging "missing null check" when the value is checked 3 lines above
+- Flagging something the PR is actively fixing as a bug
+
+LINE NUMBERS: The diff below includes actual file line numbers (e.g. "  42|+code"). Always cite these real line numbers, not diff-relative offsets.`;
+
     // Attempt to get insights (with retry logic)
     let lastError;
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -284,13 +316,11 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
         const completion = await openai.chat.completions.create({
           model: model,
           messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: prompt }
           ],
           temperature: 0.1,
-          max_tokens: 4096
+          max_tokens: 5000
         });
 
         const response = completion.choices[0]?.message?.content;
@@ -386,15 +416,21 @@ A system error prevented the QA analysis from completing: ${error.message}
  */
 async function parseAIResponse(response, title, body, diff) {
   try {
+    // Strip <bug_check> verification blocks (internal reasoning, not for display)
+    let cleaned = response;
+    if (cleaned.includes('<bug_check>')) {
+      cleaned = cleaned.replace(/<bug_check>[\s\S]*?<\/bug_check>\s*/g, '').trim();
+    }
+
     // Check if response is the new/enhanced markdown format
-    if (response.includes('🎯 QA Analysis') || 
-        response.includes('# Ovi QA Analysis') || 
-        response.includes('📋 Summary') ||
-        response.includes('Release Pulse') ||
-        response.includes('QA Pulse') ||
-        response.includes('Bugs & Risks') ||
-        response.includes('Test Recipe')) {
-      return response.trim();
+    if (cleaned.includes('🎯 QA Analysis') || 
+        cleaned.includes('# Ovi QA Analysis') || 
+        cleaned.includes('📋 Summary') ||
+        cleaned.includes('Release Pulse') ||
+        cleaned.includes('QA Pulse') ||
+        cleaned.includes('Bugs & Risks') ||
+        cleaned.includes('Test Recipe')) {
+      return cleaned.trim();
     }
     
     // Fallback: try to parse as JSON for backward compatibility
@@ -408,7 +444,7 @@ async function parseAIResponse(response, title, body, diff) {
     }
 
     // Try to extract JSON from markdown (backward compatibility)
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {
         const insights = JSON.parse(jsonMatch[0]);
@@ -420,8 +456,8 @@ async function parseAIResponse(response, title, body, diff) {
       }
     }
 
-    // If all else fails, return the response as-is (assume it's readable text)
-    return response.trim();
+    // If all else fails, return the cleaned response as-is
+    return cleaned.trim();
   } catch (error) {
     console.error('Error in parseAIResponse:', error.message);
     return null;
