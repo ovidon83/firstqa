@@ -185,23 +185,32 @@ async function verifyLinearWebhook(req, res, next) {
       return res.status(400).json({ error: 'Missing organization ID' });
     }
 
-    // Get installation
-    const installation = await getLinearInstallation(organizationId);
+    // Get installation — may not exist for unknown orgs
+    let installation = null;
+    try {
+      installation = await getLinearInstallation(organizationId);
+    } catch (lookupErr) {
+      // No installation found for this org — acknowledge the webhook (200)
+      // so Linear doesn't retry, but let the route handler decide what to do
+      console.warn(`⚠️ No Linear installation found for org ${organizationId} — passing to route handler`);
+    }
 
-    // Verify signature if secret is configured - MUST use raw body (Linear signs exact bytes)
-    if (signature && installation.webhook_secret) {
-      const rawBody = req.rawBody;
-      if (!rawBody) {
-        console.error('❌ Raw body not available for signature verification');
-        return res.status(401).json({ error: 'Webhook verification failed' });
-      }
-      const isValid = verifyWebhookSignature(rawBody, signature, installation.webhook_secret);
-      if (!isValid) {
-        return res.status(401).json({ error: 'Invalid webhook signature' });
+    if (installation) {
+      // Verify signature if secret is configured - MUST use raw body (Linear signs exact bytes)
+      if (signature && installation.webhook_secret) {
+        const rawBody = req.rawBody;
+        if (!rawBody) {
+          console.error('❌ Raw body not available for signature verification');
+          return res.status(401).json({ error: 'Webhook verification failed' });
+        }
+        const isValid = verifyWebhookSignature(rawBody, signature, installation.webhook_secret);
+        if (!isValid) {
+          return res.status(401).json({ error: 'Invalid webhook signature' });
+        }
       }
     }
 
-    // Attach installation to request
+    // Attach installation to request (null if not found)
     req.linearInstallation = installation;
 
     next();

@@ -3265,12 +3265,7 @@ async function testRepositoryAccess(repository) {
 }
 // Run the token test
 testGitHubToken();
-// Export new functions
-module.exports = {
-  ...module.exports,
-  getAuthenticationStatus,
-  testRepositoryAccess
-};
+// Note: getAuthenticationStatus and testRepositoryAccess are exported in the final module.exports below
 // Run archiving operation when module is loaded
 setTimeout(() => {
   console.log('Running scheduled archive operation...');
@@ -3387,5 +3382,7 @@ module.exports = {
   backupTestRequests,
   restoreFromBackup,
   formatHybridAnalysisForComment,
-  formatShortAnalysisForComment
+  formatShortAnalysisForComment,
+  getAuthenticationStatus,
+  testRepositoryAccess
 };

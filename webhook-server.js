@@ -37,6 +37,11 @@ const discoveryInterviewRoutes = require('./backend/routes/discoveryInterview');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust first proxy (Render, Railway, etc.) so secure cookies and req.ip work correctly
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Add CORS middleware for Chrome extension (MUST be first!)
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');

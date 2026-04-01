@@ -31,7 +31,7 @@ async function checkOnboarding(req, res, next) {
       .eq('id', req.session.user.id)
       .single();
     if (error) return next(); // Column might not exist yet
-    const completed = data?.onboarding_completed_at || (data?.onboarding_step >= 6);
+    const completed = data?.onboarding_completed_at || (data?.onboarding_step >= 7);
     if (!completed) return res.redirect('/onboarding');
   } catch (e) {
     // If users table doesn't have onboarding columns yet, continue

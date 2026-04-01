@@ -449,4 +449,112 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+/**
+ * GET /auth/reset-password - Show set-new-password page
+ * Supabase redirects here with access_token in the URL hash.
+ * The token is in the fragment (#), so we also handle ?code= for email link flows.
+ */
+router.get('/reset-password', async (req, res) => {
+  // If Supabase sends a ?code= param (PKCE flow), exchange it for a session
+  if (req.query.code) {
+    try {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(req.query.code);
+      if (error) {
+        return res.render('auth/reset-password', {
+          error: 'Reset link is invalid or expired. Please request a new one.',
+          success: null
+        });
+      }
+      // Store the access token in session so the POST handler can use it
+      req.session.resetAccessToken = data.session.access_token;
+      req.session.resetRefreshToken = data.session.refresh_token;
+    } catch (e) {
+      console.error('Reset code exchange error:', e);
+      return res.render('auth/reset-password', {
+        error: 'Reset link is invalid or expired. Please request a new one.',
+        success: null
+      });
+    }
+  }
+
+  res.render('auth/reset-password', {
+    error: req.query.error || null,
+    success: req.query.success || null
+  });
+});
+
+/**
+ * POST /auth/reset-password - Update the user's password
+ */
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+
+    if (!password || password.length < 8) {
+      return res.render('auth/reset-password', {
+        error: 'Password must be at least 8 characters.',
+        success: null
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.render('auth/reset-password', {
+        error: 'Passwords do not match.',
+        success: null
+      });
+    }
+
+    if (!isSupabaseConfigured()) {
+      return res.render('auth/reset-password', {
+        error: 'Service unavailable.',
+        success: null
+      });
+    }
+
+    // Use the token from the reset link to authenticate the update
+    const accessToken = req.session.resetAccessToken;
+    if (!accessToken) {
+      return res.render('auth/reset-password', {
+        error: 'Reset session expired. Please request a new reset link.',
+        success: null
+      });
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(
+      // We need the user ID — decode from the session token
+      // Alternative: use the Supabase client with the user's session
+      // Let's use the user-scoped approach
+      await (async () => {
+        const { data: { user } } = await supabase.auth.getUser(accessToken);
+        if (!user) throw new Error('Invalid session');
+        return user.id;
+      })(),
+      { password }
+    );
+
+    if (error) {
+      console.error('Password update error:', error.message);
+      return res.render('auth/reset-password', {
+        error: error.message,
+        success: null
+      });
+    }
+
+    // Clean up reset tokens from session
+    delete req.session.resetAccessToken;
+    delete req.session.resetRefreshToken;
+
+    res.render('auth/reset-password', {
+      error: null,
+      success: 'Password updated successfully! You can now log in with your new password.'
+    });
+  } catch (error) {
+    console.error('Password reset error:', error);
+    res.render('auth/reset-password', {
+      error: 'An error occurred. Please request a new reset link.',
+      success: null
+    });
+  }
+});
+
 module.exports = router;
