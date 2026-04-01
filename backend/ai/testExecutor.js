@@ -18,11 +18,8 @@ const ACTION_TIMEOUT = 10000;
 const SCENARIO_TIMEOUT = 60000;
 const MAX_REPEAT_ACTIONS = 2;
 
-/**
- * Get the accessibility tree from a page.
- * page.accessibility.snapshot() is NOT available over CDP connections (Browserbase).
- * Falls back to CDP protocol → DOM evaluation chain.
- */
+// ─── Accessibility tree helpers ──────────────────────────────────────────────
+
 async function getA11ySnapshot(page) {
   if (page.accessibility) {
     try {
@@ -132,42 +129,46 @@ function flattenA11yTree(node, depth = 0) {
   return parts.filter(Boolean).join('\n');
 }
 
-/**
- * Ask AI what URL to start on for a given scenario.
- * Replaces the blind baseUrl reset with an intelligent decision.
- */
-async function decideStartUrl(scenario, baseUrl) {
-  try {
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You decide what URL a browser test should start on. Given a scenario's name, steps, and expected result, return the most specific URL path the test should begin at. Return JSON: {"url": "/path"}. Use relative paths. If the steps don't imply a specific page, return {"url": "/"}.`
-        },
-        {
-          role: 'user',
-          content: `Base URL: ${baseUrl}\nScenario: ${scenario.scenario}\nSteps: ${scenario.steps}\nExpected: ${scenario.expected}`
-        }
-      ],
-      temperature: 0,
-      max_tokens: 50,
-      response_format: { type: 'json_object' }
-    });
+// ─── Start URL resolution (deterministic, no AI call) ───────────────────────
 
-    const parsed = JSON.parse(response.choices[0].message.content);
-    const urlPath = parsed.url || '/';
-    return urlPath.startsWith('http') ? urlPath : `${baseUrl}${urlPath.startsWith('/') ? '' : '/'}${urlPath}`;
-  } catch (error) {
-    console.warn(`   ⚠️ Could not decide start URL, using baseUrl: ${error.message}`);
-    return baseUrl;
+const ROUTE_KEYWORDS = ['hire', 'login', 'signin', 'signup', 'register', 'contact', 'dashboard', 'settings', 'profile', 'pricing', 'checkout', 'cart', 'search', 'about', 'faq', 'help', 'billing', 'onboarding', 'invite'];
+
+function extractPathFromScenario(scenario) {
+  const text = `${scenario.scenario} ${scenario.steps} ${scenario.expected}`;
+
+  // 1. Explicit URL path in text (e.g. "Navigate to /hire page")
+  const pathMatch = text.match(/\/([a-z][a-z0-9-]*)/i);
+  if (pathMatch) return `/${pathMatch[1].toLowerCase()}`;
+
+  // 2. Route keyword in scenario name
+  const name = scenario.scenario.toLowerCase();
+  for (const kw of ROUTE_KEYWORDS) {
+    if (name.includes(kw)) return `/${kw}`;
   }
+
+  return null;
 }
 
 /**
- * Ask the AI what single action to take given the a11y tree and current step.
+ * Resolve start URLs for all scenarios. Scenarios with no detected path
+ * inherit the most common path from the batch (majority vote).
  */
-async function decideNextAction(a11yText, currentStep, expectedResult, pageUrl, stepIndex, totalSteps) {
+function resolveStartUrls(testRecipe, baseUrl) {
+  const paths = testRecipe.map(s => extractPathFromScenario(s));
+
+  const counts = {};
+  paths.forEach(p => { if (p) counts[p] = (counts[p] || 0) + 1; });
+  const fallback = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || '/';
+
+  return paths.map(p => {
+    const resolved = p || fallback;
+    return `${baseUrl}${resolved}`;
+  });
+}
+
+// ─── Agent action decision ──────────────────────────────────────────────────
+
+async function decideNextAction(a11yText, currentStep, expectedResult, pageUrl, stepIndex, totalSteps, scenarioName) {
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
@@ -194,13 +195,13 @@ Rules:
 - For "press", set value to the key name (e.g. "Enter", "Tab").
 - For "navigate", only set url. Use relative paths.
 - Match names EXACTLY as they appear in the tree (case-sensitive).
-- If the element is not on the current page, try navigating to a page where it would logically exist.
 - NEVER repeat the same failed action. If an action didn't work, try a different approach or use "done".
-- Be efficient: one action per call when possible. Don't add unnecessary steps.`
+- Be efficient: one action per call when possible.`
       },
       {
         role: 'user',
-        content: `Current URL: ${pageUrl}
+        content: `Scenario: ${scenarioName}
+Current URL: ${pageUrl}
 Step ${stepIndex}/${totalSteps}: ${currentStep}
 Expected result: ${expectedResult}
 
@@ -215,14 +216,11 @@ ${a11yText.substring(0, 8000)}`
   return JSON.parse(response.choices[0].message.content);
 }
 
-/**
- * Resolve a locator using multiple strategies with fallbacks.
- * Scrolls the element into view before returning.
- */
+// ─── Locator resolution ─────────────────────────────────────────────────────
+
 async function resolveLocator(page, role, name) {
   let locator = null;
 
-  // Strategy 1: getByRole
   try {
     const byRole = page.getByRole(role, { name, exact: false });
     if (await byRole.first().isVisible({ timeout: 800 }).catch(() => false)) {
@@ -230,7 +228,6 @@ async function resolveLocator(page, role, name) {
     }
   } catch (_) { /* fall through */ }
 
-  // Strategy 2: getByLabel
   if (!locator && name) {
     try {
       const byLabel = page.getByLabel(name, { exact: false });
@@ -240,7 +237,6 @@ async function resolveLocator(page, role, name) {
     } catch (_) { /* fall through */ }
   }
 
-  // Strategy 3: getByPlaceholder
   if (!locator && name) {
     try {
       const byPlaceholder = page.getByPlaceholder(name, { exact: false });
@@ -250,7 +246,6 @@ async function resolveLocator(page, role, name) {
     } catch (_) { /* fall through */ }
   }
 
-  // Strategy 4: getByText (for buttons/links)
   if (!locator && (role === 'button' || role === 'link')) {
     try {
       const byText = page.getByText(name, { exact: false });
@@ -260,20 +255,17 @@ async function resolveLocator(page, role, name) {
     } catch (_) { /* fall through */ }
   }
 
-  // Final fallback
   if (!locator) {
     locator = page.getByRole(role, { name, exact: false }).first();
   }
 
-  // Scroll into view before returning
   await locator.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {});
 
   return locator;
 }
 
-/**
- * Execute a single action returned by the AI agent.
- */
+// ─── Action execution ───────────────────────────────────────────────────────
+
 async function executeAgentAction(page, action, baseUrl) {
   const { action: type, role, name, value, url } = action;
 
@@ -323,10 +315,8 @@ async function executeAgentAction(page, action, baseUrl) {
   }
 }
 
-/**
- * Run the agent loop for a single scenario.
- * Includes loop detection and wall-clock timeout.
- */
+// ─── Scenario agent loop ────────────────────────────────────────────────────
+
 async function runScenarioAgent(page, scenario, baseUrl) {
   const stepsRaw = scenario.steps || '';
   const individualSteps = stepsRaw
@@ -363,7 +353,8 @@ async function runScenarioAgent(page, scenario, baseUrl) {
 
       const decision = await decideNextAction(
         a11yText, step, scenario.expected,
-        page.url(), si + 1, individualSteps.length
+        page.url(), si + 1, individualSteps.length,
+        scenario.scenario
       );
 
       const logEntry = `Step ${si + 1}.${attempts}: ${decision.action} ${decision.role || ''} "${decision.name || ''}" ${decision.value || ''} — ${decision.reasoning || ''}`;
@@ -372,7 +363,6 @@ async function runScenarioAgent(page, scenario, baseUrl) {
 
       if (decision.action === 'done') break;
 
-      // Loop detection: break if same action repeated
       const actionKey = `${decision.action}:${decision.role || ''}:${decision.name || ''}:${decision.url || ''}`;
       if (actionKey === lastActionKey) {
         repeatCount++;
@@ -394,7 +384,6 @@ async function runScenarioAgent(page, scenario, baseUrl) {
         break;
       }
 
-      // Wait for network to settle instead of fixed delay
       await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
     }
   }
@@ -402,9 +391,8 @@ async function runScenarioAgent(page, scenario, baseUrl) {
   return actionLog;
 }
 
-/**
- * Verify expected result using AI + a11y tree + visible text.
- */
+// ─── Verification ───────────────────────────────────────────────────────────
+
 async function verifyExpectedResult(page, expectedResult, manualSteps) {
   try {
     const a11ySnapshot = await getA11ySnapshot(page);
@@ -455,9 +443,8 @@ Return JSON:
   }
 }
 
-/**
- * Main entry point — execute test recipe via Browserbase + a11y agent.
- */
+// ─── Main entry point ───────────────────────────────────────────────────────
+
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT } = options;
 
@@ -468,6 +455,10 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   console.log(`🎬 Starting test execution: ${executionId}`);
   console.log(`📍 Base URL: ${baseUrl}`);
   console.log(`📋 Test scenarios: ${testRecipe.length}`);
+
+  // Resolve start URLs for all scenarios up front (deterministic, no AI)
+  const startUrls = resolveStartUrls(testRecipe, baseUrl);
+  console.log(`🧭 Start URLs: ${startUrls.map((u, i) => `\n   ${i + 1}. ${u}`).join('')}`);
 
   let browser, session, sessionId;
   const useBrowserbase = !!(process.env.BROWSERBASE_API_KEY && process.env.BROWSERBASE_PROJECT_ID);
@@ -543,9 +534,8 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
-        // Smart start URL: ask AI where this scenario should begin
-        const startUrl = await decideStartUrl(scenario, baseUrl);
-        console.log(`   🧭 Start URL: ${startUrl}`);
+        const startUrl = startUrls[i];
+        console.log(`   🧭 Navigating to: ${startUrl}`);
         await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
         await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
 
