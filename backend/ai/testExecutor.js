@@ -477,11 +477,8 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
-        // Only navigate to baseUrl if on a blank page (first scenario or after error)
-        const currentUrl = page.url();
-        if (!currentUrl || currentUrl === 'about:blank' || currentUrl === 'chrome://newtab/') {
-          await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
-        }
+        // Reset to baseUrl at the start of each scenario for a clean state
+        await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
 
         const actionLog = await runScenarioAgent(page, scenario, baseUrl);
         scenarioResult.actionLog = actionLog;
