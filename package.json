@@ -22,6 +22,10 @@
   ],
   "author": "FirstQA Team",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ovidon83/firstqa.git"
+  },
   "dependencies": {
     "@browserbasehq/sdk": "^2.9.0",
     "@octokit/auth-app": "^8.1.1",

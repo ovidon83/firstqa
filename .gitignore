@@ -73,3 +73,8 @@ frontend/public/test-screenshots/
 
 # Private keys (use GITHUB_PRIVATE_KEY in .env instead)
 *.pem
+
+# Dev workflow artifacts
+tasks/
+task-agent.md
+gstack/

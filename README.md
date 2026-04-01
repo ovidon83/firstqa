@@ -1,186 +1,139 @@
 # FirstQA
 
-> **Your First QA Hire for Solo Founders & Startups** - Ovi AI + Human QA Experts
+> AI-powered QA analysis for GitHub pull requests.
 
-FirstQA is a comprehensive QA platform that combines AI-powered analysis with on-demand human QA expertise. Our platform offers instant PR feedback through Ovi AI and connects you with expert QA engineers for complex testing scenarios.
+FirstQA is a GitHub App that analyzes your PRs like a senior QA engineer. Comment `/qa` on any pull request to get an instant analysis with bug detection, risk assessment, and a prioritized test recipe — then optionally run automated browser tests with `/qa testrun`.
 
-## 🚀 **What We Offer**
+**Live at [firstqa.dev](https://www.firstqa.dev)**
 
-### **🤖 Ovi AI - Your 24/7 QA Agent**
-- **⚡ Instant Analysis**: Get comprehensive QA feedback in seconds, not days
-- **🎯 Smart Testing**: AI analyzes tickets and PRs like a senior QA engineer
-- **🔍 Risk Detection**: Identifies potential issues, bugs, and edge cases
-- **📋 Test Recipes**: Generates actionable test plans and scenarios
-- **💡 Expert Questions**: Asks the right questions a QA engineer would ask
+---
 
-### **👥 Human QA Experts - When You Need Real Expertise**
-- **🔬 Exploratory Testing**: Deep-dive testing for complex features
-- **🛡️ Security Testing**: Vulnerability assessment and penetration testing
-- **📱 Cross-Platform Validation**: Testing across devices, browsers, and platforms
-- **🔄 Regression Testing**: Full/partial regression testing for major releases
-- **🎭 User Experience Testing**: Real user scenario validation
+## How It Works
 
-## ✨ **Key Features**
+1. Install the **FirstQA GitHub App** on your repos
+2. Open a PR and comment `/qa`
+3. Ovi AI analyzes the diff and posts a detailed QA report:
+   - **Ship Score** — confidence rating with Go/No-Go recommendation
+   - **Bugs & Risks** — potential issues, missing error handling, security concerns
+   - **Test Recipe** — prioritized test scenarios with steps and expected results
+   - **Questions** — critical questions a QA engineer would ask
+4. Optionally, comment `/qa testrun` to execute browser tests automatically
 
-- **🎯 Release Pulse Analysis**: Instant assessment of user value, confidence, and change impact
-- **🧪 AI-Generated Test Recipes**: Comprehensive test scenarios with actionable steps
-- **⚠️ Risk & Bug Detection**: Identifies potential issues and missing error handling
-- **🔍 Product Area Analysis**: Maps changes to affected features and user flows
-- **⚡ Instant GitHub Integration**: Works directly in your PRs with `/qa` command
-- **👥 Human QA Experts**: On-demand senior QA when you need real expertise
+## Features
 
-## 🏗️ **Project Structure**
+- **PR Analysis** — Deep code analysis powered by OpenAI GPT-4o
+- **Automated Test Execution** — Cloud browser testing via Browserbase + Playwright
+- **Executability Scoring** — AI evaluates which test scenarios can be automated vs. need manual testing
+- **GitHub Checks Integration** — Results posted as PR comments and Check Runs
+- **Linear Integration** — Trigger `/qa` analysis from Linear issue comments
+- **Chrome Extension** — Analyze Linear/Jira tickets directly from your browser
+- **On-demand Human QA** — Request professional testing at [firstqa.dev/hire](https://www.firstqa.dev/hire)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Node.js 18+, Express |
+| Views | EJS templates, Bootstrap 5 |
+| Database | Supabase (PostgreSQL) |
+| AI | OpenAI API (GPT-4o) |
+| Browser Testing | Browserbase (cloud browsers) + Playwright |
+| Auth | Supabase Auth, GitHub OAuth |
+| Integrations | GitHub App, Linear, Jira Connect |
+| Deployment | Render |
+
+## Project Structure
 
 ```
 FirstQA/
-├── docs/                    # Documentation
-│   ├── plan.md             # Daily/weekly plans, work log
-│   ├── features.md         # Feature backlog
-│   ├── marketing/          # LinkedIn, X, IG content
-│   └── customer-support/   # Support docs, FAQs
-├── backend/                 # Server-side code
-│   ├── routes/             # Express routes
-│   ├── services/           # Business logic
-│   ├── utils/              # Utilities
-│   ├── lib/                # Shared libs
-│   └── ai/                 # AI prompts & OpenAI client
-├── frontend/                # Client-side code
-│   ├── views/              # EJS templates
-│   ├── public/             # Static assets (CSS, images)
-│   └── chrome_extension/   # Chrome extension
-├── scripts/                # Dev/ops scripts
-├── supabase/               # DB migrations
-├── webhook-server.js       # Entry point
-└── .env.example            # Env template (copy to .env)
+├── backend/
+│   ├── ai/              # AI prompts, test executor, executability scorer
+│   ├── lib/             # Supabase client
+│   ├── routes/          # Express route handlers
+│   ├── services/        # Test orchestrator, report formatter, screenshots
+│   └── utils/           # GitHub service, auth, email, diff parsing
+├── frontend/
+│   ├── views/           # EJS templates (dashboard, auth, onboarding, marketing)
+│   ├── public/          # Static assets (CSS, logos, images)
+│   └── chrome_extension/# Chrome extension source
+├── supabase/
+│   └── migrations/      # Database schema migrations
+├── scripts/             # Ops and dev scripts
+├── docs/                # Documentation
+├── webhook-server.js    # Application entry point
+└── .env.example         # Environment variable template
 ```
 
-## 🛠️ **Tech Stack**
+## Getting Started
 
-- **Frontend**: EJS templates, Bootstrap 5, Tailwind-inspired CSS
-- **Backend**: Node.js/Express
-- **AI**: OpenAI GPT-4 integration
-- **Storage**: JSON file storage (no database required)
-- **Integration**: GitHub API via Octokit, GitHub App authentication
-- **Deployment**: Ready for production deployment
+### Prerequisites
 
-## 🚀 **Getting Started**
+- Node.js 18+ and npm
+- A [Supabase](https://supabase.com) project (free tier works)
+- An [OpenAI API](https://platform.openai.com) key
+- A registered [GitHub App](https://docs.github.com/en/apps/creating-github-apps)
 
-### **Prerequisites**
+### Setup
 
-- Node.js (v14+)
-- npm
-- A GitHub repository with a webhook configured
-- A smee.io channel for webhook proxying (for local development)
-
-### **Installation**
-
-1. **Clone the repository**:
 ```bash
 git clone https://github.com/ovidon83/firstqa.git
 cd firstqa
-```
-
-2. **Install dependencies**:
-```bash
 npm install
-```
-
-3. **Create a `.env` file** (`.env.example` documents all required variables):
-```bash
 cp .env.example .env
-# Edit .env with your GitHub App, OpenAI, Supabase, etc.
 ```
 
-4. **Start the webhook server**:
+Edit `.env` with your credentials (see `.env.example` for all available options).
+
 ```bash
 npm start
 ```
 
-5. **Visit the application**:
-- Main site: http://localhost:3000
-- Dashboard: http://localhost:3000/dashboard
-- Documentation: http://localhost:3000/docs
+The server starts at `http://localhost:3000`.
 
-## 🤖 **Ovi AI - Your AI QA Agent**
+### Key Environment Variables
 
-FirstQA features **Ovi**, an AI-powered QA Agent that provides comprehensive analysis for your pull requests.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SUPABASE_URL` | Yes | Supabase project URL |
+| `SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
+| `SUPABASE_SERVICE_KEY` | Yes | Supabase service role key |
+| `OPENAI_API_KEY` | Yes | OpenAI API key |
+| `GITHUB_APP_ID` | Yes | GitHub App ID |
+| `GITHUB_PRIVATE_KEY` | Yes | GitHub App private key (PEM) |
+| `GITHUB_WEBHOOK_SECRET` | Yes | Webhook signature secret |
+| `SESSION_SECRET` | Yes | Express session secret |
+| `BROWSERBASE_API_KEY` | For test execution | Browserbase API key |
+| `BROWSERBASE_PROJECT_ID` | For test execution | Browserbase project ID |
 
-### **What Ovi Analyzes**
+See `.env.example` for the full list including Linear, Jira, Stripe, and SMTP configuration.
 
-1. **🔍 Release Pulse Analysis**
-   - **User Value**: Assesses the meaningful value and benefit to end users
-   - **Release Confidence**: Evaluates test coverage, implementation quality, and edge case handling
-   - **Change Impact**: Analyzes scope of changes and affected components
-   - **Release Decision**: Provides Go/No-Go recommendation with clear reasoning
+## Commands
 
-2. **🧪 Test Recipe**
-   - Creates comprehensive test scenarios (Critical Priority, High Priority)
-   - Includes both positive and negative test cases
-   - Provides actionable test steps with expected results
-   - Focuses on business impact and user dependency
+| Command | Where | What it does |
+|---------|-------|-------------|
+| `/qa` | PR comment | Run full QA analysis |
+| `/qa testrun` | PR comment | Execute automated browser tests from the latest analysis |
+| `/qa testrun -env=URL` | PR comment | Run tests against a specific URL |
+| `/short` | PR comment | Run a shorter, faster analysis |
 
-3. **⚠️ Risk Assessment**
-   - Identifies potential runtime issues and security vulnerabilities
-   - Highlights missing error handling and code defects
-   - Asks critical questions about edge cases and integration
-   - Analyzes affected product areas and dependencies
+## Security & Privacy
 
-## 🌐 **Production Deployment**
+- **Read-only access** to repository contents (code, PRs, issues)
+- **No write access** to your code — only posts comments and Check Runs
+- Code is processed in memory and never permanently stored
+- All data transmitted over HTTPS/TLS
+- [Privacy Policy](https://www.firstqa.dev/privacy) | [Terms of Service](https://www.firstqa.dev/terms)
 
-### **Environment Setup**
-- Set `NODE_ENV=production`
-- Configure production database/storage
-- Set up proper SSL certificates
-- Configure production webhook endpoints
-- **Render / Production**: Set `ENABLE_KNOWLEDGE_SYNC=true` to enable codebase indexing during onboarding. If unset, the indexing step will show "Indexing is not enabled" and users can continue without it.
+## Documentation
 
-### **Deployment Options**
-- **Heroku**: Easy deployment with Git integration
-- **AWS**: EC2, ECS, or Lambda deployment
-- **DigitalOcean**: App Platform or Droplet deployment
-- **Vercel**: Serverless deployment option
+- [End-to-End Testing Guide](docs/END_TO_END_TESTING_GUIDE.md)
+- [GitHub Marketplace Publishing Guide](docs/GITHUB_MARKETPLACE_GUIDE.md)
+- [Architecture](docs/ARCHITECTURE.md)
 
-## 🔒 **Security & Privacy**
+## License
 
-FirstQA takes security seriously. We understand that granting access to your codebase is a significant decision.
-
-### **🔐 GitHub App Permissions**
-- **Read-only access** to repository contents (code, pull requests, issues)
-- **No write access** - We cannot modify your code
-- **No admin access** - We cannot change repository settings
-- **Revocable at any time** - You maintain full control
-
-### **🛡️ Data Protection**
-- **Analysis results**: Stored securely for 14 days, then automatically deleted
-- **Code content**: Processed in memory only, never permanently stored
-- **Personal information**: Never collected or stored
-- **HTTPS/TLS encryption** for all data transmission
-
-### **📋 Security Documentation**
-- **🔐 Privacy Policy**: [Privacy Policy](https://firstqa.dev/privacy)
-- **📄 Terms of Service**: [Terms](https://firstqa.dev/terms)
-- **📧 Security Contact**: security@firstqa.dev
-
-## 📚 **Documentation & Support**
-
-- **📖 Documentation**: [View Documentation →](https://firstqa.dev/docs)
-- **💬 Support**: [Get Support](https://firstqa.dev/support)
-- **📧 Contact**: [Contact Us](https://firstqa.dev/contact)
-- **💰 Pricing**: [View Plans](https://firstqa.dev/pricing)
-
-## 🔗 **Quick Links**
-
-- **🚀 Start Free Trial**: [Get Started](https://firstqa.dev)
-- **📅 Schedule Demo**: [Book Demo](https://calendly.com/firstqa/demo)
-- **📧 Contact Sales**: [Contact Sales](mailto:sales@firstqa.dev)
-- **🐛 Report Issues**: [GitHub Issues](https://github.com/ovidon83/firstqa/issues)
-
-## 📄 **License**
-
-This project is licensed under the ISC License.
+[ISC](LICENSE)
 
 ---
 
-**Built with ❤️ by the FirstQA Team**
-
-*The Only QA Stack Your Startup Needs* 
+Built by the [FirstQA](https://www.firstqa.dev) team.
