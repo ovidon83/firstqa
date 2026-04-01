@@ -537,6 +537,13 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
+        // Clear state from previous scenario to prevent leaks (cookies, storage)
+        await context.clearCookies().catch(() => {});
+        await page.evaluate(() => {
+          try { localStorage.clear(); } catch (_) {}
+          try { sessionStorage.clear(); } catch (_) {}
+        }).catch(() => {});
+
         const startUrl = startUrls[i];
         console.log(`   🧭 Navigating to: ${startUrl}`);
         await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});

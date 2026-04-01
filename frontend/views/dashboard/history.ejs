@@ -247,13 +247,13 @@
             <div class="nav-right">
                 <div class="user-info">
                     <div class="user-avatar">
-                        <% if (user.avatar_url) { %>
-                            <img src="<%= user.avatar_url %>" alt="<%= user.full_name %>">
+                        <% if (user.avatarUrl) { %>
+                            <img src="<%= user.avatarUrl %>" alt="<%= user.name %>">
                         <% } else { %>
-                            <%= user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase() %>
+                            <%= user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase() %>
                         <% } %>
                     </div>
-                    <span><%= user.full_name || user.email %></span>
+                    <span><%= user.name || user.email %></span>
                 </div>
                 <a href="/logout" class="logout-btn">Log out</a>
             </div>

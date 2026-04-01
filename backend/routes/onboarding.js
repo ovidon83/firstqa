@@ -101,7 +101,8 @@ router.get('/workspace', async (req, res) => {
     companyName: state.companyName,
     teamSize: state.teamSize,
     qualityGoals: state.qualityGoals,
-    progress: 1
+    progress: 1,
+    error: req.query.error || null
   });
 });
 
@@ -135,7 +136,13 @@ router.get('/trial', async (req, res) => {
 });
 
 router.post('/trial', async (req, res) => {
-  await updateOnboardingState(req.session.user.id, { onboarding_step: 3 });
+  const now = new Date();
+  const trialEnd = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
+  await updateOnboardingState(req.session.user.id, {
+    onboarding_step: 3,
+    trial_started_at: now.toISOString(),
+    trial_ends_at: trialEnd.toISOString()
+  });
   res.redirect('/onboarding/tools');
 });
 
@@ -168,7 +175,8 @@ router.get('/tools', async (req, res) => {
     hasCodeRepo,
     connected: req.query.connected,
     githubError: req.query.github_error || null,
-    linearOAuthEnabled: !!process.env.LINEAR_CLIENT_ID
+    linearOAuthEnabled: !!process.env.LINEAR_CLIENT_ID,
+    error: req.query.error || null
   });
 });
 

@@ -191,6 +191,7 @@ router.post('/hire', async (req, res) => {
       console.log(`✅ Hire request email sent from ${email}`);
     } else {
       console.log(`⚠️ Email not configured — hire request from ${email}: ${app_url}`);
+      return res.redirect('/hire?error=' + encodeURIComponent('Service temporarily unavailable. Please email hello@firstqa.dev directly.'));
     }
 
     res.redirect('/hire?success=true');

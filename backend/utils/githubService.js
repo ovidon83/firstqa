@@ -2814,7 +2814,7 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
   const envUrl = envMatch ? envMatch[1].trim() : null;
 
   // 1. Look up staging URL: command flag > client settings > env var
-  let baseUrl = envUrl || process.env.TEST_AUTOMATION_BASE_URL || null;
+  let baseUrl = envUrl || null;
 
   if (!baseUrl && isSupabaseConfigured() && userId) {
     const { data: settings } = await supabaseAdmin
@@ -2823,6 +2823,10 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
       .eq('user_id', userId)
       .maybeSingle();
     baseUrl = settings?.staging_url || null;
+  }
+
+  if (!baseUrl) {
+    baseUrl = process.env.TEST_AUTOMATION_BASE_URL || null;
   }
 
   if (!baseUrl) {
@@ -3001,6 +3005,28 @@ async function processWebhookEvent(event) {
     const action = payload.action || payload.review?.state;
     console.log(`Event: ${eventType} action=${action} repo=${repo}${prNum != null ? ` #${prNum}` : ''}`);
 
+    // Handle GitHub App uninstall — clean up stale integration records
+    if (eventType === 'installation' && payload.action === 'deleted' && installationId) {
+      console.log(`🗑️ GitHub App uninstalled (installation ${installationId}) — removing integration records`);
+      if (isSupabaseConfigured()) {
+        try {
+          const { error } = await supabaseAdmin
+            .from('integrations')
+            .delete()
+            .eq('provider', 'github')
+            .eq('account_id', installationId.toString());
+          if (error) {
+            console.error('❌ Failed to delete integration on uninstall:', error.message);
+          } else {
+            console.log(`✅ Removed GitHub integration for installation ${installationId}`);
+          }
+        } catch (e) {
+          console.error('❌ Exception during uninstall cleanup:', e.message);
+        }
+      }
+      return { success: true, message: 'Installation deleted — integration cleaned up' };
+    }
+
     // Handle installation_repositories - auto-index on repo connection
     if (eventType === 'installation_repositories' && payload.action === 'added' && process.env.AUTO_INDEX_ON_INSTALL === 'true') {
       const repos = payload.repositories_added || [];
@@ -3103,13 +3129,13 @@ async function processWebhookEvent(event) {
         console.log('🔬 /qa testrun command detected!');
         return await handleTestRunCommand(repository, issue, comment, sender, userId, installationId);
       }
-      // Check for /qa command (manual QA analysis)
-      if (comment.body.trim().startsWith('/qa')) {
+      // Check for /qa command (manual QA analysis) — must be exactly "/qa" or "/qa " followed by flags
+      if (/^\/qa(\s|$)/.test(commentTrimmed)) {
         console.log('🧪 /qa command detected!');
         return await handleTestRequest(repository, issue, comment, sender, userId, installationId);
       }
       // Check for /short command (short QA analysis)
-      if (comment.body.trim().startsWith('/short')) {
+      if (/^\/short(\s|$)/.test(commentTrimmed)) {
         console.log('📝 /short command detected!');
         return await handleShortRequest(repository, issue, comment, sender, userId);
       }

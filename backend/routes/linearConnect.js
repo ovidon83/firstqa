@@ -11,11 +11,18 @@ const {
   verifyLinearWebhook
 } = require('../utils/linearConnectAuth');
 
+function requireAuth(req, res, next) {
+  if (!req.session?.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  next();
+}
+
 /**
  * POST /linear-connect/install
  * Called when Linear integration is installed (manual setup via API key)
  */
-router.post('/install', async (req, res) => {
+router.post('/install', requireAuth, async (req, res) => {
   try {
     console.log('📦 Linear Connect installation request received');
     console.log('Installation payload:', JSON.stringify(req.body, null, 2));
@@ -49,7 +56,7 @@ router.post('/install', async (req, res) => {
  * POST /linear-connect/uninstall
  * Called when Linear integration is uninstalled
  */
-router.post('/uninstall', async (req, res) => {
+router.post('/uninstall', requireAuth, async (req, res) => {
   try {
     console.log('📤 Linear Connect uninstallation request received');
     
