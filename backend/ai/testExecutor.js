@@ -185,6 +185,53 @@ ${a11yText.substring(0, 8000)}`
 }
 
 /**
+ * Resolve a locator using multiple strategies with fallbacks.
+ * Tries: getByRole → getByLabel → getByPlaceholder → CSS id selector
+ */
+async function resolveLocator(page, role, name) {
+  // Strategy 1: getByRole (standard a11y approach)
+  try {
+    const byRole = page.getByRole(role, { name, exact: false });
+    if (await byRole.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+      return byRole.first();
+    }
+  } catch (_) { /* fall through */ }
+
+  // Strategy 2: getByLabel (great for form fields with <label for="...">)
+  if (name) {
+    try {
+      const byLabel = page.getByLabel(name, { exact: false });
+      if (await byLabel.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+        return byLabel.first();
+      }
+    } catch (_) { /* fall through */ }
+  }
+
+  // Strategy 3: getByPlaceholder
+  if (name) {
+    try {
+      const byPlaceholder = page.getByPlaceholder(name, { exact: false });
+      if (await byPlaceholder.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+        return byPlaceholder.first();
+      }
+    } catch (_) { /* fall through */ }
+  }
+
+  // Strategy 4: getByText (for buttons/links whose name is the visible text)
+  if (role === 'button' || role === 'link') {
+    try {
+      const byText = page.getByText(name, { exact: false });
+      if (await byText.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+        return byText.first();
+      }
+    } catch (_) { /* fall through */ }
+  }
+
+  // Final fallback: use getByRole without visibility check
+  return page.getByRole(role, { name, exact: false }).first();
+}
+
+/**
  * Execute a single action returned by the AI agent.
  */
 async function executeAgentAction(page, action, baseUrl) {
@@ -197,24 +244,24 @@ async function executeAgentAction(page, action, baseUrl) {
       break;
     }
     case 'click': {
-      const locator = page.getByRole(role, { name, exact: false });
-      await locator.first().click({ timeout: ACTION_TIMEOUT });
+      const locator = await resolveLocator(page, role, name);
+      await locator.click({ timeout: ACTION_TIMEOUT });
       break;
     }
     case 'fill': {
-      const locator = page.getByRole(role || 'textbox', { name, exact: false });
-      await locator.first().fill(value || '', { timeout: ACTION_TIMEOUT });
+      const locator = await resolveLocator(page, role || 'textbox', name);
+      await locator.fill(value || '', { timeout: ACTION_TIMEOUT });
       break;
     }
     case 'select': {
-      const locator = page.getByRole(role || 'combobox', { name, exact: false });
-      await locator.first().selectOption({ label: value }, { timeout: ACTION_TIMEOUT });
+      const locator = await resolveLocator(page, role || 'combobox', name);
+      await locator.selectOption({ label: value }, { timeout: ACTION_TIMEOUT });
       break;
     }
     case 'scroll': {
       if (role && name) {
-        const locator = page.getByRole(role, { name, exact: false });
-        await locator.first().scrollIntoViewIfNeeded({ timeout: ACTION_TIMEOUT });
+        const locator = await resolveLocator(page, role, name);
+        await locator.scrollIntoViewIfNeeded({ timeout: ACTION_TIMEOUT });
       } else {
         await page.evaluate(() => window.scrollBy(0, 400));
       }
@@ -422,8 +469,11 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
-        // Navigate to base URL at the start of each scenario so the agent has a page to work with
-        await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+        // Only navigate to baseUrl if on a blank page (first scenario or after error)
+        const currentUrl = page.url();
+        if (!currentUrl || currentUrl === 'about:blank' || currentUrl === 'chrome://newtab/') {
+          await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+        }
 
         const actionLog = await runScenarioAgent(page, scenario, baseUrl);
         scenarioResult.actionLog = actionLog;
