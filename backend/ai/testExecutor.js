@@ -18,8 +18,96 @@ const ACTION_TIMEOUT = 10000;
 const SCENARIO_TIMEOUT = 60000;
 
 /**
+ * Get the accessibility tree from a page.
+ * page.accessibility.snapshot() is NOT available over CDP connections (Browserbase).
+ * Falls back to CDP protocol → DOM evaluation chain.
+ */
+async function getA11ySnapshot(page) {
+  // Method 1: Playwright built-in (works for local browsers)
+  if (page.accessibility) {
+    try {
+      const snapshot = await page.accessibility.snapshot();
+      if (snapshot) return snapshot;
+    } catch (_) { /* fall through */ }
+  }
+
+  // Method 2: CDP Accessibility.getFullAXTree (works over CDP / Browserbase)
+  try {
+    const client = await page.context().newCDPSession(page);
+    const { nodes } = await client.send('Accessibility.getFullAXTree');
+    await client.detach().catch(() => {});
+    if (nodes && nodes.length > 0) return buildTreeFromCDP(nodes);
+  } catch (_) { /* fall through */ }
+
+  // Method 3: DOM-based extraction as last resort
+  return await extractA11yFromDOM(page);
+}
+
+function buildTreeFromCDP(nodes) {
+  const nodeMap = new Map();
+  for (const node of nodes) {
+    nodeMap.set(node.nodeId, {
+      role: node.role?.value || 'unknown',
+      name: node.name?.value || '',
+      value: node.value?.value || undefined,
+      checked: node.properties?.find(p => p.name === 'checked')?.value?.value,
+      disabled: node.properties?.find(p => p.name === 'disabled')?.value?.value,
+      expanded: node.properties?.find(p => p.name === 'expanded')?.value?.value,
+      children: []
+    });
+  }
+
+  for (const node of nodes) {
+    if (node.childIds) {
+      const parent = nodeMap.get(node.nodeId);
+      for (const childId of node.childIds) {
+        const child = nodeMap.get(childId);
+        if (child) parent.children.push(child);
+      }
+    }
+  }
+
+  return nodeMap.get(nodes[0].nodeId) || null;
+}
+
+async function extractA11yFromDOM(page) {
+  return page.evaluate(() => {
+    const interactiveRoles = new Set(['button', 'link', 'textbox', 'checkbox', 'radio', 'combobox', 'menuitem', 'tab', 'switch', 'slider']);
+    const interactiveTags = new Set(['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'DETAILS', 'SUMMARY']);
+
+    function walk(el, depth) {
+      if (depth > 6 || !el || el.nodeType !== 1) return null;
+      const role = el.getAttribute('role') || tagToRole(el);
+      const name = el.getAttribute('aria-label') || el.getAttribute('title') || el.getAttribute('placeholder') || el.innerText?.trim().substring(0, 60) || '';
+      const isInteractive = interactiveRoles.has(role) || interactiveTags.has(el.tagName);
+      const children = [];
+      for (const child of el.children) {
+        const c = walk(child, depth + 1);
+        if (c) children.push(c);
+      }
+      if (!isInteractive && children.length === 0 && !name) return null;
+      return { role, name: name.substring(0, 80), children: children.length > 0 ? children : undefined };
+    }
+
+    function tagToRole(el) {
+      const map = { A: 'link', BUTTON: 'button', INPUT: inputRole(el), SELECT: 'combobox', TEXTAREA: 'textbox', H1: 'heading', H2: 'heading', H3: 'heading', NAV: 'navigation', MAIN: 'main', FORM: 'form', IMG: 'img' };
+      return map[el.tagName] || 'generic';
+    }
+
+    function inputRole(el) {
+      const t = (el.getAttribute('type') || 'text').toLowerCase();
+      if (t === 'checkbox') return 'checkbox';
+      if (t === 'radio') return 'radio';
+      if (t === 'submit' || t === 'button') return 'button';
+      return 'textbox';
+    }
+
+    return walk(document.body, 0) || { role: 'document', name: document.title, children: [] };
+  });
+}
+
+/**
  * Flatten the accessibility tree into a compact text representation.
- * Only includes interactive / meaningful nodes to stay within token budget.
  */
 function flattenA11yTree(node, depth = 0) {
   if (!node) return '';
@@ -170,7 +258,7 @@ async function runScenarioAgent(page, scenario, baseUrl) {
 
       await page.waitForLoadState('domcontentloaded').catch(() => {});
 
-      const a11ySnapshot = await page.accessibility.snapshot();
+      const a11ySnapshot = await getA11ySnapshot(page);
       const a11yText = flattenA11yTree(a11ySnapshot);
 
       const decision = await decideNextAction(
@@ -198,7 +286,7 @@ async function runScenarioAgent(page, scenario, baseUrl) {
  */
 async function verifyExpectedResult(page, expectedResult, manualSteps) {
   try {
-    const a11ySnapshot = await page.accessibility.snapshot();
+    const a11ySnapshot = await getA11ySnapshot(page);
     const a11yText = flattenA11yTree(a11ySnapshot);
     const visibleText = await page.evaluate(() => document.body.innerText).catch(() => '');
 
@@ -334,6 +422,9 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
+        // Navigate to base URL at the start of each scenario so the agent has a page to work with
+        await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+
         const actionLog = await runScenarioAgent(page, scenario, baseUrl);
         scenarioResult.actionLog = actionLog;
 
