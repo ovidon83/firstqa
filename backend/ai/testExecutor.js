@@ -136,11 +136,14 @@ const ROUTE_KEYWORDS = ['hire', 'login', 'signin', 'signup', 'register', 'contac
 function extractPathFromScenario(scenario) {
   const text = `${scenario.scenario} ${scenario.steps} ${scenario.expected}`;
 
-  // 1. Explicit URL path in text (e.g. "Navigate to /hire page")
-  const pathMatch = text.match(/\/([a-z][a-z0-9-]*)/i);
+  // 1. Strip full URLs (https://...) so embedded domains don't pollute path detection
+  const cleanText = text.replace(/https?:\/\/[^\s'"]+/g, '');
+
+  // 2. Explicit URL path in cleaned text (e.g. "Navigate to /hire page")
+  const pathMatch = cleanText.match(/\/([a-z][a-z0-9-]*)/i);
   if (pathMatch) return `/${pathMatch[1].toLowerCase()}`;
 
-  // 2. Route keyword in scenario name
+  // 3. Route keyword in scenario name
   const name = scenario.scenario.toLowerCase();
   for (const kw of ROUTE_KEYWORDS) {
     if (name.includes(kw)) return `/${kw}`;
