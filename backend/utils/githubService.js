@@ -2941,7 +2941,7 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
     owner,
     repo,
     prNumber,
-    sha: sha || 'unknown',
+    sha: sha || null,
     testRecipe: runnableRecipe,
     baseUrl,
     installationId
@@ -3118,7 +3118,7 @@ async function processWebhookEvent(event) {
         return { success: true, message: 'Skipped non-PR comment' };
       }
       // Skip comments from bots to avoid processing our own acknowledgment comments
-      if (sender.type === 'Bot' || sender.login.includes('bot') || comment.body.includes('🤖 Ovi QA Assistant')) {
+      if (sender.type === 'Bot' || sender.login.endsWith('[bot]') || comment.body.includes('🤖 Ovi QA Assistant')) {
         console.log(`Skipping bot comment from ${sender.login}`);
         return { success: true, message: 'Skipped bot comment' };
       }

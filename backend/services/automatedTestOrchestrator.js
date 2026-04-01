@@ -25,7 +25,11 @@ async function executeAutomatedTests(params) {
 
   try {
     octokit = await getOctokit(installationId);
-    checkRunId = await createCheckRun(octokit, owner, repo, sha, prNumber);
+    if (sha) {
+      checkRunId = await createCheckRun(octokit, owner, repo, sha, prNumber);
+    } else {
+      console.warn('⚠️ No SHA available — skipping GitHub Check Run creation');
+    }
 
     // Score each scenario for browser executability
     console.log(`🧠 Scoring scenario executability...`);

@@ -592,7 +592,20 @@ router.post('/settings', async (req, res) => {
       }
     }
 
-    const autoAnalyzePrs = req.body.auto_analyze_prs === 'on';
+    // auto_analyze_prs checkbox is disabled in the UI, so it never submits.
+    // Preserve the existing DB value to avoid silently resetting it.
+    let autoAnalyzePrs = false;
+    const { data: existingSettings } = await supabaseAdmin
+      .from('client_settings')
+      .select('auto_analyze_prs')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if ('auto_analyze_prs' in (req.body || {})) {
+      autoAnalyzePrs = req.body.auto_analyze_prs === 'on';
+    } else {
+      autoAnalyzePrs = existingSettings?.auto_analyze_prs ?? false;
+    }
+
     const postMergeTests = req.body.post_merge_tests === 'on';
     const postMergeDelayMs = parseInt(req.body.post_merge_delay_ms, 10) || 300000;
 

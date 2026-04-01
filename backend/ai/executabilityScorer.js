@@ -49,11 +49,22 @@ Return ONLY a JSON object with key "scores" containing an array. Each entry must
     const parsed = JSON.parse(response.choices[0].message.content);
     const scores = parsed.scores || parsed;
 
+    if (!Array.isArray(scores)) {
+      console.warn('⚠️ Executability scorer: AI returned non-array scores, defaulting all to 80');
+      return testRecipe.map(s => ({
+        ...s,
+        browser_score: 80,
+        browser_steps: s.steps,
+        manual_steps: '',
+        skip_reason: ''
+      }));
+    }
+
     return testRecipe.map((scenario, i) => {
-      const score = (Array.isArray(scores) ? scores : []).find(s => s.index === i) || {
-        browser_score: 50,
-        browser_steps: 'Unknown',
-        manual_steps: 'Could not evaluate',
+      const score = scores.find(s => s.index === i) || {
+        browser_score: 80,
+        browser_steps: scenario.steps,
+        manual_steps: '',
         skip_reason: ''
       };
       return {

@@ -160,13 +160,21 @@ router.post('/request', async (req, res) => {
 router.get('/hire', (req, res) => {
   res.render('hire', {
     title: 'Hire a Human Tester - FirstQA',
-    success: req.query.success === 'true'
+    success: req.query.success === 'true',
+    error: req.query.error || null
   });
 });
 
 router.post('/hire', async (req, res) => {
   try {
     const { name, email, app_url, urgency, scope, details } = req.body;
+
+    if (!name?.trim() || !email?.trim()) {
+      return res.redirect('/hire?error=' + encodeURIComponent('Name and email are required.'));
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.redirect('/hire?error=' + encodeURIComponent('Please enter a valid email address.'));
+    }
 
     const emailContent = `
       <h2>New Human Testing Request</h2>

@@ -409,15 +409,6 @@ app.post('/generate-short-analysis', bodyParser.json({ limit: '10mb' }), async (
   }
 });
 
-// Add dashboard page to view test requests
-app.get('/dashboard', (req, res) => {
-  const testRequests = githubService.loadAllTestRequests();
-  res.render('admin/dashboard', { 
-    title: 'Test Requests Dashboard',
-    testRequests
-  });
-});
-
 // Request details page
 app.get('/request/:id', (req, res) => {
   const requestId = req.params.id;

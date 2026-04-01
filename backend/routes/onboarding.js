@@ -115,11 +115,12 @@ router.post('/workspace', async (req, res) => {
   if (!validSizes.includes(team_size)) {
     return res.redirect('/onboarding/workspace?error=' + encodeURIComponent('Please select team size'));
   }
+  const currentState = await getOnboardingState(req.session.user.id);
   await updateOnboardingState(req.session.user.id, {
     company_name: (company_name || '').trim(),
     team_size,
     quality_goals: (quality_goals || '').trim().slice(0, 2000),
-    onboarding_step: 2
+    onboarding_step: Math.max(currentState.step || 1, 2)
   });
   res.redirect('/onboarding/trial');
 });
@@ -136,13 +137,14 @@ router.get('/trial', async (req, res) => {
 });
 
 router.post('/trial', async (req, res) => {
-  const now = new Date();
-  const trialEnd = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
-  await updateOnboardingState(req.session.user.id, {
-    onboarding_step: 3,
-    trial_started_at: now.toISOString(),
-    trial_ends_at: trialEnd.toISOString()
-  });
+  const currentState = await getOnboardingState(req.session.user.id);
+  const updates = { onboarding_step: Math.max(currentState.step || 1, 3) };
+  if (!currentState.trialStartedAt) {
+    const now = new Date();
+    updates.trial_started_at = now.toISOString();
+    updates.trial_ends_at = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString();
+  }
+  await updateOnboardingState(req.session.user.id, updates);
   res.redirect('/onboarding/tools');
 });
 
@@ -192,7 +194,8 @@ router.post('/tools/continue', async (req, res) => {
   if (!hasCodeRepo) {
     return res.redirect('/onboarding/tools?error=' + encodeURIComponent('Connect at least one code repository to continue'));
   }
-  await updateOnboardingState(req.session.user.id, { onboarding_step: 4 });
+  const currentState = await getOnboardingState(req.session.user.id);
+  await updateOnboardingState(req.session.user.id, { onboarding_step: Math.max(currentState.step || 1, 4) });
   res.redirect('/onboarding/staging');
 });
 
@@ -245,12 +248,14 @@ router.post('/staging', async (req, res) => {
       }, { onConflict: 'user_id' });
   }
 
-  await updateOnboardingState(req.session.user.id, { onboarding_step: 5 });
+  const currentState = await getOnboardingState(req.session.user.id);
+  await updateOnboardingState(req.session.user.id, { onboarding_step: Math.max(currentState.step || 1, 5) });
   res.redirect('/onboarding/indexing');
 });
 
 router.post('/staging/skip', async (req, res) => {
-  await updateOnboardingState(req.session.user.id, { onboarding_step: 5 });
+  const currentState = await getOnboardingState(req.session.user.id);
+  await updateOnboardingState(req.session.user.id, { onboarding_step: Math.max(currentState.step || 1, 5) });
   res.redirect('/onboarding/indexing');
 });
 
@@ -417,7 +422,8 @@ router.get('/api/indexing-status', async (req, res) => {
 });
 
 router.post('/indexing/continue', async (req, res) => {
-  await updateOnboardingState(req.session.user.id, { onboarding_step: 6 });
+  const currentState = await getOnboardingState(req.session.user.id);
+  await updateOnboardingState(req.session.user.id, { onboarding_step: Math.max(currentState.step || 1, 6) });
   res.redirect('/onboarding/first-review');
 });
 
