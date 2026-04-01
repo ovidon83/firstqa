@@ -13,9 +13,10 @@ const { v4: uuidv4 } = require('uuid');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const MAX_AGENT_STEPS = 15;
+const MAX_AGENT_STEPS = 10;
 const ACTION_TIMEOUT = 10000;
 const SCENARIO_TIMEOUT = 60000;
+const MAX_REPEAT_ACTIONS = 2;
 
 /**
  * Get the accessibility tree from a page.
@@ -23,7 +24,6 @@ const SCENARIO_TIMEOUT = 60000;
  * Falls back to CDP protocol → DOM evaluation chain.
  */
 async function getA11ySnapshot(page) {
-  // Method 1: Playwright built-in (works for local browsers)
   if (page.accessibility) {
     try {
       const snapshot = await page.accessibility.snapshot();
@@ -31,7 +31,6 @@ async function getA11ySnapshot(page) {
     } catch (_) { /* fall through */ }
   }
 
-  // Method 2: CDP Accessibility.getFullAXTree (works over CDP / Browserbase)
   try {
     const client = await page.context().newCDPSession(page);
     const { nodes } = await client.send('Accessibility.getFullAXTree');
@@ -39,7 +38,6 @@ async function getA11ySnapshot(page) {
     if (nodes && nodes.length > 0) return buildTreeFromCDP(nodes);
   } catch (_) { /* fall through */ }
 
-  // Method 3: DOM-based extraction as last resort
   return await extractA11yFromDOM(page);
 }
 
@@ -106,9 +104,6 @@ async function extractA11yFromDOM(page) {
   });
 }
 
-/**
- * Flatten the accessibility tree into a compact text representation.
- */
 function flattenA11yTree(node, depth = 0) {
   if (!node) return '';
   const indent = '  '.repeat(depth);
@@ -135,6 +130,38 @@ function flattenA11yTree(node, depth = 0) {
   }
 
   return parts.filter(Boolean).join('\n');
+}
+
+/**
+ * Ask AI what URL to start on for a given scenario.
+ * Replaces the blind baseUrl reset with an intelligent decision.
+ */
+async function decideStartUrl(scenario, baseUrl) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: `You decide what URL a browser test should start on. Given a scenario's name, steps, and expected result, return the most specific URL path the test should begin at. Return JSON: {"url": "/path"}. Use relative paths. If the steps don't imply a specific page, return {"url": "/"}.`
+        },
+        {
+          role: 'user',
+          content: `Base URL: ${baseUrl}\nScenario: ${scenario.scenario}\nSteps: ${scenario.steps}\nExpected: ${scenario.expected}`
+        }
+      ],
+      temperature: 0,
+      max_tokens: 50,
+      response_format: { type: 'json_object' }
+    });
+
+    const parsed = JSON.parse(response.choices[0].message.content);
+    const urlPath = parsed.url || '/';
+    return urlPath.startsWith('http') ? urlPath : `${baseUrl}${urlPath.startsWith('/') ? '' : '/'}${urlPath}`;
+  } catch (error) {
+    console.warn(`   ⚠️ Could not decide start URL, using baseUrl: ${error.message}`);
+    return baseUrl;
+  }
 }
 
 /**
@@ -167,9 +194,9 @@ Rules:
 - For "press", set value to the key name (e.g. "Enter", "Tab").
 - For "navigate", only set url. Use relative paths.
 - Match names EXACTLY as they appear in the tree (case-sensitive).
-- If the element is not on the current page, DO NOT give up. Instead, look for a navigation link that might lead to the right page, or use "navigate" to go to a likely URL (e.g. if the step mentions a form on /hire, navigate to /hire).
-- Only use "done" when the step is truly complete or you've exhausted navigation options.
-- Be efficient: if a step requires one action, do it and return "done" on the next call. Don't add unnecessary waits.`
+- If the element is not on the current page, try navigating to a page where it would logically exist.
+- NEVER repeat the same failed action. If an action didn't work, try a different approach or use "done".
+- Be efficient: one action per call when possible. Don't add unnecessary steps.`
       },
       {
         role: 'user',
@@ -190,49 +217,58 @@ ${a11yText.substring(0, 8000)}`
 
 /**
  * Resolve a locator using multiple strategies with fallbacks.
- * Tries: getByRole → getByLabel → getByPlaceholder → CSS id selector
+ * Scrolls the element into view before returning.
  */
 async function resolveLocator(page, role, name) {
-  // Strategy 1: getByRole (standard a11y approach)
+  let locator = null;
+
+  // Strategy 1: getByRole
   try {
     const byRole = page.getByRole(role, { name, exact: false });
     if (await byRole.first().isVisible({ timeout: 800 }).catch(() => false)) {
-      return byRole.first();
+      locator = byRole.first();
     }
   } catch (_) { /* fall through */ }
 
-  // Strategy 2: getByLabel (great for form fields with <label for="...">)
-  if (name) {
+  // Strategy 2: getByLabel
+  if (!locator && name) {
     try {
       const byLabel = page.getByLabel(name, { exact: false });
       if (await byLabel.first().isVisible({ timeout: 800 }).catch(() => false)) {
-        return byLabel.first();
+        locator = byLabel.first();
       }
     } catch (_) { /* fall through */ }
   }
 
   // Strategy 3: getByPlaceholder
-  if (name) {
+  if (!locator && name) {
     try {
       const byPlaceholder = page.getByPlaceholder(name, { exact: false });
       if (await byPlaceholder.first().isVisible({ timeout: 800 }).catch(() => false)) {
-        return byPlaceholder.first();
+        locator = byPlaceholder.first();
       }
     } catch (_) { /* fall through */ }
   }
 
-  // Strategy 4: getByText (for buttons/links whose name is the visible text)
-  if (role === 'button' || role === 'link') {
+  // Strategy 4: getByText (for buttons/links)
+  if (!locator && (role === 'button' || role === 'link')) {
     try {
       const byText = page.getByText(name, { exact: false });
       if (await byText.first().isVisible({ timeout: 800 }).catch(() => false)) {
-        return byText.first();
+        locator = byText.first();
       }
     } catch (_) { /* fall through */ }
   }
 
-  // Final fallback: use getByRole without visibility check
-  return page.getByRole(role, { name, exact: false }).first();
+  // Final fallback
+  if (!locator) {
+    locator = page.getByRole(role, { name, exact: false }).first();
+  }
+
+  // Scroll into view before returning
+  await locator.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {});
+
+  return locator;
 }
 
 /**
@@ -289,8 +325,7 @@ async function executeAgentAction(page, action, baseUrl) {
 
 /**
  * Run the agent loop for a single scenario.
- * Splits the steps string into individual steps, then for each step
- * repeatedly asks the AI for the next action until it says "done".
+ * Includes loop detection and wall-clock timeout.
  */
 async function runScenarioAgent(page, scenario, baseUrl) {
   const stepsRaw = scenario.steps || '';
@@ -304,12 +339,21 @@ async function runScenarioAgent(page, scenario, baseUrl) {
   }
 
   const actionLog = [];
+  const scenarioDeadline = Date.now() + SCENARIO_TIMEOUT;
 
   for (let si = 0; si < individualSteps.length; si++) {
     const step = individualSteps[si];
     let attempts = 0;
+    let lastActionKey = null;
+    let repeatCount = 0;
 
     while (attempts < MAX_AGENT_STEPS) {
+      if (Date.now() > scenarioDeadline) {
+        actionLog.push(`Scenario timed out after ${SCENARIO_TIMEOUT / 1000}s`);
+        console.log(`      ⏱️ Scenario timed out`);
+        return actionLog;
+      }
+
       attempts++;
 
       await page.waitForLoadState('domcontentloaded').catch(() => {});
@@ -328,9 +372,30 @@ async function runScenarioAgent(page, scenario, baseUrl) {
 
       if (decision.action === 'done') break;
 
-      await executeAgentAction(page, decision, baseUrl);
+      // Loop detection: break if same action repeated
+      const actionKey = `${decision.action}:${decision.role || ''}:${decision.name || ''}:${decision.url || ''}`;
+      if (actionKey === lastActionKey) {
+        repeatCount++;
+        if (repeatCount >= MAX_REPEAT_ACTIONS) {
+          actionLog.push(`Loop detected: "${decision.action}" repeated ${MAX_REPEAT_ACTIONS} times, moving on`);
+          console.log(`      🔄 Loop detected, breaking`);
+          break;
+        }
+      } else {
+        repeatCount = 0;
+      }
+      lastActionKey = actionKey;
 
-      await page.waitForTimeout(300);
+      try {
+        await executeAgentAction(page, decision, baseUrl);
+      } catch (actionError) {
+        actionLog.push(`Action failed: ${actionError.message}`);
+        console.log(`      ❌ Action failed: ${actionError.message}`);
+        break;
+      }
+
+      // Wait for network to settle instead of fixed delay
+      await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
     }
   }
 
@@ -478,8 +543,11 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
-        // Reset to baseUrl at the start of each scenario for a clean state
-        await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+        // Smart start URL: ask AI where this scenario should begin
+        const startUrl = await decideStartUrl(scenario, baseUrl);
+        console.log(`   🧭 Start URL: ${startUrl}`);
+        await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
 
         const actionLog = await runScenarioAgent(page, scenario, baseUrl);
         scenarioResult.actionLog = actionLog;
