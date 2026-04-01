@@ -2026,8 +2026,32 @@ The AI analysis failed: ${aiInsights?.error || 'unknown error'}
 *Note: Ovi QA Agent insights could not be generated for this PR (${aiInsights.error}), but manual testing will proceed as normal.*
     `;
   }
+  // Generate Playwright spec file (non-blocking, appended to comment if ready in time)
+  let specResult = null;
+  if (aiInsights && aiInsights.success) {
+    try {
+      const { generatePlaywrightSpec } = require('../ai/playwrightSpecGenerator');
+      const scenarios = parseTestRecipeFromAiResponse(aiInsights.data);
+      if (scenarios.length > 0) {
+        specResult = await generatePlaywrightSpec({
+          scenarios,
+          fileContents,
+          selectorHints,
+          prTitle: issue.title,
+          repoName: repository.full_name,
+          prNumber: issue.number
+        });
+      }
+    } catch (specErr) {
+      console.warn('⚠️ Playwright spec generation skipped:', specErr.message);
+    }
+  }
+
   const fullAnalysisId = generateAnalysisId();
   if (aiInsights && aiInsights.success) {
+    if (specResult && specResult.success) {
+      acknowledgmentComment += `\n\n---\n\n📋 **Playwright Tests** — [Download .spec.ts](${specResult.specUrl}) (${specResult.scenarioCount} scenarios)\n`;
+    }
     acknowledgmentComment += feedbackFooter(fullAnalysisId);
   }
   const elapsedSec = ((Date.now() - analysisStartMs) / 1000).toFixed(1);

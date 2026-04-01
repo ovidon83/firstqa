@@ -102,7 +102,13 @@ app.use('/bootstrap-icons', express.static(path.join(__dirname, 'node_modules/bo
 
 // Serve test results (screenshots and videos)
 app.use('/test-screenshots', express.static(path.join(__dirname, 'frontend', 'public', 'test-screenshots')));
-app.use('/test-results', express.static(path.join(__dirname, 'test-results')));
+app.use('/test-results', express.static(path.join(__dirname, 'test-results'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.ts')) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    }
+  }
+}));
 
 // Add error handling middleware
 app.use((err, req, res, next) => {
