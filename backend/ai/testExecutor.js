@@ -167,7 +167,8 @@ Rules:
 - For "press", set value to the key name (e.g. "Enter", "Tab").
 - For "navigate", only set url. Use relative paths.
 - Match names EXACTLY as they appear in the tree (case-sensitive).
-- If the element is not in the tree, use "done" with reasoning explaining it wasn't found.
+- If the element is not on the current page, DO NOT give up. Instead, look for a navigation link that might lead to the right page, or use "navigate" to go to a likely URL (e.g. if the step mentions a form on /hire, navigate to /hire).
+- Only use "done" when the step is truly complete or you've exhausted navigation options.
 - Be efficient: if a step requires one action, do it and return "done" on the next call. Don't add unnecessary waits.`
       },
       {
