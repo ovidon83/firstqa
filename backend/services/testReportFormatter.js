@@ -79,7 +79,7 @@ function generateTestReportComment(results, videoUrl, screenshotUrls = {}, manua
     });
 
     comment += `</details>\n\n`;
-    comment += `> ⚠️ If tests failed due to login or missing test data, ensure your environment has the required accounts. Configure \`TEST_USER_EMAIL\` / \`TEST_USER_PASSWORD\` if login is needed.\n\n`;
+    comment += `> ⚠️ Some tests may fail due to authentication, missing test data, or environment differences. Review the details above for specifics.\n\n`;
   }
 
   // Manual testing section

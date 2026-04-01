@@ -150,7 +150,7 @@ async function decideNextAction(a11yText, currentStep, expectedResult, pageUrl, 
 
 Return ONLY a JSON object with one action:
 {
-  "action": "click" | "fill" | "select" | "navigate" | "scroll" | "press" | "done",
+  "action": "click" | "fill" | "clear" | "select" | "navigate" | "scroll" | "press" | "done",
   "role": "button" | "link" | "textbox" | "combobox" | "checkbox" | ...,
   "name": "exact accessible name from the tree",
   "value": "text to type or option to select (for fill/select/press)",
@@ -161,11 +161,14 @@ Return ONLY a JSON object with one action:
 Rules:
 - Use "done" when the current step's actions are complete and you should move to the next step.
 - For "fill", set role+name to identify the input, and value to the text.
+- For "clear", set role+name to identify the input — this empties the field completely.
+- If a step says "leave field empty", "clear the field", or implies a field should be blank, use "clear" first if the field has a value, then "done".
 - For "select" (dropdowns), set role to "combobox", name to identify it, value to the option text.
 - For "press", set value to the key name (e.g. "Enter", "Tab").
 - For "navigate", only set url. Use relative paths.
 - Match names EXACTLY as they appear in the tree (case-sensitive).
-- If the element is not in the tree, use "done" with reasoning explaining it wasn't found.`
+- If the element is not in the tree, use "done" with reasoning explaining it wasn't found.
+- Be efficient: if a step requires one action, do it and return "done" on the next call. Don't add unnecessary waits.`
       },
       {
         role: 'user',
@@ -192,7 +195,7 @@ async function resolveLocator(page, role, name) {
   // Strategy 1: getByRole (standard a11y approach)
   try {
     const byRole = page.getByRole(role, { name, exact: false });
-    if (await byRole.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await byRole.first().isVisible({ timeout: 800 }).catch(() => false)) {
       return byRole.first();
     }
   } catch (_) { /* fall through */ }
@@ -201,7 +204,7 @@ async function resolveLocator(page, role, name) {
   if (name) {
     try {
       const byLabel = page.getByLabel(name, { exact: false });
-      if (await byLabel.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await byLabel.first().isVisible({ timeout: 800 }).catch(() => false)) {
         return byLabel.first();
       }
     } catch (_) { /* fall through */ }
@@ -211,7 +214,7 @@ async function resolveLocator(page, role, name) {
   if (name) {
     try {
       const byPlaceholder = page.getByPlaceholder(name, { exact: false });
-      if (await byPlaceholder.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await byPlaceholder.first().isVisible({ timeout: 800 }).catch(() => false)) {
         return byPlaceholder.first();
       }
     } catch (_) { /* fall through */ }
@@ -221,7 +224,7 @@ async function resolveLocator(page, role, name) {
   if (role === 'button' || role === 'link') {
     try {
       const byText = page.getByText(name, { exact: false });
-      if (await byText.first().isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await byText.first().isVisible({ timeout: 800 }).catch(() => false)) {
         return byText.first();
       }
     } catch (_) { /* fall through */ }
@@ -251,6 +254,11 @@ async function executeAgentAction(page, action, baseUrl) {
     case 'fill': {
       const locator = await resolveLocator(page, role || 'textbox', name);
       await locator.fill(value || '', { timeout: ACTION_TIMEOUT });
+      break;
+    }
+    case 'clear': {
+      const locator = await resolveLocator(page, role || 'textbox', name);
+      await locator.fill('', { timeout: ACTION_TIMEOUT });
       break;
     }
     case 'select': {
@@ -321,7 +329,7 @@ async function runScenarioAgent(page, scenario, baseUrl) {
 
       await executeAgentAction(page, decision, baseUrl);
 
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(300);
     }
   }
 
