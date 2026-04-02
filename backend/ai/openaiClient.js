@@ -170,16 +170,18 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
       return `\n--- FILE: ${filePath} ---\n${snipped}${content.length > 6000 ? '\n...[truncated]' : ''}`;
     }).join('\n') || '';
 
-    // Dynamic diff budget: model context (128k) minus output (4k) minus other parts
+    // Dynamic diff budget: use the smaller of model context (128k) and TPM rate limit
     const { budgetDiff, estimateTokens } = require('./diffLineMapper');
     const MODEL_CONTEXT_TOKENS = 128000;
+    const TPM_LIMIT = parseInt(process.env.OPENAI_TPM_LIMIT, 10) || 30000;
+    const EFFECTIVE_TOKEN_CAP = Math.min(MODEL_CONTEXT_TOKENS, TPM_LIMIT);
     const OUTPUT_RESERVE_TOKENS = 7000;
     const otherTokens = estimateTokens(sanitizedBody) + estimateTokens(sanitizedContext) +
       estimateTokens(selectorHintsFormatted) + estimateTokens(fileContentsForPrompt) +
       estimateTokens(productKnowledgeContext) + estimateTokens(flowContextFormatted || '') +
       6000; // prompt template + system message overhead
-    const diffBudget = MODEL_CONTEXT_TOKENS - OUTPUT_RESERVE_TOKENS - otherTokens;
-    const { diff: sanitizedDiff, truncated: diffTruncated, fileCount: diffFileCount } = budgetDiff(diff, Math.max(diffBudget, 10000));
+    const diffBudget = EFFECTIVE_TOKEN_CAP - OUTPUT_RESERVE_TOKENS - otherTokens;
+    const { diff: sanitizedDiff, truncated: diffTruncated, fileCount: diffFileCount } = budgetDiff(diff, Math.max(diffBudget, 2000));
 
     console.log(`🔍 Deep analysis input: Title=${sanitizedTitle.length}ch, Body=${sanitizedBody.length}ch, Diff=${sanitizedDiff.length}ch (${diffFileCount} files${diffTruncated ? ', truncated' : ', full'}), Context=${sanitizedContext.length}ch, FileContents=${fileContentsForPrompt.length}ch`);
     if (isUpdateAnalysis) {
