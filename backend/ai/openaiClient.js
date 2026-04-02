@@ -354,8 +354,11 @@ LINE NUMBERS: The diff below includes actual file line numbers (e.g. "  42|+code
             }
           };
         }
+
+        console.warn(`⚠️ Attempt ${attempt}/3: AI returned response (${response.length} chars) but parseAIResponse returned falsy — retrying`);
+        lastError = new Error('parseAIResponse returned falsy');
       } catch (error) {
-        console.error(`❌ Attempt ${attempt} failed:`, error.message);
+        console.error(`❌ Attempt ${attempt}/3 failed:`, error.message);
         lastError = error;
         if (attempt === 3) { break; }
         await new Promise(resolve => setTimeout(resolve, 1000));
