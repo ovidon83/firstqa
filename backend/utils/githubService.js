@@ -2833,20 +2833,29 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
 
   console.log(`🔬 [testrun] Manual test run requested by ${sender.login} for ${repoFullName}#${prNumber}`);
 
-  // Parse -env=URL flag from comment
+  // Parse flags from comment
   const envMatch = comment.body.match(/-env=(\S+)/i);
   const envUrl = envMatch ? envMatch[1].trim() : null;
+  const contextMatch = comment.body.match(/-context="([^"]+)"/i) || comment.body.match(/-context=(\S+)/i);
+  const userContext = contextMatch ? contextMatch[1].trim() : null;
 
-  // 1. Look up staging URL: command flag > client settings > env var
+  // 1. Look up staging URL + test credentials: command flag > client settings > env var
   let baseUrl = envUrl || null;
+  let testCredentials = null;
 
-  if (!baseUrl && isSupabaseConfigured() && userId) {
+  if (isSupabaseConfigured() && userId) {
     const { data: settings } = await supabaseAdmin
       .from('client_settings')
-      .select('staging_url')
+      .select('staging_url, test_user_email, test_user_password')
       .eq('user_id', userId)
       .maybeSingle();
-    baseUrl = settings?.staging_url || null;
+    if (!baseUrl) baseUrl = settings?.staging_url || null;
+    if (settings?.test_user_email) {
+      testCredentials = {
+        email: settings.test_user_email,
+        password: settings.test_user_password || ''
+      };
+    }
   }
 
   if (!baseUrl) {
@@ -2968,7 +2977,9 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
     sha: sha || null,
     testRecipe: runnableRecipe,
     baseUrl,
-    installationId
+    installationId,
+    userContext,
+    testCredentials
   }).catch(err => {
     console.error(`❌ [testrun] Execution failed for ${repoFullName}#${prNumber}:`, err.message);
     postComment(repoFullName, prNumber,

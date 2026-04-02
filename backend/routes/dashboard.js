@@ -608,6 +608,8 @@ router.post('/settings', async (req, res) => {
 
     const postMergeTests = req.body.post_merge_tests === 'on';
     const postMergeDelayMs = parseInt(req.body.post_merge_delay_ms, 10) || 300000;
+    const testUserEmail = (req.body.test_user_email || '').trim() || null;
+    const testUserPassword = (req.body.test_user_password || '').trim() || null;
 
     const { error } = await supabaseAdmin
       .from('client_settings')
@@ -617,6 +619,8 @@ router.post('/settings', async (req, res) => {
         auto_analyze_prs: autoAnalyzePrs,
         post_merge_tests: postMergeTests,
         post_merge_delay_ms: postMergeDelayMs,
+        test_user_email: testUserEmail,
+        test_user_password: testUserPassword,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
 

@@ -171,13 +171,8 @@ function resolveStartUrls(testRecipe, baseUrl) {
 
 // ─── Agent action decision ──────────────────────────────────────────────────
 
-async function decideNextAction(a11yText, currentStep, expectedResult, pageUrl, stepIndex, totalSteps, scenarioName) {
-  const response = await openai.chat.completions.create({
-    model: process.env.OPENAI_MODEL || 'gpt-4o',
-    messages: [
-      {
-        role: 'system',
-        content: `You are a browser automation agent. You see the accessibility tree of a web page and must perform one action at a time to complete a test step.
+async function decideNextAction(a11yText, currentStep, expectedResult, pageUrl, stepIndex, totalSteps, scenarioName, agentContext = null) {
+  let systemPrompt = `You are a browser automation agent. You see the accessibility tree of a web page and must perform one action at a time to complete a test step.
 
 Return ONLY a JSON object with one action:
 {
@@ -199,8 +194,16 @@ Rules:
 - For "navigate", only set url. Use relative paths.
 - Match names EXACTLY as they appear in the tree (case-sensitive).
 - NEVER repeat the same failed action. If an action didn't work, try a different approach or use "done".
-- Be efficient: one action per call when possible.`
-      },
+- Be efficient: one action per call when possible.`;
+
+  if (agentContext) {
+    systemPrompt += `\n\nEnvironment context provided by the user:\n${agentContext}`;
+  }
+
+  const response = await openai.chat.completions.create({
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
+    messages: [
+      { role: 'system', content: systemPrompt },
       {
         role: 'user',
         content: `Scenario: ${scenarioName}
@@ -320,7 +323,7 @@ async function executeAgentAction(page, action, baseUrl) {
 
 // ─── Scenario agent loop ────────────────────────────────────────────────────
 
-async function runScenarioAgent(page, scenario, baseUrl) {
+async function runScenarioAgent(page, scenario, baseUrl, agentContext = null) {
   const stepsRaw = scenario.steps || '';
   const individualSteps = stepsRaw
     .split(/\d+\.\s+/)
@@ -357,7 +360,7 @@ async function runScenarioAgent(page, scenario, baseUrl) {
       const decision = await decideNextAction(
         a11yText, step, scenario.expected,
         page.url(), si + 1, individualSteps.length,
-        scenario.scenario
+        scenario.scenario, agentContext
       );
 
       const logEntry = `Step ${si + 1}.${attempts}: ${decision.action} ${decision.role || ''} "${decision.name || ''}" ${decision.value || ''} — ${decision.reasoning || ''}`;
@@ -449,7 +452,7 @@ Return JSON:
 // ─── Main entry point ───────────────────────────────────────────────────────
 
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
-  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT } = options;
+  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null } = options;
 
   const executionId = uuidv4();
   const resultsDir = path.join(__dirname, '..', '..', 'test-results', executionId);
@@ -502,6 +505,20 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
     resultsDir
   };
 
+  // Build agent context from credentials + inline hints
+  let agentContext = null;
+  const contextParts = [];
+  if (testCredentials && testCredentials.email) {
+    contextParts.push(`Test account credentials — Email: ${testCredentials.email}, Password: ${testCredentials.password}. Use these when a login or sign-up form is encountered.`);
+  }
+  if (userContext) {
+    contextParts.push(userContext);
+  }
+  if (contextParts.length > 0) {
+    agentContext = contextParts.join('\n');
+    console.log(`📋 Agent context provided (${contextParts.length} part${contextParts.length > 1 ? 's' : ''})`);
+  }
+
   try {
     for (let i = 0; i < testRecipe.length; i++) {
       const scenario = testRecipe[i];
@@ -549,7 +566,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
         await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
         await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
 
-        const actionLog = await runScenarioAgent(page, scenario, baseUrl);
+        const actionLog = await runScenarioAgent(page, scenario, baseUrl, agentContext);
         scenarioResult.actionLog = actionLog;
 
         const verification = await verifyExpectedResult(page, scenario.expected, scenario.manual_steps);

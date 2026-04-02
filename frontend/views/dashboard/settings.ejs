@@ -401,6 +401,26 @@
                         </span>
                     </div>
 
+                    <div class="settings-row">
+                        <span class="settings-label">Test Account Email</span>
+                        <input type="email" name="test_user_email" class="form-input"
+                               placeholder="test@yourapp.com"
+                               value="<%= (settings && settings.test_user_email) ? settings.test_user_email : '' %>">
+                        <span class="settings-label" style="margin-top:0.25rem">
+                            Login email for your app's test account. Used by the AI agent during test runs.
+                        </span>
+                    </div>
+
+                    <div class="settings-row">
+                        <span class="settings-label">Test Account Password</span>
+                        <input type="password" name="test_user_password" class="form-input"
+                               placeholder="••••••••"
+                               value="<%= (settings && settings.test_user_password) ? settings.test_user_password : '' %>">
+                        <span class="settings-label" style="margin-top:0.25rem">
+                            Password for the test account. Stored securely. Never shared or logged.
+                        </span>
+                    </div>
+
                     <div class="toggle-row">
                         <div class="toggle-label">
                             <div class="label-text">Run tests after merge</div>
