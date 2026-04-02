@@ -124,10 +124,14 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 **TEST CASE REQUIREMENTS:**
 - **MANDATORY ROW ORDER**: Output the Test Recipe table with rows in this exact order: (1) every **Smoke** row, (2) then every **Critical Path** row, (3) then every **Regression** row. Do not interleave priorities. Use ONLY these three priority labels.
 - **TABLE FORMAT**: Keep Steps and Expected Result cells concise so the table renders with consistent alignment. Use one short line per step; separate steps with `<br>`. Avoid long run-on sentences inside a single cell. Max 2 lines per step line when possible.
-- **SCENARIO** (name rules):
-  - NEVER include the test type or automation type in the scenario name. Wrong: "E2E: Submit Contact Form", "Visual: Footer Layout", "Manual: Accessibility Check". Right: "Submit Contact Form", "Footer Layout", "Accessibility Check".
-  - **E2E / Visual / Manual**: User-facing name. Format: "[User action] from [context]" or "User [accomplishes X]". Examples: "User completes onboarding from landing page", "User resets state by logging out and back in". Never generic ("Verify Onboarding V2 Flow") or technical ("Verify useOnboardingV2Store export").
-  - **Unit / Integration**: Technical name OK. Examples: "resetAllUserState calls store reset", "POST /api/onboarding returns 200 for valid payload".
+- **SCENARIO TITLE** (strict rules):
+  - The title MUST describe the **expected behavior** — what "pass" looks like. It reads as a statement of what should happen.
+  - NEVER start with "Verify", "Test", "Check", or "Validate". State the behavior directly.
+  - NEVER use component names, implementation details, or CSS/code concepts (wrong: "Verify InputBar Flex Layout", "Dynamic Padding with ResizeObserver"). Use user-observable behavior instead (right: "Messages stay scrollable above expanded input", "Spacing adjusts when input grows").
+  - NEVER include the test type or automation type in the title (wrong: "E2E: Submit Form", "Visual: Footer Layout").
+  - Keep titles short (under 10 words), immediately understandable by anyone.
+  - **UI/E2E scenarios**: Frame from the user's perspective. Examples: "Messages stay scrollable above expanded input", "Banner doesn't hide last message", "Form shows error on empty email".
+  - **Unit / API scenarios**: Technical name OK. Examples: "resetAllUserState calls store reset", "POST /api/onboarding returns 200 for valid payload".
 - **STEPS** (follow the strict rules below — atomic, unambiguous, executable by someone who doesn't know the app):
 <% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
 <%= testRecipeRules %>
@@ -192,6 +196,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions
 - Generate test scenarios for every meaningful change. Each distinct change area needs at least 1 Smoke (happy path) + 1 Critical Path (key edge case). Base test recipe on indexed product context, affected flows, and dependency impact — no invented flows.
 - **COVERAGE PROPORTIONAL TO SCOPE**: Before writing test cases, list every distinct feature area modified in the PR (group by directory/module). Each major area MUST be represented by at least one Smoke + one Critical Path scenario. If a change could break in production, it MUST have a test. Evaluate criticality: data loss, security, broken user flows, auth/payment paths = highest. Config, copy, style = lowest.
+- **CROSS-REFERENCE PR DESCRIPTION**: If the PR description contains a testing checklist, manual testing notes, or "how to test" section, ensure EVERY item from that list is covered by a test scenario. The developer wrote those because they matter — do not omit them.
 - **ONE TEST CASE PER FIX**: Each distinct fix mentioned in commits should get its own dedicated test case
 - Provide concrete, actionable test steps with specific details based on the real changes
 - Consider the full user journey and how ALL changes work together
@@ -270,7 +275,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Use ONLY these priority levels: Smoke, Critical Path, Regression
     - Order scenarios by priority (Smoke first, then Critical Path, then Regression)
     - **TEST CASE STRUCTURE REQUIREMENTS:**
-      - **Scenario Name**: Descriptive name focusing on what's being tested (e.g., "Mark as Shared from Draft Filter", "Verify Flicker Fix", "Rapid Toggle Mark/Unmark")
+      - **Scenario Name**: State the expected behavior — what "pass" looks like (e.g., "Shared badge appears after marking from draft filter", "List stays stable without flicker on toggle", "Rapid mark/unmark keeps correct state")
       - **Steps** (automation-ready - atomic, one action per step, executable by Playwright):
         - **Setup/Initial State**: 
           - Exact filter active (use exact filter name from code: "Draft", "Shared", "All", etc.)

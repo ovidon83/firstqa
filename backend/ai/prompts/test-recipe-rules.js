@@ -39,7 +39,15 @@ module.exports = `
 - **Other**: Analytics/telemetry verification, visual regression, manual exploratory, or a mix of UI+API in one scenario where the primary verification is not purely UI, API, or unit.
 Do not use "UI" for API-only tests or "API" for browser-driven tests.
 
-**Test recipe must be based on indexed product context, affected flows, and dependency impact — no invented flows. Cover every meaningful change (at least 1 Smoke + 1 Critical Path per change area). Scenario names: clear, platform-language words from the codebase.**
+**Test recipe must be based on indexed product context, affected flows, and dependency impact — no invented flows. Cover every meaningful change (at least 1 Smoke + 1 Critical Path per change area).**
+
+**SCENARIO TITLE RULES (STRICT):**
+- The title must describe the EXPECTED BEHAVIOR — what "pass" looks like. It should read as a statement of what should happen, not what you're testing.
+- WRONG (component/implementation names): "Verify InputBar Flex Layout", "Dynamic Padding with ResizeObserver", "Verify Banner Overlay Visibility"
+- RIGHT (expected behavior): "Messages stay scrollable above expanded input", "Spacing adjusts when input bar grows or shrinks", "Banner doesn't hide last message"
+- NEVER start with "Verify", "Test", "Check", or "Validate" — just state the expected behavior directly.
+- Frame from the user's perspective, not the developer's. Users don't know about ResizeObserver, flex layouts, or component names.
+- Keep titles short (under 10 words) and immediately understandable.
 
 **TABLE LAYOUT:** Keep Steps and Expected Result cells short so the table aligns well. Use one concise line per step; separate steps with <br>. Avoid long paragraphs inside a single cell; prefer "1. Do X<br>2. Do Y<br>3. Verify Z" over run-on text.
 
