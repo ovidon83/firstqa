@@ -460,46 +460,93 @@ async function attemptAutoLogin(page, credentials, baseUrl) {
   const hasLoginForm = /\b(log\s*in|sign\s*in|password)\b/i.test(a11yText) &&
     /\b(email|username)\b/i.test(a11yText);
 
-  if (!hasLoginForm) return false;
-
-  // Use the agent to fill in the login form
-  const loginSteps = [
-    `Enter '${credentials.email}' in the email/username field`,
-    `Enter '${credentials.password}' in the password field`,
-    `Click the login/sign-in/submit button`
-  ];
-
-  for (const step of loginSteps) {
-    let attempts = 0;
-    while (attempts < 3) {
-      attempts++;
-      const currentSnapshot = await getA11ySnapshot(page);
-      const currentA11y = flattenA11yTree(currentSnapshot);
-
-      const decision = await decideNextAction(
-        currentA11y, step, 'User is logged in',
-        page.url(), 1, 1, 'Auto-login'
-      );
-
-      if (decision.action === 'done') break;
-
-      try {
-        await executeAgentAction(page, decision, baseUrl);
-        await page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
-        break;
-      } catch (err) {
-        if (attempts >= 3) break;
-      }
+  if (!hasLoginForm) {
+    // Maybe there's a "Log In" / "Sign In" link on a landing page — click it first
+    const loginLink = page.getByRole('link', { name: /log\s*in|sign\s*in/i }).first();
+    if (await loginLink.isVisible({ timeout: 2000 }).catch(() => false)) {
+      console.log(`   🔐 Clicking login link on landing page...`);
+      await loginLink.click();
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+      // Re-check for login form
+      const snap2 = await getA11ySnapshot(page);
+      const a11y2 = flattenA11yTree(snap2);
+      if (!/\b(password)\b/i.test(a11y2)) return false;
+    } else {
+      return false;
     }
   }
 
+  // Use direct Playwright locators — never click OAuth/SSO buttons
+  try {
+    // Find and fill email field (try multiple locator strategies)
+    const emailField =
+      page.getByLabel(/email/i).first() ||
+      page.getByPlaceholder(/email/i).first() ||
+      page.locator('input[type="email"]').first();
+
+    if (await emailField.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await emailField.clear();
+      await emailField.fill(credentials.email);
+      console.log(`   📧 Filled email: ${credentials.email}`);
+    } else {
+      console.log(`   ⚠️ Could not find email field`);
+      return false;
+    }
+
+    // Find and fill password field
+    const passwordField =
+      page.getByLabel(/password/i).first() ||
+      page.locator('input[type="password"]').first();
+
+    if (await passwordField.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await passwordField.clear();
+      await passwordField.fill(credentials.password);
+      console.log(`   🔑 Filled password`);
+    } else {
+      console.log(`   ⚠️ Could not find password field`);
+      return false;
+    }
+
+    // Click submit button — avoid OAuth buttons (Google, GitHub, etc.)
+    // Look for submit-type buttons that are NOT OAuth
+    const submitSelectors = [
+      page.getByRole('button', { name: /^(continue|sign\s*in|log\s*in|submit|enter)$/i }).first(),
+      page.locator('button[type="submit"]').first(),
+      page.locator('form button:not([data-provider])').last()
+    ];
+
+    let clicked = false;
+    for (const btn of submitSelectors) {
+      try {
+        if (await btn.isVisible({ timeout: 1000 }).catch(() => false)) {
+          const btnText = await btn.textContent().catch(() => '');
+          // Skip OAuth buttons
+          if (/google|github|facebook|apple|microsoft|twitter|sso/i.test(btnText)) continue;
+          await btn.click();
+          console.log(`   🔘 Clicked submit: "${btnText.trim()}"`);
+          clicked = true;
+          break;
+        }
+      } catch (_) { continue; }
+    }
+
+    if (!clicked) {
+      // Fallback: press Enter in the password field
+      await passwordField.press('Enter');
+      console.log(`   ⏎ Pressed Enter to submit`);
+    }
+  } catch (err) {
+    console.warn(`   ⚠️ Login form interaction failed: ${err.message}`);
+    return false;
+  }
+
   // Wait for navigation after login submit
-  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
 
   // Check if we're still on a login page
   const postSnapshot = await getA11ySnapshot(page);
   const postA11y = flattenA11yTree(postSnapshot);
-  const stillOnLogin = /\b(log\s*in|sign\s*in)\b/i.test(postA11y) &&
+  const stillOnLogin = /\b(sign\s*in|log\s*in)\b/i.test(postA11y) &&
     /\b(password)\b/i.test(postA11y);
 
   return !stillOnLogin;
