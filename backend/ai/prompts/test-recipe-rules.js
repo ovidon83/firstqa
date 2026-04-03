@@ -11,26 +11,31 @@ module.exports = `
 4. Number each step clearly (1., 2., 3., …)
 5. Include specific, observable expected results after verification steps
 
+**PREREQUISITE-AWARE STEPS (CRITICAL):**
+Steps must be complete from the perspective of an unauthenticated user arriving at the base URL. A browser automation agent will execute these steps literally — it cannot infer implicit prerequisites. Include ALL intermediate steps:
+- If the page requires authentication, start with: "Log in with test credentials" (the agent has credentials)
+- If reaching a page requires clicking through navigation (sidebar, menu, user dropdown), include each click
+- If a modal or panel must be opened before interacting with elements inside it, include the trigger step
+- NEVER write "Navigate to Settings" if Settings requires login + sidebar + user menu. Instead: "1. Log in<br>2. Click user avatar/menu<br>3. Click 'Settings'"
+- Trace the real user journey from the app's entry point to the target screen
+
 **STEP TYPES TO USE:**
-- **Navigation**: "Navigate to [exact URL or page name]" (e.g., "Navigate to /login" or "Navigate to Settings page")
+- **Login**: "Log in with test credentials" (agent will use provided email/password on whatever login form exists)
+- **Navigation**: "Navigate to [exact URL or page name]" or "Click '[menu item]' in the [sidebar/navbar/user menu]"
 - **Input**: "Enter '[exact text]' in the [specific field name] field" (e.g., "Enter 'test@example.com' in the 'Email Address' field")
 - **Action**: "Click the [specific button/link text]" (e.g., "Click the 'Submit' button")
 - **Verification**: "Verify that [specific, observable outcome]" (e.g., "Verify that the text 'Order Confirmed' appears at the top of the page")
 - **Wait**: "Wait for [specific element/state] to appear/complete" (e.g., "Wait for the 'Loading...' spinner to disappear")
 
 **GOOD STEP EXAMPLES:**
-- "Click the 'Submit' button (blue button, bottom right)"
-- "Enter 'test@example.com' in the 'Email Address' field"
-- "Verify that the text 'Order Confirmed' appears at the top of the page"
-- "Navigate to /dashboard"
-- "Wait for the success toast to appear"
+- "1. Log in with test credentials<br>2. Click 'Settings' in the sidebar<br>3. Click 'Connect LinkedIn' button<br>4. Verify success toast appears"
+- "1. Navigate to /signup<br>2. Enter 'test@example.com' in the 'Email' field<br>3. Enter 'Password123' in the 'Password' field<br>4. Click the 'Sign Up' button<br>5. Verify redirect to /dashboard"
 
-**BAD STEP EXAMPLES (too vague — avoid these):**
-- "Submit the form"
-- "Enter a valid email"
-- "Check if it worked"
-- "Test the flow"
-- "Verify functionality"
+**BAD STEP EXAMPLES (missing prerequisites — avoid these):**
+- "Navigate to Settings page" (HOW? Does it need login? Where is the link?)
+- "Open the Post Editor" (HOW? What clicks get you there from the homepage?)
+- "Submit the form" (WHICH form? What fields? What values?)
+- "Verify functionality" (WHAT specific outcome?)
 
 **AUTOMATION COLUMN (choose exactly one):**
 - **UI**: The test is executed in a browser or against the DOM (clicks, typing, navigation, visible UI state). Use for: E2E, Playwright/Cypress, any scenario that requires a rendered page or user interaction.

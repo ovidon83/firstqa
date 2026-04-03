@@ -194,7 +194,9 @@ Rules:
 - For "navigate", only set url. Use relative paths.
 - Match names EXACTLY as they appear in the tree (case-sensitive).
 - NEVER repeat the same failed action. If an action didn't work, try a different approach or use "done".
-- Be efficient: one action per call when possible.`;
+- Be efficient: one action per call when possible.
+- If a step says "Log in" or "Log in with test credentials", use the credentials from the environment context to fill the email and password fields, then submit.
+- If the expected elements are not on the page, check if you're on a login or landing page first — you may need to log in before proceeding.`;
 
   if (agentContext) {
     systemPrompt += `\n\nEnvironment context provided by the user:\n${agentContext}`;
@@ -449,6 +451,60 @@ Return JSON:
   }
 }
 
+// ─── Auto-login helper ──────────────────────────────────────────────────────
+
+async function attemptAutoLogin(page, credentials, baseUrl) {
+  const snapshot = await getA11ySnapshot(page);
+  const a11yText = flattenA11yTree(snapshot);
+
+  const hasLoginForm = /\b(log\s*in|sign\s*in|password)\b/i.test(a11yText) &&
+    /\b(email|username)\b/i.test(a11yText);
+
+  if (!hasLoginForm) return false;
+
+  // Use the agent to fill in the login form
+  const loginSteps = [
+    `Enter '${credentials.email}' in the email/username field`,
+    `Enter '${credentials.password}' in the password field`,
+    `Click the login/sign-in/submit button`
+  ];
+
+  for (const step of loginSteps) {
+    let attempts = 0;
+    while (attempts < 3) {
+      attempts++;
+      const currentSnapshot = await getA11ySnapshot(page);
+      const currentA11y = flattenA11yTree(currentSnapshot);
+
+      const decision = await decideNextAction(
+        currentA11y, step, 'User is logged in',
+        page.url(), 1, 1, 'Auto-login'
+      );
+
+      if (decision.action === 'done') break;
+
+      try {
+        await executeAgentAction(page, decision, baseUrl);
+        await page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
+        break;
+      } catch (err) {
+        if (attempts >= 3) break;
+      }
+    }
+  }
+
+  // Wait for navigation after login submit
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+
+  // Check if we're still on a login page
+  const postSnapshot = await getA11ySnapshot(page);
+  const postA11y = flattenA11yTree(postSnapshot);
+  const stillOnLogin = /\b(log\s*in|sign\s*in)\b/i.test(postA11y) &&
+    /\b(password)\b/i.test(postA11y);
+
+  return !stillOnLogin;
+}
+
 // ─── Main entry point ───────────────────────────────────────────────────────
 
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
@@ -519,6 +575,25 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
     console.log(`📋 Agent context provided (${contextParts.length} part${contextParts.length > 1 ? 's' : ''})`);
   }
 
+  // Pre-login: if credentials are available, attempt login on the first page load
+  let isLoggedIn = false;
+  if (testCredentials && testCredentials.email) {
+    try {
+      console.log(`🔐 Attempting pre-login with ${testCredentials.email}...`);
+      await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+
+      isLoggedIn = await attemptAutoLogin(page, testCredentials, baseUrl);
+      if (isLoggedIn) {
+        console.log(`✅ Pre-login successful`);
+      } else {
+        console.log(`ℹ️ Pre-login skipped — no login form detected or login not needed`);
+      }
+    } catch (err) {
+      console.warn(`⚠️ Pre-login failed: ${err.message}`);
+    }
+  }
+
   try {
     for (let i = 0; i < testRecipe.length; i++) {
       const scenario = testRecipe[i];
@@ -554,17 +629,25 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       page.on('requestfailed', requestFailedHandler);
 
       try {
-        // Clear state from previous scenario to prevent leaks (cookies, storage)
-        await context.clearCookies().catch(() => {});
-        await page.evaluate(() => {
-          try { localStorage.clear(); } catch (_) {}
-          try { sessionStorage.clear(); } catch (_) {}
-        }).catch(() => {});
-
         const startUrl = startUrls[i];
         console.log(`   🧭 Navigating to: ${startUrl}`);
         await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
         await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+
+        // If we were logged in but got redirected to login (session expired), re-login
+        if (isLoggedIn && testCredentials) {
+          const currentUrl = page.url();
+          const a11yCheck = await getA11ySnapshot(page);
+          const a11yText = flattenA11yTree(a11yCheck);
+          const looksLikeLogin = /\b(log\s*in|sign\s*in|password)\b/i.test(a11yText) &&
+            /\b(email|username)\b/i.test(a11yText);
+          if (looksLikeLogin) {
+            console.log(`   🔄 Session expired — re-logging in...`);
+            await attemptAutoLogin(page, testCredentials, baseUrl);
+            await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+            await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+          }
+        }
 
         const actionLog = await runScenarioAgent(page, scenario, baseUrl, agentContext);
         scenarioResult.actionLog = actionLog;
