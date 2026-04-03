@@ -44,7 +44,7 @@ Steps must be complete from the perspective of an unauthenticated user arriving 
 - **Other**: Analytics/telemetry verification, visual regression, manual exploratory, or a mix of UI+API in one scenario where the primary verification is not purely UI, API, or unit.
 Do not use "UI" for API-only tests or "API" for browser-driven tests.
 
-**Test recipe must be based on indexed product context, affected flows, and dependency impact — no invented flows. Cover every meaningful change (at least 1 Smoke + 1 Critical Path per change area). Scenario title = expected behavior (what "pass" looks like). NEVER start with "Verify/Test/Check". NEVER use component or implementation names. Keep under 10 words. Wrong: "Verify InputBar Flex Layout". Right: "Messages stay scrollable above expanded input".**
+**Test recipe must be based on indexed product context, affected flows, and dependency impact — no invented flows. Cover every meaningful change (at least 1 Smoke + 1 Critical Path per change area). Scenario title = user-visible outcome (what a real user sees when it passes). NEVER start with "Verify/Test/Check". NEVER use source code names (DraftsPage, PostEditor, InputBar) or implementation jargon (race condition, optimistic, conditional action). Keep under 10 words. Wrong: "DraftsPage auto-save functionality". Right: "Draft auto-saves after editing".**
 
 **TABLE LAYOUT:** Keep Steps and Expected Result cells short so the table aligns well. Use one concise line per step; separate steps with <br>. Avoid long paragraphs inside a single cell; prefer "1. Do X<br>2. Do Y<br>3. Verify Z" over run-on text.
 

@@ -50,7 +50,7 @@ Before analyzing anything, categorize the changed files:
    - Identify visual indicators: badges, borders, highlights, colors, icons
    - Understand conditional logic: when things appear/disappear, when filters switch
 2. **USE EXACT CODE DETAILS** in test cases - don't guess or use generic terms
-3. **REFERENCE ACTUAL CODE ELEMENTS** by their names as they appear in the diff
+3. **REFERENCE ACTUAL CODE ELEMENTS** by their names in test **steps** and **expected results** (exact button text, field labels, URLs, toast messages). Do NOT use code element names in scenario titles — titles must describe user-visible outcomes.
 4. **CRITICAL: Only use UI element names, page names, button text, and URLs that you can directly cite from the CODE DIFF, FULL FILE CONTENTS, FLOW DISCOVERY, or PRODUCT KNOWLEDGE CONTEXT sections above. If you cannot find the exact element name in the provided context, describe the expected behavior instead of guessing. Never invent UI elements.**
 
 **PR CONTEXT:**
@@ -107,7 +107,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 
 ## 🔍 Bugs & Risks
 
-[FIRST write <bug_check> verification blocks for every candidate bug. Then output ONLY verified REAL BUGs here as a bullet list. Max 6 items, sorted by severity (🚫 BLOCKER > 🔴 HIGH > 🟡 MEDIUM). Format: "[SEVERITY] Description at `file:line` — impact". If no verified bugs: "✅ No critical issues found."]
+[FIRST write <bug_check> verification blocks for every candidate bug. Then output ONLY verified REAL BUGs here as a bullet list. Max 6 items, sorted by severity (🚫 BLOCKER > 🔴 HIGH > 🟡 MEDIUM). Format: "[SEVERITY] Description at `file:line` — impact". If the same bug pattern exists in multiple files, report it ONCE listing all affected locations (e.g., "`FileA.tsx:42` and `FileB.tsx:88`"). If no verified bugs: "✅ No critical issues found."]
 
 ## 🧪 Test Recipe
 
@@ -124,10 +124,10 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 **TEST CASE REQUIREMENTS:**
 - **MANDATORY ROW ORDER**: Output the Test Recipe table with rows in this exact order: (1) every **Smoke** row, (2) then every **Critical Path** row, (3) then every **Regression** row. Do not interleave priorities. Use ONLY these three priority labels.
 - **TABLE FORMAT**: Keep Steps and Expected Result cells concise so the table renders with consistent alignment. Use one short line per step; separate steps with `<br>`. Avoid long run-on sentences inside a single cell. Max 2 lines per step line when possible.
-- **SCENARIO TITLE**: Must state the **expected behavior** — what "pass" looks like. NEVER start with "Verify/Test/Check". NEVER use component names or implementation details. Keep under 10 words.
-  - Wrong: "Verify InputBar Flex Layout", "Dynamic Padding with ResizeObserver", "E2E: Submit Form"
-  - Right: "Messages stay scrollable above expanded input", "Spacing adjusts when input grows", "Form submits successfully with valid data"
-  - **Unit / API**: Technical name OK. Examples: "resetAllUserState calls store reset", "POST /api/onboarding returns 200".
+- **SCENARIO TITLE**: Must describe the **user-visible outcome** — what a real user sees when the test passes. NEVER start with "Verify/Test/Check". NEVER use source code names (component names like DraftsPage/PostEditor, file names, function names, class names). NEVER use implementation jargon (race condition, optimistic delete, conditional action, ResizeObserver). Keep under 10 words.
+  - Wrong: "DraftsPage auto-save functionality", "Save/delete race condition resolved", "PostEditorFooter retry disabled", "'Remove from Drafts' action is conditional", "DraftEditor dropdown on mobile", "Optimistic delete works", "Verify InputBar Flex Layout"
+  - Right: "Draft auto-saves after editing", "Draft deletes without error", "Retry blocked when over limit", "Remove button hidden when unavailable", "Dropdown works on mobile", "Deleted draft disappears from list", "Input stays scrollable above keyboard"
+  - **Unit / API**: Technical names OK. Examples: "resetAllUserState calls store reset", "POST /api/onboarding returns 200".
 - **STEPS** (follow the strict rules below — atomic, unambiguous, executable by someone who doesn't know the app):
 <% if (typeof testRecipeRules !== 'undefined' && testRecipeRules) { %>
 <%= testRecipeRules %>
@@ -270,7 +270,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Use ONLY these priority levels: Smoke, Critical Path, Regression
     - Order scenarios by priority (Smoke first, then Critical Path, then Regression)
     - **TEST CASE STRUCTURE REQUIREMENTS:**
-      - **Scenario Name**: State the expected behavior (e.g., "Shared badge appears after marking from draft", "List stays stable without flicker on toggle", "Rapid mark/unmark keeps correct state")
+      - **Scenario Name**: Describe user-visible outcome — no code names, no jargon (e.g., "Shared badge appears after marking", "List stays stable on toggle", "Draft deletes without error")
       - **Steps** (automation-ready - atomic, one action per step, executable by Playwright):
         - **Setup/Initial State**: 
           - Exact filter active (use exact filter name from code: "Draft", "Shared", "All", etc.)
@@ -345,6 +345,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     ```
   - ONLY include items where VERDICT is REAL BUG in the final output.
   - If all candidates are FALSE POSITIVE, write "✅ No critical issues found." — this is correct, not a failure.
+  - **DEDUP**: If the same bug pattern appears in multiple files, combine into ONE item listing all locations. Do not report the same issue twice.
   - Max 6 items. Format: `[SEVERITY] Description at \`file:line\` — impact`
   - Severity: 🚫 BLOCKER → 🔴 HIGH → 🟡 MEDIUM (sorted)
   - **DEPLOYMENT**: Flag `.sql` migrations and new environment variables as deployment prerequisites.
