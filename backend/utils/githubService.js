@@ -2081,6 +2081,8 @@ The AI analysis failed: ${aiInsights?.error || 'unknown error'}
     } catch (error) {
       console.error('❌ Error saving analysis to database:', error.message);
     }
+  } else if (aiInsights?.success && !userId) {
+    console.warn(`⚠️ Analysis for ${repository.full_name}#${issue.number} NOT saved to DB — userId is null (installation lookup may have failed)`);
   }
   
   // Post GitHub Check status (non-blocking)
@@ -2315,6 +2317,8 @@ Or wait until next month when your limit resets.
     } catch (error) {
       console.error('❌ Error saving short analysis to database:', error.message);
     }
+  } else if (aiInsights?.success && !userId) {
+    console.warn(`⚠️ Short analysis for ${repository.full_name}#${issue.number} NOT saved to DB — userId is null`);
   }
   
   // Add "Reviewed by Ovi" label after AI analysis is complete
@@ -2870,38 +2874,61 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
   }
   baseUrl = baseUrl.replace(/\/+$/, '');
 
-  // 2. Look up the most recent /qa analysis for this PR
-  if (!isSupabaseConfigured()) {
-    await postComment(repoFullName, prNumber, '❌ Database not configured — cannot look up prior analysis.');
-    return { success: false, message: 'No database' };
+  // 2. Look up the most recent /qa analysis for this PR (DB first, then PR comments as fallback)
+  let fullRecipe = [];
+
+  if (isSupabaseConfigured()) {
+    const { data: analysis } = await supabaseAdmin
+      .from('analyses')
+      .select('result')
+      .eq('repository', repoFullName)
+      .eq('pr_number', prNumber)
+      .order('completed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (analysis?.result) {
+      const rawData = analysis.result.raw || analysis.result;
+      fullRecipe = parseTestRecipeFromAiResponse(rawData);
+      console.log(`📊 [testrun] Found analysis in DB: ${fullRecipe.length} scenarios`);
+    }
   }
 
-  const { data: analysis } = await supabaseAdmin
-    .from('analyses')
-    .select('result')
-    .eq('repository', repoFullName)
-    .eq('pr_number', prNumber)
-    .order('completed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Fallback: parse test recipe from PR comments if DB had nothing
+  if (fullRecipe.length === 0) {
+    console.log(`🔄 [testrun] No analysis in DB — scanning PR comments for test recipe...`);
+    try {
+      const repoOctokit = await githubAppAuth.getOctokitForRepo(owner, repo);
+      if (repoOctokit) {
+        const { data: comments } = await repoOctokit.issues.listComments({
+          owner, repo, issue_number: prNumber, per_page: 30
+        });
+        // Find the most recent bot comment containing a Test Recipe table
+        const botComments = comments
+          .filter(c => c.user?.login?.includes('[bot]') || c.user?.type === 'Bot')
+          .filter(c => c.body?.includes('Test Recipe') && c.body?.includes('| Scenario'))
+          .reverse();
 
-  if (!analysis?.result) {
+        for (const bc of botComments) {
+          fullRecipe = parseTestRecipeFromAiResponse(bc.body);
+          if (fullRecipe.length > 0) {
+            console.log(`✅ [testrun] Parsed ${fullRecipe.length} scenarios from PR comment fallback`);
+            break;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`⚠️ [testrun] Comment fallback failed: ${err.message}`);
+    }
+  }
+
+  if (fullRecipe.length === 0) {
     await postComment(repoFullName, prNumber,
       `⚠️ **No prior analysis found for this PR.**\n\nRun \`/qa\` first to generate a QA analysis with a test recipe, then use \`/qa testrun\` to execute those tests.`
     );
     return { success: false, message: 'No prior analysis' };
   }
 
-  // 3. Extract test recipe
-  const rawData = analysis.result.raw || analysis.result;
-  const fullRecipe = parseTestRecipeFromAiResponse(rawData);
-
-  if (fullRecipe.length === 0) {
-    await postComment(repoFullName, prNumber,
-      `⚠️ **No test recipe found in the last analysis.**\n\nThe prior \`/qa\` analysis didn't produce a test recipe. Try running \`/qa\` again.`
-    );
-    return { success: false, message: 'No test recipe in analysis' };
-  }
 
   // 4. Filter: run UI + API scenarios, skip Unit
   const unitSkipped = fullRecipe.filter(s => s.automation && s.automation.toLowerCase() === 'unit');
