@@ -27,6 +27,7 @@
     "url": "https://github.com/ovidon83/firstqa.git"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
     "@browserbasehq/sdk": "^2.9.0",
     "@octokit/auth-app": "^8.1.1",
     "@octokit/rest": "^19.0.13",

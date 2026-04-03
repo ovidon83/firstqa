@@ -4,12 +4,13 @@
  */
 
 const OpenAI = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-// Initialize OpenAI client
+// Initialize OpenAI client (used by test executor, spec generator, scorer)
 let openai;
 try {
   if (!process.env.OPENAI_API_KEY) {
@@ -22,6 +23,19 @@ try {
   }
 } catch (error) {
   console.error('❌ Error initializing OpenAI client:', error.message);
+}
+
+// Initialize Anthropic client (used for main QA analysis)
+let anthropic;
+try {
+  if (process.env.ANTHROPIC_API_KEY) {
+    anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    console.log('✅ Anthropic client initialized (primary analysis provider)');
+  } else {
+    console.log('ℹ️ ANTHROPIC_API_KEY not set — will use OpenAI for analysis');
+  }
+} catch (error) {
+  console.error('❌ Error initializing Anthropic client:', error.message);
 }
 
 /**
@@ -277,8 +291,11 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
 
     console.log(`🤖 FirstQA Ovi AI performing DEEP CODE ANALYSIS for PR #${pr_number} in ${repo}`);
 
-    // Get model from environment or use default
-    const model = process.env.OPENAI_MODEL || 'gpt-4o';
+    const useAnthropic = !!anthropic;
+    const model = useAnthropic
+      ? (process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514')
+      : (process.env.OPENAI_MODEL || 'gpt-4o');
+    console.log(`   Provider: ${useAnthropic ? 'Anthropic' : 'OpenAI'}, Model: ${model}`);
 
     // System message: role, rules, verification requirements (stable across PRs)
     const systemMessage = `You are Ovi AI, FirstQA's senior QA engineer. You review PRs with a focus on accuracy and zero false positives.
@@ -311,28 +328,43 @@ LINE NUMBERS: The diff below includes actual file line numbers (e.g. "  42|+code
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         console.log(`🔄 Attempt ${attempt}/3 to generate deep analysis insights`);
-        
-        const completion = await openai.chat.completions.create({
-          model: model,
-          messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.1,
-          max_tokens: 7000
-        });
 
-        const response = completion.choices[0]?.message?.content;
-        if (!response) {
-          throw new Error('Empty response from OpenAI');
+        let response;
+        if (useAnthropic) {
+          const completion = await anthropic.messages.create({
+            model,
+            system: systemMessage,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.1,
+            max_tokens: 7000
+          });
+          response = completion.content?.[0]?.text;
+          console.log('🔍 AI response:', {
+            length: response?.length,
+            usage: { input_tokens: completion.usage?.input_tokens, output_tokens: completion.usage?.output_tokens },
+            model: completion.model
+          });
+        } else {
+          const completion = await openai.chat.completions.create({
+            model,
+            messages: [
+              { role: 'system', content: systemMessage },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.1,
+            max_tokens: 7000
+          });
+          response = completion.choices[0]?.message?.content;
+          console.log('🔍 AI response:', {
+            length: response?.length,
+            usage: completion.usage,
+            model: completion.model
+          });
         }
 
-        // Log summary
-        console.log('🔍 AI response:', {
-          length: response.length,
-          usage: completion.usage,
-          model: completion.model
-        });
+        if (!response) {
+          throw new Error(`Empty response from ${useAnthropic ? 'Anthropic' : 'OpenAI'}`);
+        }
 
         // Try to parse the JSON response with multiple fallback strategies
         let insights = await parseAIResponse(response, sanitizedTitle, sanitizedBody, sanitizedDiff);
@@ -1564,29 +1596,36 @@ async function generateShortAnalysis({ repo, pr_number, title, body, diff }) {
 
     console.log(`📝 Generated prompt length: ${prompt.length} characters`);
 
-    // Call OpenAI API with short analysis prompt
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are Ovi AI, FirstQA\'s senior QA engineer. Generate ONLY the requested short analysis format with the exact sections specified. Do not include any additional content or explanations outside the format.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_tokens: 2000, // Lower token limit for short analysis
-      temperature: 0.1, // Very low temperature for maximum consistency
-      top_p: 0.9
-    });
+    // Call AI API with short analysis prompt
+    const shortSystemMsg = 'You are Ovi AI, FirstQA\'s senior QA engineer. Generate ONLY the requested short analysis format with the exact sections specified. Do not include any additional content or explanations outside the format.';
+    let aiResponse;
 
-    if (!response.choices || !response.choices[0] || !response.choices[0].message) {
-      throw new Error('Invalid response from OpenAI API');
+    if (anthropic) {
+      const completion = await anthropic.messages.create({
+        model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514',
+        system: shortSystemMsg,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 2000,
+        temperature: 0.1
+      });
+      aiResponse = completion.content?.[0]?.text?.trim();
+    } else {
+      const response = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
+        messages: [
+          { role: 'system', content: shortSystemMsg },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 2000,
+        temperature: 0.1,
+        top_p: 0.9
+      });
+      aiResponse = response.choices?.[0]?.message?.content?.trim();
     }
 
-    const aiResponse = response.choices[0].message.content.trim();
+    if (!aiResponse) {
+      throw new Error('Invalid response from AI API');
+    }
     console.log(`✅ Short analysis generated successfully (${aiResponse.length} characters)`);
 
     return {
@@ -1887,14 +1926,24 @@ Return JSON format. For FULL analysis:
 
 Recommendations: ready-to-paste text for the ticket body. Test scenarios: clear, complete descriptions. No blocked/caveat suffixes.`;
 
-  const response = await openai.chat.completions.create({
-    model: process.env.OPENAI_MODEL || 'gpt-4o',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.1, // Very low temperature for consistency and speed
-    max_tokens: 2000
-  });
-
-  const content = response.choices[0].message.content;
+  let content;
+  if (anthropic) {
+    const completion = await anthropic.messages.create({
+      model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.1,
+      max_tokens: 2000
+    });
+    content = completion.content?.[0]?.text;
+  } else {
+    const response = await openai.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.1,
+      max_tokens: 2000
+    });
+    content = response.choices[0]?.message?.content;
+  }
   
   // Log summary instead of full response
   console.log('🤖 AI response:', {
