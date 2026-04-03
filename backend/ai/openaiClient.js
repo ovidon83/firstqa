@@ -321,6 +321,11 @@ FALSE POSITIVE EXAMPLES (DO NOT MAKE THESE MISTAKES):
 - Flagging "missing null check" when the value is checked 3 lines above
 - Flagging something the PR is actively fixing as a bug
 
+BUG-FINDING METHODOLOGY (use these lenses on the diff):
+- DATA FLOW: When the same data lives in multiple places (DB, API cache, component state, URL params), can they diverge? What does the user see when they do?
+- UI CLAIMS vs REALITY: For every status message ("Saved", "Connected", "Synced"), is the claim actually verified or assumed? What if the underlying operation failed silently?
+- BOUNDARY TRANSITIONS: What happens if a component unmounts during an async operation? What if the backend succeeds but the frontend doesn't know (or vice versa)?
+
 LINE NUMBERS: The diff below includes actual file line numbers (e.g. "  42|+code"). Always cite these real line numbers, not diff-relative offsets.`;
 
     // Attempt to get insights (with retry logic)

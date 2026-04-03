@@ -59,6 +59,13 @@ Do not use "UI" for API-only tests or "API" for browser-driven tests.
 - "Send POST request with body { \"name\": \"test\" } to /api/items"
 - "Verify database row exists where id=123"
 
+**USER JOURNEY COVERAGE (when relevant to the change):**
+- Happy path forward (create → view → edit → save)
+- Return path (go back to the list/page you came from — does it reflect your changes?)
+- Exit path (navigate away mid-action — is anything lost or corrupted?)
+- Re-entry path (reopen/revisit the same thing later — is state consistent?)
+- N+1 test: do the action a SECOND time (create a second item, edit again after saving). Bugs often appear on the second action, not the first.
+
 **EDGE CASES TO INCLUDE (when relevant to the change):**
 - Empty fields (e.g., "Leave 'Email' field empty and click Submit")
 - Invalid inputs (e.g., "Enter 'invalid-email' in the 'Email' field")

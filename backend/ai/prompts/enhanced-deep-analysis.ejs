@@ -189,7 +189,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - **What should NOT happen**: List specific things that should NOT occur (e.g., "UI should NOT flicker", "Item should NOT disappear", "Filter should NOT switch unexpectedly")
 - **EDGE CASES**: Include important edge cases (rapid actions, multiple states, concurrent operations, boundary conditions)
 - **NEGATIVE TESTS**: Include negative test cases (error conditions, failure scenarios, invalid states)
-- **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions
+- **COMPLETE USER FLOWS**: Test full user journeys, not just isolated actions. Include the return path (go back — does the list reflect changes?), exit path (navigate away mid-action — is anything lost?), re-entry path (revisit later — is state consistent?), and N+1 path (do the same action a second time — bugs often appear on the second action)
 - Generate test scenarios for every meaningful change. Each distinct change area needs at least 1 Smoke (happy path) + 1 Critical Path (key edge case). Base test recipe on indexed product context, affected flows, and dependency impact — no invented flows.
 - **COVERAGE PROPORTIONAL TO SCOPE**: Before writing test cases, list every distinct feature area modified in the PR (group by directory/module). Each major area MUST be represented by at least one Smoke + one Critical Path scenario. If a change could break in production, it MUST have a test. If the PR description contains a testing checklist or manual testing notes, ensure every item is covered by a scenario.
 - **ONE TEST CASE PER FIX**: Each distinct fix mentioned in commits should get its own dedicated test case
@@ -346,6 +346,8 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
   - ONLY include items where VERDICT is REAL BUG in the final output.
   - If all candidates are FALSE POSITIVE, write "✅ No critical issues found." — this is correct, not a failure.
   - **DEDUP**: If the same bug pattern appears in multiple files, combine into ONE item listing all locations. Do not report the same issue twice.
+  - **DATA FLOW**: When data lives in multiple places (DB, cache, component state, URL), check if they can diverge and what the user sees when they do.
+  - **UI CLAIMS**: For every status text ("Saved", "Connected", "Synced"), verify it reflects actual operation result, not just optimistic assumption.
   - Max 6 items. Format: `[SEVERITY] Description at \`file:line\` — impact`
   - Severity: 🚫 BLOCKER → 🔴 HIGH → 🟡 MEDIUM (sorted)
   - **DEPLOYMENT**: Flag `.sql` migrations and new environment variables as deployment prerequisites.
