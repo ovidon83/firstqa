@@ -5,26 +5,23 @@
  */
 
 const OpenAI = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai;
+function getOpenAI() {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
-/**
- * Score a batch of test scenarios for browser executability.
- * @param {Array} testRecipe - Array of scenario objects { scenario, steps, expected, priority, automation }
- * @returns {Promise<Array>} Annotated recipe with browser_score, browser_steps, manual_steps, skip_reason
- */
-async function scoreExecutability(testRecipe) {
-  const scenarioList = testRecipe.map((s, i) => (
-    `[${i}] Scenario: ${s.scenario}\n    Steps: ${s.steps}\n    Expected: ${s.expected}\n    Automation: ${s.automation || 'UI'}`
-  )).join('\n\n');
+let _anthropic;
+function getAnthropic() {
+  if (!_anthropic && process.env.ANTHROPIC_API_KEY) {
+    _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _anthropic;
+}
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You evaluate test scenarios for browser automation feasibility.
+const SYSTEM_PROMPT = `You evaluate test scenarios for browser automation feasibility.
 For each scenario, determine what percentage can be verified by a headless browser (Playwright) visiting a URL, clicking, typing, and reading visible page content.
 
 Scoring guide:
@@ -38,15 +35,44 @@ Return ONLY a JSON object with key "scores" containing an array. Each entry must
 - browser_score: 0-100
 - browser_steps: string describing what CAN be done in browser
 - manual_steps: string describing what CANNOT be verified in browser (empty string if none)
-- skip_reason: string explaining why score is low (empty string if score >= 70)`
-        },
-        { role: 'user', content: scenarioList }
-      ],
-      temperature: 0.2,
-      response_format: { type: 'json_object' }
-    });
+- skip_reason: string explaining why score is low (empty string if score >= 70)`;
 
-    const parsed = JSON.parse(response.choices[0].message.content);
+/**
+ * Score a batch of test scenarios for browser executability.
+ * @param {Array} testRecipe - Array of scenario objects { scenario, steps, expected, priority, automation }
+ * @returns {Promise<Array>} Annotated recipe with browser_score, browser_steps, manual_steps, skip_reason
+ */
+async function scoreExecutability(testRecipe) {
+  const scenarioList = testRecipe.map((s, i) => (
+    `[${i}] Scenario: ${s.scenario}\n    Steps: ${s.steps}\n    Expected: ${s.expected}\n    Automation: ${s.automation || 'UI'}`
+  )).join('\n\n');
+
+  try {
+    let parsed;
+
+    const anthropic = getAnthropic();
+    if (anthropic) {
+      const response = await anthropic.messages.create({
+        model: 'claude-3-5-haiku-20241022',
+        max_tokens: 2000,
+        system: SYSTEM_PROMPT + '\n\nReturn ONLY valid JSON, no markdown fences.',
+        messages: [{ role: 'user', content: scenarioList }],
+        temperature: 0.2
+      });
+      const text = response.content?.[0]?.text || '{}';
+      parsed = JSON.parse(text);
+    } else {
+      const response = await getOpenAI().chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: scenarioList }
+        ],
+        temperature: 0.2,
+        response_format: { type: 'json_object' }
+      });
+      parsed = JSON.parse(response.choices[0].message.content);
+    }
     const scores = parsed.scores || parsed;
 
     if (!Array.isArray(scores)) {

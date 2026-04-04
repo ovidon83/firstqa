@@ -7,6 +7,7 @@
 
 const { Stagehand } = require('@browserbasehq/stagehand');
 const OpenAI = require('openai');
+const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs').promises;
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -17,9 +18,18 @@ function getOpenAI() {
   return _openai;
 }
 
+let _anthropic;
+function getAnthropic() {
+  if (!_anthropic && process.env.ANTHROPIC_API_KEY) {
+    _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _anthropic;
+}
+
 const MAX_AGENT_STEPS = 25;
 const ACTION_TIMEOUT = 10000;
 const SCENARIO_TIMEOUT = 90000;
+const MAX_CONSECUTIVE_QUOTA_ERRORS = 3;
 
 // ─── Start URL resolution (deterministic, no AI call) ───────────────────────
 
@@ -188,6 +198,19 @@ Return JSON:
   "unverifiable": "aspects that need manual checking (empty string if none)"
 }`;
 
+    const anthropic = getAnthropic();
+    if (anthropic) {
+      const response = await anthropic.messages.create({
+        model: 'claude-3-5-haiku-20241022',
+        max_tokens: 500,
+        system: 'You are a QA engineer verifying browser test results. Return only valid JSON, no markdown fences.',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.2
+      });
+      const text = response.content?.[0]?.text || '{}';
+      return JSON.parse(text);
+    }
+
     const response = await getOpenAI().chat.completions.create({
       model: process.env.VERIFICATION_MODEL || 'gpt-4o-mini',
       messages: [
@@ -222,7 +245,8 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   console.log(`🧭 Start URLs: ${startUrls.map((u, i) => `\n   ${i + 1}. ${u}`).join('')}`);
 
   const useBrowserbase = !!(process.env.BROWSERBASE_API_KEY && process.env.BROWSERBASE_PROJECT_ID);
-  const agentModel = process.env.TEST_EXECUTION_MODEL || 'openai/gpt-4o-mini';
+  const defaultModel = process.env.ANTHROPIC_API_KEY ? 'anthropic/claude-3-5-haiku-20241022' : 'openai/gpt-4o-mini';
+  const agentModel = process.env.TEST_EXECUTION_MODEL || defaultModel;
 
   let stagehand;
   try {
@@ -306,10 +330,34 @@ Rules:
 - After completing all steps, stay on the final page so we can take a screenshot and verify the results.
 - Do NOT close tabs, navigate away from the result, or reset the page after completing steps.`;
 
+  let consecutiveQuotaErrors = 0;
+
   try {
     for (let i = 0; i < testRecipe.length; i++) {
       const scenario = testRecipe[i];
       const scenarioStartTime = Date.now();
+
+      if (consecutiveQuotaErrors >= MAX_CONSECUTIVE_QUOTA_ERRORS) {
+        console.log(`\n⛔ Aborting remaining tests — ${consecutiveQuotaErrors} consecutive API quota errors.`);
+        for (let j = i; j < testRecipe.length; j++) {
+          results.scenarios.push({
+            scenario: testRecipe[j].scenario,
+            priority: testRecipe[j].priority || 'Unknown',
+            status: 'SKIPPED',
+            duration: 0,
+            error: 'Skipped due to API quota limit',
+            steps: testRecipe[j].steps,
+            expected: testRecipe[j].expected,
+            actualResult: null,
+            screenshotPath: null,
+            actionLog: [],
+            consoleLogs: [],
+            networkErrors: []
+          });
+          results.skipped++;
+        }
+        break;
+      }
 
       console.log(`\n🧪 Test ${i + 1}/${testRecipe.length}: ${scenario.scenario}`);
       console.log(`   Priority: ${scenario.priority || 'N/A'} · Score: ${scenario.browser_score ?? 'N/A'}`);
@@ -409,6 +457,14 @@ Rules:
         scenarioResult.error = error.message;
         results.failed++;
         console.log(`   ❌ ERROR: ${error.message}`);
+      }
+
+      const isQuotaError = (scenarioResult.error || '').includes('exceeded your current quota') ||
+        (scenarioResult.error || '').includes('429');
+      if (isQuotaError) {
+        consecutiveQuotaErrors++;
+      } else if (scenarioResult.status === 'PASS' || scenarioResult.status === 'PARTIAL') {
+        consecutiveQuotaErrors = 0;
       }
 
       try { page.removeListener('console', consoleHandler); } catch (_) {}
