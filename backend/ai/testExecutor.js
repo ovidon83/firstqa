@@ -337,8 +337,8 @@ Rules:
       const requestFailedHandler = request => {
         scenarioResult.networkErrors.push({ url: request.url(), failure: request.failure()?.errorText });
       };
-      page.on('console', consoleHandler);
-      page.on('requestfailed', requestFailedHandler);
+      try { page.on('console', consoleHandler); } catch (_) {}
+      try { page.on('requestfailed', requestFailedHandler); } catch (_) {}
 
       try {
         const startUrl = startUrls[i];
@@ -411,8 +411,8 @@ Rules:
         console.log(`   ❌ ERROR: ${error.message}`);
       }
 
-      page.removeListener('console', consoleHandler);
-      page.removeListener('requestfailed', requestFailedHandler);
+      try { page.removeListener('console', consoleHandler); } catch (_) {}
+      try { page.removeListener('requestfailed', requestFailedHandler); } catch (_) {}
 
       if (takeScreenshots) {
         try {
