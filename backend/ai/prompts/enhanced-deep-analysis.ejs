@@ -131,7 +131,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - [ ] … (3–5 items total)
 
 **TEST CASE REQUIREMENTS:**
-- **MANDATORY ROW ORDER**: Output the Test Recipe table with rows in this exact order: (1) every **Smoke** row, (2) then every **Critical Path** row, (3) then every **Regression** row. Do not interleave priorities. Use ONLY these three priority labels.
+- **MANDATORY ROW ORDER**: Output the Test Recipe table with rows in this exact order: (1) every **Smoke** row, (2) then every **Critical Path** row, (3) then every **Regression** row. Do not interleave priorities. Use ONLY these three priority labels. **Within each priority group**, order scenarios by natural user journey: access/navigation → view/read → create → edit/update → delete → states (empty, error) → integration with other features.
 - **TABLE FORMAT**: Keep Steps and Expected Result cells concise so the table renders with consistent alignment. Use one short line per step; separate steps with `<br>`. Avoid long run-on sentences inside a single cell. Max 2 lines per step line when possible.
 - **SCENARIO TITLE**: Must describe the **user-visible outcome** — what a real user sees when the test passes. NEVER start with "Verify/Test/Check". NEVER use source code names (component names like DraftsPage/PostEditor, file names, function names, class names). NEVER use implementation jargon (race condition, optimistic delete, conditional action, ResizeObserver). Keep under 10 words.
   - Wrong: "DraftsPage auto-save functionality", "Save/delete race condition resolved", "PostEditorFooter retry disabled", "'Remove from Drafts' action is conditional", "DraftEditor dropdown on mobile", "Optimistic delete works", "Verify InputBar Flex Layout"
