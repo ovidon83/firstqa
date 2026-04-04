@@ -40,18 +40,25 @@ Before analyzing anything, categorize the changed files:
    - Focus analysis on code files only
    - Mention non-code changes briefly in summary
 
-**CRITICAL: Before generating test cases, you MUST:**
-1. **ANALYZE THE CODE DIFF DEEPLY** to extract exact details:
-   - Identify all UI elements mentioned (buttons, filters, badges, toasts, notifications)
-   - Extract exact function names, variable names, component names
-   - Understand the exact flow/logic: what triggers what, when, and how
-   - Identify state changes: what state variables exist, how they change
-   - Extract exact strings/messages used in the code (toast messages, labels, button text)
-   - Identify visual indicators: badges, borders, highlights, colors, icons
-   - Understand conditional logic: when things appear/disappear, when filters switch
-2. **USE EXACT CODE DETAILS** in test cases - don't guess or use generic terms
-3. **REFERENCE ACTUAL CODE ELEMENTS** by their names in test **steps** and **expected results** (exact button text, field labels, URLs, toast messages). Do NOT use code element names in scenario titles — titles must describe user-visible outcomes.
-4. **CRITICAL: Only use UI element names, page names, button text, and URLs that you can directly cite from the CODE DIFF, FULL FILE CONTENTS, FLOW DISCOVERY, or PRODUCT KNOWLEDGE CONTEXT sections above. If you cannot find the exact element name in the provided context, describe the expected behavior instead of guessing. Never invent UI elements.**
+**CRITICAL: Before generating test cases, you MUST think like a senior QA engineer:**
+1. **INFER THE PRODUCT INTENT** — What feature or change is this PR delivering? Reverse-engineer from:
+   - PR title, description, and commit messages → the "what" and "why"
+   - File paths and route definitions → what pages/endpoints are added or changed?
+   - Component names and UI strings in the code → what does the user see?
+   - API calls, data models, state management → what data operations exist (CRUD)?
+   - Conditional rendering and error handling → what UI states exist (empty, loaded, error, loading)?
+2. **PLAN TEST COVERAGE SYSTEMATICALLY** — Organize scenarios the way an experienced QA would:
+   - Feature is accessible (route works, navigation link appears, page renders)
+   - Core operations work (create, read/view, update/edit, delete — whichever apply)
+   - Navigation flows correctly (into the feature, within it, back out)
+   - All UI states render (empty state, populated, loading, error)
+   - Integration with existing features is intact
+3. **USE CODE FOR SPECIFICS** — Fill in exact details from the diff for steps and expected results:
+   - Exact button text, field labels, URLs, toast messages, error strings
+   - Exact state transitions and conditional logic
+   - Exact route paths from code (e.g., `/drafts`, `/settings`)
+4. **REFERENCE ACTUAL CODE ELEMENTS** in test **steps** and **expected results** only. Scenario titles must describe user-visible outcomes, never code names.
+5. **Only use UI element names, page names, button text, and URLs that you can cite from the CODE DIFF, FULL FILE CONTENTS, FLOW DISCOVERY, or PRODUCT KNOWLEDGE CONTEXT. Never invent UI elements.**
 
 **PR CONTEXT:**
 Title: <%= title %>
@@ -170,14 +177,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **COVER ALL CHANGES**: Ensure test cases cover ALL added, fixed, changed, and REMOVED features across ALL commits
 - **VERIFY ADDITIONS**: Test that added features are present and working correctly
 - **VERIFY REMOVALS**: Test that removed features are actually gone/not present (negative testing)
-- **ANALYZE CODE FIRST**: Before writing ANY test case, deeply analyze the CODE DIFF to extract:
-  - Exact UI element names (buttons, filters, badges, toasts, etc.)
-  - Exact function/variable/component names
-  - Exact strings/messages used (toast text, button labels, error messages)
-  - Exact state variables and how they change
-  - Exact conditional logic (when things appear/disappear/switch)
-  - Exact visual indicators (badge names, colors, icons, borders, highlights)
-  - Exact flow: what triggers what, in what order
+- **INFER THEN DETAIL**: First understand what feature/change this PR delivers (from title, routes, components, data flow). Then extract exact UI labels, messages, routes, and state transitions from the code to make steps and expected results specific.
 - **TEST EVERY FIX**: For EACH distinct fix mentioned in commit messages, generate a SEPARATE specific test case that verifies that fix works
 - **AVOID LOW-PRIORITY**: Skip obscure edge cases that users won't encounter in normal usage
 - **EXTREMELY SPECIFIC EXPECTED RESULTS**: Include EXACT expected behaviors extracted from code:

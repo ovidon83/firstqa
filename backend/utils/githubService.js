@@ -1415,7 +1415,7 @@ Or wait until next month when your limit resets.
     newCommitsContext = `\n\n## 🔄 ${isUpdate ? 'RE-ANALYSIS — NEW COMMITS SINCE LAST REVIEW' : 'COMMIT HISTORY'}:\n\n`;
 
     if (isUpdate) {
-      newCommitsContext += `**${newCommits.length} new commit(s) added since last review. Regenerate a COMPLETE analysis of the entire PR (not a delta). Pay special attention to regressions the new commits may have introduced and whether earlier fixes are still intact.**\n\n`;
+      newCommitsContext += `**${newCommits.length} new commit(s) added since last review. Regenerate a COMPLETE analysis of the entire PR. Keep the core test scenarios stable (same feature, same QA coverage structure). Add or modify scenarios only where new commits introduce fixes, behavioral changes, or new risks. Do not produce a completely different test recipe — build on the same product-level coverage.**\n\n`;
     }
 
     // Concise commit list — message + change type tags
