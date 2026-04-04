@@ -211,37 +211,12 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
       console.log('✅ Using enhanced deep analysis template with algorithm-aware testing');
       const promptTemplate = fs.readFileSync(enhancedPromptTemplatePath, 'utf8');
       
-      // Add comprehensive analysis instruction if commits are provided
-      let analysisInstruction = '';
-      if (newCommits && newCommits.length > 0) {
-        if (isUpdateAnalysis) {
-          analysisInstruction = `\n\n⚠️ **COMPREHENSIVE UPDATE ANALYSIS MODE**: ${newCommits.length} new commit(s) have been added since the last review.\n\n`;
-        } else {
-          analysisInstruction = `\n\n⚠️ **COMPREHENSIVE PR ANALYSIS MODE**: This PR contains ${newCommits.length} commit(s).\n\n`;
-        }
-        
-        analysisInstruction += `**CRITICAL REQUIREMENTS FOR TEST GENERATION:**\n`;
-        analysisInstruction += `1. Generate test scenarios for **every meaningful change** — at least 1 Smoke + 1 Critical Path per change area\n`;
-        analysisInstruction += `2. **HIGHEST PRIORITY**: For EACH fix mentioned in commit messages, generate a test case that specifically verifies that fix works\n`;
-        analysisInstruction += `3. Include **specific, detailed expected results** with:\n`;
-        analysisInstruction += `   - Exact UI states (what's visible/hidden/selected)\n`;
-        analysisInstruction += `   - Exact messages and notifications (toast text, error messages)\n`;
-        analysisInstruction += `   - Exact state changes (filter switches, data updates, navigation)\n`;
-        analysisInstruction += `   - Exact behaviors (no flicker, smooth transitions, error handling)\n`;
-        analysisInstruction += `4. Include **edge cases** (rapid actions, multiple states, concurrent operations, boundary conditions)\n`;
-        analysisInstruction += `5. Include **negative test cases** (error conditions, failure scenarios, invalid states)\n`;
-        analysisInstruction += `6. Test **complete user flows**, not just isolated actions\n`;
-        analysisInstruction += `7. Focus on **user-facing changes** and **fixes** as highest priority\n`;
-        analysisInstruction += `8. Base test cases on the **actual code changes** and **commit messages**, not assumptions\n`;
-        analysisInstruction += `9. Consider how all changes work **TOGETHER** (integration testing)\n\n`;
-      }
-      
       const testRecipeRules = require('./prompts/test-recipe-rules');
       prompt = ejs.render(promptTemplate, {
         repo,
         pr_number,
         title: sanitizedTitle,
-        body: sanitizedBody + analysisInstruction,
+        body: sanitizedBody,
         diff: sanitizedDiff,
         codeContext: sanitizedContext,
         productKnowledgeContext: productKnowledgeContext || 'No product knowledge context available.',
