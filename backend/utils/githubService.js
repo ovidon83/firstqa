@@ -2399,7 +2399,20 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
   const envMatch = comment.body.match(/-env=(\S+)/i);
   const envUrl = envMatch ? envMatch[1].trim() : null;
   const contextMatch = comment.body.match(/-context="([^"]+)"/i) || comment.body.match(/-context=(\S+)/i);
-  const userContext = contextMatch ? contextMatch[1].trim() : null;
+  const rawContext = contextMatch ? contextMatch[1].trim() : null;
+
+  // Extract cookie: entries from context, pass remaining text as userContext
+  let userContext = rawContext;
+  let authCookies = null;
+  if (rawContext) {
+    const cookiePattern = /cookie:([^\s,]+(?:=[^\s,]+)?(?:;[^\s,]+(?:=[^\s,]+)?)*)/gi;
+    const cookieMatches = rawContext.match(cookiePattern);
+    if (cookieMatches) {
+      authCookies = cookieMatches.map(m => m.replace(/^cookie:/i, '')).join(';');
+      userContext = rawContext.replace(cookiePattern, '').replace(/,\s*,/g, ',').replace(/^\s*,|,\s*$/g, '').trim() || null;
+      console.log(`🍪 [testrun] Auth cookies detected in context`);
+    }
+  }
 
   // 1. Look up staging URL + test credentials: command flag > client settings > env var
   let baseUrl = envUrl || null;
@@ -2564,7 +2577,8 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
     baseUrl,
     installationId,
     userContext,
-    testCredentials
+    testCredentials,
+    authCookies
   }).catch(err => {
     console.error(`❌ [testrun] Execution failed for ${repoFullName}#${prNumber}:`, err.message);
     postComment(repoFullName, prNumber,

@@ -231,7 +231,7 @@ Return JSON:
 // ─── Main entry point ───────────────────────────────────────────────────────
 
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
-  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null } = options;
+  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null, authCookies = null } = options;
 
   const executionId = uuidv4();
   const resultsDir = path.join(__dirname, '..', '..', 'test-results', executionId);
@@ -301,9 +301,46 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
     console.log(`📋 Agent context provided (${contextParts.length} part${contextParts.length > 1 ? 's' : ''})`);
   }
 
-  // Pre-login with deterministic Playwright (fast, free, reliable)
+  // Auth: cookie injection OR deterministic login
   let isLoggedIn = false;
-  if (testCredentials && testCredentials.email) {
+  let usingCookieAuth = false;
+
+  if (authCookies) {
+    try {
+      console.log(`🍪 Injecting auth cookies...`);
+      const parsedUrl = new URL(baseUrl);
+      const domain = parsedUrl.hostname;
+      const cookiePairs = authCookies.split(';').map(c => c.trim()).filter(Boolean);
+      const playwrightCookies = cookiePairs.map(pair => {
+        const eqIdx = pair.indexOf('=');
+        const name = pair.substring(0, eqIdx).trim();
+        const value = pair.substring(eqIdx + 1).trim();
+        return { name, value, domain, path: '/' };
+      });
+
+      await stagehand.context.addCookies(playwrightCookies);
+      console.log(`🍪 Injected ${playwrightCookies.length} cookie(s) for ${domain}`);
+      usingCookieAuth = true;
+      isLoggedIn = true;
+
+      // Verify cookies work by loading the app
+      await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+      const pageText = await page.evaluate(() => document.body.innerText).catch(() => '');
+      const landsOnLogin = /\b(log\s*in|sign\s*in)\b/i.test(pageText) && /\b(password|email)\b/i.test(pageText);
+      if (landsOnLogin) {
+        console.warn(`⚠️ Auth cookies appear expired — landed on login page`);
+        isLoggedIn = false;
+        usingCookieAuth = false;
+      } else {
+        console.log(`✅ Cookie auth verified — app loaded successfully`);
+      }
+    } catch (err) {
+      console.warn(`⚠️ Cookie injection failed: ${err.message}`);
+    }
+  }
+
+  if (!isLoggedIn && testCredentials && testCredentials.email) {
     try {
       console.log(`🔐 Attempting pre-login with ${testCredentials.email}...`);
       await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
@@ -394,8 +431,8 @@ Rules:
         await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
         await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 
-        // Re-login if session expired
-        if (isLoggedIn && testCredentials) {
+        // Re-login if session expired (only for password-based auth, not cookie auth)
+        if (isLoggedIn && !usingCookieAuth && testCredentials) {
           const pageText = await page.evaluate(() => document.body.innerText).catch(() => '');
           const looksLikeLogin = /\b(log\s*in|sign\s*in|password)\b/i.test(pageText) &&
             /\b(email|username)\b/i.test(pageText);

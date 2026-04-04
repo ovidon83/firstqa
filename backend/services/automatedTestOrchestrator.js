@@ -10,7 +10,7 @@ const { generateTestReportComment } = require('./testReportFormatter');
 const { uploadScreenshotToGitHub } = require('./screenshotService');
 
 async function executeAutomatedTests(params) {
-  const { owner, repo, prNumber, sha, testRecipe, baseUrl, installationId, userContext, testCredentials } = params;
+  const { owner, repo, prNumber, sha, testRecipe, baseUrl, installationId, userContext, testCredentials, authCookies } = params;
 
   console.log(`\n${'='.repeat(60)}`);
   console.log(`🚀 Starting Automated Test Execution`);
@@ -52,7 +52,8 @@ async function executeAutomatedTests(params) {
       takeScreenshots: true,
       timeout: 60000,
       userContext,
-      testCredentials
+      testCredentials,
+      authCookies
     });
 
     console.log(`\n✅ Test execution completed`);
