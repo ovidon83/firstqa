@@ -201,7 +201,7 @@ Return JSON:
     const anthropic = getAnthropic();
     if (anthropic) {
       const response = await anthropic.messages.create({
-        model: 'claude-3-5-haiku-20241022',
+        model: 'claude-haiku-4-5-20251015',
         max_tokens: 500,
         system: 'You are a QA engineer verifying browser test results. Return only valid JSON, no markdown fences.',
         messages: [{ role: 'user', content: prompt }],
@@ -253,6 +253,11 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
     stagehand = new Stagehand({
       env: useBrowserbase ? 'BROWSERBASE' : 'LOCAL',
       enableCaching: true,
+      ...(useBrowserbase ? {
+        browserbaseSessionCreateParams: {
+          timeout: 900,
+        }
+      } : {}),
     });
     await stagehand.init();
   } catch (initErr) {
@@ -496,12 +501,37 @@ Rules:
         console.log(`   ❌ ERROR: ${error.message}`);
       }
 
-      const isQuotaError = (scenarioResult.error || '').includes('exceeded your current quota') ||
-        (scenarioResult.error || '').includes('429');
+      const errorMsg = scenarioResult.error || '';
+      const isQuotaError = errorMsg.includes('exceeded your current quota') || errorMsg.includes('429');
+      const isSessionDead = errorMsg.includes('awaitActivePage') || errorMsg.includes('CDP transport closed') ||
+        errorMsg.includes('Target closed') || errorMsg.includes('Session closed');
+
       if (isQuotaError) {
         consecutiveQuotaErrors++;
       } else if (scenarioResult.status === 'PASS' || scenarioResult.status === 'PARTIAL') {
         consecutiveQuotaErrors = 0;
+      }
+
+      if (isSessionDead) {
+        console.log(`\n⛔ Browser session died — aborting remaining tests.`);
+        for (let j = i + 1; j < testRecipe.length; j++) {
+          results.scenarios.push({
+            scenario: testRecipe[j].scenario,
+            priority: testRecipe[j].priority || 'Unknown',
+            status: 'SKIPPED',
+            duration: 0,
+            error: 'Browser session closed unexpectedly',
+            steps: testRecipe[j].steps,
+            expected: testRecipe[j].expected,
+            actualResult: null,
+            screenshotPath: null,
+            actionLog: [],
+            consoleLogs: [],
+            networkErrors: []
+          });
+          results.skipped++;
+        }
+        break;
       }
 
       try { page.removeListener('console', consoleHandler); } catch (_) {}

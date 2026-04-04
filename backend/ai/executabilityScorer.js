@@ -53,7 +53,7 @@ async function scoreExecutability(testRecipe) {
     const anthropic = getAnthropic();
     if (anthropic) {
       const response = await anthropic.messages.create({
-        model: 'claude-3-5-haiku-20241022',
+        model: 'claude-haiku-4-5-20251015',
         max_tokens: 2000,
         system: SYSTEM_PROMPT + '\n\nReturn ONLY valid JSON, no markdown fences.',
         messages: [{ role: 'user', content: scenarioList }],
