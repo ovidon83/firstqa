@@ -1,149 +1,38 @@
 /**
- * AI-Powered Test Executor
- * Uses Browserbase cloud browsers + accessibility-tree agent loop.
- * Each test step is resolved at runtime via the a11y tree, not pre-generated CSS selectors.
+ * AI-Powered Test Executor — Stagehand Agent Mode
+ * Uses Browserbase cloud browsers + Stagehand's autonomous agent for intelligent
+ * browser automation. The agent navigates, adapts to unexpected UI states, and
+ * figures out intermediate steps on its own.
  */
 
-const { chromium } = require('playwright-core');
-const Browserbase = require('@browserbasehq/sdk').default;
+const { Stagehand } = require('@browserbasehq/stagehand');
 const OpenAI = require('openai');
 const fs = require('fs').promises;
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai;
+function getOpenAI() {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
-const MAX_AGENT_STEPS = 10;
+const MAX_AGENT_STEPS = 25;
 const ACTION_TIMEOUT = 10000;
-const SCENARIO_TIMEOUT = 60000;
-const MAX_REPEAT_ACTIONS = 2;
-
-// ─── Accessibility tree helpers ──────────────────────────────────────────────
-
-async function getA11ySnapshot(page) {
-  if (page.accessibility) {
-    try {
-      const snapshot = await page.accessibility.snapshot();
-      if (snapshot) return snapshot;
-    } catch (_) { /* fall through */ }
-  }
-
-  try {
-    const client = await page.context().newCDPSession(page);
-    const { nodes } = await client.send('Accessibility.getFullAXTree');
-    await client.detach().catch(() => {});
-    if (nodes && nodes.length > 0) return buildTreeFromCDP(nodes);
-  } catch (_) { /* fall through */ }
-
-  return await extractA11yFromDOM(page);
-}
-
-function buildTreeFromCDP(nodes) {
-  const nodeMap = new Map();
-  for (const node of nodes) {
-    nodeMap.set(node.nodeId, {
-      role: node.role?.value || 'unknown',
-      name: node.name?.value || '',
-      value: node.value?.value || undefined,
-      checked: node.properties?.find(p => p.name === 'checked')?.value?.value,
-      disabled: node.properties?.find(p => p.name === 'disabled')?.value?.value,
-      expanded: node.properties?.find(p => p.name === 'expanded')?.value?.value,
-      children: []
-    });
-  }
-
-  for (const node of nodes) {
-    if (node.childIds) {
-      const parent = nodeMap.get(node.nodeId);
-      for (const childId of node.childIds) {
-        const child = nodeMap.get(childId);
-        if (child) parent.children.push(child);
-      }
-    }
-  }
-
-  return nodeMap.get(nodes[0].nodeId) || null;
-}
-
-async function extractA11yFromDOM(page) {
-  return page.evaluate(() => {
-    const interactiveRoles = new Set(['button', 'link', 'textbox', 'checkbox', 'radio', 'combobox', 'menuitem', 'tab', 'switch', 'slider']);
-    const interactiveTags = new Set(['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'DETAILS', 'SUMMARY']);
-
-    function walk(el, depth) {
-      if (depth > 6 || !el || el.nodeType !== 1) return null;
-      const role = el.getAttribute('role') || tagToRole(el);
-      const name = el.getAttribute('aria-label') || el.getAttribute('title') || el.getAttribute('placeholder') || el.innerText?.trim().substring(0, 60) || '';
-      const isInteractive = interactiveRoles.has(role) || interactiveTags.has(el.tagName);
-      const children = [];
-      for (const child of el.children) {
-        const c = walk(child, depth + 1);
-        if (c) children.push(c);
-      }
-      if (!isInteractive && children.length === 0 && !name) return null;
-      return { role, name: name.substring(0, 80), children: children.length > 0 ? children : undefined };
-    }
-
-    function tagToRole(el) {
-      const map = { A: 'link', BUTTON: 'button', INPUT: inputRole(el), SELECT: 'combobox', TEXTAREA: 'textbox', H1: 'heading', H2: 'heading', H3: 'heading', NAV: 'navigation', MAIN: 'main', FORM: 'form', IMG: 'img' };
-      return map[el.tagName] || 'generic';
-    }
-
-    function inputRole(el) {
-      const t = (el.getAttribute('type') || 'text').toLowerCase();
-      if (t === 'checkbox') return 'checkbox';
-      if (t === 'radio') return 'radio';
-      if (t === 'submit' || t === 'button') return 'button';
-      return 'textbox';
-    }
-
-    return walk(document.body, 0) || { role: 'document', name: document.title, children: [] };
-  });
-}
-
-function flattenA11yTree(node, depth = 0) {
-  if (!node) return '';
-  const indent = '  '.repeat(depth);
-  const parts = [];
-
-  const dominated = ['generic', 'none', 'presentation'];
-  const dominated_skip = !node.name && dominated.includes(node.role);
-
-  if (!dominated_skip) {
-    let line = `${indent}[${node.role}]`;
-    if (node.name) line += ` "${node.name}"`;
-    if (node.value) line += ` value="${node.value}"`;
-    if (node.checked !== undefined) line += ` checked=${node.checked}`;
-    if (node.selected !== undefined) line += ` selected=${node.selected}`;
-    if (node.disabled) line += ` disabled`;
-    if (node.expanded !== undefined) line += ` expanded=${node.expanded}`;
-    parts.push(line);
-  }
-
-  if (node.children) {
-    for (const child of node.children) {
-      parts.push(flattenA11yTree(child, dominated_skip ? depth : depth + 1));
-    }
-  }
-
-  return parts.filter(Boolean).join('\n');
-}
+const SCENARIO_TIMEOUT = 90000;
 
 // ─── Start URL resolution (deterministic, no AI call) ───────────────────────
 
-const ROUTE_KEYWORDS = ['hire', 'login', 'signin', 'signup', 'register', 'contact', 'dashboard', 'settings', 'profile', 'pricing', 'checkout', 'cart', 'search', 'about', 'faq', 'help', 'billing', 'onboarding', 'invite'];
+const ROUTE_KEYWORDS = ['hire', 'login', 'signin', 'signup', 'register', 'contact', 'dashboard', 'settings', 'profile', 'pricing', 'checkout', 'cart', 'search', 'about', 'faq', 'help', 'billing', 'onboarding', 'invite', 'drafts', 'analytics', 'admin', 'home'];
 
 function extractPathFromScenario(scenario) {
   const text = `${scenario.scenario} ${scenario.steps} ${scenario.expected}`;
 
-  // 1. Strip full URLs (https://...) so embedded domains don't pollute path detection
   const cleanText = text.replace(/https?:\/\/[^\s'"]+/g, '');
 
-  // 2. Explicit URL path in cleaned text (e.g. "Navigate to /hire page")
-  const pathMatch = cleanText.match(/\/([a-z][a-z0-9-]*)/i);
+  const pathMatch = cleanText.match(/\/([a-z][a-z0-9-/]*)/i);
   if (pathMatch) return `/${pathMatch[1].toLowerCase()}`;
 
-  // 3. Route keyword in scenario name
   const name = scenario.scenario.toLowerCase();
   for (const kw of ROUTE_KEYWORDS) {
     if (name.includes(kw)) return `/${kw}`;
@@ -152,10 +41,6 @@ function extractPathFromScenario(scenario) {
   return null;
 }
 
-/**
- * Resolve start URLs for all scenarios. Scenarios with no detected path
- * inherit the most common path from the batch (majority vote).
- */
 function resolveStartUrls(testRecipe, baseUrl) {
   const paths = testRecipe.map(s => extractPathFromScenario(s));
 
@@ -169,257 +54,126 @@ function resolveStartUrls(testRecipe, baseUrl) {
   });
 }
 
-// ─── Agent action decision ──────────────────────────────────────────────────
+// ─── Auto-login helper (deterministic Playwright — no AI calls) ─────────────
 
-async function decideNextAction(a11yText, currentStep, expectedResult, pageUrl, stepIndex, totalSteps, scenarioName, agentContext = null) {
-  let systemPrompt = `You are a browser automation agent. You see the accessibility tree of a web page and must perform one action at a time to complete a test step.
+async function attemptAutoLogin(page, credentials, baseUrl) {
+  const pageText = await page.evaluate(() => document.body.innerText).catch(() => '');
 
-Return ONLY a JSON object with one action:
-{
-  "action": "click" | "fill" | "clear" | "select" | "navigate" | "scroll" | "press" | "done",
-  "role": "button" | "link" | "textbox" | "combobox" | "checkbox" | ...,
-  "name": "exact accessible name from the tree",
-  "value": "text to type or option to select (for fill/select/press)",
-  "url": "relative or absolute URL (for navigate only)",
-  "reasoning": "one sentence explaining why"
-}
+  const hasLoginForm = /\b(log\s*in|sign\s*in|password)\b/i.test(pageText) &&
+    /\b(email|username)\b/i.test(pageText);
 
-Rules:
-- Use "done" when the current step's actions are complete and you should move to the next step.
-- For "fill", set role+name to identify the input, and value to the text.
-- For "clear", set role+name to identify the input — this empties the field completely.
-- If a step says "leave field empty", "clear the field", or implies a field should be blank, use "clear" first if the field has a value, then "done".
-- For "select" (dropdowns), set role to "combobox", name to identify it, value to the option text.
-- For "press", set value to the key name (e.g. "Enter", "Tab").
-- For "navigate", only set url. Use relative paths.
-- Match names EXACTLY as they appear in the tree (case-sensitive).
-- NEVER repeat the same failed action. If an action didn't work, try a different approach or use "done".
-- Be efficient: one action per call when possible.
-- If a step says "Log in" or "Log in with test credentials", use the credentials from the environment context to fill the email and password fields, then submit.
-- If the expected elements are not on the page, check if you're on a login or landing page first — you may need to log in before proceeding.`;
-
-  if (agentContext) {
-    systemPrompt += `\n\nEnvironment context provided by the user:\n${agentContext}`;
+  if (!hasLoginForm) {
+    const loginLink = page.getByRole('link', { name: /log\s*in|sign\s*in/i }).first();
+    if (await loginLink.isVisible({ timeout: 2000 }).catch(() => false)) {
+      console.log(`   🔐 Clicking login link on landing page...`);
+      await loginLink.click();
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+      const text2 = await page.evaluate(() => document.body.innerText).catch(() => '');
+      if (!/\b(password)\b/i.test(text2)) return false;
+    } else {
+      return false;
+    }
   }
-
-  const response = await openai.chat.completions.create({
-    model: process.env.OPENAI_MODEL || 'gpt-4o',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      {
-        role: 'user',
-        content: `Scenario: ${scenarioName}
-Current URL: ${pageUrl}
-Step ${stepIndex}/${totalSteps}: ${currentStep}
-Expected result: ${expectedResult}
-
-Accessibility tree:
-${a11yText.substring(0, 8000)}`
-      }
-    ],
-    temperature: 0.1,
-    response_format: { type: 'json_object' }
-  });
-
-  return JSON.parse(response.choices[0].message.content);
-}
-
-// ─── Locator resolution ─────────────────────────────────────────────────────
-
-async function resolveLocator(page, role, name) {
-  let locator = null;
 
   try {
-    const byRole = page.getByRole(role, { name, exact: false });
-    if (await byRole.first().isVisible({ timeout: 800 }).catch(() => false)) {
-      locator = byRole.first();
+    const emailField =
+      page.getByLabel(/email/i).first() ||
+      page.getByPlaceholder(/email/i).first() ||
+      page.locator('input[type="email"]').first();
+
+    if (await emailField.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await emailField.clear();
+      await emailField.fill(credentials.email);
+      console.log(`   📧 Filled email: ${credentials.email}`);
+    } else {
+      console.log(`   ⚠️ Could not find email field`);
+      return false;
     }
-  } catch (_) { /* fall through */ }
 
-  if (!locator && name) {
-    try {
-      const byLabel = page.getByLabel(name, { exact: false });
-      if (await byLabel.first().isVisible({ timeout: 800 }).catch(() => false)) {
-        locator = byLabel.first();
-      }
-    } catch (_) { /* fall through */ }
-  }
+    const passwordField =
+      page.getByLabel(/password/i).first() ||
+      page.locator('input[type="password"]').first();
 
-  if (!locator && name) {
-    try {
-      const byPlaceholder = page.getByPlaceholder(name, { exact: false });
-      if (await byPlaceholder.first().isVisible({ timeout: 800 }).catch(() => false)) {
-        locator = byPlaceholder.first();
-      }
-    } catch (_) { /* fall through */ }
-  }
-
-  if (!locator && (role === 'button' || role === 'link')) {
-    try {
-      const byText = page.getByText(name, { exact: false });
-      if (await byText.first().isVisible({ timeout: 800 }).catch(() => false)) {
-        locator = byText.first();
-      }
-    } catch (_) { /* fall through */ }
-  }
-
-  if (!locator) {
-    locator = page.getByRole(role, { name, exact: false }).first();
-  }
-
-  await locator.scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {});
-
-  return locator;
-}
-
-// ─── Action execution ───────────────────────────────────────────────────────
-
-async function executeAgentAction(page, action, baseUrl) {
-  const { action: type, role, name, value, url } = action;
-
-  switch (type) {
-    case 'navigate': {
-      const target = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-      await page.goto(target, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT });
-      break;
+    if (await passwordField.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await passwordField.clear();
+      await passwordField.fill(credentials.password);
+      console.log(`   🔑 Filled password`);
+    } else {
+      console.log(`   ⚠️ Could not find password field`);
+      return false;
     }
-    case 'click': {
-      const locator = await resolveLocator(page, role, name);
-      await locator.click({ timeout: ACTION_TIMEOUT });
-      break;
-    }
-    case 'fill': {
-      const locator = await resolveLocator(page, role || 'textbox', name);
-      await locator.fill(value || '', { timeout: ACTION_TIMEOUT });
-      break;
-    }
-    case 'clear': {
-      const locator = await resolveLocator(page, role || 'textbox', name);
-      await locator.fill('', { timeout: ACTION_TIMEOUT });
-      break;
-    }
-    case 'select': {
-      const locator = await resolveLocator(page, role || 'combobox', name);
-      await locator.selectOption({ label: value }, { timeout: ACTION_TIMEOUT });
-      break;
-    }
-    case 'scroll': {
-      if (role && name) {
-        const locator = await resolveLocator(page, role, name);
-        await locator.scrollIntoViewIfNeeded({ timeout: ACTION_TIMEOUT });
-      } else {
-        await page.evaluate(() => window.scrollBy(0, 400));
-      }
-      break;
-    }
-    case 'press': {
-      await page.keyboard.press(value || 'Enter');
-      break;
-    }
-    case 'done':
-      break;
-    default:
-      console.warn(`      ⚠️ Unknown agent action: ${type}`);
-  }
-}
 
-// ─── Scenario agent loop ────────────────────────────────────────────────────
+    const submitSelectors = [
+      page.getByRole('button', { name: /^(continue|sign\s*in|log\s*in|submit|enter)$/i }).first(),
+      page.locator('button[type="submit"]').first(),
+      page.locator('form button:not([data-provider])').last()
+    ];
 
-async function runScenarioAgent(page, scenario, baseUrl, agentContext = null) {
-  const stepsRaw = scenario.steps || '';
-  const individualSteps = stepsRaw
-    .split(/\d+\.\s+/)
-    .map(s => s.trim())
-    .filter(Boolean);
-
-  if (individualSteps.length === 0) {
-    individualSteps.push(stepsRaw);
-  }
-
-  const actionLog = [];
-  const scenarioDeadline = Date.now() + SCENARIO_TIMEOUT;
-
-  for (let si = 0; si < individualSteps.length; si++) {
-    const step = individualSteps[si];
-    let attempts = 0;
-    let lastActionKey = null;
-    let repeatCount = 0;
-
-    while (attempts < MAX_AGENT_STEPS) {
-      if (Date.now() > scenarioDeadline) {
-        actionLog.push(`Scenario timed out after ${SCENARIO_TIMEOUT / 1000}s`);
-        console.log(`      ⏱️ Scenario timed out`);
-        return actionLog;
-      }
-
-      attempts++;
-
-      await page.waitForLoadState('domcontentloaded').catch(() => {});
-
-      const a11ySnapshot = await getA11ySnapshot(page);
-      const a11yText = flattenA11yTree(a11ySnapshot);
-
-      const decision = await decideNextAction(
-        a11yText, step, scenario.expected,
-        page.url(), si + 1, individualSteps.length,
-        scenario.scenario, agentContext
-      );
-
-      const logEntry = `Step ${si + 1}.${attempts}: ${decision.action} ${decision.role || ''} "${decision.name || ''}" ${decision.value || ''} — ${decision.reasoning || ''}`;
-      actionLog.push(logEntry);
-      console.log(`      → ${logEntry}`);
-
-      if (decision.action === 'done') break;
-
-      const actionKey = `${decision.action}:${decision.role || ''}:${decision.name || ''}:${decision.url || ''}`;
-      if (actionKey === lastActionKey) {
-        repeatCount++;
-        if (repeatCount >= MAX_REPEAT_ACTIONS) {
-          actionLog.push(`Loop detected: "${decision.action}" repeated ${MAX_REPEAT_ACTIONS} times, moving on`);
-          console.log(`      🔄 Loop detected, breaking`);
+    let clicked = false;
+    for (const btn of submitSelectors) {
+      try {
+        if (await btn.isVisible({ timeout: 1000 }).catch(() => false)) {
+          const btnText = await btn.textContent().catch(() => '');
+          if (/google|github|facebook|apple|microsoft|twitter|sso/i.test(btnText)) continue;
+          await btn.click();
+          console.log(`   🔘 Clicked submit: "${btnText.trim()}"`);
+          clicked = true;
           break;
         }
-      } else {
-        repeatCount = 0;
-      }
-      lastActionKey = actionKey;
-
-      try {
-        await executeAgentAction(page, decision, baseUrl);
-      } catch (actionError) {
-        actionLog.push(`Action failed: ${actionError.message}`);
-        console.log(`      ❌ Action failed: ${actionError.message}`);
-        break;
-      }
-
-      await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+      } catch (_) { continue; }
     }
+
+    if (!clicked) {
+      await passwordField.press('Enter');
+      console.log(`   ⏎ Pressed Enter to submit`);
+    }
+  } catch (err) {
+    console.warn(`   ⚠️ Login form interaction failed: ${err.message}`);
+    return false;
   }
 
-  return actionLog;
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+
+  const postText = await page.evaluate(() => document.body.innerText).catch(() => '');
+  const stillOnLogin = /\b(sign\s*in|log\s*in)\b/i.test(postText) &&
+    /\b(password)\b/i.test(postText);
+
+  return !stillOnLogin;
 }
 
-// ─── Verification ───────────────────────────────────────────────────────────
+// ─── Scenario instruction builder ───────────────────────────────────────────
+
+function buildScenarioInstruction(scenario, agentContext) {
+  let instruction = `Execute this test scenario: "${scenario.scenario}"\n\n`;
+  instruction += `Steps (use as guidance — adapt if the page requires different navigation or intermediate actions):\n${scenario.steps}\n\n`;
+  instruction += `Expected result to verify:\n${scenario.expected}\n\n`;
+  instruction += `After completing all steps, stay on the final page so we can verify the results.\n`;
+
+  if (agentContext) {
+    instruction += `\nContext:\n${agentContext}\n`;
+  }
+
+  return instruction;
+}
+
+// ─── Verification (separate AI call for structured pass/fail) ───────────────
 
 async function verifyExpectedResult(page, expectedResult, manualSteps) {
   try {
-    const a11ySnapshot = await getA11ySnapshot(page);
-    const a11yText = flattenA11yTree(a11ySnapshot);
     const visibleText = await page.evaluate(() => document.body.innerText).catch(() => '');
+    const pageUrl = page.url();
+    const pageTitle = await page.title().catch(() => 'unknown');
 
     const prompt = `You are verifying a browser test result.
 
 Expected Result:
 ${expectedResult}
 
-Current page URL: ${page.url()}
-Page title: ${await page.title().catch(() => 'unknown')}
-
-Accessibility tree (truncated):
-${a11yText.substring(0, 4000)}
+Current page URL: ${pageUrl}
+Page title: ${pageTitle}
 
 Visible text (truncated):
-${visibleText.substring(0, 2000)}
+${visibleText.substring(0, 3000)}
 
 ${manualSteps ? `Note: These aspects CANNOT be verified in the browser and should be ignored for pass/fail: ${manualSteps}` : ''}
 
@@ -434,8 +188,8 @@ Return JSON:
   "unverifiable": "aspects that need manual checking (empty string if none)"
 }`;
 
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o',
+    const response = await getOpenAI().chat.completions.create({
+      model: process.env.VERIFICATION_MODEL || 'gpt-4o-mini',
       messages: [
         { role: 'system', content: 'You are a QA engineer verifying browser test results. Return only valid JSON.' },
         { role: 'user', content: prompt }
@@ -451,107 +205,6 @@ Return JSON:
   }
 }
 
-// ─── Auto-login helper ──────────────────────────────────────────────────────
-
-async function attemptAutoLogin(page, credentials, baseUrl) {
-  const snapshot = await getA11ySnapshot(page);
-  const a11yText = flattenA11yTree(snapshot);
-
-  const hasLoginForm = /\b(log\s*in|sign\s*in|password)\b/i.test(a11yText) &&
-    /\b(email|username)\b/i.test(a11yText);
-
-  if (!hasLoginForm) {
-    // Maybe there's a "Log In" / "Sign In" link on a landing page — click it first
-    const loginLink = page.getByRole('link', { name: /log\s*in|sign\s*in/i }).first();
-    if (await loginLink.isVisible({ timeout: 2000 }).catch(() => false)) {
-      console.log(`   🔐 Clicking login link on landing page...`);
-      await loginLink.click();
-      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-      // Re-check for login form
-      const snap2 = await getA11ySnapshot(page);
-      const a11y2 = flattenA11yTree(snap2);
-      if (!/\b(password)\b/i.test(a11y2)) return false;
-    } else {
-      return false;
-    }
-  }
-
-  // Use direct Playwright locators — never click OAuth/SSO buttons
-  try {
-    // Find and fill email field (try multiple locator strategies)
-    const emailField =
-      page.getByLabel(/email/i).first() ||
-      page.getByPlaceholder(/email/i).first() ||
-      page.locator('input[type="email"]').first();
-
-    if (await emailField.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await emailField.clear();
-      await emailField.fill(credentials.email);
-      console.log(`   📧 Filled email: ${credentials.email}`);
-    } else {
-      console.log(`   ⚠️ Could not find email field`);
-      return false;
-    }
-
-    // Find and fill password field
-    const passwordField =
-      page.getByLabel(/password/i).first() ||
-      page.locator('input[type="password"]').first();
-
-    if (await passwordField.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await passwordField.clear();
-      await passwordField.fill(credentials.password);
-      console.log(`   🔑 Filled password`);
-    } else {
-      console.log(`   ⚠️ Could not find password field`);
-      return false;
-    }
-
-    // Click submit button — avoid OAuth buttons (Google, GitHub, etc.)
-    // Look for submit-type buttons that are NOT OAuth
-    const submitSelectors = [
-      page.getByRole('button', { name: /^(continue|sign\s*in|log\s*in|submit|enter)$/i }).first(),
-      page.locator('button[type="submit"]').first(),
-      page.locator('form button:not([data-provider])').last()
-    ];
-
-    let clicked = false;
-    for (const btn of submitSelectors) {
-      try {
-        if (await btn.isVisible({ timeout: 1000 }).catch(() => false)) {
-          const btnText = await btn.textContent().catch(() => '');
-          // Skip OAuth buttons
-          if (/google|github|facebook|apple|microsoft|twitter|sso/i.test(btnText)) continue;
-          await btn.click();
-          console.log(`   🔘 Clicked submit: "${btnText.trim()}"`);
-          clicked = true;
-          break;
-        }
-      } catch (_) { continue; }
-    }
-
-    if (!clicked) {
-      // Fallback: press Enter in the password field
-      await passwordField.press('Enter');
-      console.log(`   ⏎ Pressed Enter to submit`);
-    }
-  } catch (err) {
-    console.warn(`   ⚠️ Login form interaction failed: ${err.message}`);
-    return false;
-  }
-
-  // Wait for navigation after login submit
-  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
-
-  // Check if we're still on a login page
-  const postSnapshot = await getA11ySnapshot(page);
-  const postA11y = flattenA11yTree(postSnapshot);
-  const stillOnLogin = /\b(sign\s*in|log\s*in)\b/i.test(postA11y) &&
-    /\b(password)\b/i.test(postA11y);
-
-  return !stillOnLogin;
-}
-
 // ─── Main entry point ───────────────────────────────────────────────────────
 
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
@@ -561,34 +214,37 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   const resultsDir = path.join(__dirname, '..', '..', 'test-results', executionId);
   await fs.mkdir(resultsDir, { recursive: true });
 
-  console.log(`🎬 Starting test execution: ${executionId}`);
+  console.log(`🎬 Starting test execution (Stagehand Agent): ${executionId}`);
   console.log(`📍 Base URL: ${baseUrl}`);
   console.log(`📋 Test scenarios: ${testRecipe.length}`);
 
-  // Resolve start URLs for all scenarios up front (deterministic, no AI)
   const startUrls = resolveStartUrls(testRecipe, baseUrl);
   console.log(`🧭 Start URLs: ${startUrls.map((u, i) => `\n   ${i + 1}. ${u}`).join('')}`);
 
-  let browser, session, sessionId;
   const useBrowserbase = !!(process.env.BROWSERBASE_API_KEY && process.env.BROWSERBASE_PROJECT_ID);
+  const agentModel = process.env.TEST_EXECUTION_MODEL || 'openai/gpt-4o-mini';
 
-  if (useBrowserbase) {
-    const bb = new Browserbase({ apiKey: process.env.BROWSERBASE_API_KEY });
-    session = await bb.sessions.create({ projectId: process.env.BROWSERBASE_PROJECT_ID });
-    sessionId = session.id;
-    console.log(`☁️  Browserbase session: ${sessionId}`);
-    browser = await chromium.connectOverCDP(session.connectUrl);
-  } else {
-    console.log('⚠️  No BROWSERBASE_API_KEY — falling back to local Chromium');
-    browser = await chromium.launch({ headless: true, args: ['--disable-web-security'] });
+  let stagehand;
+  try {
+    stagehand = new Stagehand({
+      env: useBrowserbase ? 'BROWSERBASE' : 'LOCAL',
+      enableCaching: true,
+    });
+    await stagehand.init();
+  } catch (initErr) {
+    console.error(`❌ Stagehand init failed: ${initErr.message}`);
+    throw initErr;
   }
 
-  const context = browser.contexts()[0] || await browser.newContext({
-    viewport: { width: 1280, height: 720 },
-    ignoreHTTPSErrors: true
-  });
-  const page = context.pages()[0] || await context.newPage();
-  page.setDefaultTimeout(timeout);
+  const page = stagehand.context.pages()[0];
+  const sessionId = stagehand.browserbaseSessionID;
+
+  if (useBrowserbase) {
+    console.log(`☁️  Browserbase session: ${sessionId || 'unknown'}`);
+  } else {
+    console.log('⚠️  Running locally (no Browserbase)');
+  }
+  console.log(`🤖 Agent model: ${agentModel}`);
 
   const results = {
     executionId,
@@ -608,7 +264,6 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
     resultsDir
   };
 
-  // Build agent context from credentials + inline hints
   let agentContext = null;
   const contextParts = [];
   if (testCredentials && testCredentials.email) {
@@ -622,7 +277,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
     console.log(`📋 Agent context provided (${contextParts.length} part${contextParts.length > 1 ? 's' : ''})`);
   }
 
-  // Pre-login: if credentials are available, attempt login on the first page load
+  // Pre-login with deterministic Playwright (fast, free, reliable)
   let isLoggedIn = false;
   if (testCredentials && testCredentials.email) {
     try {
@@ -640,6 +295,16 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       console.warn(`⚠️ Pre-login failed: ${err.message}`);
     }
   }
+
+  const agentSystemPrompt = `You are a senior QA engineer testing a web application. Your job is to execute test scenarios precisely and intelligently.
+
+Rules:
+- Follow the test steps as guidance, but adapt if the page requires different navigation or intermediate actions.
+- If a step requires you to reach a specific page and you're not there, figure out the navigation path (sidebar, menu, links).
+- If you encounter unexpected modals, popups, or overlays, dismiss or handle them before continuing.
+- If a step mentions clicking something that isn't visible, scroll or look for it in navigation menus.
+- After completing all steps, stay on the final page so we can take a screenshot and verify the results.
+- Do NOT close tabs, navigate away from the result, or reset the page after completing steps.`;
 
   try {
     for (let i = 0; i < testRecipe.length; i++) {
@@ -679,26 +344,45 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
         const startUrl = startUrls[i];
         console.log(`   🧭 Navigating to: ${startUrl}`);
         await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
-        await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 
-        // If we were logged in but got redirected to login (session expired), re-login
+        // Re-login if session expired
         if (isLoggedIn && testCredentials) {
-          const currentUrl = page.url();
-          const a11yCheck = await getA11ySnapshot(page);
-          const a11yText = flattenA11yTree(a11yCheck);
-          const looksLikeLogin = /\b(log\s*in|sign\s*in|password)\b/i.test(a11yText) &&
-            /\b(email|username)\b/i.test(a11yText);
+          const pageText = await page.evaluate(() => document.body.innerText).catch(() => '');
+          const looksLikeLogin = /\b(log\s*in|sign\s*in|password)\b/i.test(pageText) &&
+            /\b(email|username)\b/i.test(pageText);
           if (looksLikeLogin) {
             console.log(`   🔄 Session expired — re-logging in...`);
             await attemptAutoLogin(page, testCredentials, baseUrl);
             await page.goto(startUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
-            await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+            await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
           }
         }
 
-        const actionLog = await runScenarioAgent(page, scenario, baseUrl, agentContext);
-        scenarioResult.actionLog = actionLog;
+        const instruction = buildScenarioInstruction(scenario, agentContext);
 
+        const agent = stagehand.agent({
+          model: agentModel,
+          systemPrompt: agentSystemPrompt,
+        });
+
+        console.log(`   🤖 Agent executing...`);
+        const agentResult = await agent.execute({
+          instruction,
+          maxSteps: MAX_AGENT_STEPS,
+        });
+
+        if (agentResult.actions && agentResult.actions.length > 0) {
+          agentResult.actions.forEach(action => {
+            const logEntry = `[${action.type}] ${action.action || action.reasoning || ''} @ ${action.pageUrl || ''}`;
+            scenarioResult.actionLog.push(logEntry);
+          });
+          console.log(`   📝 Agent took ${agentResult.actions.length} actions`);
+        }
+
+        console.log(`   🤖 Agent: ${agentResult.completed ? 'completed' : 'incomplete'} — ${agentResult.message || 'done'}`);
+
+        // Verify expected result with a separate, cheap AI call
         const verification = await verifyExpectedResult(page, scenario.expected, scenario.manual_steps);
         scenarioResult.actualResult = verification.actualResult;
 
@@ -750,7 +434,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   } catch (error) {
     console.error('❌ Test execution error:', error);
   } finally {
-    await browser.close().catch(() => {});
+    await stagehand.close().catch(() => {});
 
     results.endTime = new Date().toISOString();
     results.duration = new Date(results.endTime) - new Date(results.startTime);
