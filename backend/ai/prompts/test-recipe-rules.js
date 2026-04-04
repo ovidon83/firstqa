@@ -48,7 +48,7 @@ Do not use "UI" for API-only tests or "API" for browser-driven tests.
 
 **TABLE LAYOUT:** Keep Steps and Expected Result cells short so the table aligns well. Use one concise line per step; separate steps with <br>. Avoid long paragraphs inside a single cell; prefer "1. Do X<br>2. Do Y<br>3. Verify Z" over run-on text.
 
-**ROW ORDER:** Always output Test Recipe rows in this order: all Smoke rows first, then all Critical Path rows, then all Regression rows. Do not interleave priorities.
+**ROW ORDER:** Always output Test Recipe rows in this order: all Smoke rows first, then all Critical Path rows, then all Regression rows. Do not interleave priorities. Within each priority group, order scenarios by user journey: access/navigation first (ALWAYS the first Smoke scenario), then view/read, create, edit/update, delete, states, integration.
 
 **FOR UI/FRONTEND CHANGES:** Use exact labels, button text, field names, and URLs from the code. Include selectors in parentheses when available: (data-testid="submit-btn").
 
