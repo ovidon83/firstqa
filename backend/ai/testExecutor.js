@@ -201,7 +201,7 @@ Return JSON:
     const anthropic = getAnthropic();
     if (anthropic) {
       const response = await anthropic.messages.create({
-        model: 'claude-haiku-4-5-20251015',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 500,
         system: 'You are a QA engineer verifying browser test results. Return only valid JSON, no markdown fences.',
         messages: [{ role: 'user', content: prompt }],
@@ -256,6 +256,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       ...(useBrowserbase ? {
         browserbaseSessionCreateParams: {
           timeout: 900,
+          keepAlive: true,
         }
       } : {}),
     });
