@@ -59,7 +59,8 @@ async function scoreExecutability(testRecipe) {
         messages: [{ role: 'user', content: scenarioList }],
         temperature: 0.2
       });
-      const text = response.content?.[0]?.text || '{}';
+      let text = response.content?.[0]?.text || '{}';
+      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
       parsed = JSON.parse(text);
     } else {
       const response = await getOpenAI().chat.completions.create({

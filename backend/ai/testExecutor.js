@@ -207,7 +207,8 @@ Return JSON:
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.2
       });
-      const text = response.content?.[0]?.text || '{}';
+      let text = response.content?.[0]?.text || '{}';
+      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
       return JSON.parse(text);
     }
 
@@ -255,6 +256,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       enableCaching: true,
       ...(useBrowserbase ? {
         browserbaseSessionCreateParams: {
+          timeout: 1800,
           keepAlive: true,
         }
       } : {}),
