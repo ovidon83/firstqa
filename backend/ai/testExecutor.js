@@ -246,7 +246,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   console.log(`🧭 Start URLs: ${startUrls.map((u, i) => `\n   ${i + 1}. ${u}`).join('')}`);
 
   const useBrowserbase = !!(process.env.BROWSERBASE_API_KEY && process.env.BROWSERBASE_PROJECT_ID);
-  const agentModel = process.env.TEST_EXECUTION_MODEL || 'openai/gpt-4.1-mini';
+  const agentModel = process.env.TEST_EXECUTION_MODEL || 'anthropic/claude-haiku-4-5-20251001';
 
   let stagehand;
   try {
