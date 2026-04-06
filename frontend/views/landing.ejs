@@ -3,437 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirstQA - Your AI QA Engineer</title>
-    <meta name="description" content="Meet Ovi, your AI QA Engineer. Reviews requirements, analyzes PRs, tests on staging, files bugs, automates regressions, and gives go/no-go on releases. The full QA role, powered by AI.">
-    
+    <title>FirstQA — Meet Ovi, Your AI QA Engineer</title>
+    <meta name="description" content="Ovi is your AI QA Engineer. Analyzes PRs and tickets, runs browser tests, generates Playwright code, and catches bugs before your users do.">
     <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<!-- Join Waitlist Modal -->
+<!-- Waitlist Modal -->
 <div class="modal-overlay" id="ea-modal">
     <div class="modal-card">
         <button class="modal-close" id="modal-close">&times;</button>
-        <h2>Join Waitlist</h2>
-        <p>Give your team a QA engineer today. Waitlist teams get founder-direct support and help shape Ovi&rsquo;s roadmap.</p>
-        <form class="ea-form" id="subscribe-form" action="/subscribe" method="POST">
-            <div class="ea-input-group">
-                <input type="email" name="email" placeholder="you@company.com" required>
-                <button type="submit" class="btn-submit">
-                    <span>Join Waitlist</span>
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-            <p class="ea-message" id="subscribe-message"></p>
+        <h2>Join the Waitlist</h2>
+        <p>Get early access to Ovi. Waitlist teams get founder-direct support and help shape the roadmap.</p>
+        <form class="modal-form" id="subscribe-form">
+            <input type="email" name="email" placeholder="you@company.com" required>
+            <button type="submit"><span>Join Waitlist</span><i class="fas fa-arrow-right"></i></button>
         </form>
-        <p class="ea-demo-link"><a href="https://calendly.com/firstqa/demo" target="_blank" rel="noopener">Talk to founder</a> &mdash; book a call</p>
+        <p class="modal-msg" id="subscribe-message"></p>
+        <p class="modal-sub"><a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank">Talk to founder</a> — book a call</p>
     </div>
 </div>
 
-<!-- Navigation -->
+<!-- Nav -->
 <nav class="navbar">
     <div class="container">
         <a href="/" class="logo">
-            <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="logoGradNav" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                <circle cx="16" cy="16" r="14" fill="url(#logoGradNav)"/>
-                <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
+            <svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#059669"/></linearGradient></defs><circle cx="16" cy="16" r="14" fill="url(#lg)"/><path d="M10 16 L14 20 L22 11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
             <span class="logo-text">FirstQA</span>
         </a>
-        <div class="nav-menu">
-            <a href="#how-it-works" class="nav-link">How It Works</a>
-            <a href="#features" class="nav-link">Features</a>
-            <a href="#how-it-looks" class="nav-link">Ovi in Action</a>
-            <a href="/docs" class="nav-link">Docs</a>
-            <a href="#" class="btn-signup" data-ea-trigger>Join Waitlist</a>
+        <div class="nav-links">
+            <a href="#offering">What We Offer</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#in-action">Features</a>
+            <a href="#" class="btn-nav" data-ea-trigger>Join Waitlist</a>
         </div>
-        <button class="mobile-menu-btn" aria-label="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button class="mobile-menu-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
     </div>
 </nav>
 
-<!-- Hero -->
+<!-- ════════ HERO ════════ -->
 <section class="hero">
-    <div class="hero-bg">
-        <div class="grid-pattern"></div>
-        <div class="glow glow-1"></div>
-        <div class="glow glow-2"></div>
-    </div>
-    <div class="container">
-        <div class="hero-content">
-            <div class="hero-badge">
-                <span class="pulse"></span>
-                Join the Waitlist
-            </div>
-            <h1>
-                Meet <span class="highlight">Ovi</span>, Your<br>
-                AI QA Engineer
-            </h1>
-            <p class="hero-sub">
-                By FirstQA — the QA platform that combines AI QA agents with on-demand human QA.
-            </p>
-            <div class="hero-cta">
-                <a href="#" class="btn-primary" data-ea-trigger>
-                    <span>Join Waitlist</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-                <a href="/discovery-interview" class="btn-launch-partner">
-                    <span class="btn-launch-partner-main">Become a Launch Partner</span>
-                    <span class="btn-launch-partner-tag">3 months free · 50% off for life</span>
+    <div class="hero-glow"></div>
+    <div class="container hero-grid">
+        <div class="hero-left">
+            <div class="hero-badge"><span class="badge-dot"></span> Accepting Launch Partners</div>
+            <h1>Meet <span class="gr">Ovi</span>, Your<br>AI QA Engineer</h1>
+            <p class="hero-sub">Ovi reviews your PRs and tickets, finds bugs, generates test scenarios, runs them in a real browser, and writes Playwright test code. Triggered on-demand or automatically on PR/Ticket.</p>
+            <div class="hero-ctas">
+                <a href="#" class="btn-primary" data-ea-trigger><i class="fas fa-rocket"></i> Join Waitlist</a>
+                <a href="/discovery-interview" class="btn-partner">
+                    <span>Become a Launch Partner</span>
+                    <span class="partner-sub">3 months free &middot; 50% off for life</span>
                 </a>
             </div>
             <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-value" id="ovi-tag-count">182</span>
-                    <span class="stat-label">Times Ovi got tagged in PRs & Tickets</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-value">&lt;2min</span>
-                    <span class="stat-label">Setup Time</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat">
-                    <span class="stat-value">24/7</span>
-                    <span class="stat-label">Always On</span>
-                </div>
+                <div class="hs"><span class="hs-val" id="ovi-tag-count">182</span><span class="hs-lbl">PRs & Tickets Analyzed</span></div>
+                <div class="hs-sep"></div>
+                <div class="hs"><span class="hs-val">&lt;2min</span><span class="hs-lbl">Setup</span></div>
+                <div class="hs-sep"></div>
+                <div class="hs"><span class="hs-val">24/7</span><span class="hs-lbl">Always On</span></div>
             </div>
         </div>
-        <div class="hero-visual">
+        <div class="hero-right">
             <div class="terminal">
-                <div class="terminal-header">
-                    <div class="terminal-dots">
-                        <span></span><span></span><span></span>
-                    </div>
-                    <span class="terminal-title">@ovi</span>
-                </div>
-                <div class="terminal-body">
-                    <div class="terminal-output">
-                        <div class="output-line fade-in-1">
-                            <span class="icon">&#128270;</span> Analyzing requirements &amp; design...
-                        </div>
-                        <div class="output-line fade-in-2">
-                            <span class="icon">&#9888;&#65039;</span> 2 gaps flagged in acceptance criteria
-                        </div>
-                        <div class="output-line fade-in-3">
-                            <span class="icon">&#128203;</span> Generated 8 test cases
-                        </div>
-                        <div class="output-line fade-in-4">
-                            <span class="icon">&#128064;</span> Reviewing PR...
-                        </div>
-                        <div class="output-line fade-in-6">
-                            <span class="icon">&#128221;</span> QA review posted to PR
-                        </div>
-                        <div class="output-line fade-in-4">
-                            <span class="icon">&#129514;</span> Testing on staging...
-                        </div>
-                        <div class="output-line fade-in-5">
-                            <span class="icon">&#9989;</span> 7 passed <span class="warning">&bull; 2 bugs filed</span>
-                        </div>
-                        <div class="output-line fade-in-7">
-                            <span class="icon">&#128640;</span> Release v2.4 &rarr; <span class="go-badge">Go</span>
-                        </div>
-                    </div>
+                <div class="t-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t-title">PR #142 — Add user settings page</span></div>
+                <div class="t-body">
+                    <div class="tl" style="--d:.3s"><span class="ti">💬</span><span class="tc">/qa</span> triggered by @developer</div>
+                    <div class="tl" style="--d:.8s"><span class="ti">🔍</span>Analyzing 12 files, +847 -203</div>
+                    <div class="tl" style="--d:1.3s"><span class="ti">🐛</span><span class="tw">2 bugs found</span> — missing validation, race condition</div>
+                    <div class="tl" style="--d:1.8s"><span class="ti">📋</span>Generated <strong>14 test scenarios</strong></div>
+                    <div class="tl" style="--d:2.3s"><span class="ti">✅</span>QA review posted to PR</div>
+                    <div class="tl" style="--d:3s"><span class="ti">💬</span><span class="tc">/qa testrun</span> -env=staging.app.com</div>
+                    <div class="tl" style="--d:3.5s"><span class="ti">🧪</span>Running 14 scenarios in Chromium...</div>
+                    <div class="tl" style="--d:4.2s"><span class="ti">📊</span><span class="ts">12 passed</span> &middot; <span class="tw">2 failed</span> &middot; Screenshots attached</div>
+                    <div class="tl" style="--d:4.8s"><span class="ti">📝</span>Playwright spec: <strong>settings.spec.ts</strong></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- The Real Problem -->
-<section id="problem" class="why-section">
+<!-- ════════ THE PROBLEM ════════ -->
+<section id="problem" class="problem">
     <div class="container">
-        <div class="section-header">
-            <span class="section-tag">The Real Problem</span>
-            <h2>Every Bug Is a Tax on Your Runway</h2>
-            <p>You have 12&ndash;18 months runway.</p>
-        </div>
-
-        <div class="runway-visual" aria-hidden="true">
-            <div class="runway-bar">
-                <span class="runway-segment runway-build" style="flex: 14;" title="14 months building &amp; iterating"></span>
-                <span class="runway-segment runway-lost" style="flex: 4;" title="4 months lost to bugs"></span>
-            </div>
-            <div class="runway-labels">
-                <span class="runway-label-build">14 mo building</span>
-                <span class="runway-label-lost">4 mo lost to bugs</span>
-            </div>
-            <p class="runway-caption">18 months runway &rarr; 30% engineer time on bugs = 4 months gone</p>
-        </div>
-
-        <div class="runway-math">
-            <p class="runway-math-intro">Let&rsquo;s do the math:</p>
-            <p class="runway-math-statement">If your engineers spend 30% of their time fixing bugs (staging + production) instead of building features or iterating on the product, you just lost <strong class="runway-highlight">4 months of runway</strong> to … rework (not iteration!).</p>
-        </div>
-
-        <div class="why-ovi-job">
-            <p><strong>Bugs aren&rsquo;t just annoying. They&rsquo;re expensive.</strong></p>
-        </div>
-
-        <div class="process-compare">
-            <div class="process-column process-current">
-                <h3>Your Current Process</h3>
-                <ol class="process-steps">
-                    <li>Developer writes code without clarity</li>
-                    <li>Basic Code review(AI + Human) -> LGTM</li>
-                    <li>Code merges, deploys to staging</li>
-                    <li>Some manual testing and bugfix cycles</li>
-                    <li>Ships to production</li>
-                    <li>Users find real bugs</li>
-                    <li>Engineer context-switches to fix it</li>
-                    <li>Repeat forever</li>
-                </ol>
-            </div>
-            <div class="process-column process-ovi">
-                <h3>With Ovi - In seconds</h3>
-                <ol class="process-steps">
-                    <li>Ticket with ACs and designs</li>
-                    <li>Ovi - Ticket Review: gaps, questions, test recipe</li>
-                    <li>Engineer writes code - clarity and support</li>
-                    <li>Ovi - PR Review: Bugs, Risks, Test cases</li>
-                    <li>Developer fixes it before merge</li>
-                    <li>Ovi tests in staging &amp; logs bugs</li>
-                    <li>Short bugfix cycle</li>
-                    <li>Ship clean</li>
-                </ol>
-            </div>
-        </div>
-
-        <div class="section-cta" style="margin-top: 64px;">
-            <a href="#" class="btn-primary" data-ea-trigger>
-                <span>Join Waitlist</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- How It Works -->
-<section id="how-it-works" class="how-it-works">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">Onboard Ovi Like a New Hire</span>
-            <h2>First Hour &mdash; Already Contributing.</h2>
-        </div>
-        
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <h3>Give Ovi Access to your tools</h3>
-                    <p>Ovi learns your codebase, and builds full context on your product. Set up in minutes, not days.</p>
-                    <div class="step-tools">
-                        <span class="tool-badge"><i class="fab fa-github"></i> GitHub</span>
-                        <span class="tool-badge"><svg class="tool-badge-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 100 100" aria-hidden="true"><path d="M1.22541 61.5228c-.2225-.9485.90748-1.5459 1.59638-.857L39.3342 97.1782c.6889.6889.0915 1.8189-.857 1.5964C20.0515 94.4522 5.54779 79.9485 1.22541 61.5228ZM.00189135 46.8891c-.01764375.2833.08887215.5599.28957165.7606L52.3503 99.7085c.2007.2007.4773.3075.7606.2896 2.3692-.1476 4.6938-.46 6.9624-.9259.7645-.157 1.0301-1.0963.4782-1.6481L2.57595 39.4485c-.55186-.5519-1.49117-.2863-1.648174.4782-.465915 2.2686-.77832 4.5932-.92588465 6.9624ZM4.21093 29.7054c-.16649.3738-.08169.8106.20765 1.1l64.77602 64.776c.2894.2894.7262.3742 1.1.2077 1.7861-.7956 3.5171-1.6927 5.1855-2.684.5521-.328.6373-1.0867.1832-1.5407L8.43566 24.3367c-.45409-.4541-1.21271-.3689-1.54074.1832-.99132 1.6684-1.88843 3.3994-2.68399 5.1855ZM12.6587 18.074c-.3701-.3701-.393-.9637-.0443-1.3541C21.7795 6.45931 35.1114 0 49.9519 0 77.5927 0 100 22.4073 100 50.0481c0 14.8405-6.4593 28.1724-16.7199 37.3375-.3903.3487-.984.3258-1.3542-.0443L12.6587 18.074Z"/></svg> Linear</span>
-                        <span class="tool-badge"><i class="fab fa-slack"></i> Slack</span>
-                        <span class="tool-badge"><i class="fab fa-figma"></i> Figma</span>
+        <div class="sh"><h2>Iterate on What Users Want &mdash;<br>Not on What&rsquo;s Broken</h2></div>
+        <div class="problem-card">
+            <div class="problem-top">
+                <div class="runway-viz">
+                    <div class="runway-bar">
+                        <span class="runway-build" style="flex:14"></span>
+                        <span class="runway-lost" style="flex:4"></span>
+                    </div>
+                    <div class="runway-labels">
+                        <span>14 mo building &amp; iterating</span>
+                        <span class="runway-red">4 mo fixing bugs</span>
                     </div>
                 </div>
+                <p class="problem-statement"><strong>12&ndash;18 months</strong> of runway. 30% of engineer time on bugs = <strong class="problem-hl">4 months gone</strong>.</p>
             </div>
-            
-            <div class="step-connector">
-                <svg viewBox="0 0 24 80" fill="none">
-                    <path d="M12 0 L12 80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
-                </svg>
+            <div class="problem-insight">
+                <div class="pi-icon"><i class="fas fa-lightbulb"></i></div>
+                <p>Moving fast is only valuable when you&rsquo;re iterating on <strong>product feedback</strong> &mdash; not on bug reports from frustrated users. Every bug is a cycle stolen from the feature your users actually asked for.</p>
             </div>
-            
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <h3>Tag Ovi When Needed</h3>
-                    <p>Mention @ovi in Slack, tag on Linear issues, or in GitHub pull requests. Ovi lives in your workflow &mdash; one tag away.</p>
+            <div class="problem-compare">
+                <div class="pc-col pc-before">
+                    <h4><i class="fas fa-times-circle"></i> Without QA</h4>
+                    <ul>
+                        <li>Code merges with &ldquo;LGTM&rdquo;</li>
+                        <li>Users find the real bugs</li>
+                        <li>Engineers context-switch to fix</li>
+                        <li>Iteration cycles wasted on rework</li>
+                    </ul>
                 </div>
-            </div>
-            
-            <div class="step-connector">
-                <svg viewBox="0 0 24 80" fill="none">
-                    <path d="M12 0 L12 80" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
-                </svg>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <h3>Ovi Does the QA Work</h3>
-                    <p>Requirements reviewed. PRs analyzed. Staging tested. Bugs filed. Regressions automated. Release decision made. Every single day.</p>
+                <div class="pc-col pc-after">
+                    <h4><i class="fas fa-check-circle"></i> With FirstQA</h4>
+                    <ul>
+                        <li>Bugs caught before merge</li>
+                        <li>Tests run on every PR</li>
+                        <li>Ship clean, iterate on feedback</li>
+                        <li>Engineers stay on what matters</li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-
-        <div class="section-cta">
-            <a href="#" class="btn-primary" data-ea-trigger>
-                <span>Join Waitlist</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- What Ovi Does -->
-<section id="features" class="features">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">The Complete AI-Powered QA Engineer</span>
-            <h2>Everything a QA Engineer Does A-Z.</h2>
-        </div>
-        
-        <div class="pillars-grid">
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fas fa-clipboard-check"></i>
-                </div>
-                <h3>Requirements &amp; Design Review</h3>
-                <p>Flags gaps in requirements and design before development starts. Asks the questions a senior QA would.</p>
-            </div>
-            
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fas fa-list-check"></i>
-                </div>
-                <h3>Test Recipe Creation</h3>
-                <p>Generates test cases from requirements, designs, and code. Your team&rsquo;s shared definition of &ldquo;done&rdquo; and testing playbook.</p>
-            </div>
-            
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fas fa-code-pull-request"></i>
-                </div>
-                <h3>PR Review (QA Lens)</h3>
-                <p>Reviews PRs for logic, functional, security gaps, and testability. Gives devs test cases to verify their own work.</p>
-            </div>
-            
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fas fa-hand-pointer"></i>
-                </div>
-                <h3>Manual Testing on Staging</h3>
-                <p>Tests features in the browser like a real QA would. Explores edge cases, files bugs with repro steps.</p>
-            </div>
-            
-            <div class="pillar-card">
-                <div class="pillar-icon">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h3>Test Automation</h3>
-                <p>Automates critical regressions with Playwright. Living test suites that evolve with your product.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- How It Looks Like -->
-<section id="how-it-looks" class="how-it-looks">
+<!-- ════════ WHAT WE OFFER ════════ -->
+<section id="offering" class="offering">
     <div class="container">
-        <div class="section-header">
-            <span class="section-tag">See Ovi in Action</span>
-            <h2>How It Looks Like</h2>
-            <p>Ticket review, PR review, agentic testing, and more &mdash; in your tools.</p>
+        <div class="sh">
+            <span class="sh-tag">What FirstQA Offers</span>
+            <h2>AI + Human QA. Complete Coverage.</h2>
+            <p>Two ways to cover your quality — use both or start with one.</p>
         </div>
-        
-        <div class="looks-grid">
-            <div class="looks-card">
-                <div class="looks-image">
-                    <img src="/images/landing/ticket-review.png" alt="Ovi reviewing a Linear ticket: requirements, acceptance criteria, and test cases" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
-                    <div class="looks-placeholder">
-                        <i class="fas fa-clipboard-check"></i>
-                        <span>Ticket / requirements review</span>
-                    </div>
-                </div>
-                <h3>Ticket &amp; Requirements Review</h3>
-                <p>Pulse, affected areas, risk, recommendations, and test recipe before dev.</p>
-            </div>
-            
-            <div class="looks-card">
-                <div class="looks-image">
-                    <img src="/images/landing/pr-review.png" alt="Ovi PR review comment on GitHub with risks and test cases" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
-                    <div class="looks-placeholder">
-                        <i class="fas fa-code-pull-request"></i>
-                        <span>PR review (QA lens)</span>
-                    </div>
-                </div>
-                <h3>PR Review</h3>
-                <p>Risks, edge cases, and test cases for the author and reviewers.</p>
-            </div>
-            
-            <div class="looks-card">
-                <div class="looks-image">
-                    <img src="/images/landing/agentic-testing.png" alt="Ovi running tests in the browser with step-by-step execution" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
-                    <div class="looks-placeholder">
-                        <i class="fas fa-play-circle"></i>
-                        <span>Agentic testing in browser</span>
-                    </div>
-                </div>
-                <h3>Agentic Testing</h3>
-                <p>Test cases executed in the browser, and bugs filed with repro steps.</p>
-            </div>
-            
-            <div class="looks-card">
-                <div class="looks-image">
-                    <img src="/images/landing/test-automation.png" alt="Playwright test code and run results" onerror="this.style.display='none'; this.nextElementSibling.classList.add('visible');">
-                    <div class="looks-placeholder">
-                        <i class="fas fa-robot"></i>
-                        <span>Test automation</span>
-                    </div>
-                </div>
-                <h3>Test Automation</h3>
-                <p>Generates Playwright tests and keeps them up to date.</p>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Human QA On Demand -->
-<section class="human-qa">
-    <div class="container">
-        <div class="human-qa-card">
-            <div class="human-qa-icon">
-                <i class="fas fa-user-check"></i>
-            </div>
-            <div class="human-qa-content">
-                <span class="human-qa-tag">When Ovi Isn&rsquo;t Enough</span>
-                <h3>Senior Human QA When It Matters</h3>
-                <p>
-                    Ovi handles the daily grind. For high-stakes releases, complex flows, or 
-                    building the QA strategy; &mdash; get senior human QA on demand. 
-                    No hiring. No long-term commitments; they slot in alongside Ovi.
-                </p>
-                <ul class="human-qa-list">
-                    <li><i class="fas fa-check"></i> Exploratory testing before major releases</li>
-                    <li><i class="fas fa-check"></i> Human judgment over agentic testing on every major change</li>
-                    <li><i class="fas fa-check"></i> Pre-launch audits and go/no-go confidence</li>
-                    <li><i class="fas fa-check"></i> QA strategy and in-the-loop QA</li>
-                    <li><i class="fas fa-check"></i> Pay per engagement &mdash; scale up when it matters</li>
+        <div class="offer-grid">
+            <!-- Ovi AI Pillar -->
+            <div class="offer-pillar offer-ai">
+                <div class="op-header">
+                    <div class="op-icon"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <h3>Ovi &mdash; AI QA Engineer</h3>
+                        <p class="op-sub">Automated. 24/7. On every PR.</p>
+                    </div>
+                </div>
+                <ul class="op-list">
+                    <li><i class="fas fa-code-pull-request"></i><div><strong>PR Analysis</strong><span>Finds functional bugs, logic errors, edge cases, UI/UX risks</span></div></li>
+                    <li><i class="fas fa-clipboard-check"></i><div><strong>Ticket Analysis</strong><span>Reviews requirements for gaps before development starts</span></div></li>
+                    <li><i class="fas fa-list-check"></i><div><strong>Test Recipe</strong><span>Generates prioritized test scenarios with steps & expected results</span></div></li>
+                    <li><i class="fas fa-play"></i><div><strong>Browser Test Execution</strong><span>AI agent runs tests in a real browser with screenshots & video</span></div></li>
+                    <li><i class="fas fa-file-code"></i><div><strong>Playwright Test Code</strong><span>Ready-to-use spec files with accurate selectors and flows</span></div></li>
+                    <li><i class="fas fa-chart-bar"></i><div><strong>Test Reports</strong><span>Detailed pass/fail reports posted directly on your PR</span></div></li>
                 </ul>
-                <a href="https://calendly.com/firstqa/demo" class="btn-human-qa" target="_blank">
-                    <span>Get Human QA Backup</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
+                <div class="op-trigger">
+                    <span class="op-trigger-label">Trigger:</span>
+                    <code>/qa</code> command <span class="op-or">or</span> automatic on PR open/update
+                </div>
+            </div>
+
+            <!-- Human QA Pillar -->
+            <div class="offer-pillar offer-human">
+                <div class="op-header">
+                    <div class="op-icon op-icon-human"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <h3>Human QA Engineers</h3>
+                        <p class="op-sub">On-demand. Senior. No hiring.</p>
+                    </div>
+                </div>
+                <ul class="op-list op-list-human">
+                    <li><i class="fas fa-check"></i><div><strong>Exploratory Testing</strong><span>Before major releases — find what automation misses</span></div></li>
+                    <li><i class="fas fa-check"></i><div><strong>Human Judgment</strong><span>Review complex flows, edge cases, and user experience</span></div></li>
+                    <li><i class="fas fa-check"></i><div><strong>Pre-Launch Audits</strong><span>Go/no-go confidence on critical releases</span></div></li>
+                    <li><i class="fas fa-check"></i><div><strong>QA Strategy</strong><span>Process setup, test planning, and in-the-loop QA</span></div></li>
+                    <li><i class="fas fa-check"></i><div><strong>Pay Per Engagement</strong><span>Scale up when it matters — no long-term contracts</span></div></li>
+                </ul>
+                <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" class="btn-human" target="_blank">Get Human QA <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Bottom CTA -->
-<section class="bottom-cta">
+<!-- ════════ HOW IT WORKS ════════ -->
+<section id="how-it-works" class="how-section">
     <div class="container">
-        <div class="bottom-cta-content">
-            <h2>Ready to Give Your Team a QA Engineer?</h2>
-            <p>Join the waitlist and bring Ovi onto your team today.</p>
-            <a href="#" class="btn-primary btn-large" data-ea-trigger>
-                <span>Join Waitlist</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
+        <div class="sh">
+            <span class="sh-tag">Get Started</span>
+            <h2>Up and Running in 3 Steps</h2>
+            <p>Install once. Ovi works on every PR, every day.</p>
+        </div>
+
+        <div class="journey">
+            <!-- Step 1 -->
+            <div class="j-step">
+                <div class="j-num">1</div>
+                <div class="j-card">
+                    <h3>Install the GitHub App</h3>
+                    <p>One click. Select your repos. No code changes, no CI config needed.</p>
+                    <div class="j-tools">
+                        <span><i class="fab fa-github"></i> GitHub</span>
+                        <span><svg width="14" height="14" viewBox="0 0 100 100" fill="currentColor"><path d="M1.22541 61.5228c-.2225-.9485.90748-1.5459 1.59638-.857L39.3342 97.1782c.6889.6889.0915 1.8189-.857 1.5964C20.0515 94.4522 5.54779 79.9485 1.22541 61.5228ZM.00189135 46.8891c-.01764375.2833.08887215.5599.28957165.7606L52.3503 99.7085c.2007.2007.4773.3075.7606.2896 2.3692-.1476 4.6938-.46 6.9624-.9259.7645-.157 1.0301-1.0963.4782-1.6481L2.57595 39.4485c-.55186-.5519-1.49117-.2863-1.648174.4782-.465915 2.2686-.77832 4.5932-.92588465 6.9624ZM4.21093 29.7054c-.16649.3738-.08169.8106.20765 1.1l64.77602 64.776c.2894.2894.7262.3742 1.1.2077 1.7861-.7956 3.5171-1.6927 5.1855-2.684.5521-.328.6373-1.0867.1832-1.5407L8.43566 24.3367c-.45409-.4541-1.21271-.3689-1.54074.1832-.99132 1.6684-1.88843 3.3994-2.68399 5.1855ZM12.6587 18.074c-.3701-.3701-.393-.9637-.0443-1.3541C21.7795 6.45931 35.1114 0 49.9519 0 77.5927 0 100 22.4073 100 50.0481c0 14.8405-6.4593 28.1724-16.7199 37.3375-.3903.3487-.984.3258-1.3542-.0443L12.6587 18.074Z"/></svg> Linear</span>
+                    </div>
+                </div>
+            </div>
+            <div class="j-connector"><div class="j-line"></div></div>
+
+            <!-- Step 2 — The full FirstQA offer -->
+            <div class="j-step">
+                <div class="j-num">2</div>
+                <div class="j-card j-card-wide">
+                    <h3>FirstQA Goes to Work</h3>
+                    <p>Automatically on every PR — or triggered with <code>/qa</code>. Here&rsquo;s what kicks in:</p>
+                    <div class="j-offer">
+                        <div class="j-pillar j-pillar-ai">
+                            <div class="j-pillar-header">
+                                <div class="j-pillar-icon"><i class="fas fa-robot"></i></div>
+                                <div>
+                                    <strong>Ovi &mdash; AI QA Engineer</strong>
+                                    <span>Automated &middot; 24/7 &middot; Every PR</span>
+                                </div>
+                            </div>
+                            <div class="j-pillar-items">
+                                <div class="j-item"><i class="fas fa-search"></i> PR &amp; ticket analysis — bugs, risks, edge cases</div>
+                                <div class="j-item"><i class="fas fa-list-check"></i> Test recipe — prioritized scenarios with exact steps</div>
+                                <div class="j-item"><i class="fas fa-play"></i> Browser test run — AI agent in real Chromium</div>
+                                <div class="j-item"><i class="fas fa-file-code"></i> Playwright tests — spec files with accurate selectors</div>
+                                <div class="j-item"><i class="fas fa-chart-bar"></i> Reports — pass/fail, screenshots, video in the PR</div>
+                            </div>
+                            <div class="j-pillar-trigger">
+                                <code>/qa</code> <span class="j-or">or</span> auto on PR open/update
+                            </div>
+                        </div>
+                        <div class="j-plus"><span>+</span></div>
+                        <div class="j-pillar j-pillar-human">
+                            <div class="j-pillar-header j-pillar-header-human">
+                                <div class="j-pillar-icon j-pillar-icon-human"><i class="fas fa-user-check"></i></div>
+                                <div>
+                                    <strong>Human QA Engineers</strong>
+                                    <span>On-demand &middot; Senior &middot; No hiring</span>
+                                </div>
+                            </div>
+                            <div class="j-pillar-items j-pillar-items-human">
+                                <div class="j-item"><i class="fas fa-check"></i> Exploratory testing before major releases</div>
+                                <div class="j-item"><i class="fas fa-check"></i> Human judgment on complex flows &amp; UX</div>
+                                <div class="j-item"><i class="fas fa-check"></i> Pre-launch audits &amp; go/no-go calls</div>
+                                <div class="j-item"><i class="fas fa-check"></i> QA strategy &amp; process setup</div>
+                                <div class="j-item"><i class="fas fa-check"></i> Book directly from a PR or Linear ticket</div>
+                            </div>
+                            <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" class="j-human-cta" target="_blank">Book a QA session <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="j-connector"><div class="j-line"></div></div>
+
+            <!-- Step 3 -->
+            <div class="j-step">
+                <div class="j-num">3</div>
+                <div class="j-card">
+                    <h3>Ship With Confidence</h3>
+                    <p>Every PR gets a full QA review, test results, and Playwright code — before it merges. Your team iterates on <strong>product feedback</strong>, not bug reports.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════ SEE IT IN ACTION ════════ -->
+<section id="in-action" class="in-action">
+    <div class="container">
+        <div class="sh">
+            <span class="sh-tag">See It In Action</span>
+            <h2>What Ovi&rsquo;s Output Looks Like</h2>
+            <p>Deep QA review. Agentic Test Execution. Stable Playwright tests.</p>
+        </div>
+
+        <div class="showcase">
+            <div class="showcase-tabs">
+                <button class="stab active" data-tab="tab-analysis"><i class="fas fa-code-pull-request"></i> PR Analysis</button>
+                <button class="stab" data-tab="tab-ticket"><i class="fas fa-clipboard-check"></i> Ticket Analysis</button>
+                <button class="stab" data-tab="tab-testrun"><i class="fas fa-play"></i> Test Execution</button>
+                <button class="stab" data-tab="tab-playwright"><i class="fas fa-file-code"></i> Playwright Code</button>
+            </div>
+            <div class="showcase-panels">
+                <div class="spanel active" id="tab-analysis">
+                    <img src="/images/landing/pr-analysis.png" alt="Ovi AI PR Analysis showing bugs found, test scenarios, and QA review posted on a GitHub Pull Request">
+                </div>
+                <div class="spanel" id="tab-ticket">
+                    <img src="/images/landing/ticket-analysis.png" alt="Ovi AI Ticket Analysis on a Linear ticket showing requirements review, QA questions, pre-dev test recipe, and risks">
+                </div>
+                <div class="spanel" id="tab-testrun">
+                    <img src="/images/landing/test-execution.png" alt="Ovi AI Test Execution report showing 12/14 tests passed with screenshots and video evidence">
+                </div>
+                <div class="spanel" id="tab-playwright">
+                    <img src="/images/landing/playwright-code.png" alt="Playwright test spec file generated by Ovi AI with accurate selectors and test flows">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════ BOTTOM CTA ════════ -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Stop shipping bugs.<br>Start shipping confidence.</h2>
+        <p>Install FirstQA and get a QA engineer on every PR — starting now.</p>
+        <div class="cta-btns">
+            <a href="#" class="btn-primary" data-ea-trigger><i class="fas fa-rocket"></i> Join Waitlist</a>
+            <a href="/discovery-interview" class="btn-secondary">Become a Launch Partner</a>
         </div>
     </div>
 </section>
@@ -441,1751 +320,290 @@
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
-        <div class="footer-main">
+        <div class="footer-top">
             <div class="footer-brand">
                 <a href="/" class="logo">
-                    <svg class="logo-icon-svg" width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="logoGradFoot" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <circle cx="16" cy="16" r="14" fill="url(#logoGradFoot)"/>
-                        <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    </svg>
+                    <svg width="24" height="24" viewBox="0 0 32 32"><defs><linearGradient id="lgf" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#059669"/></linearGradient></defs><circle cx="16" cy="16" r="14" fill="url(#lgf)"/><path d="M10 16 L14 20 L22 11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
                     <span class="logo-text">FirstQA</span>
                 </a>
-                <p>Your AI QA Engineer. Quality across the entire SDLC.</p>
+                <p>AI + Human QA for startups that ship fast.</p>
             </div>
-            <div class="footer-links">
-                <div class="footer-col">
-                    <h4>Product</h4>
-                    <a href="#problem">Why FirstQA & Ovi AI?</a>
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#features">What Ovi Does</a>
-                    <a href="#how-it-looks">Ovi in Action</a>
-                    <a href="/docs">Documentation</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Company</h4>
-                    <a href="/about">About</a>
-                    <a href="/contact">Contact</a>
-                    <a href="https://github.com/ovidon83/firstqa" target="_blank">GitHub</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Legal</h4>
-                    <a href="/privacy">Privacy</a>
-                    <a href="/terms">Terms</a>
-                </div>
+            <div class="footer-cols">
+                <div><h4>Product</h4><a href="#offering">What We Offer</a><a href="#in-action">See It Live</a><a href="#how-it-works">How It Works</a><a href="/docs">Docs</a></div>
+                <div><h4>Company</h4><a href="/about">About</a><a href="/contact">Contact</a><a href="https://github.com/ovidon83/firstqa" target="_blank">GitHub</a></div>
+                <div><h4>Legal</h4><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 FirstQA. All rights reserved.</p>
-        </div>
+        <div class="footer-bottom"><p>&copy; 2026 FirstQA. All rights reserved.</p></div>
     </div>
 </footer>
 
 <style>
-/* ============================================
-   CSS Variables & Reset
-   ============================================ */
-:root {
-    --bg-dark: #0a0a0b;
-    --bg-card: #121214;
-    --bg-elevated: #1c1c1e;
-    --border: #2d2d30;
-    --text-primary: #ffffff;
-    --text-secondary: #b4b4b8;
-    --text-muted: #8a8a8e;
-    --accent: #22d3ee;
-    --accent-hover: #06b6d4;
-    --accent-glow: rgba(34, 211, 238, 0.18);
-    --success: #4ade80;
-    --warning: #fbbf24;
-    --danger: #f87171;
-    --gradient: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
-    --font-main: 'Space Grotesk', -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
-    --radius-lg: 14px;
-    --radius-xl: 18px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: var(--font-main);
-    background: var(--bg-dark);
-    color: var(--text-primary);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-}
-
-/* ============================================
-   Modal
-   ============================================ */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(6px);
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    padding: 48px;
-    max-width: 520px;
-    width: 90%;
-    position: relative;
-    text-align: center;
-    box-shadow: var(--shadow-card), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    animation: modalIn 0.25s ease-out;
-}
-
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.97);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.modal-close {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 28px;
-    cursor: pointer;
-    transition: color 0.2s;
-    line-height: 1;
-}
-
-.modal-close:hover {
-    color: var(--text-primary);
-}
-
-.modal-card h2 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
-}
-
-.modal-card > p {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 32px;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* ============================================
-   Navigation
-   ============================================ */
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: 16px 0;
-    background: rgba(10, 10, 11, 0.92);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border);
-}
-
-.navbar .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: var(--text-primary);
-}
-
-.logo-icon-svg {
-    flex-shrink: 0;
-}
-
-.logo-text {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-}
-
-.nav-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.nav-link:hover {
-    color: var(--text-primary);
-}
-
-.btn-signup {
-    background: var(--text-primary);
-    color: var(--bg-dark);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 22px;
-    border-radius: 10px;
-    transition: all 0.2s;
-    cursor: pointer;
-    box-shadow: 0 2px 12px rgba(255, 255, 255, 0.15);
-}
-
-.btn-signup:hover {
-    background: var(--accent);
-    color: var(--bg-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px var(--accent-glow);
-}
-
-.mobile-menu-btn {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-.mobile-menu-btn span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--text-primary);
-    transition: 0.2s;
-}
-
-/* ============================================
-   Hero Section
-   ============================================ */
-.hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 100px 0 60px;
-    overflow: hidden;
-}
-
-.hero-bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
-.grid-pattern {
-    position: absolute;
-    inset: 0;
-    background-image: 
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 60px 60px;
-    opacity: 0.3;
-    mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
-}
-
-.glow {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.4;
-}
-
-.glow-1 {
-    top: 10%;
-    left: 20%;
-    width: 400px;
-    height: 400px;
-    background: var(--accent);
-}
-
-.glow-2 {
-    bottom: 20%;
-    right: 10%;
-    width: 300px;
-    height: 300px;
-    background: #a78bfa;
-}
-
-.hero .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    align-items: start;
-    padding-top: 40px;
-    position: relative;
-    z-index: 1;
-}
-
-.hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent-glow);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 8px 16px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 24px;
-}
-
-.pulse {
-    width: 8px;
-    height: 8px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
-}
-
-.hero h1 {
-    font-size: 64px;
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -2px;
-    margin-bottom: 24px;
-    color: var(--text-primary);
-}
-
-.highlight {
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.hero-sub {
-    font-size: 18px;
-    color: var(--text-secondary);
-    line-height: 1.75;
-    margin-bottom: 32px;
-    max-width: 520px;
-    letter-spacing: 0.01em;
-}
-
-.hero-sub strong {
-    color: var(--text-primary);
-}
-
-.hero-cta {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 48px;
-}
-
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--gradient);
-    color: var(--bg-dark);
-    font-size: 15px;
-    font-weight: 600;
-    padding: 14px 28px;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: all 0.3s;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(34, 211, 238, 0.25);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px var(--accent-glow);
-}
-
-.btn-primary i {
-    font-size: 12px;
-    transition: transform 0.3s;
-}
-
-.btn-primary:hover i {
-    transform: translateX(4px);
-}
-
-.btn-primary.btn-large {
-    font-size: 17px;
-    padding: 18px 36px;
-}
-
-.btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    color: var(--text-secondary);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 14px 24px;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    border-radius: 12px;
-}
-
-.btn-ghost:hover {
-    color: var(--text-primary);
-    border-color: var(--border);
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.btn-launch-partner {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 12px 20px 14px;
-    border-radius: 12px;
-    background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
-                var(--gradient) border-box;
-    border: 2px solid transparent;
-    color: var(--text-primary);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 15px;
-    transition: all 0.3s;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
-}
-
-.btn-launch-partner:hover {
-    box-shadow: 0 4px 24px var(--accent-glow), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    transform: translateY(-2px);
-    color: var(--text-primary);
-}
-
-.btn-launch-partner-main {
-    line-height: 1.2;
-}
-
-.btn-launch-partner-tag {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: var(--accent);
-    opacity: 0.95;
-}
-
-.btn-launch-partner:hover .btn-launch-partner-tag {
-    color: #a78bfa;
-}
-
-.hero-stats {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-}
-
-.stat {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.stat-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.stat-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-}
-
-.stat-divider {
-    width: 1px;
-    height: 40px;
-    background: var(--border);
-}
-
-/* Terminal Visual */
-.hero-visual {
-    display: flex;
-    justify-content: center;
-}
-
-.terminal {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    width: 100%;
-    max-width: 540px;
-    box-shadow: var(--shadow-card), 0 0 0 1px rgba(255, 255, 255, 0.03);
-}
-
-.terminal-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: var(--bg-elevated);
-    border-bottom: 1px solid var(--border);
-}
-
-.terminal-dots {
-    display: flex;
-    gap: 6px;
-}
-
-.terminal-dots span {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--border);
-}
-
-.terminal-dots span:nth-child(1) { background: #f87171; }
-.terminal-dots span:nth-child(2) { background: #fbbf24; }
-.terminal-dots span:nth-child(3) { background: #4ade80; }
-
-.terminal-title {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-.terminal-body {
-    padding: 24px;
-    font-family: var(--font-mono);
-    font-size: 13.5px;
-}
-
-.terminal-line {
-    margin-bottom: 16px;
-}
-
-.prompt {
-    color: var(--accent);
-    margin-right: 8px;
-}
-
-.command {
-    color: var(--text-primary);
-}
-
-.terminal-output {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.output-line {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text-secondary);
-    opacity: 0;
-    animation: fadeIn 0.5s forwards;
-}
-
-.fade-in-1 { animation-delay: 0.5s; }
-.fade-in-2 { animation-delay: 1.1s; }
-.fade-in-3 { animation-delay: 1.7s; }
-.fade-in-4 { animation-delay: 2.3s; }
-.fade-in-5 { animation-delay: 2.9s; }
-.fade-in-6 { animation-delay: 3.5s; }
-.fade-in-7 { animation-delay: 4.1s; }
-
-@keyframes fadeIn {
-    to { opacity: 1; }
-}
-
-.output-line .icon {
-    font-size: 15px;
-}
-
-.go-badge {
-    display: inline-block;
-    background: rgba(74, 222, 128, 0.15);
-    color: var(--success);
-    font-weight: 600;
-    padding: 1px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.output-line .success {
-    color: var(--success);
-    font-weight: 600;
-}
-
-.output-line .warning {
-    color: var(--warning);
-}
-
-.output-line .link {
-    color: var(--accent);
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-/* ============================================
-   Features / Pillars Section
-   ============================================ */
-.features {
-    padding: 120px 0;
-    background: var(--bg-card);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-}
-
-.section-header {
-    text-align: center;
-    margin-bottom: 64px;
-}
-
-.section-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2.5px;
-    color: var(--accent);
-    margin-bottom: 16px;
-    opacity: 0.95;
-}
-
-.section-header h2 {
-    font-size: 42px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-}
-
-.section-header p {
-    font-size: 17px;
-    color: var(--text-secondary);
-    max-width: 640px;
-    margin: 0 auto;
-    line-height: 1.75;
-}
-
-.pillars-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-
-.pillar-card {
-    background: var(--bg-dark);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 32px 28px;
-    position: relative;
-    transition: all 0.3s;
-    width: calc(33.333% - 14px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
-
-.pillar-card:hover {
-    border-color: rgba(34, 211, 238, 0.5);
-    transform: translateY(-4px);
-    background: linear-gradient(180deg, rgba(34, 211, 238, 0.06) 0%, transparent 60%);
-    box-shadow: 0 16px 48px rgba(34, 211, 238, 0.08), 0 0 0 1px rgba(34, 211, 238, 0.1);
-}
-
-.pillar-icon {
-    width: 52px;
-    height: 52px;
-    background: var(--accent-glow);
-    border: 1px solid rgba(34, 211, 238, 0.2);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-}
-
-.pillar-icon i {
-    font-size: 21px;
-    color: var(--accent);
-}
-
-.pillar-card:hover .pillar-icon {
-    background: rgba(34, 211, 238, 0.2);
-    border-color: var(--accent);
-}
-
-.pillar-card h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    color: var(--text-primary);
-}
-
-.pillar-card p {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.65;
-}
-
-/* ============================================
-   How It Looks Like
-   ============================================ */
-.how-it-looks {
-    padding: 120px 0;
-    background: var(--bg-dark);
-    border-top: 1px solid var(--border);
-}
-
-.looks-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 32px;
-    margin-top: 48px;
-}
-
-.looks-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: all 0.3s;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
-
-.looks-card:hover {
-    border-color: rgba(34, 211, 238, 0.35);
-    box-shadow: 0 12px 40px rgba(34, 211, 238, 0.08);
-}
-
-.looks-image {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    background: var(--bg-elevated);
-}
-
-.looks-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.looks-placeholder {
-    display: none;
-    position: absolute;
-    inset: 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    background: var(--bg-elevated);
-    color: var(--text-muted);
-    font-size: 14px;
-}
-
-.looks-placeholder.visible {
-    display: flex;
-}
-
-.looks-placeholder i {
-    font-size: 48px;
-    color: var(--accent);
-    opacity: 0.7;
-}
-
-.looks-card h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 20px 24px 8px;
-    color: var(--text-primary);
-}
-
-.looks-card p {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin: 0 24px 24px;
-}
-
-/* ============================================
-   How It Works
-   ============================================ */
-.how-it-works {
-    padding: 120px 0;
-}
-
-.steps-container {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.step {
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-}
-
-.step-number {
-    width: 48px;
-    height: 48px;
-    background: var(--gradient);
-    border-radius: var(--radius-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--bg-dark);
-    flex-shrink: 0;
-}
-
-.step-content h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-}
-
-.step-content p {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.step-tools {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-}
-
-.tool-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    padding: 8px 14px;
-    border-radius: 10px;
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.tool-badge .tool-badge-icon,
-.tool-badge svg {
-    flex-shrink: 0;
-}
-
-.tool-badge:hover {
-    color: var(--text-primary);
-    border-color: var(--text-muted);
-}
-
-.step-connector {
-    display: flex;
-    justify-content: center;
-    padding: 0 24px;
-    margin-left: 24px;
-    color: var(--border);
-}
-
-.step-connector svg {
-    width: 24px;
-    height: 60px;
-}
-
-.section-cta {
-    text-align: center;
-    margin-top: 64px;
-}
-
-/* ============================================
-   Why Section
-   ============================================ */
-.why-section {
-    padding: 120px 0;
-    background: var(--bg-card);
-    border-top: 1px solid var(--border);
-}
-
-.why-section .section-header p {
-    max-width: 560px;
-}
-
-.runway-visual {
-    max-width: 560px;
-    margin: 0 auto 40px;
-}
-
-.runway-bar {
-    display: flex;
-    height: 48px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.runway-segment {
-    min-width: 0;
-}
-
-.runway-segment.runway-build {
-    background: linear-gradient(135deg, var(--accent) 0%, rgba(34, 211, 238, 0.6) 100%);
-}
-
-.runway-segment.runway-lost {
-    background: linear-gradient(135deg, var(--danger) 0%, rgba(239, 68, 68, 0.7) 100%);
-}
-
-.runway-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-
-.runway-caption {
-    margin-top: 12px;
-    font-size: 14px;
-    color: var(--text-muted);
-    text-align: center;
-    margin-bottom: 0;
-}
-
-.runway-math {
-    max-width: 640px;
-    margin: 0 auto 48px;
-    padding: 28px 32px;
-    background: var(--bg-dark);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    border-left: 4px solid var(--danger);
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
-}
-
-.runway-math-intro {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-}
-
-.runway-math-statement {
-    font-size: 17px;
-    color: var(--text-primary);
-    line-height: 1.7;
-    margin: 0;
-}
-
-.runway-highlight {
-    display: inline;
-    color: var(--accent);
-    font-weight: 700;
-    padding: 0 6px;
-    background: rgba(34, 211, 238, 0.12);
-    border-radius: 6px;
-}
-
-.bug-costs {
-    max-width: 560px;
-    margin: 0 auto 48px;
-}
-
-.bug-costs-intro {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 16px;
-}
-
-.bug-costs-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.bug-costs-list li {
-    position: relative;
-    padding-left: 24px;
-    margin-bottom: 10px;
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.bug-costs-list li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 10px;
-    width: 6px;
-    height: 6px;
-    background: var(--text-muted);
-    border-radius: 50%;
-}
-
-.why-ovi-job {
-    text-align: center;
-    max-width: 580px;
-    margin: 0 auto 56px;
-}
-
-.why-ovi-job p {
-    font-size: 16px;
-    color: var(--text-secondary);
-    line-height: 1.75;
-    margin-bottom: 12px;
-}
-
-.why-ovi-job p strong {
-    color: var(--text-primary);
-}
-
-.ovi-job-tag {
-    font-size: 18px !important;
-    margin-top: 20px !important;
-    margin-bottom: 0 !important;
-}
-
-.ovi-job-tag strong {
-    color: var(--accent);
-}
-
-.process-compare {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.process-column {
-    padding: 32px 28px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    background: var(--bg-dark);
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
-}
-
-.process-column h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-}
-
-.process-current h3 {
-    color: var(--text-primary);
-}
-
-.process-ovi h3 {
-    color: var(--accent);
-    border-bottom-color: rgba(34, 211, 238, 0.25);
-}
-
-.process-current {
-    border-color: rgba(248, 113, 113, 0.2);
-}
-
-.process-ovi {
-    border-color: rgba(34, 211, 238, 0.25);
-    background: linear-gradient(180deg, rgba(34, 211, 238, 0.04) 0%, transparent 40%);
-}
-
-.process-steps {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    counter-reset: step;
-}
-
-.process-steps li {
-    position: relative;
-    padding-left: 32px;
-    margin-bottom: 14px;
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.55;
-    counter-increment: step;
-}
-
-.process-steps li::before {
-    content: counter(step);
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 22px;
-    text-align: center;
-    font-family: var(--font-main);
-}
-
-.process-current .process-steps li::before {
-    background: rgba(248, 113, 113, 0.15);
-    color: var(--danger);
-}
-
-.process-ovi .process-steps li::before {
-    background: var(--accent-glow);
-    color: var(--accent);
-}
-
-.process-steps li:last-child {
-    margin-bottom: 0;
-}
-
-/* ============================================
-   Human QA Section
-   ============================================ */
-.human-qa {
-    padding: 80px 0;
-    border-top: 1px solid var(--border);
-}
-
-.human-qa-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 40px;
-    max-width: 800px;
-    margin: 0 auto;
-    background: var(--bg-dark);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    padding: 48px;
-    box-shadow: var(--shadow-card), 0 0 0 1px rgba(255, 255, 255, 0.02);
-}
-
-.human-qa-icon {
-    width: 64px;
-    height: 64px;
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 146, 60, 0.1) 100%);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.human-qa-icon i {
-    font-size: 24px;
-    color: #fbbf24;
-}
-
-.human-qa-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #fbbf24;
-    margin-bottom: 12px;
-}
-
-.human-qa-content h3 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-
-.human-qa-content > p {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: 20px;
-}
-
-.human-qa-list {
-    list-style: none;
-    margin-bottom: 24px;
-}
-
-.human-qa-list li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
-}
-
-.human-qa-list li i {
-    color: #fbbf24;
-    font-size: 12px;
-}
-
-.btn-human-qa {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: transparent;
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    color: #fbbf24;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 12px 24px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.btn-human-qa:hover {
-    background: rgba(251, 191, 36, 0.1);
-    border-color: #fbbf24;
-    transform: translateY(-2px);
-}
-
-.btn-human-qa i {
-    font-size: 12px;
-    transition: transform 0.3s;
-}
-
-.btn-human-qa:hover i {
-    transform: translateX(4px);
-}
-
-/* ============================================
-   Bottom CTA Section
-   ============================================ */
-.bottom-cta {
-    padding: 120px 0;
-    position: relative;
-    text-align: center;
-}
-
-.bottom-cta::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 400px;
-    background: var(--accent);
-    filter: blur(200px);
-    opacity: 0.06;
-    pointer-events: none;
-    border-radius: 50%;
-}
-
-.bottom-cta-content {
-    position: relative;
-    z-index: 1;
-}
-
-.bottom-cta h2 {
-    font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-}
-
-.bottom-cta p {
-    font-size: 17px;
-    color: var(--text-secondary);
-    margin-bottom: 32px;
-}
-
-/* ============================================
-   Shared Form Styles (used in modal)
-   ============================================ */
-.ea-form {
-    max-width: 420px;
-    margin: 0 auto 24px;
-}
-
-.ea-input-group {
-    display: flex;
-    gap: 12px;
-}
-
-.ea-input-group input {
-    flex: 1;
-    background: var(--bg-dark);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    font-size: 15px;
-    color: var(--text-primary);
-    font-family: var(--font-main);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.ea-input-group input::placeholder {
-    color: var(--text-muted);
-}
-
-.ea-input-group input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.btn-submit {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--gradient);
-    color: var(--bg-dark);
-    font-size: 15px;
-    font-weight: 600;
-    padding: 14px 28px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-    white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(34, 211, 238, 0.25);
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px var(--accent-glow);
-}
-
-.ea-message {
-    font-size: 14px;
-    margin-top: 12px;
-    min-height: 20px;
-}
-
-.ea-message.success {
-    color: var(--success);
-}
-
-.ea-message.error {
-    color: var(--danger);
-}
-
-.ea-demo-link {
-    font-size: 14px;
-    color: var(--text-muted);
-}
-
-.ea-demo-link a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.ea-demo-link a:hover {
-    color: var(--text-primary);
-}
-
-/* ============================================
-   Footer
-   ============================================ */
-.footer {
-    padding: 64px 0 32px;
-    background: var(--bg-card);
-    border-top: 1px solid var(--border);
-}
-
-.footer-main {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 64px;
-    margin-bottom: 48px;
-}
-
-.footer-brand {
-    max-width: 300px;
-}
-
-.footer-brand .logo {
-    margin-bottom: 16px;
-}
-
-.footer-brand p {
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.6;
-}
-
-.footer-links {
-    display: flex;
-    gap: 64px;
-}
-
-.footer-col h4 {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-}
-
-.footer-col a {
-    display: block;
-    font-size: 14px;
-    color: var(--text-muted);
-    text-decoration: none;
-    margin-bottom: 12px;
-    transition: color 0.2s;
-}
-
-.footer-col a:hover {
-    color: var(--text-primary);
-}
-
-.footer-bottom {
-    padding-top: 32px;
-    border-top: 1px solid var(--border);
-    text-align: center;
-}
-
-.footer-bottom p {
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-/* ============================================
-   Responsive
-   ============================================ */
-@media (max-width: 1024px) {
-    .hero .container {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-    
-    .hero-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .hero-sub {
-        max-width: 600px;
-    }
-    
-    .hero-cta {
-        justify-content: center;
-    }
-    
-    .hero-stats {
-        justify-content: center;
-    }
-    
-    .hero-visual {
-        order: -1;
-        margin-bottom: 40px;
-    }
-    
-    .terminal {
-        max-width: 480px;
-    }
-    
-    .pillar-card {
-        width: calc(50% - 10px);
-    }
-    
-    .process-compare {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .nav-menu {
-        display: none;
-    }
-    
-    .mobile-menu-btn {
-        display: flex;
-    }
-    
-    .hero h1 {
-        font-size: 40px;
-        letter-spacing: -1px;
-    }
-    
-    .hero h1 br {
-        display: none;
-    }
-    
-    .section-header h2 {
-        font-size: 32px;
-    }
-    
-    .pillar-card {
-        width: calc(50% - 10px);
-    }
-    
-    .hero-stats {
-        flex-wrap: wrap;
-        gap: 24px;
-    }
-    
-    .stat-divider {
-        display: none;
-    }
-
-    .process-compare {
-        grid-template-columns: 1fr;
-    }
-
-    .looks-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .footer-main {
-        grid-template-columns: 1fr;
-        gap: 48px;
-    }
-    
-    .footer-links {
-        gap: 32px;
-        flex-wrap: wrap;
-    }
-    
-    .ea-input-group {
-        flex-direction: column;
-    }
-    
-    .human-qa-card {
-        flex-direction: column;
-        padding: 32px 24px;
-        text-align: center;
-    }
-    
-    .human-qa-icon {
-        margin: 0 auto;
-    }
-    
-    .human-qa-list li {
-        justify-content: center;
-    }
-    
-    .human-qa-content h3 {
-        font-size: 22px;
-    }
-
-}
-
-@media (max-width: 480px) {
-    .hero {
-        padding: 100px 0 60px;
-    }
-    
-    .hero h1 {
-        font-size: 32px;
-    }
-    
-    .hero-sub {
-        font-size: 16px;
-    }
-    
-    .hero-cta {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .btn-primary,
-    .btn-ghost,
-    .btn-launch-partner {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .pillar-card {
-        width: 100%;
-    }
-    
-    .section-header h2 {
-        font-size: 28px;
-    }
-    
-    .bottom-cta h2 {
-        font-size: 28px;
-    }
-
-    .modal-card {
-        padding: 32px 20px;
-    }
+:root{--bg:#0f1117;--bg2:#161a23;--bg3:#1c2130;--bg4:#242a38;--border:#262d3d;--border2:#313a4d;--text:#e8eaf0;--text2:#9ca3b8;--text3:#6b7280;--green:#10b981;--green2:#059669;--gg:rgba(16,185,129,.12);--amber:#f59e0b;--red:#ef4444;--r:12px;--font:'Inter',-apple-system,system-ui,sans-serif;--mono:'JetBrains Mono','SF Mono',monospace}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.6}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88em;font-weight:500}
+.gr{background:linear-gradient(135deg,#34d399,#10b981 50%,#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-card{background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:40px;max-width:460px;width:90%;text-align:center;position:relative;animation:mIn .2s ease-out}
+@keyframes mIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.modal-close{position:absolute;top:14px;right:18px;background:none;border:none;color:var(--text3);font-size:26px;cursor:pointer}.modal-close:hover{color:var(--text)}
+.modal-card h2{font-size:24px;font-weight:700;margin-bottom:10px}
+.modal-card>p{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.modal-form{display:flex;gap:10px;margin-bottom:16px}
+.modal-form input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:14px;color:var(--text);font-family:var(--font);outline:none}
+.modal-form input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gg)}
+.modal-form button{display:flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:all .2s}
+.modal-form button:hover{background:var(--green2)}
+.modal-msg{font-size:13px;min-height:18px}.modal-msg.success{color:var(--green)}.modal-msg.error{color:var(--red)}
+.modal-sub{font-size:13px;color:var(--text3)}.modal-sub a{color:var(--green);text-decoration:none;font-weight:500}
+
+/* Nav */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 0;background:rgba(15,17,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.navbar .container{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-text{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.nav-links{display:flex;align-items:center;gap:22px}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{background:var(--green)!important;color:#fff!important;padding:8px 18px;border-radius:8px;font-weight:600!important}
+.btn-nav:hover{background:var(--green2)!important}
+.mobile-menu-btn{display:none;background:none;border:none;color:var(--text);font-size:18px;cursor:pointer}
+
+/* Hero */
+.hero{padding:140px 0 80px;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse at 40% 40%,rgba(16,185,129,.1),transparent 65%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);padding:7px 16px;border-radius:100px;font-size:12px;font-weight:600;color:var(--green);margin-bottom:24px;text-transform:uppercase;letter-spacing:.5px}
+.badge-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:50px;font-weight:800;line-height:1.08;letter-spacing:-2px;margin-bottom:20px}
+.hero-sub{font-size:16px;color:var(--text2);line-height:1.7;margin-bottom:32px;max-width:500px}
+.hero-ctas{display:flex;gap:12px;margin-bottom:40px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:10px;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 24px var(--gg)}
+.btn-partner{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 20px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);text-decoration:none;color:var(--text);font-size:14px;font-weight:600;transition:all .2s}
+.btn-partner:hover{border-color:var(--text3);background:var(--bg3)}
+.partner-sub{font-size:11px;font-weight:500;color:var(--green)}
+.hero-stats{display:flex;gap:28px;align-items:center}
+.hs{display:flex;flex-direction:column;gap:3px}
+.hs-val{font-size:22px;font-weight:700}
+.hs-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.hs-sep{width:1px;height:36px;background:var(--border)}
+
+/* Terminal */
+.terminal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.t-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%}.dot.r{background:#ef4444}.dot.y{background:#eab308}.dot.g{background:#22c55e}
+.t-title{margin-left:8px;font-size:12px;color:var(--text3);font-family:var(--mono)}
+.t-body{padding:20px;font-family:var(--mono);font-size:12.5px;line-height:2}
+.tl{opacity:0;animation:fadeUp .35s forwards;animation-delay:var(--d);display:flex;gap:8px;color:var(--text2)}
+.ti{flex-shrink:0}
+.tc{color:var(--green);font-weight:600}
+.ts{color:#22c55e;font-weight:600}
+.tw{color:var(--amber);font-weight:500}
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Problem */
+.problem{padding:100px 0;border-top:1px solid var(--border)}
+.sh{text-align:center;margin-bottom:48px}
+.sh-tag{display:inline-block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:14px}
+.sh h2{font-size:34px;font-weight:700;letter-spacing:-.8px;margin-bottom:10px}
+.sh p{font-size:16px;color:var(--text2)}
+.problem-card{max-width:800px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px}
+.runway-viz{margin-bottom:28px}
+.runway-bar{display:flex;height:40px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.runway-build{background:linear-gradient(135deg,var(--green),rgba(16,185,129,.5))}
+.runway-lost{background:linear-gradient(135deg,var(--red),rgba(239,68,68,.6))}
+.runway-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--text2)}
+.runway-red{color:var(--red)}
+.problem-statement{font-size:16px;color:var(--text2);line-height:1.7;margin-bottom:28px;text-align:center}
+.problem-hl{color:var(--red);background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px}
+.problem-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pc-col{padding:24px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3)}
+.pc-col h4{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.pc-before h4{color:var(--text2)}.pc-before h4 i{color:var(--red)}
+.pc-after h4{color:var(--green)}.pc-after h4 i{color:var(--green)}
+.pc-after{border-color:rgba(16,185,129,.2);background:linear-gradient(135deg,rgba(16,185,129,.04),var(--bg3) 60%)}
+.pc-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.pc-col li{font-size:13px;color:var(--text2);padding-left:16px;position:relative}
+.pc-col li::before{content:'';position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%}
+.pc-before li::before{background:var(--red);opacity:.5}
+.pc-after li::before{background:var(--green)}
+
+/* Offering */
+.offering{padding:100px 0;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.offer-pillar{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column}
+.offer-ai{border-color:rgba(16,185,129,.2)}
+.offer-human{border-color:rgba(245,158,11,.15)}
+.op-header{display:flex;gap:16px;align-items:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.op-icon{width:48px;height:48px;background:var(--gg);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.op-icon i{font-size:20px;color:var(--green)}
+.op-icon-human{background:rgba(245,158,11,.1)}.op-icon-human i{color:var(--amber)}
+.op-header h3{font-size:18px;font-weight:700;margin-bottom:2px}
+.op-sub{font-size:13px;color:var(--text3)}
+.op-list{list-style:none;display:flex;flex-direction:column;gap:14px;flex:1}
+.op-list li{display:flex;gap:12px;align-items:flex-start}
+.op-list li>i{width:32px;height:32px;background:var(--gg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--green);flex-shrink:0;margin-top:2px}
+.op-list-human li>i{background:rgba(245,158,11,.1);color:var(--amber)}
+.op-list li div{display:flex;flex-direction:column;gap:1px}
+.op-list li strong{font-size:14px;font-weight:600}
+.op-list li span{font-size:13px;color:var(--text3);line-height:1.4}
+.op-trigger{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--text2)}
+.op-trigger-label{font-weight:600;color:var(--text3);text-transform:uppercase;font-size:11px;letter-spacing:.5px;margin-right:6px}
+.op-or{color:var(--text3);font-style:italic;margin:0 4px}
+.btn-human{display:inline-flex;align-items:center;gap:10px;margin-top:20px;background:transparent;border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;text-decoration:none;transition:all .2s}
+.btn-human:hover{background:rgba(245,158,11,.08);border-color:var(--amber);transform:translateY(-1px)}
+
+/* In Action (Screenshots) */
+.in-action{padding:100px 0;border-bottom:1px solid var(--border)}
+.showcase{max-width:860px;margin:0 auto}
+.showcase-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:4px;overflow-x:auto}
+.stab{flex:1;background:none;border:none;color:var(--text3);font-size:13px;font-weight:500;padding:10px 16px;border-radius:8px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;justify-content:center;white-space:nowrap;font-family:var(--font)}
+.stab:hover{color:var(--text2)}
+.stab.active{background:var(--bg3);color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.stab i{font-size:12px}
+.spanel{display:none;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:var(--bg2)}
+.spanel.active{display:block}
+.spanel img{width:100%;display:block}
+
+/* Problem insight */
+.problem-top{margin-bottom:0}
+.problem-insight{display:flex;gap:16px;align-items:flex-start;padding:20px 24px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:var(--r);margin:24px 0 28px}
+.pi-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;color:#fff}
+.problem-insight p{font-size:14px;color:var(--text2);line-height:1.7;margin:0}
+.problem-insight strong{color:var(--green)}
+
+/* How It Works — Journey */
+.how-section{padding:100px 0;background:var(--bg2);border-bottom:1px solid var(--border)}
+.journey{max-width:780px;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+.j-step{display:flex;gap:20px;align-items:flex-start;width:100%}
+.j-num{width:40px;height:40px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;margin-top:4px}
+.j-card{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:28px 32px}
+.j-card h3{font-size:18px;font-weight:600;margin-bottom:6px}
+.j-card p{font-size:14px;color:var(--text2);line-height:1.6}
+.j-card code{background:rgba(16,185,129,.12);color:var(--green);padding:2px 8px;border-radius:4px;font-size:13px;font-family:var(--mono)}
+.j-card-wide{padding:32px}
+.j-tools{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.j-tools span{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;color:var(--text2)}
+.j-connector{display:flex;justify-content:flex-start;padding-left:19px}
+.j-line{width:2px;height:32px;background:var(--border)}
+
+/* Journey — offer pillars */
+.j-offer{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;margin-top:20px}
+.j-plus{display:flex;align-items:center;justify-content:center;padding:0 18px}
+.j-plus span{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--text3);background:var(--bg2)}
+.j-pillar{border:1px solid var(--border);border-radius:var(--r);padding:24px;background:var(--bg2)}
+.j-pillar-ai{border-color:rgba(16,185,129,.2);background:linear-gradient(145deg,rgba(16,185,129,.05),var(--bg2) 50%)}
+.j-pillar-human{border-color:rgba(245,158,11,.15);background:linear-gradient(145deg,rgba(245,158,11,.04),var(--bg2) 50%)}
+.j-pillar-header{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.j-pillar-icon{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+.j-pillar-icon-human{background:var(--amber)}
+.j-pillar-header strong{font-size:14px;display:block;margin-bottom:2px}
+.j-pillar-header span{font-size:12px;color:var(--text3);display:block}
+.j-pillar-header-human strong{color:var(--amber)}
+.j-pillar-items{display:flex;flex-direction:column;gap:8px}
+.j-pillar-items-human .j-item i{color:var(--amber)}
+.j-item{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
+.j-item i{color:var(--green);font-size:11px;width:16px;text-align:center;flex-shrink:0}
+.j-pillar-trigger{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
+.j-pillar-trigger code{background:rgba(16,185,129,.12);color:var(--green);padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:12px}
+.j-or{color:var(--text3);margin:0 4px}
+.j-human-cta{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 18px;font-size:13px;font-weight:500;color:var(--amber);border:1px solid rgba(245,158,11,.25);border-radius:8px;text-decoration:none;transition:all .2s}
+.j-human-cta:hover{background:rgba(245,158,11,.08);border-color:var(--amber)}
+
+/* CTA */
+.cta-section{padding:120px 0;text-align:center;position:relative}
+.cta-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;background:radial-gradient(ellipse,var(--gg),transparent 65%);pointer-events:none}
+.cta-section .container{position:relative;z-index:1}
+.cta-section h2{font-size:34px;font-weight:700;letter-spacing:-.5px;margin-bottom:14px;line-height:1.2}
+.cta-section p{font-size:16px;color:var(--text2);margin-bottom:32px}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--text2);font-size:14px;font-weight:500;padding:13px 24px;border-radius:10px;text-decoration:none;border:1px solid var(--border);transition:all .2s}
+.btn-secondary:hover{color:var(--text);border-color:var(--text3);background:var(--bg2)}
+
+/* Footer */
+.footer{padding:52px 0 28px;border-top:1px solid var(--border)}
+.footer-top{display:grid;grid-template-columns:1fr auto;gap:64px;margin-bottom:36px}
+.footer-brand p{font-size:13px;color:var(--text3);margin-top:12px}
+.footer-cols{display:flex;gap:56px}
+.footer-cols h4{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin-bottom:14px}
+.footer-cols a{display:block;font-size:13px;color:var(--text3);text-decoration:none;margin-bottom:10px;transition:color .2s}
+.footer-cols a:hover{color:var(--text)}
+.footer-bottom{padding-top:24px;border-top:1px solid var(--border)}
+.footer-bottom p{font-size:12px;color:var(--text3)}
+
+/* Responsive */
+@media(max-width:1024px){
+    .hero-grid{grid-template-columns:1fr;text-align:center}
+    .hero-left{display:flex;flex-direction:column;align-items:center}
+    .hero-sub{max-width:560px}
+    .hero-ctas{justify-content:center}
+    .hero-stats{justify-content:center}
+    .hero-right{order:-1;max-width:580px;margin:0 auto}
+    .offer-grid{grid-template-columns:1fr}
+    .j-offer{grid-template-columns:1fr;gap:0}
+    .j-plus{padding:12px 0}
+}
+@media(max-width:768px){
+    .nav-links{display:none}.mobile-menu-btn{display:block}
+    .hero{padding:120px 0 60px}.hero h1{font-size:34px;letter-spacing:-1px}.hero h1 br{display:none}
+    .hero-ctas{flex-direction:column;align-items:center}
+    .hero-stats{flex-wrap:wrap;gap:20px}.hs-sep{display:none}
+    .problem-compare{grid-template-columns:1fr}
+    .problem-card{padding:24px}
+    .problem-insight{flex-direction:column;gap:12px;text-align:center;align-items:center}
+    .j-step{flex-direction:column;align-items:center}
+    .j-card{width:100%}
+    .j-card-wide{padding:24px}
+    .j-connector{padding-left:0;justify-content:center}
+    .showcase-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .footer-top{grid-template-columns:1fr;gap:32px}.footer-cols{gap:32px;flex-wrap:wrap}
+    .cta-section h2{font-size:26px}
+    .cta-btns{flex-direction:column;align-items:center}
+    .btn-primary,.btn-secondary,.btn-partner{width:100%;max-width:280px;justify-content:center}
+    .modal-form{flex-direction:column}
 }
 </style>
 
 <script>
-// Modal functionality
-const modal = document.getElementById('ea-modal');
-const modalClose = document.getElementById('modal-close');
+// Modal
+const modal=document.getElementById('ea-modal'),modalClose=document.getElementById('modal-close');
+document.querySelectorAll('[data-ea-trigger]').forEach(b=>{b.addEventListener('click',e=>{e.preventDefault();modal.classList.add('active');setTimeout(()=>modal.querySelector('input')?.focus(),100)})});
+modalClose.addEventListener('click',()=>modal.classList.remove('active'));
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('active')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('active')});
 
-// Ovi tag count (times /qa used in PRs & tickets)
-fetch('/api/stats/ovi-tag-count')
-  .then(function(r) { return r.ok ? r.json() : null; })
-  .then(function(data) {
-    var el = document.getElementById('ovi-tag-count');
-    if (el && data && typeof data.count === 'number') el.textContent = data.count;
-  })
-  .catch(function() {});
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{if(a.hasAttribute('data-ea-trigger'))return;a.addEventListener('click',function(e){e.preventDefault();const t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'})})});
 
-document.querySelectorAll('[data-ea-trigger]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        modal.classList.add('active');
-        // Focus the email input after modal opens
-        setTimeout(() => {
-            const emailInput = modal.querySelector('input[type="email"]');
-            if (emailInput) emailInput.focus();
-        }, 100);
+// Ovi tag count
+fetch('/api/stats/ovi-tag-count').then(r=>r.ok?r.json():null).then(d=>{const el=document.getElementById('ovi-tag-count');if(el&&d?.count)el.textContent=d.count}).catch(()=>{});
+
+// Subscribe
+document.getElementById('subscribe-form').addEventListener('submit',async function(e){
+    e.preventDefault();const email=this.email.value,msg=document.getElementById('subscribe-message'),btn=this.querySelector('button');btn.disabled=true;
+    try{const r=await fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();msg.textContent=d.success?'✓ You\'re on the list!':(d.error||'Something went wrong.');msg.className='modal-msg '+(d.success?'success':'error');if(d.success)this.email.value=''}catch{msg.textContent='Something went wrong.';msg.className='modal-msg error'}btn.disabled=false});
+
+// Showcase tabs
+document.querySelectorAll('.stab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+        document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.spanel').forEach(p=>p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
     });
 });
-
-modalClose.addEventListener('click', () => {
-    modal.classList.remove('active');
-});
-
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        modal.classList.remove('active');
-    }
-});
-
-// Close modal on Escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-        modal.classList.remove('active');
-    }
-});
-
-// Smooth scroll for non-modal links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    if (anchor.hasAttribute('data-ea-trigger')) return;
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
-});
-
-// Newsletter subscription
-document.getElementById('subscribe-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const form = this;
-    const email = form.email.value;
-    const message = document.getElementById('subscribe-message');
-    const button = form.querySelector('button');
-    const originalHTML = button.innerHTML;
-    
-    button.disabled = true;
-    button.innerHTML = '<span>Sending...</span>';
-    
-    try {
-        const response = await fetch('/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            message.textContent = '\u2713 You\'re on the list! We\'ll be in touch soon.';
-            message.className = 'ea-message success';
-            form.email.value = '';
-        } else {
-            message.textContent = data.error || 'Something went wrong. Please try again.';
-            message.className = 'ea-message error';
-        }
-    } catch (error) {
-        message.textContent = 'Something went wrong. Please try again.';
-        message.className = 'ea-message error';
-    }
-    
-    button.disabled = false;
-    button.innerHTML = originalHTML;
-});
-
-// Mobile menu toggle
-const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-const navMenu = document.querySelector('.nav-menu');
-
-if (mobileMenuBtn) {
-    mobileMenuBtn.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-    });
-}
 </script>
 
 <!-- Crisp Chat -->
-<script type="text/javascript">
-    window.$crisp=[];
-    window.CRISP_WEBSITE_ID="ca41fe4c-d770-4c1d-94f4-0fcc32a7067f";
-    (function(){
-        d=document;
-        s=d.createElement("script");
-        s.src="https://client.crisp.chat/l.js";
-        s.async=1;
-        d.getElementsByTagName("head")[0].appendChild(s);
-    })();
-</script>
+<script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="ca41fe4c-d770-4c1d-94f4-0fcc32a7067f";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s)})();</script>
 
 <!-- DataFast Analytics -->
 <script defer data-website-id="68b5d8fdc45c08d68dd53e66" data-domain="www.firstqa.dev" src="https://datafa.st/js/script.js"></script>

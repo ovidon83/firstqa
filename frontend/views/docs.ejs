@@ -2,315 +2,235 @@
 
 <div class="container my-5" style="max-width: 900px;">
   <h1 class="fw-bold mb-4 text-center">FirstQA Documentation</h1>
-  <p class="lead text-center mb-5">Your complete guide to Ovi AI — confidence at speed through alignment, test automation, and expert QA.</p>
+  <p class="lead text-center mb-5">Everything you need to know about Ovi AI and how FirstQA works.</p>
 
   <h2 class="mt-5 mb-3">1. What is FirstQA?</h2>
-  <p>FirstQA gives startups <b>confidence at speed</b>. Ovi AI prevents bugs by creating alignment before coding starts, generates test scenarios and automated tests, reviews every PR, and connects you with expert human QA when needed. It's your first QA hire—without the headcount.</p>
+  <p>FirstQA is your <b>AI-powered QA engineer</b>. Ovi AI analyzes every pull request for bugs, risks, and edge cases — generates prioritized test scenarios — runs them in a real browser — and delivers Playwright test code. When you need deeper coverage, on-demand senior QA engineers are one click away.</p>
 
   <h2 class="mt-5 mb-3">2. How It Works</h2>
   <ol>
-    <li><b>🔗 Connect Your Tools:</b> One-time setup with GitHub, Bitbucket, Jira, or Linear</li>
-    <li><b>📋 Ticket Review:</b> Ovi analyzes tickets before coding—surfacing gaps, risks, and edge cases</li>
-    <li><b>🧪 Test Recipe:</b> Get actionable test scenarios engineers can run before code review</li>
-    <li><b>🔍 PR Review:</b> Every pull request analyzed for bugs, risks, and test coverage</li>
-    <li><b>🤖 Test Automation:</b> E2E automated tests generated and integrated into CI/CD</li>
-    <li><b>👥 Manual Testing:</b> Senior QA engineers for complex flows when you need them</li>
+    <li><b>Install the GitHub App:</b> One click — select your repos. No code changes, no CI config.</li>
+    <li><b>Ovi Analyzes Every Change:</b> Automatically on PR open/update, or manually with <code>/qa</code>. Ovi finds bugs, risks, and edge cases.</li>
+    <li><b>Test Recipe:</b> Prioritized test scenarios with exact steps and expected results, generated from the code changes.</li>
+    <li><b>Browser Test Execution:</b> Comment <code>/qa testrun</code> — Ovi's AI agent runs every scenario in a real Chromium browser with screenshots and video.</li>
+    <li><b>Playwright Test Code:</b> Download ready-to-use spec files with accurate selectors and flows.</li>
+    <li><b>Human QA (on-demand):</b> Senior QA engineers for exploratory testing, pre-launch audits, and complex flows.</li>
   </ol>
 
   <h2 class="mt-5 mb-3">3. Getting Started</h2>
-  
-  <h3 class="mt-4 mb-3">Option A: GitHub App (for PR Analysis)</h3>
+
+  <h3 class="mt-4 mb-3">Option A: GitHub App (PR Analysis + Test Execution)</h3>
   <ol>
-    <li><b>Install the GitHub App:</b> <a href="https://github.com/apps/oviai-by-firstqa/installations/new" target="_blank">Install FirstQA</a> on your repository. Choose which repos to enable.</li>
-    <li><b>Open a Pull Request:</b> Create or update a PR in your enabled repository.</li>
-    <li><b>Automatic Analysis:</b> Ovi automatically analyzes your PR—bugs, risks, test scenarios, and release readiness.</li>
-    <li><b>Request Human QA:</b> Add a comment with <code>/test</code> for comprehensive manual testing.</li>
+    <li><b>Install the GitHub App:</b> <a href="https://github.com/apps/oviai-by-firstqa/installations/new" target="_blank">Install FirstQA</a> on your repositories.</li>
+    <li><b>Open a Pull Request:</b> Create or update a PR in an enabled repository.</li>
+    <li><b>Get Analysis:</b> Ovi automatically analyzes the PR — bugs, risks, test scenarios, ship score. Or comment <code>/qa</code> to trigger manually.</li>
+    <li><b>Run Tests:</b> Comment <code>/qa testrun</code> to execute browser tests. Add <code>-env=URL</code> to target a specific environment.</li>
+    <li><b>Download Playwright Tests:</b> Grab the generated spec files from the analysis comment.</li>
   </ol>
-  
-  <h3 class="mt-4 mb-3">Option B: Chrome Extension (for Ticket Analysis)</h3>
+
+  <h3 class="mt-4 mb-3">Option B: Chrome Extension (Ticket Analysis)</h3>
   <ol>
     <li><b>Install the Extension:</b> Add the FirstQA Chrome Extension from your account dashboard.</li>
-    <li><b>Navigate to a Ticket:</b> Open any Jira or Linear ticket in your browser.</li>
-    <li><b>Click Analyze:</b> Ovi analyzes the ticket—surfacing gaps, edge cases, risks, and test scenarios before coding starts.</li>
+    <li><b>Navigate to a Ticket:</b> Open any Linear or Jira ticket in your browser.</li>
+    <li><b>Click Analyze:</b> Ovi reviews the ticket — surfacing gaps, edge cases, risks, and test scenarios before coding starts.</li>
   </ol>
 
-  <h2 class="mt-5 mb-3">4. Ovi AI - Your AI QA Engineer</h2>
-  <p>Ovi creates alignment and confidence at every stage of development:</p>
-  
-  <h3 class="mt-4 mb-3">Ticket Analysis (Before Coding)</h3>
+  <h2 class="mt-5 mb-3">4. Commands</h2>
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr><th>Command</th><th>Where</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>/qa</code></td><td>PR comment</td><td>Run full QA analysis</td></tr>
+        <tr><td><code>/qa testrun</code></td><td>PR comment</td><td>Execute automated browser tests from the latest analysis</td></tr>
+        <tr><td><code>/qa testrun -env=URL</code></td><td>PR comment</td><td>Run tests against a specific environment URL</td></tr>
+        <tr><td><code>/qa testrun -context cookie:name=value</code></td><td>PR comment</td><td>Run tests with auth cookies injected for authentication</td></tr>
+        <tr><td><code>/short</code></td><td>PR comment</td><td>Run a shorter, faster analysis</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="mt-5 mb-3">5. Ovi AI — Your AI QA Engineer</h2>
+  <p>Ovi works on every PR, automatically or on-demand:</p>
+
+  <h3 class="mt-4 mb-3">PR Analysis</h3>
   <ul>
-    <li><b>📋 Requirements Review:</b> Surfaces missing requirements, ambiguity, and edge cases</li>
-    <li><b>⚠️ Risk Flags:</b> Identifies potential issues before code is written</li>
-    <li><b>🧪 Test Scenarios:</b> Generates test cases engineers can use to validate their work</li>
-    <li><b>🤝 Alignment:</b> Ensures engineers, QA, and PM share the same understanding</li>
-  </ul>
-  
-  <h3 class="mt-4 mb-3">PR Analysis (During Code Review)</h3>
-  <ul>
-    <li><b>🔍 Change Review:</b> Analyzes code changes, identifies bugs, and generates smart questions</li>
-    <li><b>🧪 Test Recipe:</b> Creates actionable test scenarios specific to the changes</li>
-    <li><b>📊 Impact Analysis:</b> Identifies affected modules, test coverage gaps, and risks</li>
-    <li><b>⚠️ Release Readiness:</b> Production readiness score (1-10) with confidence assessment</li>
-  </ul>
-  
-  <h3 class="mt-4 mb-3">Test Automation</h3>
-  <ul>
-    <li><b>🤖 E2E Test Generation:</b> Ovi generates automated end-to-end tests for your changes</li>
-    <li><b>🔄 CI/CD Integration:</b> Tests integrate seamlessly into your pipeline</li>
-    <li><b>🛠️ Auto-Maintenance:</b> Tests are updated as your codebase evolves</li>
+    <li><b>Bug Detection:</b> Functional bugs, logic errors, data flow issues, race conditions</li>
+    <li><b>Risk Assessment:</b> Edge cases, state transitions, missing error handling</li>
+    <li><b>UI/UX Review:</b> User-visible issues, confusing flows, inconsistent behavior</li>
+    <li><b>Ship Score:</b> Go/No-Go confidence rating based on the analysis</li>
   </ul>
 
-  <h3 class="mt-4 mb-3">Production Readiness Scoring</h3>
+  <h3 class="mt-4 mb-3">Test Recipe</h3>
+  <ul>
+    <li><b>Prioritized Scenarios:</b> High/medium/low priority based on risk and impact</li>
+    <li><b>Exact Steps:</b> Step-by-step instructions with expected results</li>
+    <li><b>User Journey Order:</b> Scenarios ordered by natural user flow (access → create → edit → delete)</li>
+    <li><b>Executability Score:</b> Each scenario scored for browser automation feasibility</li>
+  </ul>
+
+  <h3 class="mt-4 mb-3">Browser Test Execution</h3>
+  <ul>
+    <li><b>AI Agent:</b> Stagehand agent autonomously navigates and tests in real Chromium</li>
+    <li><b>Cloud Browsers:</b> Runs on Browserbase — no local setup needed</li>
+    <li><b>Evidence:</b> Screenshots and session replay video for every scenario</li>
+    <li><b>Auth Support:</b> Cookie injection via <code>-context</code> or configured credentials</li>
+  </ul>
+
+  <h3 class="mt-4 mb-3">Playwright Test Code</h3>
+  <ul>
+    <li><b>Ready-to-Use:</b> Downloadable <code>.spec.js</code> files with accurate selectors</li>
+    <li><b>Based on Real Code:</b> Selectors and flows extracted from your actual codebase</li>
+    <li><b>Copy & Integrate:</b> Drop into your test suite and run locally or in CI</li>
+  </ul>
+
+  <h3 class="mt-4 mb-3">Ship Score</h3>
   <div class="row g-3 mb-4">
     <div class="col-md-6">
       <div class="card h-100 border-success">
         <div class="card-header bg-success text-white">🚀 9-10: Ship It!</div>
-        <div class="card-body">No critical issues, ready for production</div>
+        <div class="card-body">No critical issues found — ready for production.</div>
       </div>
     </div>
     <div class="col-md-6">
       <div class="card h-100 border-warning">
         <div class="card-header bg-warning text-dark">✅ 7-8: Ship with Monitoring</div>
-        <div class="card-body">Minor issues, can be monitored and fixed quickly</div>
+        <div class="card-body">Minor issues — safe to ship with monitoring.</div>
       </div>
     </div>
     <div class="col-md-6">
       <div class="card h-100 border-warning">
         <div class="card-header bg-warning text-dark">⚠️ 5-6: Needs More Testing</div>
-        <div class="card-body">Potential issues affecting some users</div>
+        <div class="card-body">Potential issues that could affect some users.</div>
       </div>
     </div>
     <div class="col-md-6">
       <div class="card h-100 border-danger">
-        <div class="card-header bg-danger text-white">❌ 3-4: Block Release</div>
-        <div class="card-body">Issues that could significantly impact customer experience</div>
+        <div class="card-header bg-danger text-white">❌ 1-4: Block Release</div>
+        <div class="card-body">Critical issues that could significantly impact users.</div>
       </div>
     </div>
   </div>
 
-  <h2 class="mt-5 mb-3">5. Requesting Human QA Testing</h2>
-  <p>To request comprehensive manual QA testing, add a comment to your PR that starts with <code>/test</code>. You can include details about what you want tested, browsers/devices, and any special requirements.</p>
-  
+  <h2 class="mt-5 mb-3">6. Human QA Engineers (On-Demand)</h2>
+  <p>When you need deeper coverage — before a major release, for complex user flows, or when AI isn't enough:</p>
+  <ul>
+    <li><b>Exploratory Testing:</b> Senior QA engineers test your app before critical releases</li>
+    <li><b>Human Judgment:</b> Complex flows, edge cases, and UX that require human evaluation</li>
+    <li><b>Pre-Launch Audits:</b> Go/no-go confidence on critical releases</li>
+    <li><b>QA Strategy:</b> Process setup, test planning, and embedded QA support</li>
+    <li><b>Pay Per Engagement:</b> No contracts — scale up when it matters</li>
+  </ul>
+  <p><a href="/hire" class="btn btn-outline-primary">Request Human QA</a> or <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank" class="btn btn-outline-secondary">Book a Call</a></p>
+
+  <h2 class="mt-5 mb-3">7. Test Execution Authentication</h2>
+  <p>If your app requires login, you have two options to authenticate the test agent:</p>
+
+  <h3 class="mt-4 mb-3">Option A: Cookie Injection (via command)</h3>
+  <p>Pass auth cookies directly in the <code>/qa testrun</code> command:</p>
   <div class="bg-light rounded p-3 mb-3">
-    <b>Example test request comment:</b>
-    <pre class="bg-white rounded p-3 mt-2"><code>/test
+    <pre class="bg-white rounded p-3 mt-2 mb-0"><code>/qa testrun -env=https://staging.myapp.com -context cookie:session_id=abc123;auth_token=xyz789</code></pre>
+  </div>
+  <p class="text-muted small">Extract cookies from your browser's DevTools (Application → Cookies) while logged in.</p>
 
-Please run a full manual QA on this PR. Here's what I'd like you to focus on:
-- Main goal: Verify the new user onboarding flow (sign up, email verification, and first login).
-- Browsers: Chrome (latest), Firefox (latest), Safari (latest).
-- Devices: Desktop and mobile (iPhone 13, Pixel 6).
-- Test data: Use test email addresses (e.g., test+onboarding1@myapp.com).
-- What to look for:
-  - Any blockers or bugs in the onboarding steps
-  - Usability issues or confusing UI
-  - Broken links, typos, or missing error messages
-  - Accessibility issues (keyboard navigation, screen reader basics)
-  - Edge cases (weak passwords, invalid emails, slow network)
-- Environment: https://staging.myapp.com
-- Test user: testuser / password: Test1234!
-</code></pre>
+  <h3 class="mt-4 mb-3">Option B: Configured Credentials (via dashboard)</h3>
+  <p>Set <code>TEST_USER_EMAIL</code> and <code>TEST_USER_PASSWORD</code> in your FirstQA dashboard settings. The agent will attempt deterministic login with these credentials.</p>
+
+  <h2 class="mt-5 mb-3">8. Integrations</h2>
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead class="table-light">
+        <tr><th>Integration</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>GitHub</b></td><td>PR webhooks, <code>/qa</code> comments, Check Runs, automated analysis on PR open/update</td></tr>
+        <tr><td><b>Linear</b></td><td>Ticket analysis via webhooks and Chrome extension</td></tr>
+        <tr><td><b>Jira</b></td><td>Ticket analysis via Atlassian Connect</td></tr>
+        <tr><td><b>Browserbase</b></td><td>Cloud Chromium browsers for test execution with session replay</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <h2 class="mt-5 mb-3">6. What Happens Next?</h2>
-  <ol>
-    <li>Your test request is received by our expert QA team.</li>
-    <li>Testing usually begins within 4 hours (often much faster).</li>
-    <li>You'll receive comments in your PR with bug reports, usability feedback, and a final test report.</li>
-  </ol>
-
-  <h2 class="mt-5 mb-3">7. Understanding Reports</h2>
-  <p>Bug reports and test reports are posted as comments in your PR. Here's what they look like:</p>
-  
-  <div class="row g-4 mb-4">
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header bg-danger text-white">Bug Report Example</div>
-        <div class="card-body">
-<pre class="bg-light rounded p-2 small"><code>### 🐞 Bug Report
-
-Summary:
-After submitting the sign-up form with a valid email and password, the app shows a "Something went wrong" error and does not create the account.
-
-Steps to Reproduce:
-1. Go to https://staging.myapp.com/signup
-2. Enter a valid email and password
-3. Click "Sign Up"
-4. Observe the error message
-
-Expected Result:
-User account should be created and redirected to the email verification page.
-
-Actual Result:
-An error message appears: "Something went wrong. Please try again later." No account is created.
-</code></pre>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header bg-success text-white">Final Test Report Example</div>
-        <div class="card-body">
-<pre class="bg-light rounded p-2 small"><code>### ✅ Final Test Report
-
-Scope:
-- Full manual QA of the new user onboarding flow
-- Browsers: Chrome, Firefox, Safari (latest)
-- Devices: Desktop (Mac, Windows), Mobile (iPhone 13, Pixel 6)
-
-Summary:
-All critical and high-priority issues have been fixed. The onboarding flow now works smoothly across all tested browsers and devices.
-
-Results:
-- No blockers or major bugs found
-- Minor UI issues from previous round have been fixed
-- Usability is good, error messages are clear
-- Accessibility is improved (labels, focus order)
-
-Recommendation:
-Ready to merge! 🚀
-</code></pre>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <h2 class="mt-5 mb-3">8. Pricing Preview</h2>
-  <p>Here's what we're thinking. Final pricing confirmed before launch. Early access users get special pricing.</p>
-  
-  <div class="row mt-4">
-    <div class="col-md-4 mb-3">
-      <div class="card h-100">
-        <div class="card-header bg-primary text-white text-center">💼 Starter</div>
-        <div class="card-body text-center">
-          <h4 class="card-title">~$49/month</h4>
-          <ul class="list-unstyled small">
-            <li>30 PR reviews</li>
-            <li>30 Ticket analyses</li>
-            <li>Test recipes</li>
-            <li>Email support</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4 mb-3">
-      <div class="card h-100 border-primary border-2">
-        <div class="card-header bg-primary text-white text-center">🏢 Growth</div>
-        <div class="card-body text-center">
-          <h4 class="card-title">~$149/month</h4>
-          <ul class="list-unstyled small">
-            <li>Unlimited PR reviews</li>
-            <li>Unlimited ticket analysis</li>
-            <li>Test automation (E2E)</li>
-            <li>Priority support</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4 mb-3">
-      <div class="card h-100">
-        <div class="card-header bg-dark text-white text-center">👥 Human QA</div>
-        <div class="card-body text-center">
-          <h4 class="card-title">~$1,589/month</h4>
-          <ul class="list-unstyled small">
-            <li>40 hours/month</li>
-            <li>Sr. QA engineers</li>
-            <li>Manual & Automated testing</li>
-            <li>Embedded in your team</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="alert alert-info mt-3">
-    <strong>Note:</strong> Final pricing will be confirmed before launch. <a href="/#early-access">Get early access</a> for special pricing and to help shape the final plans.
-  </div>
-
-  <h2 class="mt-5 mb-3">9. Frequently Asked Questions (FAQ)</h2>
+  <h2 class="mt-5 mb-3">9. FAQ</h2>
   <div class="accordion" id="faqAccordion">
     <div class="accordion-item">
       <h2 class="accordion-header" id="faq1">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1-collapse" aria-expanded="false" aria-controls="faq1-collapse">
-          What's the difference between ticket analysis and PR analysis?
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1-collapse">
+          How does Ovi analyze my PR?
         </button>
       </h2>
-      <div id="faq1-collapse" class="accordion-collapse collapse" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+      <div id="faq1-collapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
         <div class="accordion-body">
-          <b>Ticket analysis</b> happens <em>before</em> coding—Ovi reviews Jira/Linear tickets to surface gaps, edge cases, and risks so engineers know exactly what to build. <b>PR analysis</b> happens <em>during</em> code review—Ovi analyzes code changes to find bugs, suggest tests, and assess release readiness.
+          Ovi reads the PR diff, changed file contents, and commit history. It uses Anthropic Claude to analyze the code for functional bugs, logic errors, edge cases, UI/UX risks, and missing error handling — then generates a prioritized test recipe and ship score.
         </div>
       </div>
     </div>
     <div class="accordion-item">
       <h2 class="accordion-header" id="faq2">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-collapse" aria-expanded="false" aria-controls="faq2-collapse">
-          How does test automation work?
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-collapse">
+          How does browser test execution work?
         </button>
       </h2>
-      <div id="faq2-collapse" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+      <div id="faq2-collapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
         <div class="accordion-body">
-          Ovi generates E2E automated tests based on your changes and test recipes. These tests integrate into your CI/CD pipeline and run automatically. As your codebase evolves, Ovi helps maintain and update the tests.
+          When you comment <code>/qa testrun</code>, Ovi launches an AI agent (Stagehand) in a cloud Chromium browser on Browserbase. The agent autonomously navigates your app, executes each test scenario, captures screenshots, and records video. Results are posted back as a PR comment with pass/fail status and evidence links.
         </div>
       </div>
     </div>
     <div class="accordion-item">
       <h2 class="accordion-header" id="faq3">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3-collapse" aria-expanded="false" aria-controls="faq3-collapse">
-          When should I use human QA vs AI?
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3-collapse">
+          What's the difference between AI and human QA?
         </button>
       </h2>
-      <div id="faq3-collapse" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
+      <div id="faq3-collapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
         <div class="accordion-body">
-          <b>Use Ovi AI</b> for every ticket and PR—it's instant and catches most issues. <b>Use human QA</b> for complex user flows, critical releases, exploratory testing, and when you need deep domain expertise. Many teams use both: AI for speed, humans for depth.
+          <b>Ovi AI</b> runs on every PR — instant, automated, 24/7. It catches functional bugs, generates test scenarios, runs browser tests, and produces Playwright code. <b>Human QA</b> is on-demand for deeper coverage — exploratory testing, complex user flows, pre-launch audits, and cases that require human judgment. Many teams use both.
         </div>
       </div>
     </div>
     <div class="accordion-item">
       <h2 class="accordion-header" id="faq4">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4-collapse" aria-expanded="false" aria-controls="faq4-collapse">
-          How fast will I get results?
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4-collapse">
+          How fast are the results?
         </button>
       </h2>
-      <div id="faq4-collapse" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#faqAccordion">
+      <div id="faq4-collapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
         <div class="accordion-body">
-          <b>Ovi AI analysis:</b> Instant (within seconds)<br>
-          <b>Test automation:</b> Generated with PR analysis, runs in your CI/CD<br>
-          <b>Human QA testing:</b> Usually starts within 4 hours, first results within 4–24 hours
+          <b>PR analysis:</b> 30–90 seconds depending on PR size<br>
+          <b>Browser test execution:</b> 5–15 minutes depending on number of scenarios<br>
+          <b>Human QA:</b> Usually starts within 4 hours, results within 4–24 hours
         </div>
       </div>
     </div>
     <div class="accordion-item">
       <h2 class="accordion-header" id="faq5">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5-collapse" aria-expanded="false" aria-controls="faq5-collapse">
-          What tools does FirstQA integrate with?
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5-collapse">
+          Is my code stored or shared?
         </button>
       </h2>
-      <div id="faq5-collapse" class="accordion-collapse collapse" aria-labelledby="faq5" data-bs-parent="#faqAccordion">
+      <div id="faq5-collapse" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
         <div class="accordion-body">
-          <b>Code hosting:</b> GitHub, Bitbucket<br>
-          <b>Project management:</b> Jira, Linear<br>
-          <b>CI/CD:</b> GitHub Actions, and more coming soon<br>
-          Connect once, and Ovi starts working immediately.
+          No. Code is processed in memory and never permanently stored. FirstQA has read-only access to repository contents and only writes PR comments and Check Runs. All data is transmitted over HTTPS/TLS.
         </div>
       </div>
     </div>
   </div>
 
-  <h2 class="mt-5 mb-3">10. Need Help or Have Questions?</h2>
-  <p>If you have questions, want to give feedback, or need support, you can:</p>
+  <h2 class="mt-5 mb-3">10. Need Help?</h2>
   <ul>
-    <li>Contact us via the <a href="/contact">Contact form</a></li>
-    <li>Schedule a <a href="https://calendly.com/firstqa/demo" target="_blank">demo call</a></li>
     <li>Email us at <a href="mailto:support@firstqa.dev">support@firstqa.dev</a></li>
-    <li>Visit our <a href="/support">Support page</a></li>
+    <li>Schedule a <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank">demo call</a></li>
+    <li>Visit the <a href="/support">Support page</a></li>
   </ul>
 
-  <div class="text-center mt-5">
-    <h3>Ready for Confidence at Speed?</h3>
-    <p class="lead">Join early access and help shape the future of AI-powered QA.</p>
-    <a href="/#early-access" class="btn btn-primary btn-lg me-3">Get Early Access</a>
-    <a href="https://calendly.com/firstqa/demo" class="btn btn-outline-primary btn-lg" target="_blank">Schedule Discovery Call</a>
+  <div class="text-center mt-5 mb-4">
+    <h3>Ready to get started?</h3>
+    <p class="lead">Install FirstQA and get a QA engineer on every PR.</p>
+    <a href="https://github.com/apps/oviai-by-firstqa/installations/new" class="btn btn-primary btn-lg me-3" target="_blank">Install GitHub App</a>
+    <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" class="btn btn-outline-primary btn-lg" target="_blank">Book a Demo</a>
   </div>
 </div>
 
-<!-- Bootstrap JS (for accordion) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

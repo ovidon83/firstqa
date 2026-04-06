@@ -1,98 +1,187 @@
-<%- include('partials/header', { title: 'Contact FirstQA' }) %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact FirstQA</title>
+    <meta name="description" content="Get in touch with the FirstQA team. Questions about Ovi AI, human QA, or partnership? We'd love to hear from you.">
+    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root{--bg:#0f1117;--bg2:#161a23;--bg3:#1c2130;--bg4:#242a38;--border:#262d3d;--border2:#313a4d;--text:#e8eaf0;--text2:#9ca3b8;--text3:#6b7280;--green:#10b981;--green2:#059669;--gg:rgba(16,185,129,.12);--amber:#f59e0b;--red:#ef4444;--r:12px;--font:'Inter',-apple-system,system-ui,sans-serif;--mono:'JetBrains Mono','SF Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:var(--green);text-decoration:none;transition:color .2s}
+a:hover{color:var(--green2)}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
 
-<div class="container py-5">
-  <div class="row">
-    <div class="col-lg-8 mx-auto">
-      <h1 class="text-center mb-4">Contact Us</h1>
-      <p class="lead text-center mb-5">Have questions about FirstQA? We're here to help!</p>
-      
-      <div class="card shadow">
-        <div class="card-body p-4 p-md-5">
-          <form action="/contact" method="POST">
-            <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0">
-                <label for="name" class="form-label">Your Name</label>
-                <input type="text" class="form-control" id="name" name="name" required>
-              </div>
-              <div class="col-md-6">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-              </div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="subject" class="form-label">Subject</label>
-              <input type="text" class="form-control" id="subject" name="subject" required>
-            </div>
-            
-            <div class="mb-3">
-              <label for="message" class="form-label">Message</label>
-              <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-            </div>
-            
-            <div class="mb-3">
-              <label for="service" class="form-label">I'm interested in</label>
-              <select class="form-select" id="service" name="service">
-                <option value="manual-testing">Manual Testing for PRs</option>
-                <option value="test-strategy">Test Strategy Consulting</option>
-                <option value="test-process">Testing Process Implementation</option>
-                <option value="test-automation">Test Automation Services</option>
-                <option value="other">Other Services</option>
-              </select>
-            </div>
-            
-            <div class="form-check mb-4">
-              <input class="form-check-input" type="checkbox" id="subscribe" name="subscribe">
-              <label class="form-check-label" for="subscribe">
-                Subscribe to our newsletter for product updates
-              </label>
-            </div>
-            
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
-            </div>
-          </form>
-        </div>
-      </div>
-      
-      <div class="row mt-5">
-        <div class="col-md-4 text-center mb-4 mb-md-0">
-          <div class="d-inline-block p-3 bg-light rounded-circle mb-3">
-            <i class="bi bi-envelope text-primary" style="font-size: 2rem;"></i>
-          </div>
-          <h3>Email</h3>
-          <p><a href="mailto:hello@firstqa.dev">hello@firstqa.dev</a></p>
-        </div>
-        <div class="col-md-4 text-center mb-4 mb-md-0">
-          <div class="d-inline-block p-3 bg-light rounded-circle mb-3">
-            <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
-          </div>
-          <h3>Book a Call</h3>
-                          <p><a href="https://calendly.com/firstqa/demo" target="_blank">Schedule a meeting</a></p>
-        </div>
-        <div class="col-md-4 text-center">
-          <div class="d-inline-block p-3 bg-light rounded-circle mb-3">
-            <i class="bi bi-github text-primary" style="font-size: 2rem;"></i>
-          </div>
-          <h3>GitHub</h3>
-          <p><a href="https://github.com/ovidon83" target="_blank">@ovidon83</a></p>
-        </div>
-      </div>
-      
-      <!-- Additional Services Info -->
-      <div class="mt-5 p-4 bg-light rounded">
-        <h3 class="mb-3">Additional Services</h3>
-        <p>In addition to our PR testing service, we also offer:</p>
-        <ul class="mb-3">
-          <li><strong>Test Strategy Development:</strong> Develop a comprehensive testing approach for your product</li>
-          <li><strong>Testing Process Implementation:</strong> Establish efficient testing workflows and documentation</li>
-          <li><strong>Test Automation Consulting:</strong> Guidance on building scalable test automation</li>
-          <li><strong>Quality Assurance Training:</strong> Train your team on quality best practices</li>
-        </ul>
-                    <p>Contact us to learn more about our additional services or <a href="https://calendly.com/firstqa/demo" target="_blank">book a discovery call</a>.</p>
-      </div>
+/* Nav */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 0;background:rgba(15,17,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.navbar .container{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-text{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.nav-back{color:var(--text2);text-decoration:none;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;transition:color .2s}
+.nav-back:hover{color:var(--text)}
+
+/* Page */
+.page{padding:120px 0 80px}
+.page-header{text-align:center;margin-bottom:56px}
+.page-header h1{font-size:36px;font-weight:700;letter-spacing:-.5px;margin-bottom:12px}
+.page-header p{font-size:16px;color:var(--text2);max-width:480px;margin:0 auto}
+
+/* Alert */
+.alert{max-width:600px;margin:0 auto 32px;padding:14px 20px;border-radius:var(--r);font-size:14px;text-align:center}
+.alert-success{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+.alert-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+
+/* Layout */
+.contact-layout{display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:start}
+
+/* Form */
+.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:36px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:14px;color:var(--text);font-family:var(--font);outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gg)}
+.form-group textarea{resize:vertical;min-height:120px}
+.form-group select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.form-group select option{background:var(--bg2);color:var(--text)}
+.form-check{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+.form-check input[type="checkbox"]{width:16px;height:16px;accent-color:var(--green);cursor:pointer}
+.form-check label{font-size:13px;color:var(--text3);cursor:pointer}
+.btn-submit{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;padding:14px 24px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font);transition:all .2s}
+.btn-submit:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 24px var(--gg)}
+
+/* Sidebar */
+.contact-sidebar{display:flex;flex-direction:column;gap:20px}
+.sidebar-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+.sidebar-card h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.sidebar-card p{font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.5}
+.sidebar-card .sc-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--green)}
+.sidebar-card .sc-link:hover{color:var(--green2)}
+.sidebar-card .sc-icon{width:36px;height:36px;background:var(--gg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--green);margin-bottom:14px}
+.sidebar-card-amber .sc-icon{background:rgba(245,158,11,.1);color:var(--amber)}
+.sidebar-card-amber .sc-link{color:var(--amber)}
+.sidebar-card-amber .sc-link:hover{color:#d97706}
+
+/* Footer */
+.footer{padding:32px 0;border-top:1px solid var(--border);text-align:center}
+.footer p{font-size:12px;color:var(--text3)}
+.footer a{color:var(--text3);margin:0 8px}
+.footer a:hover{color:var(--text)}
+
+@media(max-width:768px){
+    .contact-layout{grid-template-columns:1fr;gap:32px}
+    .form-row{grid-template-columns:1fr}
+    .page-header h1{font-size:28px}
+    .form-card{padding:24px}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="logo">
+            <svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#059669"/></linearGradient></defs><circle cx="16" cy="16" r="14" fill="url(#lg)"/><path d="M10 16 L14 20 L22 11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            <span class="logo-text">FirstQA</span>
+        </a>
+        <a href="/" class="nav-back"><i class="fas fa-arrow-left"></i> Back to home</a>
     </div>
-  </div>
-</div>
+</nav>
 
-<%- include('partials/footer') %> 
+<main class="page">
+    <div class="container">
+        <div class="page-header">
+            <h1>Get in Touch</h1>
+            <p>Questions about Ovi AI, human QA, or want to become a launch partner? We&rsquo;d love to hear from you.</p>
+        </div>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> <%= success %></div>
+        <% } %>
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <%= error %></div>
+        <% } %>
+
+        <div class="contact-layout">
+            <div class="form-card">
+                <form action="/contact" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" placeholder="Jane Smith" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="jane@company.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="service">I&rsquo;m interested in</label>
+                        <select id="service" name="service">
+                            <option value="ovi-ai">Ovi AI &mdash; PR &amp; ticket analysis</option>
+                            <option value="test-execution">Automated test execution</option>
+                            <option value="human-qa">On-demand human QA</option>
+                            <option value="launch-partner">Becoming a launch partner</option>
+                            <option value="demo">Scheduling a demo</option>
+                            <option value="other">Something else</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" placeholder="What can we help with?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Tell us about your team, what you're building, or what you need help with..." required></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" id="subscribe" name="subscribe">
+                        <label for="subscribe">Keep me updated on FirstQA product news</label>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send Message</button>
+                </form>
+            </div>
+
+            <div class="contact-sidebar">
+                <div class="sidebar-card">
+                    <div class="sc-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Book a Call</h3>
+                    <p>Prefer a live conversation? Schedule a 15-minute call with the founder.</p>
+                    <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank" class="sc-link">Schedule now <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sc-icon"><i class="fas fa-envelope"></i></div>
+                    <h3>Email Us</h3>
+                    <p>Drop us a line anytime &mdash; we typically respond within a few hours.</p>
+                    <a href="mailto:hello@firstqa.dev" class="sc-link">hello@firstqa.dev <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="sidebar-card sidebar-card-amber">
+                    <div class="sc-icon"><i class="fas fa-user-check"></i></div>
+                    <h3>Need Human QA?</h3>
+                    <p>Senior QA engineers on-demand &mdash; exploratory testing, pre-launch audits, and more.</p>
+                    <a href="/hire" class="sc-link">Request QA <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; <%= new Date().getFullYear() %> FirstQA &mdash;
+            <a href="/">Home</a>
+            <a href="/docs">Docs</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>

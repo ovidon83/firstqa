@@ -1,56 +1,33 @@
-/**
- * Persisted count of how many times /qa was used in PRs and tickets (GitHub, Linear, Jira, Bitbucket).
- * Used for the landing page "Times Ovi Tagged" stat. Baseline 182 = historical count before tracking.
- */
-const fs = require('fs');
-const path = require('path');
+const { supabaseAdmin } = require('../lib/supabase');
 
-const COUNT_FILE = path.join(__dirname, '../../data/ovi-tag-count.json');
 const DEFAULT_COUNT = 182;
+let cachedCount = null;
+let cacheExpiry = 0;
+const CACHE_TTL = 60_000; // 1 minute
 
-function ensureDataDir() {
-  const dir = path.dirname(COUNT_FILE);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+async function getCount() {
+  if (cachedCount !== null && Date.now() < cacheExpiry) {
+    return cachedCount;
   }
-}
 
-function readCount() {
+  if (!supabaseAdmin) {
+    return DEFAULT_COUNT;
+  }
+
   try {
-    if (fs.existsSync(COUNT_FILE)) {
-      const data = JSON.parse(fs.readFileSync(COUNT_FILE, 'utf8'));
-      return typeof data.count === 'number' ? data.count : DEFAULT_COUNT;
-    }
-  } catch (err) {
-    console.warn('oviTagCount: read failed', err.message);
-  }
-  return DEFAULT_COUNT;
-}
+    const { count, error } = await supabaseAdmin
+      .from('analyses')
+      .select('*', { count: 'exact', head: true });
 
-/**
- * Get current count (for API). Does not modify.
- */
-function getCount() {
-  return readCount();
-}
+    if (error) throw error;
 
-/**
- * Increment the count by 1 and persist. Call when a /qa command is accepted and will be processed.
- */
-function increment() {
-  ensureDataDir();
-  const count = readCount() + 1;
-  try {
-    fs.writeFileSync(
-      COUNT_FILE,
-      JSON.stringify({ count, updatedAt: new Date().toISOString() }, null, 2),
-      'utf8'
-    );
-    return count;
+    cachedCount = count || DEFAULT_COUNT;
+    cacheExpiry = Date.now() + CACHE_TTL;
+    return cachedCount;
   } catch (err) {
-    console.warn('oviTagCount: increment write failed', err.message);
-    return readCount();
+    console.warn('oviTagCount: Supabase query failed', err.message);
+    return cachedCount || DEFAULT_COUNT;
   }
 }
 
-module.exports = { getCount, increment };
+module.exports = { getCount };

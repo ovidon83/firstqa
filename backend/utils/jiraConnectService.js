@@ -44,10 +44,6 @@ async function processConnectWebhook(payload, installation) {
     console.log('🧪 /qa command detected! Processing analysis...');
     console.log(`📝 Comment preview: "${commentText.substring(0, 100)}..."`);
 
-    try {
-      const oviTagCount = require('./oviTagCount');
-      oviTagCount.increment();
-    } catch (e) { /* non-fatal */ }
 
     // Fetch full ticket details
     const ticketDetails = await fetchTicketDetails(issue.key, installation);
