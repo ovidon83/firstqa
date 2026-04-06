@@ -1264,12 +1264,6 @@ function parseTestRecipeFromAiResponse(aiData) {
  */
 async function handleTestRequest(repository, issue, comment, sender, userId = null, installationId = null) {
   const analysisStartMs = Date.now();
-  try {
-    const oviTagCount = require('./oviTagCount');
-    oviTagCount.increment();
-  } catch (e) {
-    // non-fatal
-  }
   console.log(`Processing test request from ${sender.login} on PR #${issue.number} (${repository.full_name})`);
   console.log(`Repository: ${repository.full_name}`);
   console.log(`Comment: ${comment.body}`);

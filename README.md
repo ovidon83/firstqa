@@ -1,8 +1,8 @@
 # FirstQA
 
-> AI-powered QA analysis for GitHub pull requests.
+> AI-powered QA engineer for GitHub pull requests — your first QA hire.
 
-FirstQA is a GitHub App that analyzes your PRs like a senior QA engineer. Comment `/qa` on any pull request to get an instant analysis with bug detection, risk assessment, and a prioritized test recipe — then optionally run automated browser tests with `/qa testrun`.
+FirstQA is a GitHub App that acts as a senior QA engineer on every PR. Comment `/qa` on any pull request (or enable automatic analysis on PR open/update) to get instant bug detection, risk assessment, a prioritized test recipe, and ready-to-use Playwright test code — then run automated browser tests with `/qa testrun`.
 
 **Live at [firstqa.dev](https://www.firstqa.dev)**
 
@@ -11,19 +11,24 @@ FirstQA is a GitHub App that analyzes your PRs like a senior QA engineer. Commen
 ## How It Works
 
 1. Install the **FirstQA GitHub App** on your repos
-2. Open a PR and comment `/qa`
-3. Ovi AI analyzes the diff and posts a detailed QA report:
+2. Open a PR — Ovi analyzes automatically (or comment `/qa` to trigger manually)
+3. Ovi posts a detailed QA report:
    - **Ship Score** — confidence rating with Go/No-Go recommendation
-   - **Bugs & Risks** — potential issues, missing error handling, security concerns
+   - **Bugs & Risks** — functional bugs, logic errors, edge cases, UI/UX risks
    - **Test Recipe** — prioritized test scenarios with steps and expected results
+   - **Playwright Tests** — ready-to-use spec files with accurate selectors
    - **Questions** — critical questions a QA engineer would ask
-4. Optionally, comment `/qa testrun` to execute browser tests automatically
+4. Comment `/qa testrun` to execute browser tests with an AI agent in real Chromium
 
 ## Features
 
-- **PR Analysis** — Deep code analysis powered by OpenAI GPT-4o
-- **Automated Test Execution** — Cloud browser testing via Browserbase + Playwright
-- **Executability Scoring** — AI evaluates which test scenarios can be automated vs. need manual testing
+- **PR Analysis** — Deep code analysis powered by Anthropic Claude Sonnet
+- **Ticket Analysis** — Review Linear/Jira tickets for gaps before development starts
+- **Test Recipe** — Prioritized test scenarios generated from code changes
+- **Automated Test Execution** — AI agent runs tests in cloud browsers via Stagehand + Browserbase
+- **Playwright Test Code** — Downloadable spec files with accurate selectors and flows
+- **Executability Scoring** — AI evaluates which scenarios can be automated vs. need manual testing
+- **Test Reports** — Pass/fail results with screenshots and video posted on the PR
 - **GitHub Checks Integration** — Results posted as PR comments and Check Runs
 - **Linear Integration** — Trigger `/qa` analysis from Linear issue comments
 - **Chrome Extension** — Analyze Linear/Jira tickets directly from your browser
@@ -34,10 +39,11 @@ FirstQA is a GitHub App that analyzes your PRs like a senior QA engineer. Commen
 | Layer | Technology |
 |-------|-----------|
 | Runtime | Node.js 18+, Express |
-| Views | EJS templates, Bootstrap 5 |
+| Views | EJS templates |
 | Database | Supabase (PostgreSQL) |
-| AI | OpenAI API (GPT-4o) |
-| Browser Testing | Browserbase (cloud browsers) + Playwright |
+| AI — Analysis | Anthropic Claude Sonnet |
+| AI — Test Execution | Anthropic Claude Haiku (via Stagehand agent) |
+| Browser Testing | Stagehand + Browserbase (cloud Chromium) + Playwright |
 | Auth | Supabase Auth, GitHub OAuth |
 | Integrations | GitHub App, Linear, Jira Connect |
 | Deployment | Render |
@@ -54,11 +60,9 @@ FirstQA/
 │   └── utils/           # GitHub service, auth, email, diff parsing
 ├── frontend/
 │   ├── views/           # EJS templates (dashboard, auth, onboarding, marketing)
-│   ├── public/          # Static assets (CSS, logos, images)
-│   └── chrome_extension/# Chrome extension source
+│   └── public/          # Static assets (CSS, logos, images)
 ├── supabase/
 │   └── migrations/      # Database schema migrations
-├── scripts/             # Ops and dev scripts
 ├── docs/                # Documentation
 ├── webhook-server.js    # Application entry point
 └── .env.example         # Environment variable template
@@ -70,7 +74,8 @@ FirstQA/
 
 - Node.js 18+ and npm
 - A [Supabase](https://supabase.com) project (free tier works)
-- An [OpenAI API](https://platform.openai.com) key
+- An [Anthropic API](https://console.anthropic.com) key (primary AI provider)
+- An [OpenAI API](https://platform.openai.com) key (optional, secondary)
 - A registered [GitHub App](https://docs.github.com/en/apps/creating-github-apps)
 
 ### Setup
@@ -97,7 +102,8 @@ The server starts at `http://localhost:3000`.
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
 | `SUPABASE_SERVICE_KEY` | Yes | Supabase service role key |
-| `OPENAI_API_KEY` | Yes | OpenAI API key |
+| `ANTHROPIC_API_KEY` | Yes | Anthropic API key (primary AI provider) |
+| `OPENAI_API_KEY` | Optional | OpenAI API key (fallback) |
 | `GITHUB_APP_ID` | Yes | GitHub App ID |
 | `GITHUB_PRIVATE_KEY` | Yes | GitHub App private key (PEM) |
 | `GITHUB_WEBHOOK_SECRET` | Yes | Webhook signature secret |
@@ -113,7 +119,8 @@ See `.env.example` for the full list including Linear, Jira, Stripe, and SMTP co
 |---------|-------|-------------|
 | `/qa` | PR comment | Run full QA analysis |
 | `/qa testrun` | PR comment | Execute automated browser tests from the latest analysis |
-| `/qa testrun -env=URL` | PR comment | Run tests against a specific URL |
+| `/qa testrun -env=URL` | PR comment | Run tests against a specific environment URL |
+| `/qa testrun -context cookie:name=value` | PR comment | Run tests with auth cookies injected |
 | `/short` | PR comment | Run a shorter, faster analysis |
 
 ## Security & Privacy
