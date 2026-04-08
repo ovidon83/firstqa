@@ -208,6 +208,9 @@ app.get('/signup', (req, res) => {
 // Logout shortcut
 app.get('/logout', (req, res) => res.redirect('/auth/logout'));
 
+// Beta test guide
+app.get('/beta-test', (req, res) => res.render('beta-test'));
+
 // Onboarding routes (before dashboard - middleware may redirect)
 const onboardingRoutes = require('./backend/routes/onboarding');
 app.use('/onboarding', onboardingRoutes);
