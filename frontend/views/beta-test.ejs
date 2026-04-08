@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirstQA — Beta Test Guide</title>
+    <meta name="description" content="Step-by-step guide to test FirstQA end-to-end. From signup to your first AI-powered PR analysis and browser test run.">
+    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root{--bg:#0f1117;--bg2:#161a23;--bg3:#1c2130;--bg4:#242a38;--border:#262d3d;--border2:#313a4d;--text:#e8eaf0;--text2:#9ca3b8;--text3:#6b7280;--green:#10b981;--green2:#059669;--gg:rgba(16,185,129,.12);--amber:#f59e0b;--red:#ef4444;--r:12px;--font:'Inter',-apple-system,system-ui,sans-serif;--mono:'JetBrains Mono','SF Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:var(--green);text-decoration:none;transition:color .2s}
+a:hover{color:var(--green2)}
+code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88em;font-weight:500}
+.container{max-width:720px;margin:0 auto;padding:0 24px}
+
+.navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 0;background:rgba(15,17,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.navbar .container{max-width:720px;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-text{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.nav-back{color:var(--text2);text-decoration:none;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;transition:color .2s}
+.nav-back:hover{color:var(--text)}
+
+.page{padding:110px 0 80px}
+.page-header{text-align:center;margin-bottom:48px}
+.page-header h1{font-size:32px;font-weight:700;letter-spacing:-.5px;margin-bottom:10px}
+.page-header p{font-size:15px;color:var(--text2);max-width:520px;margin:0 auto;line-height:1.7}
+
+.prereq{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px 28px;margin-bottom:40px}
+.prereq h2{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:12px}
+.prereq ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.prereq li{font-size:14px;color:var(--text2);display:flex;align-items:center;gap:10px}
+.prereq li i{color:var(--green);font-size:12px;width:16px;text-align:center}
+
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:20px;align-items:flex-start}
+.step-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.step-num{width:40px;height:40px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff}
+.step-line{width:2px;flex:1;min-height:24px;background:var(--border)}
+.step-content{flex:1;padding-bottom:32px}
+.step-content h3{font-size:16px;font-weight:600;margin-bottom:6px}
+.step-content p{font-size:14px;color:var(--text2);line-height:1.7}
+.step-content .cmd{display:block;margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--green);overflow-x:auto}
+.step-content .note{margin-top:10px;font-size:13px;color:var(--text3);font-style:italic}
+.step-tag{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:3px 8px;border-radius:4px;margin-bottom:8px}
+.tag-once{background:rgba(16,185,129,.1);color:var(--green)}
+.tag-every{background:rgba(245,158,11,.1);color:var(--amber)}
+
+.divider{display:flex;align-items:center;gap:16px;margin:20px 0 32px;padding-left:60px}
+.divider span{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.friction{margin-top:48px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px 28px}
+.friction h2{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--amber);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.friction ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.friction li{font-size:13px;color:var(--text2);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.friction li i{color:var(--amber);margin-top:3px;flex-shrink:0}
+
+.cta-box{text-align:center;margin-top:48px;padding:40px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)}
+.cta-box h2{font-size:20px;font-weight:600;margin-bottom:8px}
+.cta-box p{font-size:14px;color:var(--text2);margin-bottom:20px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;padding:13px 24px;border-radius:10px;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 24px var(--gg)}
+
+.footer{padding:32px 0;border-top:1px solid var(--border);text-align:center;margin-top:60px}
+.footer p{font-size:12px;color:var(--text3)}
+
+@media(max-width:640px){
+    .page-header h1{font-size:26px}
+    .step{gap:14px}
+    .step-content{padding-bottom:24px}
+    .divider{padding-left:54px}
+    .prereq,.friction{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="logo">
+            <svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#059669"/></linearGradient></defs><circle cx="16" cy="16" r="14" fill="url(#lg)"/><path d="M10 16 L14 20 L22 11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            <span class="logo-text">FirstQA</span>
+        </a>
+        <a href="/" class="nav-back"><i class="fas fa-arrow-left"></i> Back to home</a>
+    </div>
+</nav>
+
+<main class="page">
+    <div class="container">
+        <div class="page-header">
+            <h1>Beta Test Guide</h1>
+            <p>From visiting firstqa.dev to your first AI-powered PR analysis and browser test run &mdash; in 9 steps.</p>
+        </div>
+
+        <div class="prereq">
+            <h2>What you need</h2>
+            <ul>
+                <li><i class="fab fa-github"></i> A GitHub account</li>
+                <li><i class="fas fa-code-branch"></i> A repo with at least one open PR (or ability to create one)</li>
+            </ul>
+        </div>
+
+        <div class="steps">
+
+            <div class="divider"><span>One-time setup (steps 1&ndash;7)</span></div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">1</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Sign Up</h3>
+                    <p>Go to <a href="https://www.firstqa.dev/signup" target="_blank">firstqa.dev/signup</a>. Enter your name, email, and password &mdash; or click <strong>&ldquo;Continue with GitHub&rdquo;</strong> for one-click signup.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">2</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Onboarding: Workspace</h3>
+                    <p>Fill in your company name, team size, and quality goals. Click <strong>Continue</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">3</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Start Free Trial</h3>
+                    <p>Click <strong>&ldquo;Start Free Trial&rdquo;</strong>. You get a 5-day trial with full access.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">4</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Connect GitHub</h3>
+                    <p>Click <strong>&ldquo;Connect GitHub&rdquo;</strong>. You&rsquo;ll be redirected to GitHub to install the FirstQA app. Select the org or account, choose your repos (or all), and click <strong>Install</strong>. You&rsquo;ll be redirected back automatically.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">5</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Staging URL</h3>
+                    <p>Enter a staging or production URL for the app you want to test (used for browser test execution). You can also <strong>skip</strong> this and provide it later in the command.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">6</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Repo Indexing</h3>
+                    <p>Select which repos to index. Wait ~30 seconds for indexing to complete. Click <strong>Continue</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">7</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-once">One-time</span>
+                    <h3>Complete Setup</h3>
+                    <p>Click <strong>&ldquo;Complete Setup&rdquo;</strong>. You land on your dashboard. Setup is done!</p>
+                </div>
+            </div>
+
+            <div class="divider"><span>Use on every PR</span></div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">8</div>
+                    <div class="step-line"></div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-every">Every PR</span>
+                    <h3>Trigger PR Analysis</h3>
+                    <p>Go to any open PR in one of your connected repos. Post a comment:</p>
+                    <span class="cmd">/qa</span>
+                    <p style="margin-top:10px">Wait ~60 seconds. Ovi posts a full QA analysis &mdash; bugs, risks, test recipe, ship score &mdash; directly on the PR.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-left">
+                    <div class="step-num">9</div>
+                </div>
+                <div class="step-content">
+                    <span class="step-tag tag-every">Every PR</span>
+                    <h3>Run Browser Tests</h3>
+                    <p>On the same PR, post another comment:</p>
+                    <span class="cmd">/qa testrun -env=https://your-staging-url.com</span>
+                    <p style="margin-top:10px">Wait ~5&ndash;10 minutes. Ovi&rsquo;s AI agent runs every test scenario in a real Chromium browser and posts a report with pass/fail, screenshots, and video links.</p>
+                    <p class="note">If your app requires login, add auth cookies: <code>/qa testrun -env=URL -context cookie:session=value</code></p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="friction">
+            <h2><i class="fas fa-lightbulb"></i> Good to know</h2>
+            <ul>
+                <li><i class="fas fa-circle-info"></i> If you don&rsquo;t have a GitHub org, installing on your personal account works fine.</li>
+                <li><i class="fas fa-circle-info"></i> If you skip the staging URL in onboarding, just pass <code>-env=URL</code> in the testrun command.</li>
+                <li><i class="fas fa-circle-info"></i> If your app requires login, extract cookies from your browser&rsquo;s DevTools (Application &rarr; Cookies) and pass them with <code>-context</code>.</li>
+                <li><i class="fas fa-circle-info"></i> After setup, you only need steps 8 &amp; 9. Comment <code>/qa</code> on any PR, anytime.</li>
+            </ul>
+        </div>
+
+        <div class="cta-box">
+            <h2>Ready to start?</h2>
+            <p>Create your account and get your first QA analysis in under 5 minutes.</p>
+            <a href="/signup" class="btn-primary"><i class="fas fa-rocket"></i> Sign Up Free</a>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; <%= new Date().getFullYear() %> FirstQA &mdash; Questions? <a href="mailto:hello@firstqa.dev">hello@firstqa.dev</a></p>
+    </div>
+</footer>
+
+</body>
+</html>
