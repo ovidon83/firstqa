@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FirstQA — Beta Test Guide</title>
     <meta name="description" content="Step-by-step guide to test FirstQA end-to-end. From signup to your first AI-powered PR analysis and browser test run.">
-    <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/logo/firstqa-logo-mark.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
@@ -20,7 +20,7 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 0;background:rgba(15,17,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .navbar .container{max-width:720px;display:flex;justify-content:space-between;align-items:center}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
-.logo-text{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.logo-img{display:block;height:32px;width:auto}
 .nav-back{color:var(--text2);text-decoration:none;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;transition:color .2s}
 .nav-back:hover{color:var(--text)}
 
@@ -81,10 +81,7 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 
 <nav class="navbar">
     <div class="container">
-        <a href="/" class="logo">
-            <svg width="28" height="28" viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10b981"/><stop offset="100%" style="stop-color:#059669"/></linearGradient></defs><circle cx="16" cy="16" r="14" fill="url(#lg)"/><path d="M10 16 L14 20 L22 11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-            <span class="logo-text">FirstQA</span>
-        </a>
+        <a href="/" class="logo"><img src="/logo/firstqa-logo-dark.svg" alt="FirstQA" class="logo-img"></a>
         <a href="/" class="nav-back"><i class="fas fa-arrow-left"></i> Back to home</a>
     </div>
 </nav>

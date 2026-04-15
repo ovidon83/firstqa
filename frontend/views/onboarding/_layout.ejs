@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= typeof title !== 'undefined' ? title : 'Onboarding' %> - FirstQA</title>
-  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/logo/firstqa-logo-mark.svg">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
@@ -51,17 +51,10 @@
       font-size: 1.25rem;
       color: var(--text);
     }
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: white;
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
     }
     .progress-bar {
       display: flex;
@@ -293,7 +286,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="/dashboard" class="logo">
-        <span class="logo-icon">O</span>
+        <img src="/logo/firstqa-logo-mark.svg" alt="" class="logo-mark" width="28" height="28">
         <span>FirstQA</span>
       </a>
       <div class="progress-bar" role="progressbar" aria-valuenow="<%= progress || 1 %>" aria-valuemin="1" aria-valuemax="5">

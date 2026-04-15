@@ -29,17 +29,11 @@
   font-size: 1.25rem;
   color: #f4f4f5;
 }
-.onboarding .logo-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: white;
+.onboarding .logo-mark {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: block;
 }
 .onboarding .progress-bar {
   display: flex;

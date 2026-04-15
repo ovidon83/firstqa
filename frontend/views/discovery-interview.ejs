@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title || 'Become a Launch Partner - FirstQA' %></title>
   <meta name="description" content="Help shape the future of QA for startups. Try FirstQA free for 3 months, give feedback, get 50% off for life.">
-  <link rel="icon" type="image/svg+xml" href="/logos/firstqa-favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/logo/firstqa-logo-mark.svg">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -45,7 +45,7 @@
       font-size: 1.125rem;
       margin-bottom: 2rem;
     }
-    .di-logo svg { flex-shrink: 0; }
+    .di-logo-img { display: block; height: 28px; width: auto; flex-shrink: 0; }
     .di-card {
       background: var(--fqa-card-bg);
       border-radius: 12px;
@@ -283,17 +283,7 @@
 <body>
   <div class="di-wrap">
     <a href="/" class="di-logo">
-      <svg width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="diLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#0d9488" />
-            <stop offset="100%" style="stop-color:#059669" />
-          </linearGradient>
-        </defs>
-        <circle cx="16" cy="16" r="14" fill="url(#diLogoGrad)"/>
-        <path d="M10 16 L14 20 L22 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      </svg>
-      FirstQA
+      <img src="/logo/firstqa-logo-light.svg" alt="FirstQA" class="di-logo-img">
     </a>
 
     <!-- Landing -->
