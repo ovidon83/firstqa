@@ -2392,25 +2392,54 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
   // Parse flags from comment
   const envMatch = comment.body.match(/-env=(\S+)/i);
   const envUrl = envMatch ? envMatch[1].trim() : null;
-  const contextMatch = comment.body.match(/-context="([^"]+)"/i) || comment.body.match(/-context=(\S+)/i);
+  // Accept -context in any format: quoted or to end-of-line
+  // e.g: -context="email: foo@bar.com; password: Abc123. The app is a todo app."
+  //      -context=cookie:session=abc123
+  const contextMatch = comment.body.match(/-context="([^"]+)"/i)
+    || comment.body.match(/-context=(.+?)(?:\s+-\w|$)/is);
   const rawContext = contextMatch ? contextMatch[1].trim() : null;
 
-  // Extract cookie: entries from context, pass remaining text as userContext
+  // Always pass the full raw text to the agent so it can interpret anything
   let userContext = rawContext;
   let authCookies = null;
+  let inlineCredentials = null;
+
   if (rawContext) {
+    // Extract explicit cookie:name=value entries (must be injected programmatically)
     const cookiePattern = /cookie:([^\s,]+(?:=[^\s,]+)?(?:;[^\s,]+(?:=[^\s,]+)?)*)/gi;
     const cookieMatches = rawContext.match(cookiePattern);
     if (cookieMatches) {
       authCookies = cookieMatches.map(m => m.replace(/^cookie:/i, '')).join(';');
-      userContext = rawContext.replace(cookiePattern, '').replace(/,\s*,/g, ',').replace(/^\s*,|,\s*$/g, '').trim() || null;
       console.log(`🍪 [testrun] Auth cookies detected in context`);
+    }
+
+    // Use AI to extract email + password in any format the user typed
+    // (e.g. "credentials email: foo@bar.com; password: Abc." or "login with foo / Bar123")
+    try {
+      const Anthropic = require('@anthropic-ai/sdk');
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const extraction = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 100,
+        temperature: 0,
+        messages: [{
+          role: 'user',
+          content: `Extract login credentials from this text. Reply with JSON only: {"email":"...","password":"..."} or {"email":null,"password":null} if not present. Strip trailing punctuation from values.\n\nText: ${rawContext}`
+        }]
+      });
+      const json = JSON.parse(extraction.content[0].text.trim());
+      if (json.email && json.password) {
+        inlineCredentials = { email: json.email, password: json.password };
+        console.log(`🔐 [testrun] AI extracted credentials for: ${inlineCredentials.email}`);
+      }
+    } catch (err) {
+      console.warn(`⚠️ [testrun] Could not AI-extract credentials from context: ${err.message}`);
     }
   }
 
-  // 1. Look up staging URL + test credentials: command flag > client settings > env var
+  // 1. Look up staging URL + test credentials: inline flag > client settings > env var
   let baseUrl = envUrl || null;
-  let testCredentials = null;
+  let testCredentials = inlineCredentials || null;
 
   if (isSupabaseConfigured() && userId) {
     const { data: settings } = await supabaseAdmin
@@ -2419,7 +2448,8 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
       .eq('user_id', userId)
       .maybeSingle();
     if (!baseUrl) baseUrl = settings?.staging_url || null;
-    if (settings?.test_user_email) {
+    // Inline credentials from the comment take priority over saved settings
+    if (!testCredentials && settings?.test_user_email) {
       testCredentials = {
         email: settings.test_user_email,
         password: settings.test_user_password || ''

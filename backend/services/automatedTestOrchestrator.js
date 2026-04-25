@@ -9,6 +9,9 @@ const { createCheckRun, updateCheckRunWithResults, updateCheckRunWithError, getO
 const { generateTestReportComment } = require('./testReportFormatter');
 const { uploadScreenshotToGitHub } = require('./screenshotService');
 
+// Hard ceiling: 32 min (Browserbase sessions cap at 30 min; this gives 2 min buffer for cleanup)
+const GLOBAL_RUN_TIMEOUT_MS = 32 * 60 * 1000;
+
 async function executeAutomatedTests(params) {
   const { owner, repo, prNumber, sha, testRecipe, baseUrl, installationId, userContext, testCredentials, authCookies } = params;
 
@@ -46,15 +49,28 @@ async function executeAutomatedTests(params) {
       return { success: true, message: 'All scenarios need manual testing' };
     }
 
-    // Execute browser-testable scenarios
+    // Execute browser-testable scenarios — race against global timeout
     console.log(`\n🎬 Executing ${executable.length} scenario(s)...`);
-    const results = await executeTestRecipe(executable, baseUrl, {
-      takeScreenshots: true,
-      timeout: 60000,
-      userContext,
-      testCredentials,
-      authCookies
+
+    let globalTimeoutHandle;
+    const globalTimeoutPromise = new Promise((_, reject) => {
+      globalTimeoutHandle = setTimeout(() => {
+        reject(new Error('GLOBAL_TIMEOUT: Test run exceeded 32-minute limit and was stopped automatically.'));
+      }, GLOBAL_RUN_TIMEOUT_MS);
     });
+
+    const results = await Promise.race([
+      executeTestRecipe(executable, baseUrl, {
+        takeScreenshots: true,
+        timeout: 60000,
+        userContext,
+        testCredentials,
+        authCookies
+      }),
+      globalTimeoutPromise
+    ]);
+
+    clearTimeout(globalTimeoutHandle);
 
     console.log(`\n✅ Test execution completed`);
     console.log(`   Passed: ${results.passed} (${results.partial || 0} partial)`);
@@ -90,20 +106,34 @@ async function executeAutomatedTests(params) {
     return { success: true, results, checkRunId, videoUrl, screenshotUrls };
 
   } catch (error) {
-    console.error(`\n❌ Automated test execution failed:`, error.message);
-    console.error('❌ Stack:', error.stack);
+    clearTimeout(globalTimeoutHandle);
+
+    const isTimeout = error.message?.startsWith('GLOBAL_TIMEOUT');
+    console.error(`\n${isTimeout ? '⏱️' : '❌'} Automated test execution ${isTimeout ? 'timed out' : 'failed'}:`, error.message);
+    if (!isTimeout) console.error('❌ Stack:', error.stack);
 
     if (octokit && checkRunId) {
-      await updateCheckRunWithError(octokit, owner, repo, checkRunId, error).catch(() => {});
+      await octokit.checks.update({
+        owner, repo,
+        check_run_id: checkRunId,
+        status: 'completed',
+        conclusion: isTimeout ? 'timed_out' : 'failure',
+        completed_at: new Date().toISOString(),
+        output: {
+          title: isTimeout ? '⏱️ Test run timed out after 32 minutes' : '❌ Test execution failed',
+          summary: isTimeout
+            ? 'The test run hit the 32-minute limit and was stopped. Consider splitting into smaller batches or checking if the app requires authentication.'
+            : `An error occurred during test execution: ${error.message}`
+        }
+      }).catch(() => {});
     }
 
     if (octokit) {
-      await octokit.issues.createComment({
-        owner, repo, issue_number: prNumber,
-        body: `## ❌ Automated Test Execution Failed\n\n\`\`\`\n${error.message}\n\`\`\`\n\n` +
-              `**Possible causes:** Missing test data, login required, or environment setup.\n\n` +
-              `<sub>🤖 Ovi AI Test Automation</sub>`
-      }).catch(() => {});
+      const body = isTimeout
+        ? `## ⏱️ Test Run Timed Out\n\nThe run was stopped after **32 minutes**.\n\n**Common causes:** Too many scenarios, app requires login, or slow staging environment.\n\n**Try:** Ensure credentials are configured in [Settings](${process.env.BASE_URL || 'https://www.firstqa.dev'}/dashboard/settings) and re-run with \`/qa testrun\`.\n\n<sub>🤖 Ovi AI Test Automation</sub>`
+        : `## ❌ Automated Test Execution Failed\n\n\`\`\`\n${error.message}\n\`\`\`\n\n**Possible causes:** Missing test data, login required, or environment setup.\n\n<sub>🤖 Ovi AI Test Automation</sub>`;
+
+      await octokit.issues.createComment({ owner, repo, issue_number: prNumber, body }).catch(() => {});
     }
 
     return { success: false, error: error.message, checkRunId };

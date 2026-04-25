@@ -29,7 +29,9 @@ function getAnthropic() {
 const MAX_AGENT_STEPS = 25;
 const ACTION_TIMEOUT = 10000;
 const SCENARIO_TIMEOUT = 90000;
+const SCENARIO_STUCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 min — if a scenario hasn't finished, it's stuck
 const MAX_CONSECUTIVE_QUOTA_ERRORS = 3;
+const MAX_CONSECUTIVE_STUCK = 2; // abort whole run after this many consecutive stuck scenarios
 
 // ─── Start URL resolution (deterministic, no AI call) ───────────────────────
 
@@ -374,6 +376,7 @@ Rules:
 - Do NOT close tabs, navigate away from the result, or reset the page after completing steps.`;
 
   let consecutiveQuotaErrors = 0;
+  let consecutiveStuck = 0;
 
   try {
     for (let i = 0; i < testRecipe.length; i++) {
@@ -458,10 +461,17 @@ Rules:
         });
 
         console.log(`   🤖 Agent executing...`);
-        const agentResult = await agent.execute({
-          instruction,
-          maxSteps: MAX_AGENT_STEPS,
+        let stuckTimeoutHandle;
+        const stuckTimeout = new Promise((_, reject) => {
+          stuckTimeoutHandle = setTimeout(() => {
+            reject(new Error(`SCENARIO_STUCK: Scenario did not complete within ${SCENARIO_STUCK_TIMEOUT_MS / 60000} minutes`));
+          }, SCENARIO_STUCK_TIMEOUT_MS);
         });
+        const agentResult = await Promise.race([
+          agent.execute({ instruction, maxSteps: MAX_AGENT_STEPS }),
+          stuckTimeout
+        ]);
+        clearTimeout(stuckTimeoutHandle);
 
         if (agentResult.actions && agentResult.actions.length > 0) {
           agentResult.actions.forEach(action => {
@@ -504,32 +514,48 @@ Rules:
           console.log(`   ❌ FAIL: ${verification.reason}`);
         }
       } catch (error) {
-        scenarioResult.status = 'ERROR';
+        clearTimeout(stuckTimeoutHandle);
+        const isStuck = error.message?.startsWith('SCENARIO_STUCK');
+        scenarioResult.status = isStuck ? 'TIMEOUT' : 'ERROR';
         scenarioResult.error = error.message;
         results.failed++;
-        console.log(`   ❌ ERROR: ${error.message}`);
+        console.log(`   ${isStuck ? '⏱️ TIMEOUT' : '❌ ERROR'}: ${error.message}`);
       }
 
       const errorMsg = scenarioResult.error || '';
       const isQuotaError = errorMsg.includes('exceeded your current quota') || errorMsg.includes('429');
       const isSessionDead = errorMsg.includes('awaitActivePage') || errorMsg.includes('CDP transport closed') ||
         errorMsg.includes('Target closed') || errorMsg.includes('Session closed');
+      const isStuck = errorMsg.startsWith('SCENARIO_STUCK');
 
       if (isQuotaError) {
         consecutiveQuotaErrors++;
       } else if (scenarioResult.status === 'PASS' || scenarioResult.status === 'PARTIAL') {
         consecutiveQuotaErrors = 0;
+        consecutiveStuck = 0;
       }
 
-      if (isSessionDead) {
-        console.log(`\n⛔ Browser session died — aborting remaining tests.`);
+      if (isStuck) {
+        consecutiveStuck++;
+        console.log(`   ⚠️ Stuck count: ${consecutiveStuck}/${MAX_CONSECUTIVE_STUCK}`);
+      } else if (!isQuotaError) {
+        consecutiveStuck = 0;
+      }
+
+      const shouldAbort = isSessionDead || consecutiveStuck >= MAX_CONSECUTIVE_STUCK;
+      const abortReason = isSessionDead
+        ? 'Browser session closed unexpectedly'
+        : `Run aborted — ${consecutiveStuck} consecutive scenarios timed out (stuck)`;
+
+      if (shouldAbort) {
+        console.log(`\n⛔ ${abortReason} — aborting remaining tests.`);
         for (let j = i + 1; j < testRecipe.length; j++) {
           results.scenarios.push({
             scenario: testRecipe[j].scenario,
             priority: testRecipe[j].priority || 'Unknown',
             status: 'SKIPPED',
             duration: 0,
-            error: 'Browser session closed unexpectedly',
+            error: abortReason,
             steps: testRecipe[j].steps,
             expected: testRecipe[j].expected,
             actualResult: null,
