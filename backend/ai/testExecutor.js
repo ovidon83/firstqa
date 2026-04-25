@@ -483,10 +483,24 @@ Rules:
         }
 
         const agentCompleted = agentResult.completed === true;
-        console.log(`   🤖 Agent: ${agentCompleted ? 'completed' : 'incomplete'} — ${agentResult.message || 'done'}`);
+        const agentMessage = agentResult.message || '';
+        console.log(`   🤖 Agent: ${agentCompleted ? 'completed' : 'incomplete'} — ${agentMessage}`);
 
-        // Verify expected result with a separate AI call
-        const verification = await verifyExpectedResult(page, scenario.expected, scenario.manual_steps);
+        // If the agent message indicates the session/browser died, throw now so the
+        // session-death detection below runs — don't call verifyExpectedResult on a dead page.
+        const agentSessionDead = /awaitActivePage|CDP transport closed|Target closed|Session closed/i.test(agentMessage);
+        if (agentSessionDead) {
+          throw new Error(`CDP transport closed: browser session ended mid-scenario`);
+        }
+
+        // Verify expected result with a separate AI call (wrapped in a timeout so a dead page can't hang forever)
+        const verifyTimeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('SCENARIO_STUCK: Verification timed out')), SCENARIO_STUCK_TIMEOUT_MS)
+        );
+        const verification = await Promise.race([
+          verifyExpectedResult(page, scenario.expected, scenario.manual_steps),
+          verifyTimeout
+        ]);
         scenarioResult.actualResult = verification.actualResult;
         scenarioResult.agentAssessment = agentResult.message;
 

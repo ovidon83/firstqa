@@ -26,6 +26,7 @@ async function executeAutomatedTests(params) {
   let octokit;
   let checkRunId = null;
   let globalTimeoutHandle;
+  let sharedResults = {}; // declared outside try so catch block can read partial results on timeout
 
   try {
     octokit = await getOctokit(installationId);
@@ -55,7 +56,7 @@ async function executeAutomatedTests(params) {
     // read partial data if the timeout fires before execution finishes.
     console.log(`\n🎬 Executing ${executable.length} scenario(s)...`);
 
-    const sharedResults = {};
+    sharedResults = {};
     const globalTimeoutPromise = new Promise((_, reject) => {
       globalTimeoutHandle = setTimeout(() => {
         reject(new Error('GLOBAL_TIMEOUT: Test run exceeded 32-minute limit and was stopped automatically.'));
