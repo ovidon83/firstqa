@@ -2392,11 +2392,15 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
   // Parse flags from comment
   const envMatch = comment.body.match(/-env=(\S+)/i);
   const envUrl = envMatch ? envMatch[1].trim() : null;
-  // Accept -context in any format: quoted or to end-of-line
-  // e.g: -context="email: foo@bar.com; password: Abc123. The app is a todo app."
+  // Accept -context in any format — quoted, =value, or free-form space-separated
+  // e.g: -context="email: foo@bar.com; password: Abc123"
   //      -context=cookie:session=abc123
-  const contextMatch = comment.body.match(/-context="([^"]+)"/i)
-    || comment.body.match(/-context=(.+?)(?:\s+-\w|$)/is);
+  //      -context credentials email: foo@bar.com; password: Abc123.
+  const contextMatch =
+    comment.body.match(/-context="([^"]+)"/i) ||              // -context="..."
+    comment.body.match(/-context='([^']+)'/i) ||              // -context='...'
+    comment.body.match(/-context=(\S+)/i) ||                  // -context=word
+    comment.body.match(/-context\s+(.+?)(?=\s+-\w|\n|$)/is); // -context anything until next flag or EOL
   const rawContext = contextMatch ? contextMatch[1].trim() : null;
 
   // Always pass the full raw text to the agent so it can interpret anything
