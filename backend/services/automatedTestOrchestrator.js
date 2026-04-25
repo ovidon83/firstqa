@@ -25,6 +25,7 @@ async function executeAutomatedTests(params) {
 
   let octokit;
   let checkRunId = null;
+  let globalTimeoutHandle;
 
   try {
     octokit = await getOctokit(installationId);
@@ -52,7 +53,6 @@ async function executeAutomatedTests(params) {
     // Execute browser-testable scenarios — race against global timeout
     console.log(`\n🎬 Executing ${executable.length} scenario(s)...`);
 
-    let globalTimeoutHandle;
     const globalTimeoutPromise = new Promise((_, reject) => {
       globalTimeoutHandle = setTimeout(() => {
         reject(new Error('GLOBAL_TIMEOUT: Test run exceeded 32-minute limit and was stopped automatically.'));
@@ -76,28 +76,39 @@ async function executeAutomatedTests(params) {
     console.log(`   Passed: ${results.passed} (${results.partial || 0} partial)`);
     console.log(`   Failed: ${results.failed}`);
 
-    // Build screenshot URLs
+    // Build screenshot URLs — failures here must not block the check run from closing
     console.log(`\n📸 Processing screenshots...`);
     const screenshotUrls = {};
     for (const scenario of results.scenarios) {
       if (scenario.screenshotPath) {
-        const filename = `${scenario.scenario.replace(/[^a-z0-9]/gi, '_')}.png`;
-        const uploadResult = await uploadScreenshotToGitHub(scenario.screenshotPath, filename);
-        screenshotUrls[scenario.scenario] = uploadResult.url;
+        try {
+          const filename = `${scenario.scenario.replace(/[^a-z0-9]/gi, '_')}.png`;
+          const uploadResult = await uploadScreenshotToGitHub(scenario.screenshotPath, filename);
+          screenshotUrls[scenario.scenario] = uploadResult.url;
+        } catch (ssErr) {
+          console.warn(`⚠️ Screenshot upload failed for "${scenario.scenario}": ${ssErr.message}`);
+        }
       }
     }
 
     // Video/replay URL
     const videoUrl = results.sessionReplayUrl || null;
 
-    // Update GitHub Check Run
-    await updateCheckRunWithResults(octokit, owner, repo, checkRunId, results);
+    // Always close the check run — this must not be skipped
+    if (octokit && checkRunId) {
+      await updateCheckRunWithResults(octokit, owner, repo, checkRunId, results).catch(err => {
+        console.error(`⚠️ Failed to update check run: ${err.message}`);
+      });
+    }
 
     // Post report comment
     console.log(`\n💬 Posting test report...`);
-    const comment = generateTestReportComment(results, videoUrl, screenshotUrls, manual);
-
-    await octokit.issues.createComment({ owner, repo, issue_number: prNumber, body: comment });
+    try {
+      const comment = generateTestReportComment(results, videoUrl, screenshotUrls, manual);
+      await octokit.issues.createComment({ owner, repo, issue_number: prNumber, body: comment });
+    } catch (reportErr) {
+      console.error(`⚠️ Failed to post report comment: ${reportErr.message}`);
+    }
 
     console.log(`\n${'='.repeat(60)}`);
     console.log(`✅ Automated testing complete!`);
