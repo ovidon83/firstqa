@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FirstQA — Meet Ovi, Your AI QA Engineer</title>
-    <meta name="description" content="Ovi is your AI QA Engineer. Analyzes PRs and tickets, runs browser tests, generates Playwright code, and catches bugs before your users do.">
+    <title>FirstQA — Your First QA Engineer, Powered by AI</title>
+    <meta name="description" content="FirstQA gives every developer their own QA engineer. Ovi reviews PRs and tickets, catches bugs before users do, runs browser tests, and writes Playwright code — automatically.">
     <link rel="icon" type="image/svg+xml" href="/logo/firstqa-logo-mark.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-<!-- Waitlist Modal -->
+<!-- Early Access Modal -->
 <div class="modal-overlay" id="ea-modal">
     <div class="modal-card">
         <button class="modal-close" id="modal-close">&times;</button>
-        <h2>Join the Waitlist</h2>
-        <p>Get early access to Ovi. Waitlist teams get founder-direct support and help shape the roadmap.</p>
+        <h2>Stay in the Loop</h2>
+        <p>Drop your email and we'll reach out directly. No spam — founder replies personally within 24h.</p>
         <form class="modal-form" id="subscribe-form">
             <input type="email" name="email" placeholder="you@company.com" required>
-            <button type="submit"><span>Join Waitlist</span><i class="fas fa-arrow-right"></i></button>
+            <button type="submit"><span>Request Access</span><i class="fas fa-arrow-right"></i></button>
         </form>
         <p class="modal-msg" id="subscribe-message"></p>
-        <p class="modal-sub"><a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank">Talk to founder</a> — book a call</p>
+        <p class="modal-sub"><a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank">Prefer a call?</a> — book 15 min with the founder</p>
     </div>
 </div>
 
@@ -31,10 +31,10 @@
     <div class="container">
         <a href="/" class="logo"><img src="/logo/firstqa-logo-dark.svg" alt="FirstQA" class="logo-img"></a>
         <div class="nav-links">
-            <a href="#offering">What We Offer</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#in-action">Features</a>
-            <a href="#" class="btn-nav" data-ea-trigger>Join Waitlist</a>
+            <a href="#problem">Why FirstQA</a>
+            <a href="#offering">What Ovi Does</a>
+            <a href="#how-it-works">Get Started</a>
+            <a href="/discovery-interview" class="btn-nav">Become a Launch Partner</a>
         </div>
         <button class="mobile-menu-btn" aria-label="Menu"><i class="fas fa-bars"></i></button>
     </div>
@@ -45,37 +45,35 @@
     <div class="hero-glow"></div>
     <div class="container hero-grid">
         <div class="hero-left">
-            <div class="hero-badge"><span class="badge-dot"></span> Accepting Launch Partners</div>
-            <h1>Meet <span class="gr">Ovi</span>, Your<br>AI QA Engineer</h1>
-            <p class="hero-sub">Ovi reviews your PRs and tickets, finds bugs, generates test scenarios, runs them in a real browser, and writes Playwright test code. Triggered on-demand or automatically on PR/Ticket.</p>
+            <div class="hero-badge"><span class="badge-dot"></span> Early access open</div>
+            <h1>Meet Ovi &mdash;<br><span class="gr">your top 1% AI QA.</span></h1>
+            <p class="hero-sub">The AI that tests like a human &mdash; onboards in under 10 minutes, connects to GitHub and Linear, and immediately starts reviewing every PR and ticket, running browser tests, and writing Playwright code. For <strong style="color:var(--text)">$<!-- TODO: set price -->XX/mo</strong>.</p>
             <div class="hero-ctas">
-                <a href="#" class="btn-primary" data-ea-trigger><i class="fas fa-rocket"></i> Join Waitlist</a>
-                <a href="/discovery-interview" class="btn-partner">
-                    <span>Become a Launch Partner</span>
-                    <span class="partner-sub">3 months free &middot; 50% off for life</span>
-                </a>
+                <a href="/discovery-interview" class="btn-primary"><i class="fas fa-user-plus"></i> Add Ovi to Your Team — Free for 3 Months</a>
             </div>
             <div class="hero-stats">
                 <div class="hs"><span class="hs-val" id="ovi-tag-count">&mdash;</span><span class="hs-lbl">PRs & Tickets Analyzed</span></div>
                 <div class="hs-sep"></div>
-                <div class="hs"><span class="hs-val">&lt;2min</span><span class="hs-lbl">Setup</span></div>
+                <div class="hs"><span class="hs-val">&lt;10min</span><span class="hs-lbl">To Hire &amp; Onboard</span></div>
                 <div class="hs-sep"></div>
                 <div class="hs"><span class="hs-val">24/7</span><span class="hs-lbl">Always On</span></div>
             </div>
         </div>
         <div class="hero-right">
             <div class="terminal">
-                <div class="t-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t-title">PR #142 — Add user settings page</span></div>
+                <div class="t-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t-title">PR #52 — Add tags to thought capture</span></div>
                 <div class="t-body">
-                    <div class="tl" style="--d:.3s"><span class="ti">💬</span><span class="tc">/qa</span> triggered by @developer</div>
-                    <div class="tl" style="--d:.8s"><span class="ti">🔍</span>Analyzing 12 files, +847 -203</div>
-                    <div class="tl" style="--d:1.3s"><span class="ti">🐛</span><span class="tw">2 bugs found</span> — missing validation, race condition</div>
-                    <div class="tl" style="--d:1.8s"><span class="ti">📋</span>Generated <strong>14 test scenarios</strong></div>
-                    <div class="tl" style="--d:2.3s"><span class="ti">✅</span>QA review posted to PR</div>
-                    <div class="tl" style="--d:3s"><span class="ti">💬</span><span class="tc">/qa testrun</span> -env=staging.app.com</div>
-                    <div class="tl" style="--d:3.5s"><span class="ti">🧪</span>Running 14 scenarios in Chromium...</div>
-                    <div class="tl" style="--d:4.2s"><span class="ti">📊</span><span class="ts">12 passed</span> &middot; <span class="tw">2 failed</span> &middot; Screenshots attached</div>
-                    <div class="tl" style="--d:4.8s"><span class="ti">📝</span>Playwright spec: <strong>settings.spec.ts</strong></div>
+                    <div class="tl" style="--d:.3s"><span class="ti">🎫</span>Ticket MN-89 opened &mdash; <span class="tc">3 QA questions</span> posted</div>
+                    <div class="tl" style="--d:1.0s"><span class="ti">💬</span><span class="tc">/qa</span> triggered by @alex on PR #52</div>
+                    <div class="tl" style="--d:1.7s"><span class="ti">🔍</span>QA&rsquo;ing: 3 user-facing flows affected</div>
+                    <div class="tl" style="--d:2.3s"><span class="ti">🐛</span><span class="tw">1 blocker</span> &middot; <span style="color:var(--amber)">1 non-blocker</span></div>
+                    <div class="tl tl-indent" style="--d:2.6s"><span class="ti">↳</span><span class="tw">[BLOCKER]</span> Tags lost on Cmd+Enter save</div>
+                    <div class="tl tl-indent" style="--d:2.9s"><span class="ti">↳</span><span style="color:var(--text3)">[minor]</span> Autocomplete stays open after selection</div>
+                    <div class="tl" style="--d:3.4s"><span class="ti">📋</span>Generated <strong>9 test scenarios</strong> &middot; QA review posted</div>
+                    <div class="tl" style="--d:4.1s"><span class="ti">💬</span><span class="tc">/qa testrun</span> -env=staging.app.com -context "trial user"</div>
+                    <div class="tl" style="--d:4.8s"><span class="ti">🌐</span>Exploratory testing in the browser...</div>
+                    <div class="tl" style="--d:5.6s"><span class="ti">📊</span><span class="ts">7 passed</span> &middot; <span class="tw">2 failed</span> &middot; Screenshots attached</div>
+                    <div class="tl" style="--d:6.2s"><span class="ti">🚦</span><span class="tw">NO-GO</span> &mdash; 1 blocker must be fixed &middot; <span style="color:var(--text3)">minor can ship</span></div>
                 </div>
             </div>
         </div>
@@ -87,99 +85,126 @@
     <div class="container">
         <div class="sh"><h2>Iterate on What Users Want &mdash;<br>Not on What&rsquo;s Broken</h2></div>
         <div class="problem-card">
-            <div class="problem-top">
-                <div class="runway-viz">
-                    <div class="runway-bar">
-                        <span class="runway-build" style="flex:14"></span>
-                        <span class="runway-lost" style="flex:4"></span>
-                    </div>
-                    <div class="runway-labels">
-                        <span>14 mo building &amp; iterating</span>
-                        <span class="runway-red">4 mo fixing bugs</span>
-                    </div>
+            <p class="problem-pov"><strong>Bug reports aren&rsquo;t product feedback &mdash; they&rsquo;re noise.</strong> Every bug your users find is a sprint cycle you can&rsquo;t spend on what they actually want.</p>
+
+            <div class="feedback-cols">
+                <div class="fc-col fc-col-bad">
+                    <div class="fc-header"><span class="fc-dot fc-dot-bad"></span>Without Ovi</div>
+                    <div class="fc-item"><span class="fc-emoji">😤</span>&ldquo;The checkout is broken again&rdquo;</div>
+                    <div class="fc-item"><span class="fc-emoji">😤</span>&ldquo;Nothing loads on mobile&rdquo;</div>
+                    <div class="fc-item"><span class="fc-emoji">😤</span>&ldquo;I can&rsquo;t log in anymore&rdquo;</div>
+                    <div class="fc-label">What your users report</div>
                 </div>
-                <p class="problem-statement"><strong>12&ndash;18 months</strong> of runway. 30% of engineer time on bugs = <strong class="problem-hl">4 months gone</strong>.</p>
+                <div class="fc-divider"><i class="fas fa-arrow-right"></i></div>
+                <div class="fc-col fc-col-good">
+                    <div class="fc-header"><span class="fc-dot fc-dot-good"></span>With Ovi</div>
+                    <div class="fc-item"><span class="fc-emoji">💡</span>&ldquo;Love the new tags feature&rdquo;</div>
+                    <div class="fc-item"><span class="fc-emoji">🎯</span>&ldquo;The search UX could be faster on mobile&rdquo;</div>
+                    <div class="fc-item"><span class="fc-emoji">💡</span>&ldquo;This saved me an hour today&rdquo;</div>
+                    <div class="fc-label">What your users could tell you</div>
+                </div>
             </div>
-            <div class="problem-insight">
-                <div class="pi-icon"><i class="fas fa-lightbulb"></i></div>
-                <p>Moving fast is only valuable when you&rsquo;re iterating on <strong>product feedback</strong> &mdash; not on bug reports from frustrated users. Every bug is a cycle stolen from the feature your users actually asked for.</p>
-            </div>
-            <div class="problem-compare">
-                <div class="pc-col pc-before">
-                    <h4><i class="fas fa-times-circle"></i> Without QA</h4>
-                    <ul>
-                        <li>Code merges with &ldquo;LGTM&rdquo;</li>
-                        <li>Users find the real bugs</li>
-                        <li>Engineers context-switch to fix</li>
-                        <li>Iteration cycles wasted on rework</li>
-                    </ul>
+
+            <div class="rework-cost">
+                <div class="rc-title">Where your engineering time actually goes &mdash; per sprint</div>
+                <div class="rc-row">
+                    <span class="rc-label">Without Ovi</span>
+                    <div class="rc-track">
+                        <div class="rc-seg rc-seg-bad" style="width:38%"><span>35% bug rework</span></div>
+                        <div class="rc-seg rc-seg-build" style="width:62%"><span>65% building</span></div>
+                    </div>
                 </div>
-                <div class="pc-col pc-after">
-                    <h4><i class="fas fa-check-circle"></i> With FirstQA</h4>
-                    <ul>
-                        <li>Bugs caught before merge</li>
-                        <li>Tests run on every PR</li>
-                        <li>Ship clean, iterate on feedback</li>
-                        <li>Engineers stay on what matters</li>
-                    </ul>
+                <div class="rc-row">
+                    <span class="rc-label">With Ovi</span>
+                    <div class="rc-track">
+                        <div class="rc-seg rc-seg-bad rc-seg-thin" style="width:5%"></div>
+                        <div class="rc-seg rc-seg-build" style="width:95%"><span>95% building</span></div>
+                    </div>
                 </div>
+                <div class="rc-footnote">That&rsquo;s ~2–3 extra sprints per quarter compounding into real runway.</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ════════ WHAT WE OFFER ════════ -->
+<!-- ════════ WHAT OVI DOES ════════ -->
 <section id="offering" class="offering">
     <div class="container">
         <div class="sh">
-            <span class="sh-tag">What FirstQA Offers</span>
-            <h2>AI + Human QA. Complete Coverage.</h2>
-            <p>Two ways to cover your quality — use both or start with one.</p>
+            <span class="sh-tag">What Ovi Does</span>
+            <h2>QA is not a luxury anymore.</h2>
         </div>
 
-        <div class="offer-grid">
-            <!-- Ovi AI Pillar -->
-            <div class="offer-pillar offer-ai">
-                <div class="op-header">
-                    <div class="op-icon"><i class="fas fa-robot"></i></div>
-                    <div>
-                        <h3>Ovi &mdash; AI QA Engineer</h3>
-                        <p class="op-sub">Automated. 24/7. On every PR.</p>
-                    </div>
-                </div>
-                <ul class="op-list">
-                    <li><i class="fas fa-code-pull-request"></i><div><strong>PR Analysis</strong><span>Finds functional bugs, logic errors, edge cases, UI/UX risks</span></div></li>
-                    <li><i class="fas fa-clipboard-check"></i><div><strong>Ticket Analysis</strong><span>Reviews requirements for gaps before development starts</span></div></li>
-                    <li><i class="fas fa-list-check"></i><div><strong>Test Recipe</strong><span>Generates prioritized test scenarios with steps & expected results</span></div></li>
-                    <li><i class="fas fa-play"></i><div><strong>Browser Test Execution</strong><span>AI agent runs tests in a real browser with screenshots & video</span></div></li>
-                    <li><i class="fas fa-file-code"></i><div><strong>Playwright Test Code</strong><span>Ready-to-use spec files with accurate selectors and flows</span></div></li>
-                    <li><i class="fas fa-chart-bar"></i><div><strong>Test Reports</strong><span>Detailed pass/fail reports posted directly on your PR</span></div></li>
-                </ul>
-                <div class="op-trigger">
-                    <span class="op-trigger-label">Trigger:</span>
-                    <code>/qa</code> command <span class="op-or">or</span> automatic on PR open/update
+        <div class="qa-flow">
+            <div class="qa-step">
+                <div class="qa-step-icon"><i class="fas fa-clipboard-list"></i></div>
+                <div class="qa-step-body">
+                    <h4>Ticket Analysis</h4>
+                    <p>Reads requirements, flags gaps, and posts the QA questions a senior engineer would ask — before a line is written.</p>
                 </div>
             </div>
-
-            <!-- Human QA Pillar -->
-            <div class="offer-pillar offer-human">
-                <div class="op-header">
-                    <div class="op-icon op-icon-human"><i class="fas fa-user-check"></i></div>
-                    <div>
-                        <h3>Human QA Engineers</h3>
-                        <p class="op-sub">On-demand. Senior. No hiring.</p>
-                    </div>
+            <div class="qa-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="qa-step">
+                <div class="qa-step-icon"><i class="fas fa-code-pull-request"></i></div>
+                <div class="qa-step-body">
+                    <h4>PR Analysis</h4>
+                    <p>Reviews every code diff for bugs, logic errors, edge cases, and UX risks before merge.</p>
                 </div>
-                <ul class="op-list op-list-human">
-                    <li><i class="fas fa-check"></i><div><strong>Exploratory Testing</strong><span>Before major releases — find what automation misses</span></div></li>
-                    <li><i class="fas fa-check"></i><div><strong>Human Judgment</strong><span>Review complex flows, edge cases, and user experience</span></div></li>
-                    <li><i class="fas fa-check"></i><div><strong>Pre-Launch Audits</strong><span>Go/no-go confidence on critical releases</span></div></li>
-                    <li><i class="fas fa-check"></i><div><strong>QA Strategy</strong><span>Process setup, test planning, and in-the-loop QA</span></div></li>
-                    <li><i class="fas fa-check"></i><div><strong>Pay Per Engagement</strong><span>Scale up when it matters — no long-term contracts</span></div></li>
-                </ul>
-                <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" class="btn-human" target="_blank">Get Human QA <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="qa-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="qa-step">
+                <div class="qa-step-icon"><i class="fas fa-globe"></i></div>
+                <div class="qa-step-body">
+                    <h4>Browser Testing</h4>
+                    <p>Runs test scenarios in real Chromium. Screenshots and video evidence attached automatically.</p>
+                </div>
+            </div>
+            <div class="qa-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="qa-step">
+                <div class="qa-step-icon"><i class="fas fa-file-code"></i></div>
+                <div class="qa-step-body">
+                    <h4>Playwright Code</h4>
+                    <p>Generates production-ready spec files with accurate selectors — ready to commit and run.</p>
+                </div>
+            </div>
+            <div class="qa-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="qa-step">
+                <div class="qa-step-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="qa-step-body">
+                    <h4>QA Report</h4>
+                    <p>Posts a clear pass/fail report — bugs, results, and next steps — directly on the PR or ticket.</p>
+                </div>
             </div>
         </div>
+
+        <!-- Showcase — proof of each step, in e2e order -->
+        <div class="showcase" style="margin-top:48px">
+            <div class="showcase-tabs">
+                <button class="stab active" data-tab="s-ticket"><i class="fas fa-clipboard-list"></i> Ticket Analysis</button>
+                <button class="stab" data-tab="s-pr"><i class="fas fa-code-pull-request"></i> PR Analysis</button>
+                <button class="stab" data-tab="s-browser"><i class="fas fa-globe"></i> Browser Testing</button>
+                <button class="stab" data-tab="s-playwright"><i class="fas fa-file-code"></i> Playwright Code</button>
+                <button class="stab" data-tab="s-report"><i class="fas fa-chart-bar"></i> Report</button>
+            </div>
+            <div class="showcase-panels">
+                <div class="spanel active" id="s-ticket">
+                    <img src="/images/landing/ticket-analysis.png" alt="Step 1 — Ovi reads the ticket, flags gaps, and posts QA questions before dev starts">
+                </div>
+                <div class="spanel" id="s-pr">
+                    <img src="/images/landing/pr-analysis.png" alt="Step 2 — Ovi reviews the PR diff, finds bugs and edge cases before merge">
+                </div>
+                <div class="spanel" id="s-browser">
+                    <img src="/images/landing/agentic-testing.png" alt="Step 3 — Ovi runs test scenarios in real Chromium with screenshots and video">
+                </div>
+                <div class="spanel" id="s-playwright">
+                    <img src="/images/landing/playwright-code.png" alt="Step 4 — Ovi generates production-ready Playwright spec files">
+                </div>
+                <div class="spanel" id="s-report">
+                    <img src="/images/landing/pr-review.png" alt="Step 5 — Ovi posts a clear pass/fail report directly on the PR or ticket">
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 
@@ -188,8 +213,8 @@
     <div class="container">
         <div class="sh">
             <span class="sh-tag">Get Started</span>
-            <h2>Up and Running in 3 Steps</h2>
-            <p>Install once. Ovi works on every PR, every day.</p>
+            <h2>Up and running in minutes.</h2>
+            <p>No engineers needed. No CI changes. Works where your team already works.</p>
         </div>
 
         <div class="journey">
@@ -197,60 +222,21 @@
             <div class="j-step">
                 <div class="j-num">1</div>
                 <div class="j-card">
-                    <h3>Install the GitHub App</h3>
-                    <p>One click. Select your repos. No code changes, no CI config needed.</p>
-                    <div class="j-tools">
-                        <span><i class="fab fa-github"></i> GitHub</span>
-                        <span><svg width="14" height="14" viewBox="0 0 100 100" fill="currentColor"><path d="M1.22541 61.5228c-.2225-.9485.90748-1.5459 1.59638-.857L39.3342 97.1782c.6889.6889.0915 1.8189-.857 1.5964C20.0515 94.4522 5.54779 79.9485 1.22541 61.5228ZM.00189135 46.8891c-.01764375.2833.08887215.5599.28957165.7606L52.3503 99.7085c.2007.2007.4773.3075.7606.2896 2.3692-.1476 4.6938-.46 6.9624-.9259.7645-.157 1.0301-1.0963.4782-1.6481L2.57595 39.4485c-.55186-.5519-1.49117-.2863-1.648174.4782-.465915 2.2686-.77832 4.5932-.92588465 6.9624ZM4.21093 29.7054c-.16649.3738-.08169.8106.20765 1.1l64.77602 64.776c.2894.2894.7262.3742 1.1.2077 1.7861-.7956 3.5171-1.6927 5.1855-2.684.5521-.328.6373-1.0867.1832-1.5407L8.43566 24.3367c-.45409-.4541-1.21271-.3689-1.54074.1832-.99132 1.6684-1.88843 3.3994-2.68399 5.1855ZM12.6587 18.074c-.3701-.3701-.393-.9637-.0443-1.3541C21.7795 6.45931 35.1114 0 49.9519 0 77.5927 0 100 22.4073 100 50.0481c0 14.8405-6.4593 28.1724-16.7199 37.3375-.3903.3487-.984.3258-1.3542-.0443L12.6587 18.074Z"/></svg> Linear</span>
-                    </div>
+                    <h3>Add Ovi to your team</h3>
+                    <p>Sign up at firstqa.dev in 30 seconds and Ovi is yours.</p>
                 </div>
             </div>
             <div class="j-connector"><div class="j-line"></div></div>
 
-            <!-- Step 2 — The full FirstQA offer -->
+            <!-- Step 2 -->
             <div class="j-step">
                 <div class="j-num">2</div>
-                <div class="j-card j-card-wide">
-                    <h3>FirstQA Goes to Work</h3>
-                    <p>Automatically on every PR — or triggered with <code>/qa</code>. Here&rsquo;s what kicks in:</p>
-                    <div class="j-offer">
-                        <div class="j-pillar j-pillar-ai">
-                            <div class="j-pillar-header">
-                                <div class="j-pillar-icon"><i class="fas fa-robot"></i></div>
-                                <div>
-                                    <strong>Ovi &mdash; AI QA Engineer</strong>
-                                    <span>Automated &middot; 24/7 &middot; Every PR</span>
-                                </div>
-                            </div>
-                            <div class="j-pillar-items">
-                                <div class="j-item"><i class="fas fa-search"></i> PR &amp; ticket analysis — bugs, risks, edge cases</div>
-                                <div class="j-item"><i class="fas fa-list-check"></i> Test recipe — prioritized scenarios with exact steps</div>
-                                <div class="j-item"><i class="fas fa-play"></i> Browser test run — AI agent in real Chromium</div>
-                                <div class="j-item"><i class="fas fa-file-code"></i> Playwright tests — spec files with accurate selectors</div>
-                                <div class="j-item"><i class="fas fa-chart-bar"></i> Reports — pass/fail, screenshots, video in the PR</div>
-                            </div>
-                            <div class="j-pillar-trigger">
-                                <code>/qa</code> <span class="j-or">or</span> auto on PR open/update
-                            </div>
-                        </div>
-                        <div class="j-plus"><span>+</span></div>
-                        <div class="j-pillar j-pillar-human">
-                            <div class="j-pillar-header j-pillar-header-human">
-                                <div class="j-pillar-icon j-pillar-icon-human"><i class="fas fa-user-check"></i></div>
-                                <div>
-                                    <strong>Human QA Engineers</strong>
-                                    <span>On-demand &middot; Senior &middot; No hiring</span>
-                                </div>
-                            </div>
-                            <div class="j-pillar-items j-pillar-items-human">
-                                <div class="j-item"><i class="fas fa-check"></i> Exploratory testing before major releases</div>
-                                <div class="j-item"><i class="fas fa-check"></i> Human judgment on complex flows &amp; UX</div>
-                                <div class="j-item"><i class="fas fa-check"></i> Pre-launch audits &amp; go/no-go calls</div>
-                                <div class="j-item"><i class="fas fa-check"></i> QA strategy &amp; process setup</div>
-                                <div class="j-item"><i class="fas fa-check"></i> Book directly from a PR or Linear ticket</div>
-                            </div>
-                            <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" class="j-human-cta" target="_blank">Book a QA session <i class="fas fa-arrow-right"></i></a>
-                        </div>
+                <div class="j-card">
+                    <h3>Onboard Ovi</h3>
+                    <p>Connect GitHub and Linear in one click. Ovi indexes your codebase, reads your tickets, and learns your product — like any good new hire would.</p>
+                    <div class="j-tools">
+                        <span><i class="fab fa-github"></i> GitHub</span>
+                        <span><svg width="14" height="14" viewBox="0 0 100 100" fill="currentColor"><path d="M1.22541 61.5228c-.2225-.9485.90748-1.5459 1.59638-.857L39.3342 97.1782c.6889.6889.0915 1.8189-.857 1.5964C20.0515 94.4522 5.54779 79.9485 1.22541 61.5228ZM.00189135 46.8891c-.01764375.2833.08887215.5599.28957165.7606L52.3503 99.7085c.2007.2007.4773.3075.7606.2896 2.3692-.1476 4.6938-.46 6.9624-.9259.7645-.157 1.0301-1.0963.4782-1.6481L2.57595 39.4485c-.55186-.5519-1.49117-.2863-1.648174.4782-.465915 2.2686-.77832 4.5932-.92588465 6.9624ZM4.21093 29.7054c-.16649.3738-.08169.8106.20765 1.1l64.77602 64.776c.2894.2894.7262.3742 1.1.2077 1.7861-.7956 3.5171-1.6927 5.1855-2.684.5521-.328.6373-1.0867.1832-1.5407L8.43566 24.3367c-.45409-.4541-1.21271-.3689-1.54074.1832-.99132 1.6684-1.88843 3.3994-2.68399 5.1855ZM12.6587 18.074c-.3701-.3701-.393-.9637-.0443-1.3541C21.7795 6.45931 35.1114 0 49.9519 0 77.5927 0 100 22.4073 100 50.0481c0 14.8405-6.4593 28.1724-16.7199 37.3375-.3903.3487-.984.3258-1.3542-.0443L12.6587 18.074Z"/></svg> Linear</span>
                     </div>
                 </div>
             </div>
@@ -260,43 +246,45 @@
             <div class="j-step">
                 <div class="j-num">3</div>
                 <div class="j-card">
-                    <h3>Ship With Confidence</h3>
-                    <p>Every PR gets a full QA review, test results, and Playwright code — before it merges. Your team iterates on <strong>product feedback</strong>, not bug reports.</p>
+                    <h3>Ovi gets to work</h3>
+                    <p>From day one, Ovi reviews every PR and ticket automatically. Trigger a full run anytime with <code>/qa</code> — analysis, browser tests, Playwright code, and a report, posted where your team works.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ════════ SEE IT IN ACTION ════════ -->
-<section id="in-action" class="in-action">
+<!-- ════════ OBJECTIONS ════════ -->
+<section class="objections">
     <div class="container">
         <div class="sh">
-            <span class="sh-tag">See It In Action</span>
-            <h2>What Ovi&rsquo;s Output Looks Like</h2>
-            <p>Deep QA review. Agentic Test Execution. Stable Playwright tests.</p>
+            <span class="sh-tag">Common Questions</span>
+            <h2>Things founders usually ask.</h2>
         </div>
-
-        <div class="showcase">
-            <div class="showcase-tabs">
-                <button class="stab active" data-tab="tab-analysis"><i class="fas fa-code-pull-request"></i> PR Analysis</button>
-                <button class="stab" data-tab="tab-ticket"><i class="fas fa-clipboard-check"></i> Ticket Analysis</button>
-                <button class="stab" data-tab="tab-testrun"><i class="fas fa-play"></i> Test Execution</button>
-                <button class="stab" data-tab="tab-playwright"><i class="fas fa-file-code"></i> Playwright Code</button>
+        <div class="obj-grid">
+            <div class="obj-card">
+                <div class="obj-q"><i class="fas fa-bell-slash"></i> Will it spam my PRs with noise?</div>
+                <p>No. Ovi posts one structured comment per PR — bugs, test scenarios, and results in a single, scannable block. Your team won't notice it's there until they need it.</p>
             </div>
-            <div class="showcase-panels">
-                <div class="spanel active" id="tab-analysis">
-                    <img src="/images/landing/pr-analysis.png" alt="Ovi AI PR Analysis showing bugs found, test scenarios, and QA review posted on a GitHub Pull Request">
-                </div>
-                <div class="spanel" id="tab-ticket">
-                    <img src="/images/landing/ticket-analysis.png" alt="Ovi AI Ticket Analysis on a Linear ticket showing requirements review, QA questions, pre-dev test recipe, and risks">
-                </div>
-                <div class="spanel" id="tab-testrun">
-                    <img src="/images/landing/test-execution.png" alt="Ovi AI Test Execution report showing 12/14 tests passed with screenshots and video evidence">
-                </div>
-                <div class="spanel" id="tab-playwright">
-                    <img src="/images/landing/playwright-code.png" alt="Playwright test spec file generated by Ovi AI with accurate selectors and test flows">
-                </div>
+            <div class="obj-card">
+                <div class="obj-q"><i class="fas fa-lock"></i> What permissions does it need?</div>
+                <p>Read access to your code and PRs, write access to post comments. It never merges, never pushes, never runs destructive actions. You stay in full control.</p>
+            </div>
+            <div class="obj-card">
+                <div class="obj-q"><i class="fas fa-clock"></i> Will it slow my team down?</div>
+                <p>The opposite. Analysis runs in the background and is ready by the time your reviewer opens the PR. No waiting, no manual QA handoffs, no back-and-forth.</p>
+            </div>
+            <div class="obj-card">
+                <div class="obj-q"><i class="fas fa-code-branch"></i> What if we already have CI/CD tests?</div>
+                <p>Ovi complements your existing tests. It catches what unit and integration tests miss — UX edge cases, missing requirements, flows that break in a real browser.</p>
+            </div>
+            <div class="obj-card">
+                <div class="obj-q"><i class="fas fa-dollar-sign"></i> What does it cost?</div>
+                <p>Early access partners get 3 months free and 50% off for life. Pricing is based on usage — pay for what you actually use, not per seat.</p>
+            </div>
+            <div class="obj-card">
+                <div class="obj-q"><i class="fas fa-plug"></i> What tools does it work with?</div>
+                <p>GitHub and Linear today. Jira is in beta. Bitbucket support is in progress. Ovi posts results wherever your team already works — no new dashboard to adopt.</p>
             </div>
         </div>
     </div>
@@ -305,11 +293,11 @@
 <!-- ════════ BOTTOM CTA ════════ -->
 <section class="cta-section">
     <div class="container">
-        <h2>Stop shipping bugs.<br>Start shipping confidence.</h2>
-        <p>Install FirstQA and get a QA engineer on every PR — starting now.</p>
+        <h2>The QA every engineer<br><span class="gr">always wanted.</span></h2>
+        <p>Ovi learns your product in minutes and is ready to test — same hour.</p>
         <div class="cta-btns">
-            <a href="#" class="btn-primary" data-ea-trigger><i class="fas fa-rocket"></i> Join Waitlist</a>
-            <a href="/discovery-interview" class="btn-secondary">Become a Launch Partner</a>
+            <a href="/discovery-interview" class="btn-primary"><i class="fas fa-user-plus"></i> Add Ovi to Your Team — Free for 3 Months</a>
+            <a href="#" class="btn-secondary" data-ea-trigger>Join the List</a>
         </div>
     </div>
 </section>
@@ -320,10 +308,10 @@
         <div class="footer-top">
             <div class="footer-brand">
                 <a href="/" class="logo"><img src="/logo/firstqa-logo-dark.svg" alt="FirstQA" class="logo-img logo-img-footer"></a>
-                <p>AI + Human QA for startups that ship fast.</p>
+                <p>The first QA hire for startups that ship fast.</p>
             </div>
             <div class="footer-cols">
-                <div><h4>Product</h4><a href="#offering">What We Offer</a><a href="#in-action">See It Live</a><a href="#how-it-works">How It Works</a><a href="/docs">Docs</a></div>
+                <div><h4>Product</h4><a href="#offering">What We Offer</a><a href="#offering">What Ovi Does</a><a href="#how-it-works">How It Works</a><a href="/docs">Docs</a></div>
                 <div><h4>Company</h4><a href="/about">About</a><a href="/contact">Contact</a><a href="https://github.com/ovidon83/firstqa" target="_blank">GitHub</a></div>
                 <div><h4>Legal</h4><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div>
             </div>
@@ -397,39 +385,47 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .dot{width:10px;height:10px;border-radius:50%}.dot.r{background:#ef4444}.dot.y{background:#eab308}.dot.g{background:#22c55e}
 .t-title{margin-left:8px;font-size:12px;color:var(--text3);font-family:var(--mono)}
 .t-body{padding:20px;font-family:var(--mono);font-size:12.5px;line-height:2}
-.tl{opacity:0;animation:fadeUp .35s forwards;animation-delay:var(--d);display:flex;gap:8px;color:var(--text2)}
+.tl{opacity:0;animation:fadeUp .35s forwards;animation-delay:var(--d);display:flex;gap:8px;color:var(--text2);white-space:nowrap;overflow:hidden}
 .ti{flex-shrink:0}
 .tc{color:var(--green);font-weight:600}
+.tl-indent{padding-left:20px;color:var(--text3)!important;font-size:12px!important}
 .ts{color:#22c55e;font-weight:600}
 .tw{color:var(--amber);font-weight:500}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
 /* Problem */
-.problem{padding:100px 0;border-top:1px solid var(--border)}
+.problem{padding:80px 0;border-top:1px solid var(--border)}
 .sh{text-align:center;margin-bottom:48px}
 .sh-tag{display:inline-block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:14px}
 .sh h2{font-size:34px;font-weight:700;letter-spacing:-.8px;margin-bottom:10px}
 .sh p{font-size:16px;color:var(--text2)}
-.problem-card{max-width:800px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px}
-.runway-viz{margin-bottom:28px}
-.runway-bar{display:flex;height:40px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.runway-build{background:linear-gradient(135deg,var(--green),rgba(16,185,129,.5))}
-.runway-lost{background:linear-gradient(135deg,var(--red),rgba(239,68,68,.6))}
-.runway-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:13px;color:var(--text2)}
-.runway-red{color:var(--red)}
-.problem-statement{font-size:16px;color:var(--text2);line-height:1.7;margin-bottom:28px;text-align:center}
-.problem-hl{color:var(--red);background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px}
-.problem-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.pc-col{padding:24px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg3)}
-.pc-col h4{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.pc-before h4{color:var(--text2)}.pc-before h4 i{color:var(--red)}
-.pc-after h4{color:var(--green)}.pc-after h4 i{color:var(--green)}
-.pc-after{border-color:rgba(16,185,129,.2);background:linear-gradient(135deg,rgba(16,185,129,.04),var(--bg3) 60%)}
-.pc-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
-.pc-col li{font-size:13px;color:var(--text2);padding-left:16px;position:relative}
-.pc-col li::before{content:'';position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%}
-.pc-before li::before{background:var(--red);opacity:.5}
-.pc-after li::before{background:var(--green)}
+.problem-card{max-width:800px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:36px}
+.problem-pov{font-size:15px;color:var(--text2);line-height:1.8;margin-bottom:32px;border-left:3px solid var(--green);padding-left:18px}
+.problem-pov strong{color:var(--text)}
+/* Feedback columns */
+.feedback-cols{display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin-bottom:28px}
+.fc-col{display:flex;flex-direction:column;gap:10px;padding:20px}
+.fc-col-bad{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:12px 0 0 12px}
+.fc-col-good{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:0 12px 12px 0}
+.fc-header{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.fc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fc-dot-bad{background:var(--red)}
+.fc-dot-good{background:var(--green)}
+.fc-item{font-size:13px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.fc-emoji{font-size:14px;flex-shrink:0;margin-top:1px}
+.fc-label{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic}
+.fc-divider{display:flex;align-items:center;justify-content:center;padding:0 12px;color:var(--text3);font-size:12px}
+/* Runway bars */
+.rework-cost{border-top:1px solid var(--border);padding-top:20px;display:flex;flex-direction:column;gap:12px}
+.rc-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3)}
+.rc-row{display:flex;align-items:center;gap:14px}
+.rc-label{font-size:12px;color:var(--text2);width:90px;flex-shrink:0;text-align:right}
+.rc-track{flex:1;height:32px;display:flex;border-radius:8px;overflow:hidden;gap:2px}
+.rc-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;transition:width .6s ease}
+.rc-seg-bad{background:linear-gradient(90deg,rgba(239,68,68,.75),rgba(239,68,68,.5))}
+.rc-seg-build{background:linear-gradient(90deg,rgba(16,185,129,.5),rgba(16,185,129,.7))}
+.rc-seg-thin span{display:none}
+.rc-footnote{font-size:12px;color:var(--text3);font-style:italic;margin-top:4px;padding-left:104px}
 
 /* Offering */
 .offering{padding:100px 0;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -450,9 +446,17 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .op-list li div{display:flex;flex-direction:column;gap:1px}
 .op-list li strong{font-size:14px;font-weight:600}
 .op-list li span{font-size:13px;color:var(--text3);line-height:1.4}
-.op-trigger{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--text2)}
+.op-trigger{padding-top:0;font-size:13px;color:var(--text2)}
 .op-trigger-label{font-weight:600;color:var(--text3);text-transform:uppercase;font-size:11px;letter-spacing:.5px;margin-right:6px}
 .op-or{color:var(--text3);font-style:italic;margin:0 4px}
+/* QA Flow */
+.qa-flow{display:flex;align-items:flex-start;gap:0;margin-bottom:0}
+.qa-step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6px}
+.qa-step-num{width:22px;height:22px;background:var(--green);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0}
+.qa-step-icon{width:48px;height:48px;background:var(--gg);border:1px solid rgba(16,185,129,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:18px;color:var(--green);flex-shrink:0}
+.qa-step-body h4{font-size:13px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.qa-step-body p{font-size:11.5px;color:var(--text3);line-height:1.55}
+.qa-arrow{flex-shrink:0;width:28px;display:flex;align-items:center;justify-content:center;color:var(--border2);font-size:12px;padding-top:58px}
 .btn-human{display:inline-flex;align-items:center;gap:10px;margin-top:20px;background:transparent;border:1px solid rgba(245,158,11,.3);color:var(--amber);font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;text-decoration:none;transition:all .2s}
 .btn-human:hover{background:rgba(245,158,11,.08);border-color:var(--amber);transform:translateY(-1px)}
 
@@ -468,12 +472,6 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .spanel.active{display:block}
 .spanel img{width:100%;display:block}
 
-/* Problem insight */
-.problem-top{margin-bottom:0}
-.problem-insight{display:flex;gap:16px;align-items:flex-start;padding:20px 24px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:var(--r);margin:24px 0 28px}
-.pi-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;color:#fff}
-.problem-insight p{font-size:14px;color:var(--text2);line-height:1.7;margin:0}
-.problem-insight strong{color:var(--green)}
 
 /* How It Works — Journey */
 .how-section{padding:100px 0;background:var(--bg2);border-bottom:1px solid var(--border)}
@@ -534,6 +532,31 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .footer-bottom{padding-top:24px;border-top:1px solid var(--border)}
 .footer-bottom p{font-size:12px;color:var(--text3)}
 
+/* Offer — single full-width pillar */
+.offer-single{display:flex;justify-content:center}
+.offer-ai-full{width:100%;max-width:860px;margin:0 auto}
+.op-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.op-list-grid li{gap:12px}
+
+/* Human add-on strip */
+.human-addon{display:flex;align-items:center;gap:16px;margin-top:28px;padding:18px 24px;background:var(--bg3);border:1px solid rgba(245,158,11,.15);border-radius:var(--r);max-width:860px;margin-left:auto;margin-right:auto;flex-wrap:wrap}
+.human-addon i{color:var(--amber);font-size:18px;flex-shrink:0}
+.human-addon span{flex:1;font-size:14px;color:var(--text2);min-width:200px}
+.human-addon strong{color:var(--text)}
+.human-addon a{display:inline-flex;align-items:center;gap:6px;color:var(--amber);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;border:1px solid rgba(245,158,11,.25);padding:8px 16px;border-radius:8px;transition:all .2s}
+.human-addon a:hover{background:rgba(245,158,11,.08);border-color:var(--amber)}
+
+/* How it works — simple item list */
+.j-items-list{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+
+/* Objections */
+.objections{padding:100px 0;border-top:1px solid var(--border)}
+.obj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:0 auto}
+.obj-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px}
+.obj-q{font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.obj-q i{color:var(--green);font-size:13px;flex-shrink:0}
+.obj-card p{font-size:13px;color:var(--text2);line-height:1.7;margin:0}
+
 /* Responsive */
 @media(max-width:1024px){
     .hero-grid{grid-template-columns:1fr;text-align:center}
@@ -543,22 +566,33 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
     .hero-stats{justify-content:center}
     .hero-right{order:-1;max-width:580px;margin:0 auto}
     .offer-grid{grid-template-columns:1fr}
-    .j-offer{grid-template-columns:1fr;gap:0}
-    .j-plus{padding:12px 0}
+    .op-list-grid{grid-template-columns:1fr}
+    .obj-grid{grid-template-columns:1fr 1fr}
+    .qa-flow{flex-wrap:wrap;gap:16px}
+    .qa-step{flex:1;min-width:140px}
+    .qa-arrow{display:none}
 }
 @media(max-width:768px){
     .nav-links{display:none}.mobile-menu-btn{display:block}
     .hero{padding:120px 0 60px}.hero h1{font-size:34px;letter-spacing:-1px}.hero h1 br{display:none}
     .hero-ctas{flex-direction:column;align-items:center}
     .hero-stats{flex-wrap:wrap;gap:20px}.hs-sep{display:none}
-    .problem-compare{grid-template-columns:1fr}
     .problem-card{padding:24px}
-    .problem-insight{flex-direction:column;gap:12px;text-align:center;align-items:center}
+    .feedback-cols{grid-template-columns:1fr;gap:8px}
+    .fc-col-bad{border-radius:12px}
+    .fc-col-good{border-radius:12px}
+    .fc-divider{transform:rotate(90deg)}
     .j-step{flex-direction:column;align-items:center}
     .j-card{width:100%}
-    .j-card-wide{padding:24px}
     .j-connector{padding-left:0;justify-content:center}
+    .qa-flow{flex-direction:column;gap:0}
+    .qa-step{flex-direction:row;text-align:left;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);width:100%}
+    .qa-step:last-child{border-bottom:none}
+    .qa-step-num{flex-shrink:0;margin-bottom:0}
+    .qa-step-icon{flex-shrink:0;margin-bottom:0;width:40px;height:40px;font-size:16px}
     .showcase-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .obj-grid{grid-template-columns:1fr}
+    .human-addon{flex-direction:column;text-align:center}
     .footer-top{grid-template-columns:1fr;gap:32px}.footer-cols{gap:32px;flex-wrap:wrap}
     .cta-section h2{font-size:26px}
     .cta-btns{flex-direction:column;align-items:center}
