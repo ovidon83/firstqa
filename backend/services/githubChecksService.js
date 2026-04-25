@@ -64,8 +64,10 @@ async function createCheckRun(octokit, owner, repo, sha, prNumber) {
  */
 async function updateCheckRunWithResults(octokit, owner, repo, checkRunId, results) {
   try {
-    const passed = results.failed === 0;
-    const conclusion = passed ? 'success' : 'failure';
+    // If no scenarios ran at all, treat as a failure — not a vacuous pass
+    const noScenariosRan = !results.totalTests || results.totalTests === 0;
+    const passed = !noScenariosRan && results.failed === 0;
+    const conclusion = noScenariosRan ? 'failure' : (passed ? 'success' : 'failure');
 
     // Generate summary
     const summary = generateSummary(results);
@@ -86,9 +88,11 @@ async function updateCheckRunWithResults(octokit, owner, repo, checkRunId, resul
       conclusion,
       completed_at: new Date().toISOString(),
       output: {
-        title: passed 
-          ? `✅ All ${results.totalTests} tests passed!` 
-          : `❌ ${results.failed} of ${results.totalTests} tests failed`,
+        title: noScenariosRan
+          ? '⚠️ No tests ran — browser session may have failed to start'
+          : passed 
+            ? `✅ All ${results.totalTests} tests passed!` 
+            : `❌ ${results.failed} of ${results.totalTests} tests failed`,
         summary,
         text: textOutput,
         annotations: annotations.slice(0, 50) // GitHub limits to 50 annotations

@@ -6,16 +6,29 @@
 const { generateVideoTimeline, calculateVideoDuration } = require('./videoService');
 
 function generateTestReportComment(results, videoUrl, screenshotUrls = {}, manualScenarios = []) {
-  const allPassed = results.failed === 0;
   const executed = results.scenarios.length;
+  const noScenariosRan = executed === 0;
+  const allPassed = !noScenariosRan && results.failed === 0;
   const passRate = executed > 0 ? Math.round((results.passed / executed) * 100) : 0;
   const duration = calculateVideoDuration(results);
 
-  const verdict = allPassed
-    ? (results.partial > 0 ? `🔶 ${results.passed}/${executed} Passed (${results.partial} need manual check)` : '✅ All Tests Passed')
-    : `❌ ${results.failed}/${executed} Tests Failed`;
+  const verdict = noScenariosRan
+    ? '⚠️ No Tests Ran'
+    : allPassed
+      ? (results.partial > 0 ? `🔶 ${results.passed}/${executed} Passed (${results.partial} need manual check)` : '✅ All Tests Passed')
+      : `❌ ${results.failed}/${executed} Tests Failed`;
 
   let comment = `## 🤖 Ovi AI — Test Execution: ${verdict}\n\n`;
+
+  if (noScenariosRan) {
+    comment += `**No scenarios ran.** The browser session likely failed to start or crashed before execution began.\n\n`;
+    comment += `**Common causes:** Authentication failed, staging URL unreachable, or browser session error.\n\n`;
+    comment += `**Try:** Check credentials in [Settings](${process.env.BASE_URL || 'https://www.firstqa.dev'}/dashboard/settings) and re-run with \`/qa testrun\`.\n\n`;
+    if (videoUrl) comment += `[Watch recording](${videoUrl}) for details.\n\n`;
+    comment += `<sub>🤖 Ovi AI · Browserbase + Playwright · [Dashboard](${process.env.BASE_URL || 'https://www.firstqa.dev'}/dashboard)</sub>\n`;
+    return comment;
+  }
+
   comment += `**${results.passed}/${executed} passed** (${passRate}%) · ${duration} · Chromium`;
   if (videoUrl) {
     comment += ` · [Watch recording](${videoUrl})`;
