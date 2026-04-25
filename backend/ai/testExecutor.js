@@ -234,7 +234,7 @@ Return JSON:
 // ─── Main entry point ───────────────────────────────────────────────────────
 
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
-  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null, authCookies = null } = options;
+  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null, authCookies = null, sharedResults = null } = options;
 
   const executionId = uuidv4();
   const resultsDir = path.join(__dirname, '..', '..', 'test-results', executionId);
@@ -278,7 +278,8 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   }
   console.log(`🤖 Agent model: ${agentModel}`);
 
-  const results = {
+  const results = sharedResults || {};
+  Object.assign(results, {
     executionId,
     baseUrl,
     startTime: new Date().toISOString(),
@@ -294,7 +295,7 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
       ? `https://www.browserbase.com/sessions/${sessionId}`
       : null,
     resultsDir
-  };
+  });
 
   let agentContext = null;
   const contextParts = [];

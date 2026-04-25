@@ -50,9 +50,12 @@ async function executeAutomatedTests(params) {
       return { success: true, message: 'All scenarios need manual testing' };
     }
 
-    // Execute browser-testable scenarios — race against global timeout
+    // Execute browser-testable scenarios — race against global timeout.
+    // sharedResults is mutated in-place as scenarios complete, so we can
+    // read partial data if the timeout fires before execution finishes.
     console.log(`\n🎬 Executing ${executable.length} scenario(s)...`);
 
+    const sharedResults = {};
     const globalTimeoutPromise = new Promise((_, reject) => {
       globalTimeoutHandle = setTimeout(() => {
         reject(new Error('GLOBAL_TIMEOUT: Test run exceeded 32-minute limit and was stopped automatically.'));
@@ -65,7 +68,8 @@ async function executeAutomatedTests(params) {
         timeout: 60000,
         userContext,
         testCredentials,
-        authCookies
+        authCookies,
+        sharedResults
       }),
       globalTimeoutPromise
     ]);
@@ -123,26 +127,51 @@ async function executeAutomatedTests(params) {
     console.error(`\n${isTimeout ? '⏱️' : '❌'} Automated test execution ${isTimeout ? 'timed out' : 'failed'}:`, error.message);
     if (!isTimeout) console.error('❌ Stack:', error.stack);
 
+    // On timeout, we may have partial results from scenarios that already completed
+    const hasPartialResults = isTimeout && sharedResults && sharedResults.scenarios?.length > 0;
+    const partialResults = hasPartialResults ? sharedResults : null;
+
     if (octokit && checkRunId) {
-      await octokit.checks.update({
-        owner, repo,
-        check_run_id: checkRunId,
-        status: 'completed',
-        conclusion: isTimeout ? 'timed_out' : 'failure',
-        completed_at: new Date().toISOString(),
-        output: {
-          title: isTimeout ? '⏱️ Test run timed out after 32 minutes' : '❌ Test execution failed',
-          summary: isTimeout
-            ? 'The test run hit the 32-minute limit and was stopped. Consider splitting into smaller batches or checking if the app requires authentication.'
-            : `An error occurred during test execution: ${error.message}`
-        }
-      }).catch(() => {});
+      if (hasPartialResults) {
+        // Post partial results with a timeout note
+        await updateCheckRunWithResults(octokit, owner, repo, checkRunId, partialResults).catch(() => {
+          // Fallback if partial update also fails
+          octokit.checks.update({
+            owner, repo, check_run_id: checkRunId,
+            status: 'completed', conclusion: 'timed_out',
+            completed_at: new Date().toISOString(),
+            output: { title: '⏱️ Test run timed out', summary: 'Run exceeded 32-minute limit.' }
+          }).catch(() => {});
+        });
+      } else {
+        await octokit.checks.update({
+          owner, repo,
+          check_run_id: checkRunId,
+          status: 'completed',
+          conclusion: isTimeout ? 'timed_out' : 'failure',
+          completed_at: new Date().toISOString(),
+          output: {
+            title: isTimeout ? '⏱️ Test run timed out after 32 minutes' : '❌ Test execution failed',
+            summary: isTimeout
+              ? 'The test run hit the 32-minute limit and was stopped.'
+              : `An error occurred during test execution: ${error.message}`
+          }
+        }).catch(() => {});
+      }
     }
 
     if (octokit) {
-      const body = isTimeout
-        ? `## ⏱️ Test Run Timed Out\n\nThe run was stopped after **32 minutes**.\n\n**Common causes:** Too many scenarios, app requires login, or slow staging environment.\n\n**Try:** Ensure credentials are configured in [Settings](${process.env.BASE_URL || 'https://www.firstqa.dev'}/dashboard/settings) and re-run with \`/qa testrun\`.\n\n<sub>🤖 Ovi AI Test Automation</sub>`
-        : `## ❌ Automated Test Execution Failed\n\n\`\`\`\n${error.message}\n\`\`\`\n\n**Possible causes:** Missing test data, login required, or environment setup.\n\n<sub>🤖 Ovi AI Test Automation</sub>`;
+      let body;
+      if (hasPartialResults) {
+        const videoUrl = partialResults.sessionReplayUrl || null;
+        const screenshotUrls = {};
+        body = generateTestReportComment(partialResults, videoUrl, screenshotUrls, []);
+        body += `\n\n> ⏱️ **Run timed out after 32 minutes** — partial results above (${partialResults.scenarios.length} of ${executable?.length || '?'} scenarios completed). Re-run with \`/qa testrun\` to continue.\n`;
+      } else if (isTimeout) {
+        body = `## ⏱️ Test Run Timed Out\n\nThe run was stopped after **32 minutes** before any scenarios completed.\n\n**Common causes:** Too many scenarios, app requires login, or slow staging environment.\n\n**Try:** Ensure credentials are configured in [Settings](${process.env.BASE_URL || 'https://www.firstqa.dev'}/dashboard/settings) and re-run with \`/qa testrun\`.\n\n<sub>🤖 Ovi AI Test Automation</sub>`;
+      } else {
+        body = `## ❌ Automated Test Execution Failed\n\n\`\`\`\n${error.message}\n\`\`\`\n\n**Possible causes:** Missing test data, login required, or environment setup.\n\n<sub>🤖 Ovi AI Test Automation</sub>`;
+      }
 
       await octokit.issues.createComment({ owner, repo, issue_number: prNumber, body }).catch(() => {});
     }
