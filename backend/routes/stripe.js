@@ -152,29 +152,38 @@ async function handleSubscriptionCreated(subscription) {
   }
 }
 
+// Plan amount map (in cents) — update when Stripe products change
+const PLAN_AMOUNTS = {
+  14900: 'Launch Partner', // $149/mo
+  24900: 'Starter',        // $249/mo
+  59900: 'Pro',            // $599/mo
+};
+
 // Helper function to determine plan from checkout session
 function determinePlanFromSession(session) {
   const lineItems = session.line_items?.data || [];
-  
+
   for (const item of lineItems) {
-    if (item.price?.product) {
-      const productId = item.price.product;
-      // Map Stripe product IDs to your plan names
-      if (productId.includes('starter') || productId.includes('49')) {
-        return 'Starter';
-      } else if (productId.includes('growth') || productId.includes('149')) {
-        return 'Growth';
-      }
-    }
+    const priceId = item.price?.id || '';
+    const productId = item.price?.product || '';
+
+    // Match by Stripe Price ID env vars (preferred — set these in your .env)
+    if (process.env.STRIPE_PRICE_LAUNCH_PARTNER && priceId === process.env.STRIPE_PRICE_LAUNCH_PARTNER) return 'Launch Partner';
+    if (process.env.STRIPE_PRICE_STARTER && priceId === process.env.STRIPE_PRICE_STARTER) return 'Starter';
+    if (process.env.STRIPE_PRICE_PRO && priceId === process.env.STRIPE_PRICE_PRO) return 'Pro';
+
+    // Fallback: match by product ID keyword
+    const pid = productId.toLowerCase();
+    if (pid.includes('launch_partner') || pid.includes('launch-partner')) return 'Launch Partner';
+    if (pid.includes('starter')) return 'Starter';
+    if (pid.includes('pro')) return 'Pro';
+    if (pid.includes('enterprise')) return 'Enterprise';
   }
-  
-  // Fallback based on amount
-  if (session.amount_total === 4900) { // $49.00 in cents
-    return 'Starter';
-  } else if (session.amount_total === 14900) { // $149.00 in cents
-    return 'Growth';
-  }
-  
+
+  // Final fallback: match by total amount
+  const plan = PLAN_AMOUNTS[session.amount_total];
+  if (plan) return plan;
+
   return 'Free Trial';
 }
 

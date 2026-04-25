@@ -1,138 +1,413 @@
 <%- include('partials/header', { title: 'FirstQA Pricing' }) %>
 
-<div class="container py-5">
-  <h1 class="text-center mb-2">Simple, Transparent Pricing</h1>
-  <p class="lead text-center mb-5">Choose the plan that works for your team's testing needs</p>
-  
-  <div class="row row-cols-1 row-cols-md-3 mb-5 justify-content-center">
-    <div class="col mb-4">
-      <div class="card h-100 border-primary">
-        <div class="card-header bg-primary text-white text-center py-4">
-          <h2 class="my-0 fw-normal">Startup</h2>
-        </div>
-        <div class="card-body d-flex flex-column">
-          <h1 class="card-title pricing-card-title text-center">$29<small class="text-muted fw-light">/month</small></h1>
-          <ul class="list-unstyled mt-3 mb-4">
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> 5 tests per month</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Standard response time (24h)</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Basic test report</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Email support</li>
-            <li class="py-2 text-muted"><i class="bi bi-x-circle-fill text-muted me-2"></i> Priority support</li>
-            <li class="py-2 text-muted"><i class="bi bi-x-circle-fill text-muted me-2"></i> Custom test scenarios</li>
-          </ul>
-          <div class="mt-auto d-grid">
-            <a href="#" class="btn btn-lg btn-outline-primary">Get Started</a>
-          </div>
+<style>
+  .pricing-page {
+    padding: 80px 0 100px;
+  }
+  .pricing-page h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.5rem;
+  }
+  .pricing-page .lead {
+    color: #64748b;
+    max-width: 560px;
+    margin: 0 auto 60px;
+  }
+
+  /* Launch Partner Banner */
+  .lp-banner {
+    background: #f0fdfa;
+    border: 1.5px solid #99f6e4;
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .lp-banner-left h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .lp-banner-left p {
+    font-size: 0.9375rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .lp-badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .lp-perks {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .lp-perk {
+    font-size: 0.875rem;
+    color: #0f766e;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lp-banner-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #0d9488;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    padding: 12px 24px;
+    border-radius: 9px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .lp-banner-cta:hover { background: #0f766e; color: #fff; }
+
+  /* Plan cards */
+  .pricing-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 60px;
+  }
+  @media (max-width: 900px) { .pricing-cards { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; } }
+  .plan-card {
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .plan-card.featured {
+    border-color: #0d9488;
+    position: relative;
+  }
+  .plan-card.featured::before {
+    content: "Most popular";
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0d9488;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+  .plan-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+  .plan-price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .plan-price span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #94a3b8;
+    letter-spacing: 0;
+  }
+  .plan-desc {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    min-height: 20px;
+  }
+  .plan-divider {
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    margin: 0 0 20px;
+  }
+  .plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    flex: 1;
+  }
+  .plan-features li {
+    font-size: 0.9rem;
+    color: #334155;
+    padding: 5px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.45;
+  }
+  .plan-features li .check {
+    color: #10b981;
+    font-size: 0.8rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 11px 20px;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .plan-cta-primary {
+    background: #0d9488;
+    color: #fff;
+  }
+  .plan-cta-primary:hover { background: #0f766e; color: #fff; }
+  .plan-cta-outline {
+    background: transparent;
+    color: #0d9488;
+    border: 1.5px solid #0d9488;
+  }
+  .plan-cta-outline:hover { background: #f0fdfa; }
+  .plan-cta-muted {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1.5px solid #e2e8f0;
+  }
+  .plan-cta-muted:hover { background: #f1f5f9; color: #334155; }
+
+  /* Free trial notice */
+  .free-trial-notice {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 60px;
+  }
+  .free-trial-notice strong { color: #1e293b; }
+
+  /* FAQ */
+  .pricing-faq h2 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .pricing-faq .accordion-button {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .pricing-faq .accordion-button:not(.collapsed) {
+    color: #0d9488;
+    background: #f0fdfa;
+    box-shadow: none;
+  }
+  .pricing-faq .accordion-button:focus { box-shadow: none; }
+</style>
+
+<div class="pricing-page">
+  <div class="container">
+
+    <div class="text-center">
+      <h1>Pricing</h1>
+      <p class="lead text-center">Start free. No credit card required.</p>
+    </div>
+
+    <!-- Launch Partner Banner -->
+    <div class="lp-banner">
+      <div class="lp-banner-left">
+        <span class="lp-badge">21 spots remaining</span>
+        <h2>Become a Launch Partner &mdash; $149/mo, locked for life</h2>
+        <p>Get a 30-day free trial, give weekly feedback via call or chat, and pay $149/mo forever &mdash; 40% below standard pricing.</p>
+        <div class="lp-perks">
+          <span class="lp-perk"><i class="bi bi-gift"></i> 30-day free trial</span>
+          <span class="lp-perk"><i class="bi bi-chat-dots"></i> Weekly feedback (call or chat)</span>
+          <span class="lp-perk"><i class="bi bi-patch-check"></i> $149/mo locked forever</span>
+          <span class="lp-perk"><i class="bi bi-map"></i> Shape the roadmap</span>
         </div>
       </div>
+      <a href="/discovery-interview" class="lp-banner-cta">
+        Start Application <i class="bi bi-arrow-right"></i>
+      </a>
     </div>
-    <div class="col mb-4">
-      <div class="card h-100 border-primary shadow-lg">
-        <div class="card-header bg-primary text-white text-center py-4">
-          <h2 class="my-0 fw-normal">Business</h2>
-          <span class="badge bg-warning text-dark">Most Popular</span>
-        </div>
-        <div class="card-body d-flex flex-column">
-          <h1 class="card-title pricing-card-title text-center">$99<small class="text-muted fw-light">/month</small></h1>
-          <ul class="list-unstyled mt-3 mb-4">
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> 20 tests per month</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Fast response time (12h)</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Detailed test report</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Priority support</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Basic test scenarios included</li>
-            <li class="py-2 text-muted"><i class="bi bi-x-circle-fill text-muted me-2"></i> Custom test plan</li>
-          </ul>
-          <div class="mt-auto d-grid">
-            <a href="#" class="btn btn-lg btn-primary">Get Started</a>
-          </div>
-        </div>
+
+    <!-- Plan cards -->
+    <div class="pricing-cards">
+
+      <!-- Starter -->
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$249<span>/mo</span></div>
+        <div class="plan-desc">$224/mo billed annually</div>
+        <hr class="plan-divider">
+        <ul class="plan-features">
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Unlimited PR analyses</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Unlimited ticket analyses (Linear &amp; Jira)</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Playwright test generation</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Automated browser test execution</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> GitHub + Linear + Jira integrations</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Up to 5 repos</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> 1&ndash;3 team members</li>
+          <li><span class="check bi-x-lg" style="color:#94a3b8"><i class="bi bi-x-lg"></i></span> <span style="color:#94a3b8">Slack integration</span></li>
+        </ul>
+        <a href="/auth/github" class="plan-cta plan-cta-outline">Start free trial</a>
+      </div>
+
+      <!-- Pro (featured) -->
+      <div class="plan-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$599<span>/mo</span></div>
+        <div class="plan-desc">$539/mo billed annually</div>
+        <hr class="plan-divider">
+        <ul class="plan-features">
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Everything in Starter</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Unlimited repos</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Unlimited team members</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Slack integration</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Custom test rules &amp; personas</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Priority support (24h response)</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Early access to new features</li>
+        </ul>
+        <a href="/auth/github" class="plan-cta plan-cta-primary">Start free trial</a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="plan-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price" style="font-size:2rem;">Custom</div>
+        <div class="plan-desc">From $1,500/mo &middot; annual contract</div>
+        <hr class="plan-divider">
+        <ul class="plan-features">
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Everything in Pro</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> SSO / SAML</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Dedicated Slack channel</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Custom SLA</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Onboarding session</li>
+          <li><span class="check"><i class="bi bi-check-lg"></i></span> Quarterly reviews</li>
+        </ul>
+        <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank" rel="noopener" class="plan-cta plan-cta-muted">Book a call</a>
       </div>
     </div>
-    <div class="col mb-4">
-      <div class="card h-100 border-primary">
-        <div class="card-header bg-primary text-white text-center py-4">
-          <h2 class="my-0 fw-normal">Enterprise</h2>
-        </div>
-        <div class="card-body d-flex flex-column">
-          <h1 class="card-title pricing-card-title text-center">$299<small class="text-muted fw-light">/month</small></h1>
-          <ul class="list-unstyled mt-3 mb-4">
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> 50 tests per month</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Rapid response time (6h)</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Comprehensive test reports</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Priority support</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Custom test scenarios</li>
-            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Dedicated test manager</li>
-          </ul>
-          <div class="mt-auto d-grid">
-            <a href="#" class="btn btn-lg btn-outline-primary">Get Started</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="card mt-5">
-    <div class="card-header bg-primary text-white">
-      <h2 class="mb-0">Frequently Asked Questions</h2>
-    </div>
-    <div class="card-body">
+
+    <!-- Free trial notice -->
+    <p class="free-trial-notice">
+      All plans include a <strong>14-day free trial</strong> &mdash; no credit card required. Cancel anytime.
+      Trial starts when you connect your first GitHub repo.
+    </p>
+
+    <!-- FAQ -->
+    <div class="pricing-faq">
+      <h2>Common questions</h2>
       <div class="accordion" id="pricingFAQ">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingOne">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              Can I rollover unused tests to the next month?
+
+        <div class="accordion-item border-0 mb-2">
+          <h2 class="accordion-header">
+            <button class="accordion-button rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="true">
+              What's the difference between the Launch Partner offer and standard plans?
             </button>
           </h2>
-          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
-            <div class="accordion-body">
-              Yes, unused tests are automatically rolled over to the next month. They can accumulate for up to 3 months.
+          <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#pricingFAQ">
+            <div class="accordion-body text-muted">
+              Launch Partners get a 30-day free trial, $149/mo locked for life (vs standard $249/mo Starter), and a direct line to the founding team to shape the product. In return, they commit to weekly 15-min feedback sessions via call or async chat. Limited to 21 spots total &mdash; once full, the offer closes permanently.
             </div>
           </div>
         </div>
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingTwo">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-              What happens if I exceed my monthly test limit?
+
+        <div class="accordion-item border-0 mb-2">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+              When does the free trial start?
             </button>
           </h2>
-          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo">
-            <div class="accordion-body">
-              If you exceed your monthly test limit, additional tests will be billed at a per-test rate based on your plan.
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+            <div class="accordion-body text-muted">
+              Your trial starts when you connect your first GitHub repository &mdash; not when you sign up. This means you only start the clock once you're actually set up and ready to use FirstQA.
             </div>
           </div>
         </div>
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingThree">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-              Can I upgrade or downgrade my plan at any time?
+
+        <div class="accordion-item border-0 mb-2">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+              What happens when the trial ends?
             </button>
           </h2>
-          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree">
-            <div class="accordion-body">
-              Yes, you can change your plan at any time. Upgrades are effective immediately, while downgrades take effect at the start of the next billing cycle.
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+            <div class="accordion-body text-muted">
+              Your account moves to read-only mode &mdash; all past analyses stay visible, no data is lost. New PR and ticket analyses are paused until you add a payment method and choose a plan.
             </div>
           </div>
         </div>
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingFour">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-              Is there a plan for open-source projects?
+
+        <div class="accordion-item border-0 mb-2">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+              Can I upgrade or cancel at any time?
             </button>
           </h2>
-          <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour">
-            <div class="accordion-body">
-              We offer a special discount for open-source projects. Please contact us for more information.
+          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+            <div class="accordion-body text-muted">
+              Yes. Upgrades take effect immediately. Cancellations take effect at the end of your current billing period &mdash; you keep access until then.
             </div>
           </div>
         </div>
+
+        <div class="accordion-item border-0 mb-2">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+              Do you offer annual billing?
+            </button>
+          </h2>
+          <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+            <div class="accordion-body text-muted">
+              Yes &mdash; pay annually and get 10% off. Starter is $224/mo, Pro is $539/mo. Reach out to <a href="mailto:ovi@firstqa.dev">ovi@firstqa.dev</a> to set this up.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item border-0">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+              What integrations are supported?
+            </button>
+          </h2>
+          <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+            <div class="accordion-body text-muted">
+              All plans include GitHub, Linear, and Jira integrations. Pro adds Slack. Enterprise can request custom integrations.
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
-  
-  <div class="text-center mt-5">
-    <p class="lead">Need a custom plan for your team?</p>
-    <a href="/contact" class="btn btn-primary btn-lg">Contact Us</a>
+
+    <div class="text-center mt-5 pt-3">
+      <p class="text-muted mb-3">Not sure which plan is right for you?</p>
+      <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank" rel="noopener" class="btn btn-outline-secondary px-4">Talk to us</a>
+    </div>
+
   </div>
 </div>
 
-<%- include('partials/footer') %> 
+<%- include('partials/footer') %>
