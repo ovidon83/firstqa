@@ -12,7 +12,8 @@ const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
  */
 function requireAuth(req, res, next) {
   if (!req.session?.user) {
-    return res.redirect('/login');
+    const redirect = encodeURIComponent(req.originalUrl);
+    return res.redirect(`/login?redirect=${redirect}`);
   }
   next();
 }
