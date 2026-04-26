@@ -288,6 +288,34 @@
     .di-view-form.active { display: block; }
     .di-view-thankyou { display: none; }
     .di-view-thankyou.active { display: block; }
+    /* Product screenshots inline */
+    .di-product-shot {
+      margin-top: 1.5rem;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--fqa-border);
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+    .di-product-shot img {
+      width: 100%;
+      display: block;
+    }
+    .di-product-shot-caption {
+      font-size: 0.8125rem;
+      color: var(--fqa-text-muted);
+      padding: 0.6rem 1rem;
+      background: #f8fafc;
+      border-top: 1px solid var(--fqa-border);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .di-product-shot-caption .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--fqa-primary);
+      flex-shrink: 0;
+    }
     @media (max-width: 480px) {
       .di-features { grid-template-columns: 1fr; }
       .di-card { padding: 1.25rem; }
@@ -324,6 +352,13 @@
             <br><span>$149/mo, Locked for Life</span>
           </div>
         </div>
+        <div class="di-product-shot" style="margin-top: 2rem;">
+          <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI QA Analysis posted on a GitHub PR — commit breakdown, QA Pulse, bugs and risks, test recipe">
+          <div class="di-product-shot-caption">
+            <span class="dot"></span>
+            Ovi's analysis posted automatically on a real GitHub PR — commits reviewed, risks flagged, test recipe generated
+          </div>
+        </div>
       </div>
     </div>
 
@@ -351,6 +386,13 @@
             <label for="qa_process_other">Please specify</label>
             <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
           </div>
+          <div class="di-product-shot">
+            <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
+            <div class="di-product-shot-caption">
+              <span class="dot"></span>
+              Whatever your current process, Ovi drops a full QA analysis on every PR — automatically, in minutes
+            </div>
+          </div>
         </div>
 
         <!-- Step 2 -->
@@ -362,6 +404,13 @@
             <label class="di-option" data-value="25-40%"><input type="radio" name="bug_fix_percentage" value="25-40%"> <span class="emoji">😓</span> 25-40%</label>
             <label class="di-option" data-value="40%+ (It's a constant firefight)"><input type="radio" name="bug_fix_percentage" value="40%+ (It's a constant firefight)"> <span class="emoji">🔥</span> 40%+ (It's a constant firefight)</label>
             <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
+          </div>
+          <div class="di-product-shot">
+            <img src="/images/landing/ovi-test-execution.png" alt="Ovi running 19 browser tests across a PR — results table with pass/fail status, duration, screenshots and video evidence per scenario">
+            <div class="di-product-shot-caption">
+              <span class="dot"></span>
+              Ovi runs browser tests end-to-end and delivers a full pass/fail report with screenshots and video — before the PR merges
+            </div>
           </div>
         </div>
 
@@ -416,6 +465,13 @@
             <li>Permission to share your results publicly (anonymous if preferred)</li>
             <li>Honest feedback on what works and what doesn't</li>
           </ul>
+          <div class="di-product-shot" style="margin-bottom: 1.25rem;">
+            <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — 19 scenarios, pass/fail, video and screenshot evidence per test">
+            <div class="di-product-shot-caption">
+              <span class="dot"></span>
+              This is the kind of report your team gets on every PR run — real evidence, not just a green checkmark
+            </div>
+          </div>
           <p><strong>Does this work for you?</strong></p>
           <div class="di-options" data-name="commitment_level">
             <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
