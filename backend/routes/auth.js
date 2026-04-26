@@ -8,6 +8,25 @@ const router = express.Router();
 const { supabase, supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
 const { sendWelcomeEmail } = require('../utils/emailService');
 
+const TRIAL_ANALYSES_LIMIT = 5;
+
+async function initTrialUser(userId, email) {
+  if (!isSupabaseConfigured() || !supabaseAdmin) return;
+  try {
+    await supabaseAdmin.from('users').upsert({
+      id: userId,
+      email,
+      plan: 'free_trial',
+      analyses_limit: TRIAL_ANALYSES_LIMIT,
+      analyses_this_month: 0,
+      trial_started_at: new Date().toISOString()
+    }, { onConflict: 'id', ignoreDuplicates: true });
+    console.log(`✅ Trial initialized for ${email} (limit: ${TRIAL_ANALYSES_LIMIT})`);
+  } catch (err) {
+    console.error('initTrialUser error:', err.message);
+  }
+}
+
 /**
  * Auto-sync GitHub App installations for the logged-in user
  * This runs in the background after login to link any existing installations
@@ -188,6 +207,7 @@ router.post('/signup', async (req, res) => {
       req.session.accessToken = data.session.access_token;
       req.session.refreshToken = data.session.refresh_token;
       sendWelcomeEmail(email, name).catch(() => {});
+      initTrialUser(data.user.id, email).catch(() => {});
       const redirect = req.body.redirect && String(req.body.redirect).startsWith('/') && !String(req.body.redirect).startsWith('//');
       return res.redirect(redirect ? req.body.redirect : '/dashboard');
     }
@@ -331,6 +351,7 @@ router.get('/callback', async (req, res) => {
     const isNewUser = createdAt && (Date.now() - createdAt.getTime() < 60000);
     if (isNewUser) {
       sendWelcomeEmail(data.user.email, req.session.user.name).catch(() => {});
+      initTrialUser(data.user.id, data.user.email).catch(() => {});
     }
 
     // GitHub OAuth: sync installations for this user (they signed up/logged in via GitHub)
