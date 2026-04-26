@@ -369,6 +369,15 @@
     .di-product-shot-scroll img {
       width: 100%;
       display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+    body.split-mode .di-product-shot-scroll img {
+      width: auto;
+      max-width: 100%;
+      min-width: 100%;
+      image-rendering: auto;
+      -webkit-font-smoothing: antialiased;
     }
     .di-product-shot-fade {
       position: sticky;
@@ -432,8 +441,31 @@
       height: 100%;
       overflow-y: auto;
       border-radius: 0;
-      padding: 2.5rem 2.5rem 2rem;
+      padding: 2rem 2rem 1.5rem;
       box-shadow: 2px 0 12px rgba(0,0,0,.06);
+    }
+    body.split-mode .di-step-left h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    body.split-mode .di-step-left .di-option {
+      padding: 0.6rem 0.875rem;
+      font-size: 0.9375rem;
+    }
+    body.split-mode .di-step-left .di-options {
+      gap: 0.35rem;
+    }
+    body.split-mode .di-split-header {
+      margin-bottom: 1.25rem;
+    }
+    body.split-mode .di-step-left .di-commit-list li {
+      font-size: 0.9rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.35rem;
+    }
+    body.split-mode .di-step-left p {
+      font-size: 0.9375rem;
+      margin-bottom: 0.5rem;
     }
     body.split-mode .di-step-right {
       height: 100%;
@@ -634,7 +666,13 @@
 
         <!-- Step 3 -->
         <div class="di-step" data-step="3">
-          <h2>Here's how FirstQA works:</h2>
+          <h2>Would something like this help your team ship faster?</h2>
+          <div class="di-options" data-name="solution_interest" style="margin-bottom: 1.75rem;">
+            <label class="di-option" data-value="Yes, this would be game-changing"><input type="radio" name="solution_interest" value="Yes, this would be game-changing"> Yes, this would be game-changing</label>
+            <label class="di-option" data-value="Maybe, depends on how well it works"><input type="radio" name="solution_interest" value="Maybe, depends on how well it works"> Maybe, depends on how well it works</label>
+            <label class="di-option" data-value="No, we're good with our current process"><input type="radio" name="solution_interest" value="No, we're good with our current process"> No, we're good with our current process</label>
+          </div>
+          <p class="mb-2" style="font-size:0.9rem; color: var(--fqa-text-muted);">See how Ovi works end-to-end:</p>
           <div class="di-tabs-wrap">
             <div class="di-tabs" role="tablist">
               <button class="di-tab active" data-ditab="ditab-setup">Setup</button>
@@ -664,12 +702,6 @@
                 <img src="/images/landing/pr-review.png" alt="Test report — 7 passed, 2 failed — Cmd+Enter and autocomplete bugs confirmed">
               </div>
             </div>
-          </div>
-          <p class="mt-3 mb-1"><strong>Would something like this help your team ship faster?</strong></p>
-          <div class="di-options" data-name="solution_interest">
-            <label class="di-option" data-value="Yes, this would be game-changing"><input type="radio" name="solution_interest" value="Yes, this would be game-changing"> Yes, this would be game-changing</label>
-            <label class="di-option" data-value="Maybe, depends on how well it works"><input type="radio" name="solution_interest" value="Maybe, depends on how well it works"> Maybe, depends on how well it works</label>
-            <label class="di-option" data-value="No, we're good with our current process"><input type="radio" name="solution_interest" value="No, we're good with our current process"> No, we're good with our current process</label>
           </div>
         </div>
 
