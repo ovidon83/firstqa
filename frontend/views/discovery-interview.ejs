@@ -761,10 +761,13 @@
         }
       });
 
+      var isSubmitting = false;
       form.addEventListener('submit', function(e) {
         e.preventDefault();
+        if (isSubmitting) return;
         collectState();
         if (!validateStep(TOTAL_STEPS)) return;
+        isSubmitting = true;
         var fd = new FormData(form);
         var body = {};
         fd.forEach(function(v, k) { body[k] = v; });
@@ -783,6 +786,7 @@
             clearState();
             showThankyou(result.data.qualified, companyName);
           } else {
+            isSubmitting = false;
             nextBtn.disabled = false;
             nextBtn.textContent = 'Submit';
             var errs = result.data.errors || ['Something went wrong.'];
@@ -790,6 +794,7 @@
           }
         })
         .catch(function() {
+          isSubmitting = false;
           nextBtn.disabled = false;
           nextBtn.textContent = 'Submit';
           alert('Network error. Please try again.');

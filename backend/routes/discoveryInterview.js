@@ -102,6 +102,22 @@ router.post('/discovery-interview', async (req, res) => {
       });
     }
 
+    // Deduplicate: if this email submitted in the last 10 minutes, silently succeed
+    const email = (body.email || '').trim().toLowerCase();
+    if (isSupabaseConfigured() && supabaseAdmin) {
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      const { data: existing } = await supabaseAdmin
+        .from('discovery_interviews')
+        .select('id')
+        .eq('email', email)
+        .gte('submitted_at', tenMinutesAgo)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        console.log(`[Discovery] Duplicate submission ignored for ${email}`);
+        return res.json({ success: true, qualification_status: 'duplicate', qualified: false });
+      }
+    }
+
     const { status: qualification_status, reason: disqualification_reason } = getQualificationStatus(body);
 
     const row = {
