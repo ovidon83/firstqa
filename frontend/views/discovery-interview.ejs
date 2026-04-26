@@ -393,12 +393,101 @@
       max-height: 340px;
       box-shadow: none;
     }
+    /* ── Split-screen mode (steps 1, 2, 4) ── */
+    .di-split-header { display: none; }
+    body.split-mode {
+      overflow: hidden;
+      height: 100vh;
+    }
+    body.split-mode .di-wrap {
+      position: fixed;
+      inset: 0;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--fqa-body-bg);
+    }
+    body.split-mode .di-wrap > .di-logo,
+    body.split-mode .di-progress-wrap { display: none; }
+    body.split-mode .di-split-header { display: block; margin-bottom: 2rem; }
+    body.split-mode #di-view-form {
+      flex: 1;
+      overflow: hidden;
+      display: flex !important;
+      flex-direction: column;
+    }
+    body.split-mode #di-form.di-card-flat {
+      flex: 1;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+    body.split-mode .di-step.active { height: 100%; }
+    body.split-mode .di-step-cols {
+      height: 100%;
+      min-height: unset;
+    }
+    body.split-mode .di-step-left {
+      height: 100%;
+      overflow-y: auto;
+      border-radius: 0;
+      padding: 2.5rem 2.5rem 2rem;
+      box-shadow: 2px 0 12px rgba(0,0,0,.06);
+    }
+    body.split-mode .di-step-right {
+      height: 100%;
+      padding-left: 0;
+      overflow: hidden;
+    }
+    body.split-mode .di-product-shot {
+      height: 100%;
+      border-radius: 0;
+    }
+    body.split-mode .di-product-shot-caption {
+      border-radius: 0;
+      padding: 0.65rem 1.5rem;
+    }
+    body.split-mode .di-product-shot-scroll {
+      border-radius: 0;
+      box-shadow: none;
+      max-height: unset;
+      height: calc(100% - 38px);
+    }
+    body.split-mode .di-product-shot-fade {
+      background: linear-gradient(to bottom, transparent, rgba(248,250,252,0.95));
+    }
+    /* inline progress inside left col */
+    .di-progress-inline .di-progress-bar {
+      height: 4px;
+      background: var(--fqa-border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 0.4rem;
+    }
+    .di-progress-inline .di-progress-fill-inline {
+      height: 100%;
+      background: linear-gradient(90deg, var(--fqa-primary), var(--fqa-accent));
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+    .di-progress-inline .di-progress-label-inline {
+      font-size: 0.75rem;
+      color: var(--fqa-text-muted);
+    }
     @media (max-width: 700px) {
+      body.split-mode { overflow: auto; height: auto; }
+      body.split-mode .di-wrap { position: static; }
+      body.split-mode #di-form.di-card-flat { overflow: visible; }
+      body.split-mode .di-step.active,
+      body.split-mode .di-step-cols,
+      body.split-mode .di-step-left,
+      body.split-mode .di-step-right { height: auto; }
+      body.split-mode .di-product-shot-scroll { max-height: 280px; }
       .di-step-cols { grid-template-columns: 1fr; min-height: unset; }
-      .di-step-left { padding-bottom: 1.5rem; margin-bottom: 1rem; }
+      .di-step-left { padding-bottom: 1.5rem; margin-bottom: 1rem; border-radius: 12px; }
       .di-step-right { padding-left: 0; }
-      .di-product-shot { height: auto; }
-      .di-product-shot-scroll { max-height: 280px; }
+      .di-product-shot { height: auto; border-radius: 10px; }
       .di-features { grid-template-columns: 1fr; }
       .di-card { padding: 1.25rem; }
       .di-card.di-card-flat { background: transparent; padding: 0; }
@@ -463,6 +552,13 @@
         <div class="di-step active" data-step="1">
           <div class="di-step-cols">
             <div class="di-step-left">
+              <div class="di-split-header">
+                <a href="/" class="di-logo" style="margin-bottom:1.5rem;"><img src="/logo/firstqa-logo-light.svg" alt="FirstQA" class="di-logo-img"></a>
+                <div class="di-progress-inline" style="margin-bottom:1.75rem;">
+                  <div class="di-progress-bar"><div class="di-progress-fill-inline" style="width:16.66%"></div></div>
+                  <div class="di-progress-label-inline">Step 1 of 6</div>
+                </div>
+              </div>
               <h2>How does your team currently handle QA/testing?</h2>
               <div class="di-options" data-name="qa_process">
                 <label class="di-option" data-value="Developers test their own code"><input type="radio" name="qa_process" value="Developers test their own code"> Developers test their own code</label>
@@ -500,6 +596,13 @@
         <div class="di-step" data-step="2">
           <div class="di-step-cols">
             <div class="di-step-left">
+              <div class="di-split-header">
+                <a href="/" class="di-logo" style="margin-bottom:1.5rem;"><img src="/logo/firstqa-logo-light.svg" alt="FirstQA" class="di-logo-img"></a>
+                <div class="di-progress-inline" style="margin-bottom:1.75rem;">
+                  <div class="di-progress-bar"><div class="di-progress-fill-inline" style="width:33.33%"></div></div>
+                  <div class="di-progress-label-inline">Step 2 of 6</div>
+                </div>
+              </div>
               <h2>Roughly what % of your sprint goes to bug fixes vs new features?</h2>
               <div class="di-options" data-name="bug_fix_percentage">
                 <label class="di-option" data-value="0-10% (We rarely have bugs)"><input type="radio" name="bug_fix_percentage" value="0-10% (We rarely have bugs)"> <span class="emoji">😊</span> 0-10% (We rarely have bugs)</label>
@@ -574,6 +677,13 @@
         <div class="di-step" data-step="4">
           <div class="di-step-cols">
             <div class="di-step-left">
+              <div class="di-split-header">
+                <a href="/" class="di-logo" style="margin-bottom:1.5rem;"><img src="/logo/firstqa-logo-light.svg" alt="FirstQA" class="di-logo-img"></a>
+                <div class="di-progress-inline" style="margin-bottom:1.75rem;">
+                  <div class="di-progress-bar"><div class="di-progress-fill-inline" style="width:66.66%"></div></div>
+                  <div class="di-progress-label-inline">Step 4 of 6</div>
+                </div>
+              </div>
               <h2>Here's what the Launch Partner deal looks like:</h2>
               <ul class="di-commit-list">
                 <li><strong>30-day free trial</strong> — full access, no credit card required until the trial ends</li>
@@ -794,6 +904,12 @@
         var isTwoCol = TWO_COL_STEPS.includes(step);
         sharedButtons.style.display = isTwoCol ? 'none' : 'flex';
         form.classList.toggle('di-card-flat', isTwoCol);
+        document.body.classList.toggle('split-mode', isTwoCol);
+        // Sync inline progress bars
+        var pct = (step / TOTAL_STEPS * 100) + '%';
+        var label = 'Step ' + step + ' of ' + TOTAL_STEPS;
+        document.querySelectorAll('.di-progress-fill-inline').forEach(function(el) { el.style.width = pct; });
+        document.querySelectorAll('.di-progress-label-inline').forEach(function(el) { el.textContent = label; });
         backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
         nextBtn.textContent = step === TOTAL_STEPS ? 'Submit' : 'Next';
         nextBtn.type = step === TOTAL_STEPS ? 'submit' : 'button';
