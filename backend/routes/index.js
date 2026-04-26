@@ -45,9 +45,7 @@ router.get('/how-it-works', (req, res) => {
 
 // Pricing page
 router.get('/pricing', (req, res) => {
-  res.render('pricing', { 
-    title: 'FirstQA Pricing' 
-  });
+  res.redirect('/#pricing');
 });
 
 // Request services page
