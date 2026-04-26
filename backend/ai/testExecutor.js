@@ -463,6 +463,7 @@ Rules:
         const agent = stagehand.agent({
           model: agentModel,
           systemPrompt: agentSystemPrompt,
+          mode: 'hybrid',
         });
 
         console.log(`   🤖 Agent executing...`);
