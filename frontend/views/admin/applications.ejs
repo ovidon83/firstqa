@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background: #f4f6f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .page-header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 1rem 2rem; margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+    .page-header a { font-size: 0.85rem; color: #6b7280; text-decoration: none; }
+    .badge-high_priority { background: #dcfce7; color: #166534; }
+    .badge-medium { background: #fef9c3; color: #854d0e; }
+    .badge-low { background: #f3f4f6; color: #374151; }
+    .badge-disqualified { background: #fee2e2; color: #991b1b; }
+    .badge-approved { background: #dbeafe; color: #1e40af; }
+    .badge-rejected { background: #fce7f3; color: #9d174d; }
+    .app-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); margin-bottom: 1rem; padding: 1.25rem 1.5rem; }
+    .app-card .company { font-weight: 600; font-size: 1rem; }
+    .app-card .meta { font-size: 0.82rem; color: #6b7280; margin-top: 2px; }
+    .app-card .answers { font-size: 0.85rem; color: #374151; margin-top: 0.75rem; border-top: 1px solid #f3f4f6; padding-top: 0.75rem; }
+    .app-card .answers dt { font-weight: 500; color: #6b7280; }
+    .app-card .answers dd { margin-bottom: 0.4rem; }
+    .status-pill { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 20px; display: inline-block; }
+    .btn-approve { background: #16a34a; color: #fff; border: none; font-size: 0.82rem; padding: 0.35rem 0.9rem; border-radius: 6px; }
+    .btn-approve:hover { background: #15803d; color: #fff; }
+    .btn-reject { background: #fff; color: #dc2626; border: 1px solid #fca5a5; font-size: 0.82rem; padding: 0.35rem 0.9rem; border-radius: 6px; }
+    .btn-reject:hover { background: #fee2e2; }
+    .empty-state { text-align: center; padding: 4rem; color: #9ca3af; }
+    .filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .filter-btn { font-size: 0.8rem; padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; }
+    .filter-btn.active { background: #111; color: #fff; border-color: #111; }
+  </style>
+</head>
+<body>
+
+<div class="page-header d-flex align-items-center justify-content-between">
+  <div>
+    <div style="font-size:0.75rem;color:#9ca3af;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:2px;">FirstQA Admin</div>
+    <h1><i class="bi bi-people me-2"></i>Launch Partners</h1>
+  </div>
+  <span class="text-muted" style="font-size:0.85rem;"><%= applications.length %> applications</span>
+</div>
+
+<div class="container-fluid px-4" style="max-width:900px;">
+
+  <% if (applications.length === 0) { %>
+    <div class="empty-state">
+      <i class="bi bi-inbox" style="font-size:2rem;"></i>
+      <p class="mt-2">No applications yet.</p>
+    </div>
+  <% } else { %>
+
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">All (<%= applications.length %>)</button>
+      <button class="filter-btn" data-filter="high_priority">High Priority</button>
+      <button class="filter-btn" data-filter="medium">Medium</button>
+      <button class="filter-btn" data-filter="low">Low</button>
+      <button class="filter-btn" data-filter="disqualified">Disqualified</button>
+      <button class="filter-btn" data-filter="approved">Approved</button>
+    </div>
+
+    <% applications.forEach(app => { %>
+      <div class="app-card" data-status="<%= app.qualification_status %>">
+        <div class="d-flex align-items-start justify-content-between gap-3">
+          <div>
+            <div class="company"><%= app.company_name %></div>
+            <div class="meta">
+              <%= app.role %> &bull; <%= app.team_size %> &bull;
+              <a href="mailto:<%= app.email %>"><%= app.email %></a>
+              <% if (app.linkedin_url) { %> &bull; <a href="<%= app.linkedin_url %>" target="_blank">LinkedIn</a><% } %>
+            </div>
+            <div class="meta mt-1">
+              Submitted <%= new Date(app.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <span class="status-pill badge-<%= app.qualification_status %>"><%= app.qualification_status.replace('_', ' ') %></span>
+            <% if (app.qualification_status !== 'approved' && app.qualification_status !== 'rejected') { %>
+              <button class="btn-approve" onclick="updateStatus('<%= app.id %>', 'approve', this)">Approve</button>
+              <button class="btn-reject" onclick="updateStatus('<%= app.id %>', 'reject', this)">Reject</button>
+            <% } %>
+          </div>
+        </div>
+
+        <dl class="answers row mb-0">
+          <div class="col-md-6">
+            <dt>QA Process</dt>
+            <dd><%= app.qa_process %><%= app.qa_process_other ? ` — ${app.qa_process_other}` : '' %></dd>
+            <dt>Bug fix time</dt>
+            <dd><%= app.bug_fix_percentage %></dd>
+            <dt>Interest level</dt>
+            <dd><%= app.solution_interest %></dd>
+          </div>
+          <div class="col-md-6">
+            <dt>Commitment</dt>
+            <dd><%= app.commitment_level %></dd>
+            <dt>Tech stack</dt>
+            <dd><%= app.tech_stack %></dd>
+            <dt>Can start</dt>
+            <dd><%= app.start_timeline %></dd>
+          </div>
+          <% if (app.additional_notes) { %>
+            <div class="col-12">
+              <dt>Notes</dt>
+              <dd><%= app.additional_notes %></dd>
+            </div>
+          <% } %>
+        </dl>
+      </div>
+    <% }) %>
+
+  <% } %>
+</div>
+
+<script>
+  // Filter by status
+  document.getElementById('filterBar')?.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.app-card').forEach(card => {
+      card.style.display = filter === 'all' || card.dataset.status === filter ? '' : 'none';
+    });
+  });
+
+  // Approve / reject
+  async function updateStatus(id, action, btn) {
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+      const res = await fetch(`/admin/launch-partners/${id}/${action}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Something went wrong: ' + (data.error || 'unknown error'));
+        btn.disabled = false;
+        btn.textContent = action === 'approve' ? 'Approve' : 'Reject';
+      }
+    } catch (err) {
+      alert('Request failed');
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

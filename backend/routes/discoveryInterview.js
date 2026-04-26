@@ -10,6 +10,7 @@ const {
   sendDiscoveryInterviewAdminEmail,
   sendDiscoveryInterviewConfirmationEmail
 } = require('../utils/emailService');
+const loops = require('../services/loops');
 
 const TOTAL_STEPS = 6;
 
@@ -137,12 +138,22 @@ router.post('/discovery-interview', async (req, res) => {
     }
 
     await sendDiscoveryInterviewAdminEmail({ ...row, submitted_at: row.submitted_at });
-    await sendDiscoveryInterviewConfirmationEmail(row.email, qualification_status !== 'disqualified' && qualification_status !== 'low');
+    const qualified = qualification_status !== 'disqualified' && qualification_status !== 'low';
+    await sendDiscoveryInterviewConfirmationEmail(row.email, qualified);
+
+    // Loops: add applicant to appropriate sequence (fire-and-forget)
+    loops.addLaunchPartnerApplicant({
+      email: row.email,
+      companyName: row.company_name,
+      role: row.role,
+      qualified,
+      qualificationStatus: qualification_status
+    }).catch(() => {});
 
     res.json({
       success: true,
       qualification_status,
-      qualified: qualification_status !== 'disqualified' && qualification_status !== 'low'
+      qualified
     });
   } catch (err) {
     console.error('Discovery interview submit error:', err);

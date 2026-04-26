@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 
+const loops = require('../services/loops');
+
 // Subscribers file path
 const subscribersFile = path.join(__dirname, '../../data/subscribers.json');
 
@@ -333,6 +335,9 @@ router.post('/subscribe', async (req, res) => {
     // Save subscribers
     fs.writeFileSync(subscribersFile, JSON.stringify(subscribers, null, 2));
     console.log(`✅ New subscriber added: ${email}`);
+
+    // Loops: add to waitlist sequence (fire-and-forget)
+    loops.addToWaitlist(email).catch(() => {});
     
     // Send notification email
     if (transporter) {
