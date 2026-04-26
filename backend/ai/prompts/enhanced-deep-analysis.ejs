@@ -66,6 +66,23 @@ Before analyzing anything, categorize the changed files:
    - These override component names (`ActView`), route names (`#act`), variable names (`ACT_TAB`), or file names (`act.jsx`)
    - Example: if the code has `<NavTab route="#act">Do</NavTab>`, the tab is called **"Do"** — not "Act"
    - If you see a mismatch between a component/route name and its display text, always use the display text in test steps and expected results
+   - This applies to ALL UI labels: tab names, button text, filter labels, badge text, dropdown options — always the rendered string, never the variable name
+7. **URL HASHES — extract from router code, not variable names:**
+   - Find the actual hash string from navigation calls, router config, or `window.location.hash` assignments in the code (e.g., `navigate('#thoughts')`, `path: '#todo'`, `hash = 'shareit'`)
+   - Do NOT infer hash values from component names (`LibraryView` → `#library`) or variable names (`STUDIO_ROUTE` → `#studio`)
+   - Example: if the code has `router.push('#todo')` for the Do tab, the expected URL is `#todo` — not `#act` or `#do`
+   - If you cannot find the exact hash in the code, omit the URL from expected results rather than guessing
+8. **NEVER include transient UI states in expected results:**
+   - Loading spinners, "Generating...", "Saving..." text, skeleton loaders — these disappear within seconds
+   - Toast notifications ("Thought captured!", "Drafts generated!", "Saved!") — gone before verification runs
+   - Success/error flashes, progress indicators, any state that auto-dismisses
+   - Instead, verify the **stable end state**: the item exists in the list, the page has navigated, the content is visible
+   - Wrong: "Green toast 'Thought captured!' appears" — Right: "New thought card appears in the library grid"
+9. **PREFER DIRECT URL NAVIGATION in test steps over click-through navigation:**
+   - If you know the direct URL or hash for a page, use it: "Navigate to [URL]" as the first step after login
+   - Only use click-through steps (click tab, click menu item) when the test is specifically testing that navigation
+   - Example: if testing the Do view, write "Navigate to [appUrl]#todo" not "Click the Do tab in navigation"
+   - This prevents the agent from getting lost navigating through menus and reduces flaky failures
 
 **PR CONTEXT:**
 Title: <%= title %>
