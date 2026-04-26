@@ -1274,15 +1274,17 @@ async function handleTestRequest(repository, issue, comment, sender, userId = nu
     const limitCheck = await checkUsageLimits(userId);
     if (!limitCheck.allowed) {
       console.warn(`⚠️ Usage limit exceeded for user ${userId}`);
-      const limitMessage = `
-## 🚫 Usage Limit Reached
+      const baseUrl = process.env.BASE_URL || 'https://www.firstqa.dev';
+      const limitMessage = `## ⚡ Trial limit reached (${limitCheck.current}/${limitCheck.limit} analyses used)
 
-You've reached your monthly analysis limit (${limitCheck.current}/${limitCheck.limit} analyses).
+FirstQA paused this review — you've used all your free trial analyses.
 
-**Upgrade to Pro** to get unlimited analyses: https://www.firstqa.dev/dashboard
+**Two options:**
 
-Or wait until next month when your limit resets.
-      `;
+- **Extend your trial for $9** → get 10 more analyses instantly: [firstqa.dev/dashboard](${baseUrl}/dashboard)
+- **Upgrade to a full plan** → unlimited analyses + full QA coverage: [firstqa.dev/pricing](${baseUrl}/pricing)
+
+Questions? Reply here or email hello@firstqa.dev`;
       await postComment(repository.full_name, issue.number, limitMessage);
       return { 
         success: false, 
@@ -1695,15 +1697,17 @@ async function handleShortRequest(repository, issue, comment, sender, userId = n
     const limitCheck = await checkUsageLimits(userId);
     if (!limitCheck.allowed) {
       console.warn(`⚠️ Usage limit exceeded for user ${userId}`);
-      const limitMessage = `
-## 🚫 Usage Limit Reached
+      const baseUrl = process.env.BASE_URL || 'https://www.firstqa.dev';
+      const limitMessage = `## ⚡ Trial limit reached (${limitCheck.current}/${limitCheck.limit} analyses used)
 
-You've reached your monthly analysis limit (${limitCheck.current}/${limitCheck.limit} analyses).
+FirstQA paused this review — you've used all your free trial analyses.
 
-**Upgrade to Pro** to get unlimited analyses: https://www.firstqa.dev/dashboard
+**Two options:**
 
-Or wait until next month when your limit resets.
-      `;
+- **Extend your trial for $9** → get 10 more analyses instantly: [firstqa.dev/dashboard](${baseUrl}/dashboard)
+- **Upgrade to a full plan** → unlimited analyses + full QA coverage: [firstqa.dev/pricing](${baseUrl}/pricing)
+
+Questions? Reply here or email hello@firstqa.dev`;
       await postComment(repository.full_name, issue.number, limitMessage);
       return { 
         success: false, 
