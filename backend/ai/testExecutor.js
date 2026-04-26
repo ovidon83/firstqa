@@ -435,6 +435,10 @@ Rules:
       try { page.on('console', consoleHandler); } catch (_) {}
       try { page.on('requestfailed', requestFailedHandler); } catch (_) {}
 
+      // Declared outside the inner try so catch can always call clearTimeout safely
+      let stuckTimeoutHandle;
+      let verifyTimeoutHandle;
+
       try {
         const startUrl = startUrls[i];
         console.log(`   🧭 Navigating to: ${startUrl}`);
@@ -462,7 +466,6 @@ Rules:
         });
 
         console.log(`   🤖 Agent executing...`);
-        let stuckTimeoutHandle;
         const stuckTimeout = new Promise((_, reject) => {
           stuckTimeoutHandle = setTimeout(() => {
             reject(new Error(`SCENARIO_STUCK: Scenario did not complete within ${SCENARIO_STUCK_TIMEOUT_MS / 60000} minutes`));
@@ -494,13 +497,14 @@ Rules:
         }
 
         // Verify expected result with a separate AI call (wrapped in a timeout so a dead page can't hang forever)
-        const verifyTimeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('SCENARIO_STUCK: Verification timed out')), SCENARIO_STUCK_TIMEOUT_MS)
-        );
+        const verifyTimeout = new Promise((_, reject) => {
+          verifyTimeoutHandle = setTimeout(() => reject(new Error('SCENARIO_STUCK: Verification timed out')), SCENARIO_STUCK_TIMEOUT_MS);
+        });
         const verification = await Promise.race([
           verifyExpectedResult(page, scenario.expected, scenario.manual_steps),
           verifyTimeout
         ]);
+        clearTimeout(verifyTimeoutHandle);
         scenarioResult.actualResult = verification.actualResult;
         scenarioResult.agentAssessment = agentResult.message;
 
@@ -530,6 +534,7 @@ Rules:
         }
       } catch (error) {
         clearTimeout(stuckTimeoutHandle);
+        clearTimeout(verifyTimeoutHandle);
         const isStuck = error.message?.startsWith('SCENARIO_STUCK');
         scenarioResult.status = isStuck ? 'TIMEOUT' : 'ERROR';
         scenarioResult.error = error.message;
