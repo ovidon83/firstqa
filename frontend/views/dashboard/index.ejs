@@ -315,6 +315,26 @@
                 <p>Here's an overview of your QA activity</p>
             </div>
 
+            <!-- Trial Limit Banner -->
+            <% if (stats.trialLimitReached) { %>
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(245,158,11,0.4);border-radius:14px;padding:1.5rem 2rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:1rem;font-weight:600;color:#f59e0b;margin-bottom:0.3rem;">⚡ You've used all <%= stats.analysesLimit %> free analyses</div>
+                <div style="font-size:0.875rem;color:#a1a1aa;">Extend your trial or upgrade to keep the QA running.</div>
+              </div>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <form action="/stripe/checkout/trial-extension" method="POST">
+                  <button type="submit" style="background:#f59e0b;color:#000;border:none;padding:0.6rem 1.25rem;border-radius:8px;font-weight:600;font-size:0.875rem;cursor:pointer;white-space:nowrap;">
+                    Extend trial — $9 <span style="font-weight:400;font-size:0.8rem;">(10 more analyses)</span>
+                  </button>
+                </form>
+                <a href="/pricing" style="background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:0.6rem 1.25rem;border-radius:8px;font-weight:600;font-size:0.875rem;text-decoration:none;white-space:nowrap;">
+                  View plans →
+                </a>
+              </div>
+            </div>
+            <% } %>
+
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">

@@ -267,8 +267,9 @@ async function generateQAInsights({ repo, pr_number, title, body, diff, newCommi
     console.log(`🤖 FirstQA Ovi AI performing DEEP CODE ANALYSIS for PR #${pr_number} in ${repo}`);
 
     const useAnthropic = !!anthropic;
+    // Opus 4 for deep PR analysis + test recipe generation; falls back to Sonnet 4
     const model = useAnthropic
-      ? (process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514')
+      ? (process.env.ANTHROPIC_RECIPE_MODEL || 'claude-opus-4-20250514')
       : (process.env.OPENAI_MODEL || 'gpt-4o');
     console.log(`   Provider: ${useAnthropic ? 'Anthropic' : 'OpenAI'}, Model: ${model}`);
 

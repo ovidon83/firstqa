@@ -71,6 +71,10 @@ router.get('/', async (req, res) => {
         stats.analysesThisMonth = userData.analyses_this_month || 0;
         stats.analysesLimit = userData.analyses_limit || 10;
         stats.plan = userData.plan || 'free';
+        stats.trialLimitReached = (
+          (stats.plan === 'free_trial' || stats.plan === 'free') &&
+          stats.analysesThisMonth >= stats.analysesLimit
+        );
       }
       
       // Count connected providers (not individual installations)

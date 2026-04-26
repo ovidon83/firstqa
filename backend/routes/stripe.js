@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { addCustomer } = require('../utils/customers');
+const { supabaseAdmin, isSupabaseConfigured } = require('../lib/supabase');
+
+const TRIAL_EXTENSION_PRICE_CENTS = 900; // $9.00
+const TRIAL_EXTENSION_ANALYSES = 10;
 
 // Only initialize Stripe if API key is available
 let stripe = null;
@@ -40,7 +44,11 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   // Handle the event
   switch (event.type) {
     case 'checkout.session.completed':
-      await handleCheckoutCompleted(event.data.object);
+      if (event.data.object.metadata?.type === 'trial_extension') {
+        await handleTrialExtension(event.data.object);
+      } else {
+        await handleCheckoutCompleted(event.data.object);
+      }
       break;
     case 'invoice.payment_succeeded':
       await handlePaymentSucceeded(event.data.object);
@@ -210,6 +218,80 @@ function determinePlanFromSubscription(subscription) {
   }
   
   return 'Free Trial';
+}
+
+// ── Trial Extension Checkout ─────────────────────────────────────────────────
+
+router.post('/checkout/trial-extension', async (req, res) => {
+  if (!stripe) return res.status(503).send('Stripe unavailable');
+
+  const user = req.session?.user;
+  if (!user) return res.redirect('/login?redirect=/dashboard');
+
+  try {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      customer_email: user.email,
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          unit_amount: TRIAL_EXTENSION_PRICE_CENTS,
+          product_data: {
+            name: 'FirstQA Trial Extension',
+            description: `${TRIAL_EXTENSION_ANALYSES} more analyses added to your trial`
+          }
+        },
+        quantity: 1
+      }],
+      metadata: {
+        type: 'trial_extension',
+        user_id: user.id,
+        user_email: user.email,
+        analyses_to_add: String(TRIAL_EXTENSION_ANALYSES)
+      },
+      success_url: `${baseUrl}/dashboard?success=Trial+extended!+${TRIAL_EXTENSION_ANALYSES}+more+analyses+added.`,
+      cancel_url: `${baseUrl}/dashboard`
+    });
+
+    res.redirect(303, session.url);
+  } catch (err) {
+    console.error('Trial extension checkout error:', err);
+    res.redirect('/dashboard?error=Could+not+start+checkout.+Please+try+again.');
+  }
+});
+
+// ── Trial Extension Webhook Handler ──────────────────────────────────────────
+
+async function handleTrialExtension(session) {
+  const { user_id, user_email, analyses_to_add } = session.metadata || {};
+  if (!user_id) {
+    console.warn('[Trial Extension] Missing user_id in metadata');
+    return;
+  }
+
+  const toAdd = parseInt(analyses_to_add, 10) || TRIAL_EXTENSION_ANALYSES;
+
+  try {
+    // Increment analyses_limit by toAdd
+    const { data: current } = await supabaseAdmin
+      .from('users')
+      .select('analyses_limit')
+      .eq('id', user_id)
+      .single();
+
+    const newLimit = (current?.analyses_limit || 5) + toAdd;
+
+    await supabaseAdmin
+      .from('users')
+      .update({ analyses_limit: newLimit })
+      .eq('id', user_id);
+
+    console.log(`✅ Trial extended for ${user_email}: limit now ${newLimit}`);
+  } catch (err) {
+    console.error('[Trial Extension] Supabase update error:', err.message);
+  }
 }
 
 module.exports = router;
