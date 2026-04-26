@@ -170,7 +170,7 @@ function buildScenarioInstruction(scenario, agentContext) {
 
 // ─── Verification (separate AI call for structured pass/fail) ───────────────
 
-async function verifyExpectedResult(page, expectedResult, manualSteps) {
+async function verifyExpectedResult(page, expectedResult, manualSteps, agentMessage = '') {
   try {
     const visibleText = await page.evaluate(() => document.body.innerText).catch(() => '');
     const pageUrl = page.url();
@@ -181,7 +181,11 @@ async function verifyExpectedResult(page, expectedResult, manualSteps) {
 Expected Result:
 ${expectedResult}
 
-Current page URL: ${pageUrl}
+${agentMessage ? `What the agent did and observed during execution:
+${agentMessage}
+
+IMPORTANT: The agent's account above describes what happened during the test — including transient states like modals, toasts, and loading indicators that may no longer be visible in the final screenshot. If the agent confirms it completed a step (e.g. "clicked Retry Draft, modal opened, entered feedback, regenerated successfully"), treat that step as verified even if the modal is no longer visible. The final page state is the ground truth for persistent UI — but use the agent's account for transient interactions.
+` : ''}Current page URL: ${pageUrl}
 Page title: ${pageTitle}
 
 Visible text (truncated):
@@ -189,7 +193,7 @@ ${visibleText.substring(0, 3000)}
 
 ${manualSteps ? `Note: These aspects CANNOT be verified in the browser and should be ignored for pass/fail: ${manualSteps}` : ''}
 
-Evaluate ONLY what is visible in the browser. If the expected result mentions things that cannot be checked in a browser (email delivery, database state, server logs), mark those as "unverifiable" but do NOT fail the test for them.
+Evaluate what is visible in the browser AND what the agent reported doing. If the expected result mentions things that cannot be checked in a browser (email delivery, database state, server logs), mark those as "unverifiable" but do NOT fail the test for them.
 
 Return JSON:
 {
@@ -502,7 +506,7 @@ Rules:
           verifyTimeoutHandle = setTimeout(() => reject(new Error('SCENARIO_STUCK: Verification timed out')), SCENARIO_STUCK_TIMEOUT_MS);
         });
         const verification = await Promise.race([
-          verifyExpectedResult(page, scenario.expected, scenario.manual_steps),
+          verifyExpectedResult(page, scenario.expected, scenario.manual_steps, agentMessage),
           verifyTimeout
         ]);
         clearTimeout(verifyTimeoutHandle);
