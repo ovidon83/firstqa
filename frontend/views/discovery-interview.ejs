@@ -288,14 +288,23 @@
     .di-view-form.active { display: block; }
     .di-view-thankyou { display: none; }
     .di-view-thankyou.active { display: block; }
-    /* Product screenshots inline */
+    /* Two-column step layout */
+    .di-step-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .di-step-right {
+      position: sticky;
+      top: 1rem;
+    }
+    /* Product screenshots */
     .di-product-shot {
-      margin-top: 1.75rem;
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--fqa-border);
       background: #fff;
-      position: relative;
     }
     .di-product-shot-caption {
       font-size: 0.8125rem;
@@ -321,7 +330,7 @@
       flex-shrink: 0;
     }
     .di-product-shot-scroll {
-      max-height: 300px;
+      max-height: 420px;
       overflow-y: auto;
       position: relative;
     }
@@ -330,32 +339,16 @@
       display: block;
     }
     .di-product-shot-fade {
-      position: absolute;
+      position: sticky;
       bottom: 0; left: 0; right: 0;
       height: 48px;
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.9));
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.85));
       pointer-events: none;
+      margin-top: -48px;
     }
-    /* Divider between question and screenshot */
-    .di-shot-divider {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin: 1.75rem 0 0;
-      color: var(--fqa-text-muted);
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .di-shot-divider::before,
-    .di-shot-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--fqa-border);
-    }
-    @media (max-width: 480px) {
+    @media (max-width: 680px) {
+      .di-step-cols { grid-template-columns: 1fr; }
+      .di-step-right { position: static; }
       .di-features { grid-template-columns: 1fr; }
       .di-card { padding: 1.25rem; }
     }
@@ -418,52 +411,62 @@
       <form id="di-form" class="di-card">
         <!-- Step 1 -->
         <div class="di-step active" data-step="1">
-          <h2>How does your team currently handle QA/testing?</h2>
-          <div class="di-options" data-name="qa_process">
-            <label class="di-option" data-value="Developers test their own code"><input type="radio" name="qa_process" value="Developers test their own code"> Developers test their own code</label>
-            <label class="di-option" data-value="We have a dedicated QA person/team"><input type="radio" name="qa_process" value="We have a dedicated QA person/team"> We have a dedicated QA person/team</label>
-            <label class="di-option" data-value="We use automated testing tools (Cypress, Playwright, etc.)"><input type="radio" name="qa_process" value="We use automated testing tools (Cypress, Playwright, etc.)"> We use automated testing tools (Cypress, Playwright, etc.)</label>
-            <label class="di-option" data-value="We don't really test systematically"><input type="radio" name="qa_process" value="We don't really test systematically"> We don't really test systematically</label>
-            <label class="di-option" data-value="Other"><input type="radio" name="qa_process" value="Other"> Other</label>
-          </div>
-          <div class="di-form-group" id="di-qa-other-wrap" style="display:none;">
-            <label for="qa_process_other">Please specify</label>
-            <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
-          </div>
-          <div class="di-shot-divider">See it in action</div>
-          <div class="di-product-shot">
-            <div class="di-product-shot-caption">
-              <span class="dot"></span>
-              <span class="di-product-shot-label">Ovi in action</span>
-              <span style="margin-left:0.25rem;">— full QA analysis on every PR, automatically</span>
+          <div class="di-step-cols">
+            <div class="di-step-left">
+              <h2>How does your team currently handle QA/testing?</h2>
+              <div class="di-options" data-name="qa_process">
+                <label class="di-option" data-value="Developers test their own code"><input type="radio" name="qa_process" value="Developers test their own code"> Developers test their own code</label>
+                <label class="di-option" data-value="We have a dedicated QA person/team"><input type="radio" name="qa_process" value="We have a dedicated QA person/team"> We have a dedicated QA person/team</label>
+                <label class="di-option" data-value="We use automated testing tools (Cypress, Playwright, etc.)"><input type="radio" name="qa_process" value="We use automated testing tools (Cypress, Playwright, etc.)"> We use automated testing tools (Cypress, Playwright, etc.)</label>
+                <label class="di-option" data-value="We don't really test systematically"><input type="radio" name="qa_process" value="We don't really test systematically"> We don't really test systematically</label>
+                <label class="di-option" data-value="Other"><input type="radio" name="qa_process" value="Other"> Other</label>
+              </div>
+              <div class="di-form-group" id="di-qa-other-wrap" style="display:none;">
+                <label for="qa_process_other">Please specify</label>
+                <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
+              </div>
             </div>
-            <div class="di-product-shot-scroll">
-              <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
-              <div class="di-product-shot-fade"></div>
+            <div class="di-step-right">
+              <div class="di-product-shot">
+                <div class="di-product-shot-caption">
+                  <span class="dot"></span>
+                  <span class="di-product-shot-label">Ovi in action</span>
+                  <span style="margin-left:0.25rem;">— full QA analysis on every PR</span>
+                </div>
+                <div class="di-product-shot-scroll">
+                  <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
+                  <div class="di-product-shot-fade"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Step 2 -->
         <div class="di-step" data-step="2">
-          <h2>Roughly what % of your sprint capacity goes to bug fixes vs building new features?</h2>
-          <div class="di-options" data-name="bug_fix_percentage">
-            <label class="di-option" data-value="0-10% (We rarely have bugs)"><input type="radio" name="bug_fix_percentage" value="0-10% (We rarely have bugs)"> <span class="emoji">😊</span> 0-10% (We rarely have bugs)</label>
-            <label class="di-option" data-value="10-25%"><input type="radio" name="bug_fix_percentage" value="10-25%"> <span class="emoji">😐</span> 10-25%</label>
-            <label class="di-option" data-value="25-40%"><input type="radio" name="bug_fix_percentage" value="25-40%"> <span class="emoji">😓</span> 25-40%</label>
-            <label class="di-option" data-value="40%+ (It's a constant firefight)"><input type="radio" name="bug_fix_percentage" value="40%+ (It's a constant firefight)"> <span class="emoji">🔥</span> 40%+ (It's a constant firefight)</label>
-            <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
-          </div>
-          <div class="di-shot-divider">See it in action</div>
-          <div class="di-product-shot">
-            <div class="di-product-shot-caption">
-              <span class="dot"></span>
-              <span class="di-product-shot-label">Ovi in action</span>
-              <span style="margin-left:0.25rem;">— browser tests run automatically, every scenario tracked</span>
+          <div class="di-step-cols">
+            <div class="di-step-left">
+              <h2>Roughly what % of your sprint goes to bug fixes vs new features?</h2>
+              <div class="di-options" data-name="bug_fix_percentage">
+                <label class="di-option" data-value="0-10% (We rarely have bugs)"><input type="radio" name="bug_fix_percentage" value="0-10% (We rarely have bugs)"> <span class="emoji">😊</span> 0-10% (We rarely have bugs)</label>
+                <label class="di-option" data-value="10-25%"><input type="radio" name="bug_fix_percentage" value="10-25%"> <span class="emoji">😐</span> 10-25%</label>
+                <label class="di-option" data-value="25-40%"><input type="radio" name="bug_fix_percentage" value="25-40%"> <span class="emoji">😓</span> 25-40%</label>
+                <label class="di-option" data-value="40%+ (It's a constant firefight)"><input type="radio" name="bug_fix_percentage" value="40%+ (It's a constant firefight)"> <span class="emoji">🔥</span> 40%+ (It's a constant firefight)</label>
+                <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
+              </div>
             </div>
-            <div class="di-product-shot-scroll">
-              <img src="/images/landing/ovi-test-execution.png" alt="Ovi running browser tests — pass/fail table with priority, duration, screenshot and video per scenario">
-              <div class="di-product-shot-fade"></div>
+            <div class="di-step-right">
+              <div class="di-product-shot">
+                <div class="di-product-shot-caption">
+                  <span class="dot"></span>
+                  <span class="di-product-shot-label">Ovi in action</span>
+                  <span style="margin-left:0.25rem;">— browser tests, every scenario tracked</span>
+                </div>
+                <div class="di-product-shot-scroll">
+                  <img src="/images/landing/ovi-test-execution.png" alt="Ovi running browser tests — pass/fail table with priority, duration, screenshot and video per scenario">
+                  <div class="di-product-shot-fade"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -511,31 +514,36 @@
 
         <!-- Step 4 -->
         <div class="di-step" data-step="4">
-          <h2>Here's what the Launch Partner deal looks like:</h2>
-          <ul class="di-commit-list">
-            <li><strong>30-day free trial</strong> — full access, no credit card required until the trial ends</li>
-            <li>After the trial: <strong>$149/mo, locked for life</strong> — never goes up as long as you stay subscribed (standard price will be $249/mo)</li>
-            <li>Weekly 15-min feedback session — call or async chat, whichever works for you</li>
-            <li>Permission to share your results publicly (anonymous if preferred)</li>
-            <li>Honest feedback on what works and what doesn't</li>
-          </ul>
-          <div class="di-shot-divider">See it in action</div>
-          <div class="di-product-shot" style="margin-bottom: 1.25rem;">
-            <div class="di-product-shot-caption">
-              <span class="dot"></span>
-              <span class="di-product-shot-label">Ovi in action</span>
-              <span style="margin-left:0.25rem;">— real evidence per PR, not just a green checkmark</span>
+          <div class="di-step-cols">
+            <div class="di-step-left">
+              <h2>Here's what the Launch Partner deal looks like:</h2>
+              <ul class="di-commit-list">
+                <li><strong>30-day free trial</strong> — full access, no credit card required until the trial ends</li>
+                <li>After the trial: <strong>$149/mo, locked for life</strong> — never goes up as long as you stay subscribed (standard price will be $249/mo)</li>
+                <li>Weekly 15-min feedback session — call or async chat, whichever works for you</li>
+                <li>Permission to share your results publicly (anonymous if preferred)</li>
+                <li>Honest feedback on what works and what doesn't</li>
+              </ul>
+              <p><strong>Does this work for you?</strong></p>
+              <div class="di-options" data-name="commitment_level">
+                <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
+                <label class="di-option" data-value="Maybe, need to discuss with my team first"><input type="radio" name="commitment_level" value="Maybe, need to discuss with my team first"> Maybe, need to check with my team first</label>
+                <label class="di-option" data-value="No, too much commitment right now"><input type="radio" name="commitment_level" value="No, too much commitment right now"> No, too much commitment right now</label>
+              </div>
             </div>
-            <div class="di-product-shot-scroll">
-              <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — scenarios, pass/fail, video and screenshot evidence per test">
-              <div class="di-product-shot-fade"></div>
+            <div class="di-step-right">
+              <div class="di-product-shot">
+                <div class="di-product-shot-caption">
+                  <span class="dot"></span>
+                  <span class="di-product-shot-label">Ovi in action</span>
+                  <span style="margin-left:0.25rem;">— real evidence per PR, not just a green checkmark</span>
+                </div>
+                <div class="di-product-shot-scroll">
+                  <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — scenarios, pass/fail, video and screenshot evidence per test">
+                  <div class="di-product-shot-fade"></div>
+                </div>
+              </div>
             </div>
-          </div>
-          <p><strong>Does this work for you?</strong></p>
-          <div class="di-options" data-name="commitment_level">
-            <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
-            <label class="di-option" data-value="Maybe, need to discuss with my team first"><input type="radio" name="commitment_level" value="Maybe, need to discuss with my team first"> Maybe, need to check with my team first</label>
-            <label class="di-option" data-value="No, too much commitment right now"><input type="radio" name="commitment_level" value="No, too much commitment right now"> No, too much commitment right now</label>
           </div>
         </div>
 
@@ -720,7 +728,7 @@
         backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
         nextBtn.textContent = step === TOTAL_STEPS ? 'Submit' : 'Next';
         nextBtn.type = step === TOTAL_STEPS ? 'submit' : 'button';
-        document.querySelector('.di-wrap').classList.toggle('step-wide', step === 3);
+        document.querySelector('.di-wrap').classList.toggle('step-wide', [1, 2, 3, 4].includes(step));
         state.currentStep = step;
         saveState();
         if (typeof window.diTrackStep === 'function') window.diTrackStep(step);
