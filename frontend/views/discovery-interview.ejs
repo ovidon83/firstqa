@@ -372,12 +372,16 @@
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
     }
+    body.split-mode .di-product-shot-scroll {
+      background: #f1f5f9;
+    }
     body.split-mode .di-product-shot-scroll img {
       width: auto;
       max-width: 100%;
-      min-width: 100%;
+      min-width: min(100%, 662px);
+      display: block;
+      margin: 0 auto;
       image-rendering: auto;
-      -webkit-font-smoothing: antialiased;
     }
     .di-product-shot-fade {
       position: sticky;
