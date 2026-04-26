@@ -299,16 +299,26 @@
     .di-product-shot img {
       width: 100%;
       display: block;
+      max-height: 260px;
+      object-fit: cover;
+      object-position: top;
     }
     .di-product-shot-caption {
       font-size: 0.8125rem;
       color: var(--fqa-text-muted);
       padding: 0.6rem 1rem;
       background: #f8fafc;
-      border-top: 1px solid var(--fqa-border);
+      border-bottom: 1px solid var(--fqa-border);
       display: flex;
       align-items: center;
       gap: 0.4rem;
+    }
+    .di-product-shot-label {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fqa-primary);
     }
     .di-product-shot-caption .dot {
       width: 7px; height: 7px;
@@ -353,11 +363,12 @@
           </div>
         </div>
         <div class="di-product-shot" style="margin-top: 2rem;">
-          <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI QA Analysis posted on a GitHub PR — commit breakdown, QA Pulse, bugs and risks, test recipe">
           <div class="di-product-shot-caption">
             <span class="dot"></span>
-            Ovi's analysis posted automatically on a real GitHub PR — commits reviewed, risks flagged, test recipe generated
+            <span class="di-product-shot-label">Ovi in action</span>
+            <span style="margin-left:0.25rem;">— PR analysis posted automatically on GitHub</span>
           </div>
+          <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI QA Analysis posted on a GitHub PR — commit breakdown, QA Pulse, bugs and risks, test recipe">
         </div>
       </div>
     </div>
@@ -387,11 +398,12 @@
             <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
           </div>
           <div class="di-product-shot">
-            <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
             <div class="di-product-shot-caption">
               <span class="dot"></span>
-              Whatever your current process, Ovi drops a full QA analysis on every PR — automatically, in minutes
+              <span class="di-product-shot-label">Ovi in action</span>
+              <span style="margin-left:0.25rem;">— full QA analysis on every PR, automatically</span>
             </div>
+            <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
           </div>
         </div>
 
@@ -406,11 +418,12 @@
             <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
           </div>
           <div class="di-product-shot">
-            <img src="/images/landing/ovi-test-execution.png" alt="Ovi running 19 browser tests across a PR — results table with pass/fail status, duration, screenshots and video evidence per scenario">
             <div class="di-product-shot-caption">
               <span class="dot"></span>
-              Ovi runs browser tests end-to-end and delivers a full pass/fail report with screenshots and video — before the PR merges
+              <span class="di-product-shot-label">Ovi in action</span>
+              <span style="margin-left:0.25rem;">— browser test run, pass/fail report with video evidence</span>
             </div>
+            <img src="/images/landing/ovi-test-execution.png" alt="Ovi running 19 browser tests across a PR — results table with pass/fail status, duration, screenshots and video evidence per scenario">
           </div>
         </div>
 
@@ -466,11 +479,12 @@
             <li>Honest feedback on what works and what doesn't</li>
           </ul>
           <div class="di-product-shot" style="margin-bottom: 1.25rem;">
-            <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — 19 scenarios, pass/fail, video and screenshot evidence per test">
             <div class="di-product-shot-caption">
               <span class="dot"></span>
-              This is the kind of report your team gets on every PR run — real evidence, not just a green checkmark
+              <span class="di-product-shot-label">Ovi in action</span>
+              <span style="margin-left:0.25rem;">— real evidence per PR, not just a green checkmark</span>
             </div>
+            <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — 19 scenarios, pass/fail, video and screenshot evidence per test">
           </div>
           <p><strong>Does this work for you?</strong></p>
           <div class="di-options" data-name="commitment_level">
