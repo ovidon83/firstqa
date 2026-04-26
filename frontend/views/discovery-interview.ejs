@@ -299,8 +299,10 @@
     .di-step-left {
       display: flex;
       flex-direction: column;
-      padding-right: 2rem;
-      border-right: 1px solid var(--fqa-border);
+      background: var(--fqa-card-bg);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      padding: 2rem;
     }
     .di-step-left h2 { margin-bottom: 1rem; }
     .di-buttons-inline {
@@ -309,17 +311,25 @@
       justify-content: space-between;
       gap: 1rem;
     }
+    /* Strip the card when two-col is active */
+    .di-card.di-card-flat {
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 0;
+      margin-bottom: 0;
+    }
     .di-step-right {
-      padding-left: 0;
+      padding-left: 1.5rem;
       display: flex;
       flex-direction: column;
     }
     /* Product screenshots */
     .di-product-shot {
-      border-radius: 0 8px 8px 0;
+      border-radius: 10px;
       overflow: hidden;
       border: none;
-      background: #fff;
+      background: transparent;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -327,9 +337,10 @@
     .di-product-shot-caption {
       font-size: 0.8125rem;
       color: var(--fqa-text-muted);
-      padding: 0.6rem 1.25rem;
-      background: #f1f5f9;
-      border-bottom: 1px solid var(--fqa-border);
+      padding: 0.6rem 1rem;
+      background: rgba(0,0,0,.04);
+      border-radius: 8px 8px 0 0;
+      border-bottom: 1px solid rgba(0,0,0,.08);
       display: flex;
       align-items: center;
       gap: 0.4rem;
@@ -352,6 +363,8 @@
       flex: 1;
       overflow-y: auto;
       position: relative;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.10);
     }
     .di-product-shot-scroll img {
       width: 100%;
@@ -361,7 +374,7 @@
       position: sticky;
       bottom: 0; left: 0; right: 0;
       height: 56px;
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.9));
+      background: linear-gradient(to bottom, transparent, rgba(248,250,252,0.92));
       pointer-events: none;
       margin-top: -56px;
     }
@@ -369,21 +382,26 @@
     .di-product-shot-standalone {
       border-radius: 10px;
       border: 1px solid var(--fqa-border);
+      background: #fff;
     }
     .di-product-shot-standalone .di-product-shot-caption {
+      background: #f1f5f9;
       border-radius: 10px 10px 0 0;
+      border-bottom: 1px solid var(--fqa-border);
     }
     .di-product-shot-standalone .di-product-shot-scroll {
       max-height: 340px;
+      box-shadow: none;
     }
     @media (max-width: 700px) {
       .di-step-cols { grid-template-columns: 1fr; min-height: unset; }
-      .di-step-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--fqa-border); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+      .di-step-left { padding-bottom: 1.5rem; margin-bottom: 1rem; }
       .di-step-right { padding-left: 0; }
-      .di-product-shot { border-radius: 8px; border: 1px solid var(--fqa-border); height: auto; }
-      .di-product-shot-scroll { max-height: 300px; }
+      .di-product-shot { height: auto; }
+      .di-product-shot-scroll { max-height: 280px; }
       .di-features { grid-template-columns: 1fr; }
       .di-card { padding: 1.25rem; }
+      .di-card.di-card-flat { background: transparent; padding: 0; }
     }
   </style>
 </head>
@@ -775,6 +793,7 @@
 
         var isTwoCol = TWO_COL_STEPS.includes(step);
         sharedButtons.style.display = isTwoCol ? 'none' : 'flex';
+        form.classList.toggle('di-card-flat', isTwoCol);
         backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
         nextBtn.textContent = step === TOTAL_STEPS ? 'Submit' : 'Next';
         nextBtn.type = step === TOTAL_STEPS ? 'submit' : 'button';
