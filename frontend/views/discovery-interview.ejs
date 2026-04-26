@@ -290,21 +290,18 @@
     .di-view-thankyou.active { display: block; }
     /* Product screenshots inline */
     .di-product-shot {
-      margin-top: 1.5rem;
+      margin-top: 1.75rem;
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--fqa-border);
-      box-shadow: 0 4px 16px rgba(0,0,0,.08);
-    }
-    .di-product-shot img {
-      width: 100%;
-      display: block;
+      background: #fff;
+      position: relative;
     }
     .di-product-shot-caption {
       font-size: 0.8125rem;
       color: var(--fqa-text-muted);
-      padding: 0.6rem 1rem;
-      background: #f8fafc;
+      padding: 0.55rem 1rem;
+      background: #f1f5f9;
       border-bottom: 1px solid var(--fqa-border);
       display: flex;
       align-items: center;
@@ -322,6 +319,41 @@
       border-radius: 50%;
       background: var(--fqa-primary);
       flex-shrink: 0;
+    }
+    .di-product-shot-scroll {
+      max-height: 300px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .di-product-shot-scroll img {
+      width: 100%;
+      display: block;
+    }
+    .di-product-shot-fade {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 48px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.9));
+      pointer-events: none;
+    }
+    /* Divider between question and screenshot */
+    .di-shot-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.75rem 0 0;
+      color: var(--fqa-text-muted);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .di-shot-divider::before,
+    .di-shot-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--fqa-border);
     }
     @media (max-width: 480px) {
       .di-features { grid-template-columns: 1fr; }
@@ -359,13 +391,17 @@
             <br><span>$149/mo, Locked for Life</span>
           </div>
         </div>
-        <div class="di-product-shot" style="margin-top: 2rem;">
+        <div class="di-shot-divider">See it in action</div>
+        <div class="di-product-shot">
           <div class="di-product-shot-caption">
             <span class="dot"></span>
             <span class="di-product-shot-label">Ovi in action</span>
             <span style="margin-left:0.25rem;">— PR analysis posted automatically on GitHub</span>
           </div>
-          <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI QA Analysis posted on a GitHub PR — commit breakdown, QA Pulse, bugs and risks, test recipe">
+          <div class="di-product-shot-scroll">
+            <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI QA Analysis posted on a GitHub PR — commit breakdown, QA Pulse, bugs and risks, test recipe">
+            <div class="di-product-shot-fade"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -394,13 +430,17 @@
             <label for="qa_process_other">Please specify</label>
             <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
           </div>
+          <div class="di-shot-divider">See it in action</div>
           <div class="di-product-shot">
             <div class="di-product-shot-caption">
               <span class="dot"></span>
               <span class="di-product-shot-label">Ovi in action</span>
               <span style="margin-left:0.25rem;">— full QA analysis on every PR, automatically</span>
             </div>
-            <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
+            <div class="di-product-shot-scroll">
+              <img src="/images/landing/ovi-pr-analysis.png" alt="Ovi AI posting a full QA analysis on a GitHub PR — commit list, QA Pulse table, bugs, test recipe">
+              <div class="di-product-shot-fade"></div>
+            </div>
           </div>
         </div>
 
@@ -414,13 +454,17 @@
             <label class="di-option" data-value="40%+ (It's a constant firefight)"><input type="radio" name="bug_fix_percentage" value="40%+ (It's a constant firefight)"> <span class="emoji">🔥</span> 40%+ (It's a constant firefight)</label>
             <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
           </div>
+          <div class="di-shot-divider">See it in action</div>
           <div class="di-product-shot">
             <div class="di-product-shot-caption">
               <span class="dot"></span>
               <span class="di-product-shot-label">Ovi in action</span>
-              <span style="margin-left:0.25rem;">— browser test run, pass/fail report with video evidence</span>
+              <span style="margin-left:0.25rem;">— browser tests run automatically, every scenario tracked</span>
             </div>
-            <img src="/images/landing/ovi-test-execution.png" alt="Ovi running 19 browser tests across a PR — results table with pass/fail status, duration, screenshots and video evidence per scenario">
+            <div class="di-product-shot-scroll">
+              <img src="/images/landing/ovi-test-execution.png" alt="Ovi running browser tests — pass/fail table with priority, duration, screenshot and video per scenario">
+              <div class="di-product-shot-fade"></div>
+            </div>
           </div>
         </div>
 
@@ -475,13 +519,17 @@
             <li>Permission to share your results publicly (anonymous if preferred)</li>
             <li>Honest feedback on what works and what doesn't</li>
           </ul>
+          <div class="di-shot-divider">See it in action</div>
           <div class="di-product-shot" style="margin-bottom: 1.25rem;">
             <div class="di-product-shot-caption">
               <span class="dot"></span>
               <span class="di-product-shot-label">Ovi in action</span>
               <span style="margin-left:0.25rem;">— real evidence per PR, not just a green checkmark</span>
             </div>
-            <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — 19 scenarios, pass/fail, video and screenshot evidence per test">
+            <div class="di-product-shot-scroll">
+              <img src="/images/landing/ovi-test-execution.png" alt="Ovi test execution report — scenarios, pass/fail, video and screenshot evidence per test">
+              <div class="di-product-shot-fade"></div>
+            </div>
           </div>
           <p><strong>Does this work for you?</strong></p>
           <div class="di-options" data-name="commitment_level">
