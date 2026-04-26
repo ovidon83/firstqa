@@ -292,29 +292,50 @@
     .di-step-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      align-items: start;
+      gap: 0;
+      align-items: stretch;
+      min-height: 480px;
+    }
+    .di-step-left {
+      display: flex;
+      flex-direction: column;
+      padding-right: 2rem;
+      border-right: 1px solid var(--fqa-border);
+    }
+    .di-step-left h2 { margin-bottom: 1rem; }
+    .di-step-left .di-options { flex: 0 0 auto; }
+    .di-buttons-inline {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
     }
     .di-step-right {
-      position: sticky;
-      top: 1rem;
+      padding-left: 0;
+      display: flex;
+      flex-direction: column;
     }
     /* Product screenshots */
     .di-product-shot {
-      border-radius: 10px;
+      border-radius: 0 8px 8px 0;
       overflow: hidden;
-      border: 1px solid var(--fqa-border);
+      border: none;
       background: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
     .di-product-shot-caption {
       font-size: 0.8125rem;
       color: var(--fqa-text-muted);
-      padding: 0.55rem 1rem;
+      padding: 0.6rem 1.25rem;
       background: #f1f5f9;
       border-bottom: 1px solid var(--fqa-border);
       display: flex;
       align-items: center;
       gap: 0.4rem;
+      flex-shrink: 0;
     }
     .di-product-shot-label {
       font-size: 0.6875rem;
@@ -330,7 +351,7 @@
       flex-shrink: 0;
     }
     .di-product-shot-scroll {
-      max-height: 420px;
+      flex: 1;
       overflow-y: auto;
       position: relative;
     }
@@ -341,14 +362,28 @@
     .di-product-shot-fade {
       position: sticky;
       bottom: 0; left: 0; right: 0;
-      height: 48px;
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.85));
+      height: 56px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.9));
       pointer-events: none;
-      margin-top: -48px;
+      margin-top: -56px;
     }
-    @media (max-width: 680px) {
-      .di-step-cols { grid-template-columns: 1fr; }
-      .di-step-right { position: static; }
+    /* Landing page shot (standalone, not in two-col) */
+    .di-product-shot-standalone {
+      border-radius: 10px;
+      border: 1px solid var(--fqa-border);
+    }
+    .di-product-shot-standalone .di-product-shot-caption {
+      border-radius: 10px 10px 0 0;
+    }
+    .di-product-shot-standalone .di-product-shot-scroll {
+      max-height: 340px;
+    }
+    @media (max-width: 700px) {
+      .di-step-cols { grid-template-columns: 1fr; min-height: unset; }
+      .di-step-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--fqa-border); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+      .di-step-right { padding-left: 0; }
+      .di-product-shot { border-radius: 8px; border: 1px solid var(--fqa-border); height: auto; }
+      .di-product-shot-scroll { max-height: 300px; }
       .di-features { grid-template-columns: 1fr; }
       .di-card { padding: 1.25rem; }
     }
@@ -384,8 +419,7 @@
             <br><span>$149/mo, Locked for Life</span>
           </div>
         </div>
-        <div class="di-shot-divider">See it in action</div>
-        <div class="di-product-shot">
+        <div class="di-product-shot di-product-shot-standalone" style="margin-top:2rem;">
           <div class="di-product-shot-caption">
             <span class="dot"></span>
             <span class="di-product-shot-label">Ovi in action</span>
@@ -425,6 +459,10 @@
                 <label for="qa_process_other">Please specify</label>
                 <input type="text" id="qa_process_other" name="qa_process_other" placeholder="Describe your QA process">
               </div>
+              <div class="di-buttons-inline">
+                <button type="button" class="di-btn-back di-back-inline" style="visibility:hidden;">Back</button>
+                <button type="button" class="di-cta di-next-inline">Next</button>
+              </div>
             </div>
             <div class="di-step-right">
               <div class="di-product-shot">
@@ -453,6 +491,10 @@
                 <label class="di-option" data-value="25-40%"><input type="radio" name="bug_fix_percentage" value="25-40%"> <span class="emoji">😓</span> 25-40%</label>
                 <label class="di-option" data-value="40%+ (It's a constant firefight)"><input type="radio" name="bug_fix_percentage" value="40%+ (It's a constant firefight)"> <span class="emoji">🔥</span> 40%+ (It's a constant firefight)</label>
                 <label class="di-option" data-value="Not sure"><input type="radio" name="bug_fix_percentage" value="Not sure"> Not sure</label>
+              </div>
+              <div class="di-buttons-inline">
+                <button type="button" class="di-btn-back di-back-inline">Back</button>
+                <button type="button" class="di-cta di-next-inline">Next</button>
               </div>
             </div>
             <div class="di-step-right">
@@ -529,6 +571,10 @@
                 <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
                 <label class="di-option" data-value="Maybe, need to discuss with my team first"><input type="radio" name="commitment_level" value="Maybe, need to discuss with my team first"> Maybe, need to check with my team first</label>
                 <label class="di-option" data-value="No, too much commitment right now"><input type="radio" name="commitment_level" value="No, too much commitment right now"> No, too much commitment right now</label>
+              </div>
+              <div class="di-buttons-inline">
+                <button type="button" class="di-btn-back di-back-inline">Back</button>
+                <button type="button" class="di-cta di-next-inline">Next</button>
               </div>
             </div>
             <div class="di-step-right">
@@ -718,6 +764,9 @@
         if (state.qa_process === 'Other') { otherWrap.style.display = 'block'; if (qaOther) qaOther.value = state.qa_process_other || ''; }
       }
 
+      const TWO_COL_STEPS = [1, 2, 4];
+      const sharedButtons = document.querySelector('.di-buttons');
+
       function showStep(step) {
         currentStep = step;
         form.querySelectorAll('.di-step').forEach(function(el) {
@@ -725,9 +774,13 @@
         });
         progressFill.style.width = (step / TOTAL_STEPS * 100) + '%';
         progressLabel.textContent = 'Step ' + step + ' of ' + TOTAL_STEPS;
+
+        var isTwoCol = TWO_COL_STEPS.includes(step);
+        sharedButtons.style.display = isTwoCol ? 'none' : 'flex';
         backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
         nextBtn.textContent = step === TOTAL_STEPS ? 'Submit' : 'Next';
         nextBtn.type = step === TOTAL_STEPS ? 'submit' : 'button';
+
         document.querySelector('.di-wrap').classList.toggle('step-wide', [1, 2, 3, 4].includes(step));
         state.currentStep = step;
         saveState();
@@ -904,6 +957,14 @@
           var panel = document.getElementById(tab.getAttribute('data-ditab'));
           if (panel) panel.classList.add('active');
         });
+      });
+
+      // Inline buttons (two-column steps) delegate to the shared handlers
+      document.querySelectorAll('.di-back-inline').forEach(function(btn) {
+        btn.addEventListener('click', function() { backBtn.click(); });
+      });
+      document.querySelectorAll('.di-next-inline').forEach(function(btn) {
+        btn.addEventListener('click', function() { nextBtn.click(); });
       });
 
       document.addEventListener('keydown', function(e) {
