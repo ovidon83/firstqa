@@ -1,18 +1,117 @@
 <%- include('partials/header', { title: 'FirstQA – Support' }) %>
+<style>
+body{background:#0f1117;color:#e8eaf0;font-family:'Inter',-apple-system,system-ui,sans-serif}
+.support-wrap{max-width:860px;margin:0 auto;padding:80px 24px 80px}
+.support-wrap h1{font-size:32px;font-weight:700;margin-bottom:8px}
+.support-wrap .page-sub{font-size:15px;color:#9ca3b8;margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid #262d3d}
+.support-wrap h2{font-size:19px;font-weight:700;margin:48px 0 20px;color:#e8eaf0}
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+.contact-card{background:#161a23;border:1px solid #262d3d;border-radius:12px;padding:24px}
+.contact-card .cc-icon{width:40px;height:40px;background:rgba(16,185,129,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#10b981;margin-bottom:14px}
+.contact-card h3{font-size:14px;font-weight:600;margin-bottom:6px;color:#e8eaf0}
+.contact-card p,.contact-card a{font-size:13px;color:#9ca3b8;text-decoration:none;line-height:1.6}
+.contact-card a{color:#10b981}
+.contact-card a:hover{color:#059669}
+.faq-item{border-bottom:1px solid #262d3d;padding:20px 0}
+.faq-item:last-child{border-bottom:none}
+.faq-q{font-size:15px;font-weight:600;color:#e8eaf0;margin-bottom:8px}
+.faq-a{font-size:14px;color:#9ca3b8;line-height:1.8}
+.faq-a code{font-family:'JetBrains Mono','SF Mono',monospace;background:rgba(16,185,129,.1);color:#10b981;padding:2px 7px;border-radius:5px;font-size:.88em}
+.faq-a a{color:#10b981;text-decoration:none}
+.faq-a a:hover{color:#059669}
+.faq-section{margin-bottom:12px}
+.faq-section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin-bottom:4px;padding-top:16px}
+@media(max-width:640px){.contact-grid{grid-template-columns:1fr}}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<div class="container my-5" style="max-width: 900px;">
-  <h1 class="fw-bold mb-4 text-center">Get Help with FirstQA</h1>
+<div class="support-wrap">
+  <h1>Support</h1>
+  <p class="page-sub">Get help with FirstQA. Browse common questions below or reach out directly.</p>
 
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <h2 class="mt-3 mb-3">Contact Support</h2>
-      <ul class="list-unstyled">
-        <li class="mb-3"><strong>Email</strong>: <a href="mailto:support@firstqa.dev">support@firstqa.dev</a> or <a href="mailto:hello@firstqa.dev">hello@firstqa.dev</a></li>
-        <li class="mb-3"><strong>Response Time</strong>: Within 24 hours</li>
-        <li class="mb-3"><strong>Hours</strong>: Monday-Friday, 9 AM - 6 PM EST</li>
-      </ul>
+  <h2>Contact Us</h2>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <div class="cc-icon"><i class="fas fa-envelope"></i></div>
+      <h3>Email Support</h3>
+      <p><a href="mailto:support@firstqa.dev">support@firstqa.dev</a></p>
+      <p>Response within 24 hours, Mon–Fri</p>
     </div>
+    <div class="contact-card">
+      <div class="cc-icon"><i class="fas fa-calendar"></i></div>
+      <h3>Book a Demo</h3>
+      <p><a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank">Schedule 15 minutes</a></p>
+      <p>Talk directly with the founder</p>
+    </div>
+    <div class="contact-card">
+      <div class="cc-icon"><i class="fas fa-book"></i></div>
+      <h3>Documentation</h3>
+      <p><a href="/docs">Read the full guide</a></p>
+      <p>Commands, integrations, and FAQ</p>
+    </div>
+  </div>
+
+  <h2>Frequently Asked Questions</h2>
+
+  <div class="faq-section-label">Getting Started</div>
+
+  <div class="faq-item">
+    <div class="faq-q">How do I set up FirstQA?</div>
+    <div class="faq-a">
+      Install the <a href="https://github.com/apps/oviai-by-firstqa/installations/new" target="_blank">FirstQA GitHub App</a> on your repositories. That's it — Ovi starts analyzing every new PR automatically. No code changes, no CI configuration needed. Full setup takes under 10 minutes.
+    </div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How do I trigger an analysis manually?</div>
+    <div class="faq-a">Comment <code>/qa</code> on any PR to trigger a full analysis. Ovi also runs automatically on every PR open and update if you have auto-analysis enabled.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How do I analyze a Linear or Jira ticket?</div>
+    <div class="faq-a">Comment <code>/qa</code> in a Linear or Jira issue, or use the FirstQA Chrome Extension to analyze any ticket directly from your browser. Ovi surfaces gaps, edge cases, and QA questions before development starts.</div>
+  </div>
+
+  <div class="faq-section-label">Test Execution</div>
+
+  <div class="faq-item">
+    <div class="faq-q">How do I run browser tests?</div>
+    <div class="faq-a">Comment <code>/qa testrun</code> on a PR. To target a specific environment: <code>/qa testrun -env=https://staging.myapp.com</code>. Results are posted back as a PR comment with screenshots and a Go/No-Go decision.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">My app requires login — how does Ovi authenticate?</div>
+    <div class="faq-a">
+      Three options:<br>
+      1. Pass context: <code>/qa testrun -context "logged in as trial user"</code><br>
+      2. Inject cookies: <code>/qa testrun -context cookie:session_id=abc123</code><br>
+      3. Configure credentials in your FirstQA dashboard (TEST_USER_EMAIL / TEST_USER_PASSWORD)
+    </div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How long does a test run take?</div>
+    <div class="faq-a">PR analysis takes 30–90 seconds. Browser test execution takes 5–15 minutes depending on the number of scenarios.</div>
+  </div>
+
+  <div class="faq-section-label">Security & Privacy</div>
+
+  <div class="faq-item">
+    <div class="faq-q">Is my code stored?</div>
+    <div class="faq-a">No. Code is processed in memory for analysis and never permanently stored. FirstQA has read-only access to your repositories and only writes PR comments and Check Runs. All data is transmitted over HTTPS/TLS. See our <a href="/privacy">Privacy Policy</a>.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What permissions does the GitHub App require?</div>
+    <div class="faq-a">Read access to repository contents, pull requests, and issues. Write access to post PR comments and Check Runs. We never modify your code.</div>
+  </div>
+
+  <div class="faq-section-label">Billing & Access</div>
+
+  <div class="faq-item">
+    <div class="faq-q">What is the Launch Partner program?</div>
+    <div class="faq-a">Launch Partners get a 30-day free trial and then $149/mo locked for life (standard price will be $249/mo). Limited to 20 spots. In return, we ask for one feedback call after your first month. <a href="/discovery-interview">Apply here.</a></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How do I cancel?</div>
+    <div class="faq-a">Email <a href="mailto:support@firstqa.dev">support@firstqa.dev</a> at any time. We'll cancel your account and confirm within 24 hours. No lock-in, no cancellation fees.</div>
   </div>
 </div>
 
-<%- include('partials/footer') %> 
+<%- include('partials/footer') %>

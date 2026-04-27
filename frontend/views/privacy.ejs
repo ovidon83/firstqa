@@ -1,23 +1,83 @@
 <%- include('partials/header', { title: 'FirstQA – Privacy Policy' }) %>
-<div class="container my-5" style="max-width: 800px;">
-  <h1 class="fw-bold mb-4 text-center">Privacy Policy</h1>
-      <p>We respect your privacy. FirstQA only collects the minimum information necessary to provide our QA/testing services. We do not sell or share your data with third parties.</p>
-  <h2 class="mt-4">What We Collect</h2>
+<style>
+body{background:#0f1117;color:#e8eaf0;font-family:'Inter',-apple-system,system-ui,sans-serif}
+.legal-wrap{max-width:760px;margin:0 auto;padding:80px 24px 60px}
+.legal-wrap h1{font-size:32px;font-weight:700;margin-bottom:8px;color:#e8eaf0}
+.legal-meta{font-size:13px;color:#6b7280;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid #262d3d}
+.legal-wrap h2{font-size:17px;font-weight:600;color:#e8eaf0;margin:36px 0 10px}
+.legal-wrap p,.legal-wrap li{font-size:14px;color:#9ca3b8;line-height:1.8}
+.legal-wrap ul{padding-left:20px;margin-bottom:0}
+.legal-wrap li{margin-bottom:6px}
+.legal-wrap a{color:#10b981;text-decoration:none}
+.legal-wrap a:hover{color:#059669}
+.legal-notice{background:#1c2130;border:1px solid #262d3d;border-radius:10px;padding:16px 20px;font-size:13px;color:#9ca3b8;margin-top:40px}
+</style>
+
+<div class="legal-wrap">
+  <h1>Privacy Policy</h1>
+  <p class="legal-meta">Last Updated: April 25, 2026</p>
+
+  <p>FirstQA is committed to protecting your privacy. We collect only the minimum information necessary to provide our QA services. We do not sell your data to third parties.</p>
+
+  <h2>1. What We Collect</h2>
+  <p>When you use FirstQA, we may collect:</p>
   <ul>
-    <li>GitHub username and repository information (for PR testing)</li>
-    <li>Contact information you provide (for support or feedback)</li>
-    <li>Test request details and comments</li>
+    <li><strong>Account information</strong> — GitHub username, email address, and OAuth tokens used to authenticate and connect your tools</li>
+    <li><strong>Repository data</strong> — PR diffs, commit metadata, and changed file contents, processed in memory to generate QA analysis</li>
+    <li><strong>Ticket data</strong> — Linear and Jira ticket content submitted for analysis</li>
+    <li><strong>Usage data</strong> — commands triggered, features used, and performance metrics to improve the Service</li>
+    <li><strong>Contact information</strong> — name and email provided via forms (support, early access, discovery interview)</li>
+    <li><strong>Test execution data</strong> — environment URLs and context parameters passed with <code>/qa testrun</code> commands</li>
   </ul>
-  <h2 class="mt-4">How We Use Your Data</h2>
+
+  <h2>2. How We Use Your Data</h2>
   <ul>
-    <li>To deliver manual QA/testing services on your pull requests</li>
-    <li>To communicate with you about your requests</li>
-    <li>To improve our service</li>
+    <li>To deliver QA analysis and browser test execution on your pull requests and tickets</li>
+    <li>To post results as PR comments and GitHub Check Runs</li>
+    <li>To communicate with you about your account, support requests, and the Service</li>
+    <li>To improve the accuracy and performance of Ovi's AI analysis</li>
+    <li>To send product updates and early access communications (you can unsubscribe at any time)</li>
   </ul>
-  <h2 class="mt-4">Your Rights</h2>
+
+  <h2>3. Code and Repository Access</h2>
+  <p>FirstQA has <strong>read-only</strong> access to your repository contents. Code is processed in memory for analysis purposes and is <strong>never permanently stored</strong>. We only write PR comments and Check Run results back to GitHub — we never modify your code.</p>
+
+  <h2>4. AI Processing</h2>
+  <p>Code diffs and ticket content are sent to AI providers to generate QA analysis. Data sent to AI providers is subject to their respective privacy policies. We do not allow AI providers to use your code or content to train their models.</p>
+
+  <h2>5. Data Sharing</h2>
+  <p>We do not sell or rent your personal data. We may share data with:</p>
   <ul>
-    <li>You can request deletion of your data at any time by contacting us.</li>
-    <li>We do not use your data for marketing or advertising.</li>
+    <li><strong>Service providers</strong> — infrastructure, AI, and browser automation providers necessary to operate the Service</li>
+    <li><strong>Legal requirements</strong> — if required by law, court order, or to protect our rights</li>
   </ul>
-  <p class="mt-4">For questions, contact us via the <a href="/contact">Contact form</a>.</p>
-</div> 
+
+  <h2>6. Data Retention</h2>
+  <p>Account data is retained as long as your account is active. Analysis results posted to GitHub are subject to GitHub's retention policies. You can request deletion of your FirstQA account data at any time.</p>
+
+  <h2>7. Security</h2>
+  <p>All data is transmitted over HTTPS/TLS. We use industry-standard security practices to protect your data. Access to production systems is limited to authorized personnel.</p>
+
+  <h2>8. Your Rights</h2>
+  <ul>
+    <li>Request access to the personal data we hold about you</li>
+    <li>Request correction of inaccurate data</li>
+    <li>Request deletion of your account and associated data</li>
+    <li>Unsubscribe from marketing communications at any time</li>
+  </ul>
+
+  <h2>9. Cookies</h2>
+  <p>We use session cookies to maintain your authenticated state. We do not use tracking or advertising cookies.</p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will notify you of significant changes via email or through the Service. Continued use after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>11. Contact</h2>
+  <p>For privacy-related questions or data requests, contact us at <a href="mailto:privacy@firstqa.dev">privacy@firstqa.dev</a> or via the <a href="/contact">Contact page</a>.</p>
+
+  <div class="legal-notice">
+    By using FirstQA, you agree to the collection and use of information as described in this Privacy Policy.
+  </div>
+</div>
+
+<%- include('partials/footer') %>
