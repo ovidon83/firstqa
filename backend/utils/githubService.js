@@ -2435,7 +2435,8 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
           content: `Extract login credentials from this text. Reply with JSON only: {"email":"...","password":"..."} or {"email":null,"password":null} if not present. Strip trailing punctuation from values.\n\nText: ${rawContext}`
         }]
       });
-      const json = JSON.parse(extraction.content[0].text.trim());
+      const rawText = extraction.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+      const json = JSON.parse(rawText);
       if (json.email && json.password) {
         inlineCredentials = { email: json.email, password: json.password };
         console.log(`🔐 [testrun] AI extracted credentials for: ${inlineCredentials.email}`);

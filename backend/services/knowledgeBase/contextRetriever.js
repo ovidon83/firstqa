@@ -67,7 +67,7 @@ async function getAffectedFlows(repoId, changedFiles) {
         if (changedSet.has(d)) return true;
         if (d.endsWith('.js') || d.endsWith('.ts') || d.endsWith('.tsx') || d.endsWith('.jsx')) return changedSet.has(d);
         const asPath = d.replace(/^\.\//, '').replace(/^\@\//, '');
-        return changedSet.has(asPath) || changedFiles.some(cf => cf.includes(d) || cf.endsWith(d)));
+        return changedSet.has(asPath) || changedFiles.some(cf => cf.includes(d) || cf.endsWith(d));
       });
       if (matchesChanged) impactedFiles.add(file);
     }
