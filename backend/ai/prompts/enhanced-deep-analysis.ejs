@@ -84,6 +84,14 @@ Before analyzing anything, categorize the changed files:
    - Example: if testing the Do view, write "Navigate to [appUrl]#todo" not "Click the Do tab in navigation"
    - This prevents the agent from getting lost navigating through menus and reduces flaky failures
 
+10. **ALWAYS include prerequisite setup steps for conditionally available UI:**
+    - If a button, action, or element is only available under specific conditions — only in a certain view/page, only when a certain object already exists, only after a specific action, only for a certain user state — you MUST include explicit setup steps to reach that condition BEFORE the step that needs it
+    - Identify the condition from the code (conditional rendering, permission checks, state guards) and translate it into concrete setup steps
+    - Examples of conditions to watch for: "only shown when draft exists", "only in edit mode", "only after image is generated", "only for premium users", "only when list is non-empty", "only on a specific route"
+    - Wrong: jumping straight to "Click Add to Draft" without first ensuring a draft exists in the current context
+    - Right: "1. Create a new draft, 2. Navigate to chat that is linked to that draft, 3. Generate image, 4. Click Add to Draft"
+    - Apply this to any conditional — not just drafts. Any state-dependent UI must have its preconditions explicitly set up in the steps.
+
 **PR CONTEXT:**
 Title: <%= title %>
 Description: <%= body %>

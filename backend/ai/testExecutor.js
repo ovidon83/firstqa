@@ -33,6 +33,29 @@ const SCENARIO_STUCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 min — if a scenario hasn
 const MAX_CONSECUTIVE_QUOTA_ERRORS = 3;
 const MAX_CONSECUTIVE_STUCK = 2; // abort whole run after this many consecutive stuck scenarios
 
+// ─── Agent Blocked detection — patterns the browser agent cannot execute ────
+
+const BLOCKER_PATTERNS = [
+  { pattern: /\b(upload|attach|select|choose|pick)\b.{0,40}\b(file|photo|image|video|document|pdf)\b.{0,40}\b(from|local|device|disk|computer|machine|finder|explorer)\b/i, reason: 'requires local file system access' },
+  { pattern: /\b(upload|attach)\b.{0,40}\b(file|photo|image|video|document)\b/i, reason: 'requires file upload from device' },
+  { pattern: /\binput\[type=.?file.?\]|\bfile\s*picker\b|\bfile\s*input\b/i, reason: 'requires file upload from device' },
+  { pattern: /\b(sms|text\s*message|phone\s*code|otp|one.time\s*password|verification\s*code)\b.{0,40}\b(enter|input|type|submit)\b/i, reason: 'requires SMS/phone verification' },
+  { pattern: /\b(enter|type|input).{0,40}\b(sms|otp|phone\s*code|verification\s*code)\b/i, reason: 'requires SMS/phone verification' },
+  { pattern: /\b(camera|take\s*photo|take\s*a\s*photo|capture\s*image|scan\s*qr)\b/i, reason: 'requires device camera access' },
+  { pattern: /\b(biometric|face\s*id|touch\s*id|fingerprint)\b/i, reason: 'requires biometric device authentication' },
+  { pattern: /\b(open|launch)\b.{0,30}\b(desktop\s*app|native\s*app|installed\s*app)\b/i, reason: 'requires native desktop or mobile app' },
+  { pattern: /\b(download|open).{0,30}\b(pdf|excel|csv|zip)\b.{0,40}\b(verify|check|open|read)\b/i, reason: 'requires inspecting a downloaded file' },
+  { pattern: /\bpush\s*notification\b/i, reason: 'requires device push notification access' },
+];
+
+function detectBlocker(scenario) {
+  const text = `${scenario.steps || ''} ${scenario.expected || ''}`;
+  for (const { pattern, reason } of BLOCKER_PATTERNS) {
+    if (pattern.test(text)) return reason;
+  }
+  return null;
+}
+
 // ─── Start URL resolution (deterministic, no AI call) ───────────────────────
 
 const ROUTE_KEYWORDS = ['hire', 'login', 'signin', 'signup', 'register', 'contact', 'dashboard', 'settings', 'profile', 'pricing', 'checkout', 'cart', 'search', 'about', 'faq', 'help', 'billing', 'onboarding', 'invite', 'drafts', 'analytics', 'admin', 'home'];
@@ -429,6 +452,18 @@ Rules:
         consoleLogs: [],
         networkErrors: []
       };
+
+      // Check for steps the browser agent fundamentally cannot execute
+      const blockerReason = detectBlocker(scenario);
+      if (blockerReason) {
+        console.log(`   ⛔ Agent Blocked: ${blockerReason}`);
+        scenarioResult.status = 'BLOCKED';
+        scenarioResult.error = `Agent blocked: ${blockerReason}`;
+        scenarioResult.actualResult = `This test requires manual execution — ${blockerReason}.`;
+        results.scenarios.push(scenarioResult);
+        results.skipped++;
+        continue;
+      }
 
       const consoleHandler = msg => {
         scenarioResult.consoleLogs.push({ type: msg.type(), text: msg.text() });

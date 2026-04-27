@@ -35,10 +35,10 @@ function generateTestReportComment(results, videoUrl, screenshotUrls = {}, manua
   }
   comment += `\n\n`;
 
-  // Results table — failures first, then partial, then passes
+  // Results table — failures first, then partial, then blocked, then passes
   const sorted = [...results.scenarios].sort((a, b) => {
-    const order = { FAIL: 0, ERROR: 1, PARTIAL: 2, SKIP: 3, PASS: 4 };
-    return (order[a.status] ?? 5) - (order[b.status] ?? 5);
+    const order = { FAIL: 0, ERROR: 1, PARTIAL: 2, BLOCKED: 3, SKIP: 4, PASS: 5 };
+    return (order[a.status] ?? 6) - (order[b.status] ?? 6);
   });
 
   comment += `| # | Scenario | Priority | Status | Duration | Evidence |\n`;
@@ -95,6 +95,17 @@ function generateTestReportComment(results, videoUrl, screenshotUrls = {}, manua
     comment += `> ⚠️ Some tests may fail due to authentication, missing test data, or environment differences. Review the details above for specifics.\n\n`;
   }
 
+  // Blocked scenarios section
+  const blocked = results.scenarios.filter(s => s.status === 'BLOCKED');
+  if (blocked.length > 0) {
+    comment += `> 🚫 **Agent Blocked** — these scenarios require manual execution:\n`;
+    blocked.forEach(s => {
+      const why = s.error ? s.error.replace(/^Agent blocked:\s*/i, '') : 'not automatable in browser';
+      comment += `> - **${s.scenario}**: ${why}\n`;
+    });
+    comment += `\n`;
+  }
+
   // Manual testing section
   if (manualScenarios.length > 0) {
     comment += `<details>\n<summary><strong>📋 Manual Testing Required (${manualScenarios.length})</strong></summary>\n\n`;
@@ -119,6 +130,7 @@ function getStatusLabel(status) {
     ERROR: '⚠️ Error',
     PARTIAL: '🔶 Partial',
     SKIP: '⏭️ Skip',
+    BLOCKED: '🚫 Agent Blocked',
     PENDING: '⏳'
   }[status] || '❓';
 }
