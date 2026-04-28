@@ -189,13 +189,22 @@ async function attemptAutoLogin(page, credentials, baseUrl) {
 // ─── Scenario instruction builder ───────────────────────────────────────────
 
 function buildScenarioInstruction(scenario, agentContext) {
-  let instruction = `Execute this test scenario: "${scenario.scenario}"\n\n`;
-  instruction += `Steps (use as guidance — adapt if the page requires different navigation or intermediate actions):\n${scenario.steps}\n\n`;
-  instruction += `Expected result to verify:\n${scenario.expected}\n\n`;
-  instruction += `After completing all steps, stay on the final page so we can verify the results.\n`;
+  // Goal-based: tell the agent WHAT to verify and WHAT passing looks like.
+  // Steps are hints only — the agent must adapt when the UI differs.
+  let instruction = `## Goal\nVerify: "${scenario.scenario}"\n\n`;
+
+  instruction += `## What "passing" looks like\n${scenario.expected}\n\n`;
+
+  instruction += `## Suggested steps (hints — adapt freely if the page looks different)\n${scenario.steps}\n\n`;
+
+  instruction += `## Rules\n`;
+  instruction += `- Your primary job is to achieve the goal, not to follow the steps literally.\n`;
+  instruction += `- If a suggested step mentions a button/element you can't find, look for it in the navigation, try scrolling, or find an equivalent path to the same goal.\n`;
+  instruction += `- If the suggested URL or route looks wrong, navigate to the app root and find the right section from there.\n`;
+  instruction += `- After completing the goal, stay on the final page — do not navigate away.\n`;
 
   if (agentContext) {
-    instruction += `\nContext:\n${agentContext}\n`;
+    instruction += `\n## Context\n${agentContext}\n`;
   }
 
   return instruction;
@@ -271,7 +280,7 @@ Return JSON:
 // ─── Main entry point ───────────────────────────────────────────────────────
 
 async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
-  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null, authCookies = null, sharedResults = null } = options;
+  const { takeScreenshots = true, timeout = SCENARIO_TIMEOUT, userContext = null, testCredentials = null, authCookies = null, sharedResults = null, appKnowledge = null } = options;
 
   const executionId = uuidv4();
   const resultsDir = path.join(__dirname, '..', '..', 'test-results', executionId);
@@ -339,11 +348,15 @@ async function executeTestRecipe(testRecipe, baseUrl, options = {}) {
   if (testCredentials && testCredentials.email) {
     contextParts.push(`Test account credentials — Email: ${testCredentials.email}, Password: ${testCredentials.password}. Use these when a login or sign-up form is encountered.`);
   }
+  if (appKnowledge) {
+    contextParts.push(`App knowledge (use to navigate and identify UI elements):\n${appKnowledge}`);
+    console.log(`📚 App knowledge included in agent context`);
+  }
   if (userContext) {
     contextParts.push(userContext);
   }
   if (contextParts.length > 0) {
-    agentContext = contextParts.join('\n');
+    agentContext = contextParts.join('\n\n');
     console.log(`📋 Agent context provided (${contextParts.length} part${contextParts.length > 1 ? 's' : ''})`);
   }
 
@@ -521,11 +534,37 @@ Rules:
             reject(new Error(`SCENARIO_STUCK: Scenario did not complete within ${SCENARIO_STUCK_TIMEOUT_MS / 60000} minutes`));
           }, SCENARIO_STUCK_TIMEOUT_MS);
         });
-        const agentResult = await Promise.race([
+        let agentResult = await Promise.race([
           agent.execute({ instruction, maxSteps: MAX_AGENT_STEPS }),
           stuckTimeout
         ]);
         clearTimeout(stuckTimeoutHandle);
+
+        // Recovery: if agent didn't complete and message suggests it got lost or
+        // couldn't find an element, navigate to app root and retry once with more steps.
+        const lostSignals = /couldn.t find|could not find|not find|unable to locate|not visible|not present|doesn.t exist|element not|no .* button|can.t see|cannot see|not sure where|wrong page|not on the|navigate.*first/i;
+        const needsRecovery = !agentResult.completed && lostSignals.test(agentResult.message || '');
+        if (needsRecovery) {
+          console.log(`   🔄 Recovery: agent lost — re-orienting to app root and retrying...`);
+          await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: ACTION_TIMEOUT }).catch(() => {});
+          await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+          const recoveryInstruction = `${instruction}\n\n## Recovery note\nYou are now at the app root (${baseUrl}). Navigate from here to complete the goal above. Look for the relevant section in the main navigation.`;
+          const recoveryAgent = stagehand.agent({ model: agentModel, systemPrompt: agentSystemPrompt, mode: 'hybrid' });
+          stuckTimeoutHandle = undefined;
+          const recoveryStuck = new Promise((_, reject) => {
+            stuckTimeoutHandle = setTimeout(() => reject(new Error('SCENARIO_STUCK: Recovery timed out')), SCENARIO_STUCK_TIMEOUT_MS);
+          });
+          const recoveryResult = await Promise.race([
+            recoveryAgent.execute({ instruction: recoveryInstruction, maxSteps: MAX_AGENT_STEPS }),
+            recoveryStuck
+          ]);
+          clearTimeout(stuckTimeoutHandle);
+          // Use recovery result if it did better
+          if (recoveryResult.completed || (recoveryResult.actions?.length || 0) > (agentResult.actions?.length || 0)) {
+            agentResult = recoveryResult;
+            console.log(`   ♻️  Recovery result used (${agentResult.completed ? 'completed' : 'partial'})`);
+          }
+        }
 
         if (agentResult.actions && agentResult.actions.length > 0) {
           agentResult.actions.forEach(action => {

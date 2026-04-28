@@ -13,7 +13,7 @@ const { uploadScreenshotToGitHub } = require('./screenshotService');
 const GLOBAL_RUN_TIMEOUT_MS = 32 * 60 * 1000;
 
 async function executeAutomatedTests(params) {
-  const { owner, repo, prNumber, sha, testRecipe, baseUrl, installationId, userContext, testCredentials, authCookies } = params;
+  const { owner, repo, prNumber, sha, testRecipe, baseUrl, installationId, userContext, testCredentials, authCookies, appKnowledge } = params;
 
   console.log(`\n${'='.repeat(60)}`);
   console.log(`🚀 Starting Automated Test Execution`);
@@ -70,7 +70,8 @@ async function executeAutomatedTests(params) {
         userContext,
         testCredentials,
         authCookies,
-        sharedResults
+        sharedResults,
+        appKnowledge
       }),
       globalTimeoutPromise
     ]);

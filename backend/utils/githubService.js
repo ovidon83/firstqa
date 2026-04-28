@@ -2599,7 +2599,32 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
     console.warn('⚠️ [testrun] No SHA available — Check Run will not be created');
   }
 
-  // 8. Execute tests (non-blocking)
+  // 8. Fetch product knowledge for executor context (routes, UI vocab, flows)
+  let appKnowledge = null;
+  if (process.env.ENABLE_KNOWLEDGE_SYNC === 'true' && isSupabaseConfigured()) {
+    try {
+      const { data: rc } = await supabaseAdmin
+        .from('repo_context')
+        .select('product_areas, user_flows')
+        .eq('repo_id', repoFullName)
+        .maybeSingle();
+      if (rc) {
+        const areas = rc.product_areas ? Object.values(rc.product_areas).slice(0, 8).map(a => a.name || a.slug).filter(Boolean) : [];
+        const flows = rc.user_flows ? rc.user_flows.slice(0, 10).map(f => f.name).filter(Boolean) : [];
+        if (areas.length || flows.length) {
+          appKnowledge = [
+            areas.length ? `App areas: ${areas.join(', ')}` : '',
+            flows.length ? `Key flows: ${flows.join(', ')}` : ''
+          ].filter(Boolean).join('\n');
+          console.log(`📚 [testrun] App knowledge loaded for executor: ${areas.length} areas, ${flows.length} flows`);
+        }
+      }
+    } catch (pkErr) {
+      console.warn(`⚠️ [testrun] Could not load app knowledge: ${pkErr.message}`);
+    }
+  }
+
+  // 9. Execute tests (non-blocking)
   const { executeAutomatedTests } = require('../services/automatedTestOrchestrator');
   executeAutomatedTests({
     owner,
@@ -2611,7 +2636,8 @@ async function handleTestRunCommand(repository, issue, comment, sender, userId, 
     installationId,
     userContext,
     testCredentials,
-    authCookies
+    authCookies,
+    appKnowledge
   }).catch(err => {
     console.error(`❌ [testrun] Execution failed for ${repoFullName}#${prNumber}:`, err.message);
     postComment(repoFullName, prNumber,
