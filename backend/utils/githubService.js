@@ -752,6 +752,32 @@ async function fetchChangedFileContents(repository, prNumber) {
       }
     }
 
+    // Also fetch the repo's main routing/navigation file even if it wasn't in the PR diff.
+    // Without this, hash-based routes (#todo, #thoughts) are invisible to the AI and it
+    // falls back to inferring hashes from component names — causing recipe hash mismatches.
+    const ROUTER_CANDIDATES = [
+      'src/App.tsx', 'src/App.jsx', 'src/App.js',
+      'src/router.tsx', 'src/router.jsx', 'src/router.js',
+      'src/routes.tsx', 'src/routes.jsx', 'src/routes.js',
+      'src/Router.tsx', 'src/Router.jsx',
+      'src/navigation.tsx', 'src/navigation.jsx', 'src/navigation.js',
+      'app/router.ts', 'app/routes.ts',
+    ];
+    for (const candidate of ROUTER_CANDIDATES) {
+      if (fileContents[candidate]) continue; // already fetched as part of the diff
+      try {
+        const { data } = await repoOctokit.repos.getContent({ owner, repo: repoName, path: candidate, ref: headSha });
+        if (data.type !== 'file' || !data.content) continue;
+        const content = Buffer.from(data.content, 'base64').toString('utf8');
+        if (content.length > MAX_FILE_CONTENT_CHARS * 2) continue; // allow slightly larger for router files
+        fileContents[candidate] = content;
+        console.log(`🗺️  Added routing file to context: ${candidate}`);
+        break; // one routing file is enough
+      } catch (_) {
+        // file doesn't exist in this repo — try next candidate
+      }
+    }
+
     console.log(`📂 Fetched full contents for ${Object.keys(fileContents).length} files, ${selectorHints.length} selector hints`);
     return { fileContents, selectorHints };
   } catch (error) {
