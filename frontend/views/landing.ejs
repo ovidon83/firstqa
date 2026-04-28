@@ -304,7 +304,7 @@
         <!-- Early access notice -->
         <div class="pricing-ea-bar">
             <i class="fas fa-circle-check"></i>
-            All plans include a free trial — full product, no credit card required &nbsp;·&nbsp; <strong>Early access:</strong> billing activates when we open to the public
+            All plans include a free trial &mdash; no credit card required &nbsp;&nbsp;<span class="pricing-ea-divider">·</span>&nbsp;&nbsp; Billing activates when we open to the public
         </div>
 
         <div class="pricing-grid">
@@ -654,8 +654,9 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 
 /* Pricing */
 .pricing-section{padding:100px 0;border-top:1px solid var(--border)}
-.pricing-ea-bar{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:10px 22px;font-size:13px;color:var(--text2);margin:0 auto 40px;max-width:700px;text-align:center}
+.pricing-ea-bar{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:10px 22px;font-size:13px;color:var(--text2);margin:0 auto 40px;max-width:660px;white-space:nowrap;flex-wrap:nowrap}
 .pricing-ea-bar i{color:var(--green);flex-shrink:0}
+.pricing-ea-divider{color:var(--border2)}
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1000px;margin:0 auto 24px}
 .pricing-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;flex-direction:column;gap:20px;position:relative}
 .pricing-card-featured{border-color:rgba(16,185,129,.4);background:linear-gradient(160deg,rgba(16,185,129,.07),var(--bg2) 55%)}
@@ -695,6 +696,7 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
     .hero-stats{justify-content:center}
     .hero-right{order:-1;max-width:580px;margin:0 auto}
     .pricing-grid{grid-template-columns:1fr}
+    .pricing-ea-bar{white-space:normal;text-align:center;border-radius:14px}
     .pricing-lp-strip{flex-direction:column;gap:16px}
     .pricing-lp-right{width:100%;justify-content:space-between}
     .offer-grid{grid-template-columns:1fr}
