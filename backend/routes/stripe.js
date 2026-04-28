@@ -163,8 +163,7 @@ async function handleSubscriptionCreated(subscription) {
 // Plan amount map (in cents) — update when Stripe products change
 const PLAN_AMOUNTS = {
   14900: 'Launch Partner', // $149/mo
-  24900: 'Starter',        // $249/mo
-  59900: 'Pro',            // $599/mo
+  49900: 'FirstQA',        // $499/mo
 };
 
 // Helper function to determine plan from checkout session
@@ -177,14 +176,12 @@ function determinePlanFromSession(session) {
 
     // Match by Stripe Price ID env vars (preferred — set these in your .env)
     if (process.env.STRIPE_PRICE_LAUNCH_PARTNER && priceId === process.env.STRIPE_PRICE_LAUNCH_PARTNER) return 'Launch Partner';
-    if (process.env.STRIPE_PRICE_STARTER && priceId === process.env.STRIPE_PRICE_STARTER) return 'Starter';
-    if (process.env.STRIPE_PRICE_PRO && priceId === process.env.STRIPE_PRICE_PRO) return 'Pro';
+    if (process.env.STRIPE_PRICE_FIRSTQA && priceId === process.env.STRIPE_PRICE_FIRSTQA) return 'FirstQA';
 
     // Fallback: match by product ID keyword
     const pid = productId.toLowerCase();
     if (pid.includes('launch_partner') || pid.includes('launch-partner')) return 'Launch Partner';
-    if (pid.includes('starter')) return 'Starter';
-    if (pid.includes('pro')) return 'Pro';
+    if (pid.includes('firstqa')) return 'FirstQA';
     if (pid.includes('enterprise')) return 'Enterprise';
   }
 
@@ -208,12 +205,9 @@ function determinePlanFromSubscription(subscription) {
   
   for (const item of items) {
     if (item.price?.product) {
-      const productId = item.price.product;
-      if (productId.includes('starter') || productId.includes('49')) {
-        return 'Starter';
-      } else if (productId.includes('growth') || productId.includes('149')) {
-        return 'Growth';
-      }
+      const productId = item.price.product.toLowerCase();
+      if (productId.includes('launch_partner') || productId.includes('launch-partner')) return 'Launch Partner';
+      if (productId.includes('firstqa')) return 'FirstQA';
     }
   }
   
