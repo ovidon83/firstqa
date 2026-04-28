@@ -134,7 +134,7 @@ async function updateCheckRunWithError(octokit, owner, repo, checkRunId, error) 
  */
 function generateSummary(results) {
   const duration = Math.round(results.duration / 1000);
-  const passRate = Math.round((results.passed / results.totalTests) * 100);
+  const passRate = results.totalTests > 0 ? Math.round((results.passed / results.totalTests) * 100) : 0;
 
   let summary = `### Test Execution Summary\n\n`;
   summary += `**Duration:** ${Math.floor(duration / 60)}m ${duration % 60}s\n`;
@@ -164,7 +164,7 @@ function generateSummary(results) {
 function generateDetailedOutput(results) {
   let output = `## Test Results by Priority\n\n`;
 
-  const priorities = ['Happy Path', 'Critical Path', 'Edge Case', 'Regression'];
+  const priorities = ['Smoke', 'Critical Path', 'Regression', 'Edge Case'];
   
   for (const priority of priorities) {
     const scenarios = results.scenarios.filter(s => s.priority === priority);

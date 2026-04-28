@@ -130,6 +130,7 @@ function getStatusLabel(status) {
     ERROR: '⚠️ Error',
     PARTIAL: '🔶 Partial',
     SKIP: '⏭️ Skip',
+    SKIPPED: '⏭️ Skip',
     BLOCKED: '🚫 Agent Blocked',
     PENDING: '⏳'
   }[status] || '❓';

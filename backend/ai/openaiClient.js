@@ -80,9 +80,9 @@ function trunc(x, n) {
  */
 async function generateQAInsights({ repo, pr_number, title, body, diff, newCommits, fileContents = {}, selectorHints = [] }) {
   try {
-    // Validate OpenAI client
-    if (!openai) {
-      throw new Error('OpenAI client not initialized. Check OPENAI_API_KEY.');
+    // Require at least one AI provider
+    if (!openai && !anthropic) {
+      throw new Error('No AI provider configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY.');
     }
 
     console.log(`🔍 Starting DEEP CODE ANALYSIS for PR #${pr_number} in ${repo}`);
@@ -468,7 +468,7 @@ async function parseAIResponse(response, title, body, diff) {
     
     // Fallback: try to parse as JSON for backward compatibility
     try {
-      const insights = JSON.parse(response);
+      const insights = JSON.parse(cleaned);
       if (insights && typeof insights === 'object' && validateInsightsStructure(insights)) {
         return insights;
       }
@@ -1944,12 +1944,7 @@ Recommendations: ready-to-paste text for the ticket body. Test scenarios: clear,
     content = response.choices[0]?.message?.content;
   }
   
-  // Log summary instead of full response
-  console.log('🤖 AI response:', {
-    length: content.length,
-    usage: response.usage,
-    model: response.model
-  });
+  console.log(`🤖 AI response: ${content?.length ?? 0} chars`);
   
   // Extract JSON from the response
   const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);

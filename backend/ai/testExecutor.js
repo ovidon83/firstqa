@@ -111,12 +111,17 @@ async function attemptAutoLogin(page, credentials, baseUrl) {
   }
 
   try {
-    const emailField =
-      page.getByLabel(/email/i).first() ||
-      page.getByPlaceholder(/email/i).first() ||
-      page.locator('input[type="email"]').first();
+    const emailCandidates = [
+      page.getByLabel(/email/i).first(),
+      page.getByPlaceholder(/email/i).first(),
+      page.locator('input[type="email"]').first(),
+    ];
+    let emailField = null;
+    for (const candidate of emailCandidates) {
+      if (await candidate.isVisible({ timeout: 1500 }).catch(() => false)) { emailField = candidate; break; }
+    }
 
-    if (await emailField.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (emailField) {
       await emailField.clear();
       await emailField.fill(credentials.email);
       console.log(`   📧 Filled email: ${credentials.email}`);
@@ -125,11 +130,16 @@ async function attemptAutoLogin(page, credentials, baseUrl) {
       return false;
     }
 
-    const passwordField =
-      page.getByLabel(/password/i).first() ||
-      page.locator('input[type="password"]').first();
+    const passwordCandidates = [
+      page.getByLabel(/password/i).first(),
+      page.locator('input[type="password"]').first(),
+    ];
+    let passwordField = null;
+    for (const candidate of passwordCandidates) {
+      if (await candidate.isVisible({ timeout: 1500 }).catch(() => false)) { passwordField = candidate; break; }
+    }
 
-    if (await passwordField.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (passwordField) {
       await passwordField.clear();
       await passwordField.fill(credentials.password);
       console.log(`   🔑 Filled password`);

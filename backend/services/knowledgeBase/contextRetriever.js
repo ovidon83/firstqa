@@ -263,7 +263,7 @@ function formatProductContextForPrompt(context) {
   const parts = [];
   if (context.affectedFlows && context.affectedFlows.length) {
     parts.push('### Affected User Flows\n' + context.affectedFlows.map(f =>
-      `- **${f.flowName}** (${(f.confidence * 100).toFixed(0)}% – ${f.reason}`
+      `- **${f.flowName}** (${(f.confidence * 100).toFixed(0)}% – ${f.reason})`
     ).join('\n'));
   }
   if (context.productAreas && context.productAreas.length) {

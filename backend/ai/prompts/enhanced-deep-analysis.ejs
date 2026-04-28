@@ -54,7 +54,7 @@ Before analyzing anything, categorize the changed files:
    - All UI states render (empty state, populated, loading, error)
    - Integration with existing features is intact
 3. **USE CODE FOR SPECIFICS** — Fill in exact details from the diff for steps and expected results:
-   - Exact button text, field labels, URLs, toast messages, error strings
+   - Exact button text, field labels, URLs, error strings
    - Exact state transitions and conditional logic
    - Exact route paths from code (e.g., `/drafts`, `/settings`)
    - Visual indicators: badges, icons, borders, highlights as specified in code
@@ -222,7 +222,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
 - **AVOID LOW-PRIORITY**: Skip obscure edge cases that users won't encounter in normal usage
 - **EXTREMELY SPECIFIC EXPECTED RESULTS**: Include EXACT expected behaviors extracted from code:
   - **Exact UI states**: Which filter is active (exact filter name), what item is selected (exact selection state), what's visible/hidden (exact elements)
-  - **Exact toast messages**: Full text exactly as it appears in code, color (if specified), icon (if specified), duration
+  - **Exact error/validation messages**: Full text exactly as it appears in code (for persistent error states only — not toasts)
   - **Exact visual indicators**: Badge names/labels exactly as in code, border styles, highlight colors, icon names
   - **Exact state transitions**: From state X (exact state) to state Y (exact state), triggered by action Z (exact action)
   - **Exact behaviors**: No flicker (verify this specifically), no disappearing unexpectedly (verify item remains visible), smooth transitions (verify this)
@@ -300,10 +300,10 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
     - Extract exact UI element names (buttons: "Mark as Shared", filters: "Draft"/"Shared"/"All", etc.)
     - Extract exact function names (e.g., `handleMarkAsShared`, `switchFilter`, etc.)
     - Extract exact variable/state names (e.g., `selectedThought`, `activeFilter`, `isShared`, etc.)
-    - Extract exact strings/messages from code (e.g., toast messages: "Marked as shared! ✔", "Switched to 'All' view...")
+    - Extract exact strings/messages from code (e.g., error messages, validation text, persistent status labels)
     - Extract exact badge/visual indicator names (e.g., "Shared" badge, "In Share Journey" badge, etc.)
-    - Understand conditional logic: when filters switch, when items appear/disappear, when toasts show
-    - Map out the exact flow: user action → state change → UI update → toast notification
+    - Understand conditional logic: when filters switch, when items appear/disappear
+    - Map out the exact flow: user action → state change → stable UI update
   - **STEP 2: TEST CASE GENERATION**:
     - Generate test scenarios to cover every meaningful change — at least 1 Smoke + 1 Critical Path per change area. Prioritize fixes and user-facing changes
     - **CRITICAL**: For EACH distinct fix mentioned in commit messages, generate a SEPARATE test case that specifically verifies that fix
@@ -327,11 +327,7 @@ Based on THESE SPECIFIC CHANGES (not assumptions), provide your analysis in this
           - Exact filter state: "Filter switches from 'Draft' to 'All'" (use exact filter names)
           - Exact visibility: "Thought remains visible in the list" (specify which list)
           - Exact selection: "Thought remains selected" (or "Selection clears" or "Another thought auto-selects")
-        - **Exact toast messages** (copy exactly from code):
-          - Full text: "Toast notification appears with message: 'Marked as shared! ✔ LinkedIn'" (exact text)
-          - Additional text: "Toast also shows: 'Switched to 'All' view to keep it visible'" (if present)
-          - Color/style: "Green toast notification" (if specified in code)
-          - Icon: "Checkmark icon (✔)" (if specified)
+        - **NO toasts in expected results** — toasts are transient (disappear in seconds). Instead verify the stable end state (item added to list, status badge updated, navigation completed, etc.)
         - **Exact visual indicators** (use exact names from code):
           - Badges: "Badge 'Shared' appears" or "Badge 'In Share Journey' visible" (exact badge names)
           - Highlights: "Thought highlighted with ring/border" (exact style if specified)
