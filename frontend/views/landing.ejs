@@ -298,61 +298,86 @@
         <div class="sh">
             <span class="sh-tag">Pricing</span>
             <h2>Simple, transparent pricing.</h2>
-            <p>No seats. No add-ons. One flat rate for everything.</p>
+            <p>No seats. No setup fees. Cancel anytime.</p>
+        </div>
+
+        <!-- Early access notice -->
+        <div class="pricing-ea-bar">
+            <i class="fas fa-circle-check"></i>
+            All plans include a free trial — full product, no credit card required &nbsp;·&nbsp; <strong>Early access:</strong> billing activates when we open to the public
         </div>
 
         <div class="pricing-grid">
-            <!-- Free Trial -->
+            <!-- Solo -->
             <div class="pricing-card">
                 <div class="pc-top">
-                    <div class="pc-label">Free Trial</div>
-                    <div class="pc-price">$0</div>
-                    <div class="pc-sub">5 analyses, no credit card</div>
+                    <div class="pc-label">Solo</div>
+                    <div class="pc-price">$199<span>/mo</span></div>
+                    <div class="pc-sub">Up to 2 engineers</div>
+                    <div class="pc-desc">Solo founders &amp; co-founder pairs shipping fast</div>
                 </div>
                 <ul class="pc-features">
                     <li><i class="fas fa-check"></i> PR &amp; ticket analysis</li>
                     <li><i class="fas fa-check"></i> Test recipe generation</li>
-                    <li><i class="fas fa-check"></i> GitHub + Linear integration</li>
-                    <li class="pc-dim"><i class="fas fa-times"></i> Browser test execution</li>
-                    <li class="pc-dim"><i class="fas fa-times"></i> Playwright code generation</li>
-                </ul>
-                <a href="#" class="pc-btn pc-btn-ghost" data-ea-trigger>Get Early Access</a>
-            </div>
-
-            <!-- Full Plan -->
-            <div class="pricing-card pricing-card-featured">
-                <div class="pc-coming-soon">Coming Soon</div>
-                <div class="pc-top">
-                    <div class="pc-label">FirstQA</div>
-                    <div class="pc-price">$499<span>/mo</span></div>
-                    <div class="pc-sub">Everything included, unlimited analyses</div>
-                </div>
-                <ul class="pc-features">
-                    <li><i class="fas fa-check"></i> PR &amp; ticket analysis</li>
-                    <li><i class="fas fa-check"></i> Test recipe generation</li>
-                    <li><i class="fas fa-check"></i> GitHub + Linear integration</li>
                     <li><i class="fas fa-check"></i> Browser test execution</li>
                     <li><i class="fas fa-check"></i> Playwright code generation</li>
-                    <li><i class="fas fa-check"></i> Release decisions &amp; reports</li>
+                    <li><i class="fas fa-check"></i> GitHub + Linear integration</li>
+                    <li><i class="fas fa-check"></i> QA reports on PRs &amp; tickets</li>
                 </ul>
-                <a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank" class="pc-btn pc-btn-primary">Book a Demo</a>
+                <a href="#" class="pc-btn pc-btn-ghost" data-ea-trigger>Join Early Access</a>
+                <div class="pc-ea-note">Billing opens soon — claim your spot now</div>
             </div>
 
-            <!-- Launch Partner -->
-            <div class="pricing-card pricing-card-partner">
+            <!-- Startup (featured) -->
+            <div class="pricing-card pricing-card-featured">
+                <div class="pc-most-popular">Most Popular</div>
                 <div class="pc-top">
-                    <div class="pc-label">Launch Partner</div>
-                    <div class="pc-price">$149<span>/mo</span></div>
-                    <div class="pc-sub">Locked for life &mdash; 21 spots only</div>
+                    <div class="pc-label">Startup</div>
+                    <div class="pc-price">$499<span>/mo</span></div>
+                    <div class="pc-sub">Up to 10 engineers</div>
+                    <div class="pc-desc">Seed–Series A teams. Your first QA hire — without the hire.</div>
                 </div>
                 <ul class="pc-features">
-                    <li><i class="fas fa-check"></i> Everything in FirstQA</li>
-                    <li><i class="fas fa-check"></i> 30-day free trial</li>
-                    <li><i class="fas fa-check"></i> Weekly feedback call or chat</li>
-                    <li><i class="fas fa-check"></i> Shape the roadmap</li>
-                    <li><i class="fas fa-check"></i> Price locked forever</li>
+                    <li><i class="fas fa-check"></i> Everything in Solo</li>
+                    <li><i class="fas fa-check"></i> Multiple repos</li>
+                    <li><i class="fas fa-check"></i> Release decisions &amp; reports</li>
+                    <li><i class="fas fa-check"></i> Priority analysis queue</li>
+                    <li><i class="fas fa-check"></i> Early access to new features</li>
                 </ul>
-                <a href="/discovery-interview" class="pc-btn pc-btn-ghost">Apply Now <i class="fas fa-arrow-right"></i></a>
+                <a href="#" class="pc-btn pc-btn-primary" data-ea-trigger>Join Early Access</a>
+                <div class="pc-ea-note">Billing opens soon — claim your spot now</div>
+            </div>
+
+            <!-- Growth -->
+            <div class="pricing-card">
+                <div class="pc-top">
+                    <div class="pc-label">Growth</div>
+                    <div class="pc-price">$999<span>/mo</span></div>
+                    <div class="pc-sub">Up to 20 engineers</div>
+                    <div class="pc-desc">Post-raise teams scaling headcount fast</div>
+                </div>
+                <ul class="pc-features">
+                    <li><i class="fas fa-check"></i> Everything in Startup</li>
+                    <li><i class="fas fa-check"></i> Unlimited repos</li>
+                    <li><i class="fas fa-check"></i> Dedicated support channel</li>
+                    <li><i class="fas fa-check"></i> Custom QA workflows</li>
+                    <li><i class="fas fa-check"></i> Onboarding call with founder</li>
+                </ul>
+                <a href="#" class="pc-btn pc-btn-ghost" data-ea-trigger>Join Early Access</a>
+                <div class="pc-ea-note">Billing opens soon — claim your spot now</div>
+            </div>
+        </div>
+
+        <!-- Launch Partner strip -->
+        <div class="pricing-lp-strip">
+            <div class="pricing-lp-left">
+                <div class="pricing-lp-label">Launch Partner</div>
+                <div class="pricing-lp-price">$149<span>/mo locked for life</span></div>
+                <div class="pricing-lp-desc">Everything in Startup. 30-day free trial. Shape the roadmap directly with the founder. Price never changes — ever.</div>
+            </div>
+            <div class="pricing-lp-right">
+                <span class="pricing-lp-badge">21 spots remaining</span>
+                <a href="/discovery-interview" class="pc-btn pc-btn-ghost">Apply Now &rarr;</a>
             </div>
         </div>
     </div>
@@ -629,26 +654,37 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 
 /* Pricing */
 .pricing-section{padding:100px 0;border-top:1px solid var(--border)}
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:0 auto}
-.pricing-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;flex-direction:column;gap:24px;position:relative}
-.pricing-card-featured{border-color:rgba(16,185,129,.35);background:linear-gradient(145deg,rgba(16,185,129,.06),var(--bg2) 60%)}
-.pricing-card-partner{border-color:rgba(245,158,11,.25);background:linear-gradient(145deg,rgba(245,158,11,.05),var(--bg2) 60%)}
-.pc-coming-soon{position:absolute;top:16px;right:16px;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
-.pc-top{display:flex;flex-direction:column;gap:6px}
-.pc-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3)}
-.pc-price{font-size:36px;font-weight:700;color:var(--text);line-height:1}
-.pc-price span{font-size:16px;font-weight:400;color:var(--text3)}
-.pc-sub{font-size:13px;color:var(--text3)}
+.pricing-ea-bar{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:10px 22px;font-size:13px;color:var(--text2);margin:0 auto 40px;max-width:700px;text-align:center}
+.pricing-ea-bar i{color:var(--green);flex-shrink:0}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1000px;margin:0 auto 24px}
+.pricing-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;flex-direction:column;gap:20px;position:relative}
+.pricing-card-featured{border-color:rgba(16,185,129,.4);background:linear-gradient(160deg,rgba(16,185,129,.07),var(--bg2) 55%)}
+.pc-most-popular{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.pc-top{display:flex;flex-direction:column;gap:5px}
+.pc-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3)}
+.pc-price{font-size:40px;font-weight:700;color:var(--text);line-height:1;margin:4px 0}
+.pc-price span{font-size:15px;font-weight:400;color:var(--text3)}
+.pc-sub{font-size:13px;color:var(--green);font-weight:500}
+.pc-desc{font-size:13px;color:var(--text3);line-height:1.5;margin-top:2px}
 .pc-features{list-style:none;display:flex;flex-direction:column;gap:10px;flex:1}
 .pc-features li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
 .pc-features li i.fa-check{color:var(--green);font-size:11px;width:14px;flex-shrink:0}
-.pc-features li i.fa-times{color:var(--text3);font-size:11px;width:14px;flex-shrink:0}
-.pc-dim{opacity:.45}
-.pc-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;text-align:center}
+.pc-dim{opacity:.4}
+.pc-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;text-align:center;cursor:pointer}
 .pc-btn-primary{background:var(--green);color:#fff}
 .pc-btn-primary:hover{background:var(--green2)}
 .pc-btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
 .pc-btn-ghost:hover{color:var(--text);border-color:var(--text3);background:var(--bg3)}
+.pc-ea-note{font-size:11.5px;color:var(--text3);text-align:center;margin-top:-8px}
+/* Launch Partner strip */
+.pricing-lp-strip{max-width:1000px;margin:0 auto;background:linear-gradient(135deg,rgba(245,158,11,.07),var(--bg2));border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.pricing-lp-left{display:flex;flex-direction:column;gap:4px}
+.pricing-lp-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--amber)}
+.pricing-lp-price{font-size:28px;font-weight:700;color:var(--text)}
+.pricing-lp-price span{font-size:14px;font-weight:400;color:var(--text3);margin-left:4px}
+.pricing-lp-desc{font-size:13px;color:var(--text3);max-width:480px;line-height:1.5}
+.pricing-lp-right{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.pricing-lp-badge{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap}
 
 /* Responsive */
 @media(max-width:1024px){
@@ -659,6 +695,8 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
     .hero-stats{justify-content:center}
     .hero-right{order:-1;max-width:580px;margin:0 auto}
     .pricing-grid{grid-template-columns:1fr}
+    .pricing-lp-strip{flex-direction:column;gap:16px}
+    .pricing-lp-right{width:100%;justify-content:space-between}
     .offer-grid{grid-template-columns:1fr}
     .op-list-grid{grid-template-columns:1fr}
     .obj-grid{grid-template-columns:1fr 1fr}
