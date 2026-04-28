@@ -15,14 +15,21 @@
 <div class="modal-overlay" id="ea-modal">
     <div class="modal-card">
         <button class="modal-close" id="modal-close">&times;</button>
-        <h2>Stay in the Loop</h2>
-        <p>Drop your email and we'll reach out directly. No spam — founder replies personally within 24h.</p>
+        <h2>Get Early Access</h2>
+        <p>Join the waitlist — we'll reach out personally when your spot opens.</p>
         <form class="modal-form" id="subscribe-form">
             <input type="email" name="email" placeholder="you@company.com" required>
-            <button type="submit"><span>Request Access</span><i class="fas fa-arrow-right"></i></button>
+            <button type="submit"><span>Join Waitlist</span><i class="fas fa-arrow-right"></i></button>
         </form>
         <p class="modal-msg" id="subscribe-message"></p>
-        <p class="modal-sub"><a href="https://calendar.app.google/wsDJhHMutNzMZQhu6" target="_blank">Prefer a call?</a> — book 15 min with the founder</p>
+        <div class="modal-divider"><span>or skip the line</span></div>
+        <a href="/discovery-interview" class="modal-lp-cta">
+            <div>
+                <div class="modal-lp-title">Become a Launch Partner</div>
+                <div class="modal-lp-sub">30-day free trial &nbsp;·&nbsp; $149/mo locked for life &nbsp;·&nbsp; 21 spots</div>
+            </div>
+            <i class="fas fa-arrow-right"></i>
+        </a>
     </div>
 </div>
 
@@ -301,12 +308,6 @@
             <p>No seats. No setup fees. Cancel anytime.</p>
         </div>
 
-        <!-- Early access notice -->
-        <div class="pricing-ea-bar">
-            <i class="fas fa-circle-check"></i>
-            All plans include a free trial &mdash; no credit card required &nbsp;·&nbsp; Billing activates when we open to the public
-        </div>
-
         <div class="pricing-grid">
             <!-- Solo -->
             <div class="pricing-card">
@@ -436,7 +437,12 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .modal-form button{display:flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:all .2s}
 .modal-form button:hover{background:var(--green2)}
 .modal-msg{font-size:13px;min-height:18px}.modal-msg.success{color:var(--green)}.modal-msg.error{color:var(--red)}
-.modal-sub{font-size:13px;color:var(--text3)}.modal-sub a{color:var(--green);text-decoration:none;font-weight:500}
+.modal-divider{display:flex;align-items:center;gap:12px;margin:20px 0 16px;color:var(--text3);font-size:12px}.modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--border)}.modal-divider span{white-space:nowrap}
+.modal-lp-cta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:16px 18px;text-decoration:none;transition:all .2s;color:var(--text)}
+.modal-lp-cta:hover{border-color:rgba(245,158,11,.5);background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.06))}
+.modal-lp-cta i{color:var(--amber);flex-shrink:0}
+.modal-lp-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.modal-lp-sub{font-size:12px;color:var(--amber);opacity:.85}
 
 /* Nav */
 .navbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 0;background:rgba(15,17,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}

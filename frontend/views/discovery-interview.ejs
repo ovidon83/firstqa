@@ -218,22 +218,52 @@
       width: 100%; height: 100%;
       border: 0;
     }
-    .di-commit-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 1rem 0;
+    .di-deal-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 0 0 1.25rem;
     }
-    .di-commit-list li {
-      padding: 0.5rem 0;
-      padding-left: 1.5rem;
-      position: relative;
+    .di-deal-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.875rem;
+      padding: 0.875rem 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
     }
-    .di-commit-list li::before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      color: var(--fqa-primary);
+    .di-deal-card-highlight {
+      background: #f0fdf9;
+      border-color: #99f6e4;
+    }
+    .di-deal-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .di-deal-title {
+      font-size: 0.9375rem;
       font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+    .di-deal-desc {
+      font-size: 0.8125rem;
+      color: #64748b;
+      line-height: 1.4;
+    }
+    .di-commitment-block {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 1.25rem;
+      margin-top: 0.25rem;
+    }
+    .di-commitment-q {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 0.75rem !important;
     }
     .di-meeting-btns {
       display: flex;
@@ -722,18 +752,45 @@
                 </div>
               </div>
               <h2>Here's what the Launch Partner deal looks like:</h2>
-              <ul class="di-commit-list">
-                <li><strong>30-day free trial</strong> — full access, no credit card required until the trial ends</li>
-                <li>After the trial: <strong>$149/mo, locked for life</strong> — never goes up as long as you stay subscribed (standard price will be $499/mo)</li>
-                <li>Weekly 15-min feedback session — call or async chat, whichever works for you</li>
-                <li>Permission to share your results publicly (anonymous if preferred)</li>
-                <li>Honest feedback on what works and what doesn't</li>
-              </ul>
-              <p><strong>Does this work for you?</strong></p>
-              <div class="di-options" data-name="commitment_level">
-                <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
-                <label class="di-option" data-value="Maybe, need to discuss with my team first"><input type="radio" name="commitment_level" value="Maybe, need to discuss with my team first"> Maybe, need to check with my team first</label>
-                <label class="di-option" data-value="No, too much commitment right now"><input type="radio" name="commitment_level" value="No, too much commitment right now"> No, too much commitment right now</label>
+
+              <div class="di-deal-cards">
+                <div class="di-deal-card di-deal-card-highlight">
+                  <div class="di-deal-icon">🎁</div>
+                  <div>
+                    <div class="di-deal-title">30-day free trial</div>
+                    <div class="di-deal-desc">Full access, no credit card until the trial ends</div>
+                  </div>
+                </div>
+                <div class="di-deal-card di-deal-card-highlight">
+                  <div class="di-deal-icon">🔒</div>
+                  <div>
+                    <div class="di-deal-title">$149/mo, locked for life</div>
+                    <div class="di-deal-desc">Never goes up — standard price will be $499/mo</div>
+                  </div>
+                </div>
+                <div class="di-deal-card">
+                  <div class="di-deal-icon">💬</div>
+                  <div>
+                    <div class="di-deal-title">Weekly 15-min feedback</div>
+                    <div class="di-deal-desc">Call or async chat — whichever works for you</div>
+                  </div>
+                </div>
+                <div class="di-deal-card">
+                  <div class="di-deal-icon">🗺️</div>
+                  <div>
+                    <div class="di-deal-title">Shape the roadmap</div>
+                    <div class="di-deal-desc">Your feedback directly influences what gets built next</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="di-commitment-block">
+                <p class="di-commitment-q"><strong>Does this work for you?</strong></p>
+                <div class="di-options" data-name="commitment_level">
+                  <label class="di-option" data-value="Yes, I'm all in"><input type="radio" name="commitment_level" value="Yes, I'm all in"> Yes, I'm all in</label>
+                  <label class="di-option" data-value="Maybe, need to discuss with my team first"><input type="radio" name="commitment_level" value="Maybe, need to discuss with my team first"> Maybe, need to check with my team first</label>
+                  <label class="di-option" data-value="No, too much commitment right now"><input type="radio" name="commitment_level" value="No, too much commitment right now"> No, too much commitment right now</label>
+                </div>
               </div>
               <div class="di-buttons-inline">
                 <button type="button" class="di-btn-back di-back-inline">Back</button>
