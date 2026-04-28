@@ -53,28 +53,38 @@ router.get('/', async (req, res) => {
     
     let stats = {
       analysesThisMonth: 0,
-      analysesLimit: 5,
       connectedIntegrations: 0,
       recentAnalyses: [],
-      plan: 'free_trial'
+      plan: 'free_trial',
+      trialDaysLeft: 5,
+      trialExpired: false
     };
     
     if (isSupabaseConfigured()) {
       // Fetch user stats
       const { data: userData } = await supabaseAdmin
         .from('users')
-        .select('plan, analyses_this_month, analyses_limit')
+        .select('plan, analyses_this_month, trial_started_at')
         .eq('id', user.id)
         .single();
       
       if (userData) {
         stats.analysesThisMonth = userData.analyses_this_month || 0;
-        stats.analysesLimit = userData.analyses_limit || 5;
         stats.plan = userData.plan || 'free_trial';
-        stats.trialLimitReached = (
-          (stats.plan === 'free_trial' || stats.plan === 'free') &&
-          stats.analysesThisMonth >= stats.analysesLimit
-        );
+
+        const TRIAL_DAYS = 5;
+        const PAID_PLANS = ['pro', 'Pro', 'enterprise', 'Enterprise', 'Launch Partner', 'FirstQA'];
+        const isTrialPlan = !PAID_PLANS.includes(stats.plan);
+
+        if (isTrialPlan && userData.trial_started_at) {
+          const trialStart = new Date(userData.trial_started_at);
+          const elapsed = Math.floor((Date.now() - trialStart.getTime()) / (24 * 60 * 60 * 1000));
+          stats.trialDaysLeft = Math.max(0, TRIAL_DAYS - elapsed);
+          stats.trialExpired = stats.trialDaysLeft === 0;
+        } else if (isTrialPlan) {
+          stats.trialDaysLeft = TRIAL_DAYS;
+          stats.trialExpired = false;
+        }
       }
       
       // Count connected providers (not individual installations)
@@ -160,10 +170,11 @@ router.get('/', async (req, res) => {
       user: req.session.user, 
       stats: {
         analysesThisMonth: 0,
-        analysesLimit: 5,
         connectedIntegrations: 0,
         recentAnalyses: [],
-        plan: 'free_trial'
+        plan: 'free_trial',
+        trialDaysLeft: 5,
+        trialExpired: false
       },
       error: 'Failed to load dashboard data',
       onboarding: req.query?.onboarding

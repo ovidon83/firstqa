@@ -131,29 +131,33 @@ async function checkUsageLimits(userId) {
   try {
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('plan, analyses_this_month, analyses_limit')
+      .select('plan, trial_started_at')
       .eq('id', userId)
       .single();
     
     if (error) throw error;
     
-    const current = user.analyses_this_month || 0;
-    const limit = user.analyses_limit || 5;
-    const plan = user.plan || 'free';
-    
-    // Pro and enterprise users have unlimited analyses
-    if (plan === 'pro' || plan === 'enterprise') {
-      return { allowed: true, current, limit: Infinity, plan };
+    const plan = user.plan || 'free_trial';
+    const PAID_PLANS = ['pro', 'Pro', 'enterprise', 'Enterprise', 'Launch Partner', 'FirstQA'];
+
+    if (PAID_PLANS.includes(plan)) {
+      return { allowed: true, plan };
     }
-    
-    // Free users have a limit
-    const allowed = current < limit;
-    
-    return { allowed, current, limit, plan };
+
+    // Free trial: 5-day full access from trial_started_at
+    const TRIAL_DAYS = 5;
+    const trialStart = user.trial_started_at ? new Date(user.trial_started_at) : null;
+    const trialExpired = trialStart
+      ? (Date.now() - trialStart.getTime()) > TRIAL_DAYS * 24 * 60 * 60 * 1000
+      : false;
+    const daysLeft = trialStart
+      ? Math.max(0, TRIAL_DAYS - Math.floor((Date.now() - trialStart.getTime()) / (24 * 60 * 60 * 1000)))
+      : TRIAL_DAYS;
+
+    return { allowed: !trialExpired, trialExpired, daysLeft, plan };
   } catch (error) {
     console.error('Error checking usage limits:', error);
-    // On error, allow the request (fail open)
-    return { allowed: true, current: 0, limit: Infinity, plan: 'error' };
+    return { allowed: true, plan: 'error' };
   }
 }
 
@@ -1275,26 +1279,26 @@ async function handleTestRequest(repository, issue, comment, sender, userId = nu
     if (!limitCheck.allowed) {
       console.warn(`⚠️ Usage limit exceeded for user ${userId}`);
       const baseUrl = process.env.BASE_URL || 'https://www.firstqa.dev';
-      const limitMessage = `## ⚡ Trial limit reached (${limitCheck.current}/${limitCheck.limit} analyses used)
+      const limitMessage = `## ⏰ Free trial ended
 
-FirstQA paused this review — you've used all your free trial analyses.
+FirstQA paused this review — your 5-day free trial has expired.
 
 **Two options:**
 
-- **Extend your trial for $9** → get 10 more analyses instantly: [firstqa.dev/dashboard](${baseUrl}/dashboard)
-- **Upgrade to a full plan** → unlimited analyses + full QA coverage: [firstqa.dev/pricing](${baseUrl}/pricing)
+- **Upgrade to a plan** → full QA coverage, unlimited reviews: [firstqa.dev/pricing](${baseUrl}/pricing)
+- **Apply as a Launch Partner** → $149/mo locked for life (21 spots): [firstqa.dev/discovery-interview](${baseUrl}/discovery-interview)
 
 Questions? Reply here or email hello@firstqa.dev`;
       await postComment(repository.full_name, issue.number, limitMessage);
       return { 
         success: false, 
-        message: 'Usage limit exceeded',
+        message: 'Trial expired',
         limitReached: true 
       };
     }
-    console.log(`✅ Usage check passed: ${limitCheck.current}/${limitCheck.limit} analyses used`);
+    console.log(`✅ Trial active: ${limitCheck.daysLeft} day(s) remaining`);
   }
-
+  
   // Check for -index / -reindex / -analyze_codebase / -setup flag - trigger codebase indexing
   const qaFlags = parseQaFlags(comment.body);
   if (qaFlags.indexCodebase) {
@@ -1698,24 +1702,24 @@ async function handleShortRequest(repository, issue, comment, sender, userId = n
     if (!limitCheck.allowed) {
       console.warn(`⚠️ Usage limit exceeded for user ${userId}`);
       const baseUrl = process.env.BASE_URL || 'https://www.firstqa.dev';
-      const limitMessage = `## ⚡ Trial limit reached (${limitCheck.current}/${limitCheck.limit} analyses used)
+      const limitMessage = `## ⏰ Free trial ended
 
-FirstQA paused this review — you've used all your free trial analyses.
+FirstQA paused this review — your 5-day free trial has expired.
 
 **Two options:**
 
-- **Extend your trial for $9** → get 10 more analyses instantly: [firstqa.dev/dashboard](${baseUrl}/dashboard)
-- **Upgrade to a full plan** → unlimited analyses + full QA coverage: [firstqa.dev/pricing](${baseUrl}/pricing)
+- **Upgrade to a plan** → full QA coverage, unlimited reviews: [firstqa.dev/pricing](${baseUrl}/pricing)
+- **Apply as a Launch Partner** → $149/mo locked for life (21 spots): [firstqa.dev/discovery-interview](${baseUrl}/discovery-interview)
 
 Questions? Reply here or email hello@firstqa.dev`;
       await postComment(repository.full_name, issue.number, limitMessage);
       return { 
         success: false, 
-        message: 'Usage limit exceeded',
+        message: 'Trial expired',
         limitReached: true 
       };
     }
-    console.log(`✅ Usage check passed: ${limitCheck.current}/${limitCheck.limit} analyses used`);
+    console.log(`✅ Trial active: ${limitCheck.daysLeft} day(s) remaining`);
   }
   
   // Create a unique ID for this test request

@@ -369,6 +369,17 @@
             </div>
         </div>
 
+        <!-- Free trial callout -->
+        <div class="pricing-trial-strip">
+            <div class="pricing-trial-items">
+                <div class="pricing-trial-item"><i class="fas fa-check-circle"></i> 5-day free trial on all plans</div>
+                <div class="pricing-trial-item"><i class="fas fa-check-circle"></i> Full access from day one — no limits</div>
+                <div class="pricing-trial-item"><i class="fas fa-check-circle"></i> No credit card required to start</div>
+                <div class="pricing-trial-item"><i class="fas fa-check-circle"></i> Cancel or upgrade anytime</div>
+            </div>
+            <a href="#" class="pricing-trial-cta open-ea-modal">Start free trial &rarr;</a>
+        </div>
+
         <!-- Launch Partner strip -->
         <div class="pricing-lp-strip">
             <div class="pricing-lp-left">
@@ -684,6 +695,12 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
 .pc-btn-ghost:hover{color:var(--text);border-color:var(--text3);background:var(--bg3)}
 .pc-ea-note{font-size:11.5px;color:var(--text3);text-align:center;margin-top:-8px}
 /* Launch Partner strip */
+.pricing-trial-strip{max-width:1000px;margin:0 auto 16px;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.15);border-radius:var(--r);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pricing-trial-items{display:flex;flex-wrap:wrap;gap:8px 24px}
+.pricing-trial-item{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.pricing-trial-item i{color:#22c55e;font-size:12px}
+.pricing-trial-cta{font-size:13px;font-weight:600;color:#22c55e;text-decoration:none;white-space:nowrap;transition:opacity .2s}
+.pricing-trial-cta:hover{opacity:.75}
 .pricing-lp-strip{max-width:1000px;margin:0 auto;background:linear-gradient(135deg,rgba(245,158,11,.07),var(--bg2));border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .pricing-lp-left{display:flex;flex-direction:column;gap:4px}
 .pricing-lp-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--amber)}
@@ -703,6 +720,7 @@ code{font-family:var(--mono);background:var(--gg);color:var(--green);padding:2px
     .hero-right{order:-1;max-width:580px;margin:0 auto}
     .pricing-grid{grid-template-columns:1fr}
     .pricing-ea-bar{white-space:normal;text-align:center;border-radius:14px}
+    .pricing-trial-strip{flex-direction:column;align-items:flex-start;gap:12px}
     .pricing-lp-strip{flex-direction:column;gap:16px}
     .pricing-lp-right{width:100%;justify-content:space-between}
     .offer-grid{grid-template-columns:1fr}
