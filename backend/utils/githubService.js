@@ -138,7 +138,7 @@ async function checkUsageLimits(userId) {
     if (error) throw error;
     
     const current = user.analyses_this_month || 0;
-    const limit = user.analyses_limit || 10;
+    const limit = user.analyses_limit || 5;
     const plan = user.plan || 'free';
     
     // Pro and enterprise users have unlimited analyses

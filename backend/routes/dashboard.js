@@ -53,10 +53,10 @@ router.get('/', async (req, res) => {
     
     let stats = {
       analysesThisMonth: 0,
-      analysesLimit: 10,
+      analysesLimit: 5,
       connectedIntegrations: 0,
       recentAnalyses: [],
-      plan: 'free'
+      plan: 'free_trial'
     };
     
     if (isSupabaseConfigured()) {
@@ -69,8 +69,8 @@ router.get('/', async (req, res) => {
       
       if (userData) {
         stats.analysesThisMonth = userData.analyses_this_month || 0;
-        stats.analysesLimit = userData.analyses_limit || 10;
-        stats.plan = userData.plan || 'free';
+        stats.analysesLimit = userData.analyses_limit || 5;
+        stats.plan = userData.plan || 'free_trial';
         stats.trialLimitReached = (
           (stats.plan === 'free_trial' || stats.plan === 'free') &&
           stats.analysesThisMonth >= stats.analysesLimit
@@ -160,10 +160,10 @@ router.get('/', async (req, res) => {
       user: req.session.user, 
       stats: {
         analysesThisMonth: 0,
-        analysesLimit: 10,
+        analysesLimit: 5,
         connectedIntegrations: 0,
         recentAnalyses: [],
-        plan: 'free'
+        plan: 'free_trial'
       },
       error: 'Failed to load dashboard data',
       onboarding: req.query?.onboarding
